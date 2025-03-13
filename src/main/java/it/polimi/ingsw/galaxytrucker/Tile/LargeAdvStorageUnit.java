@@ -15,7 +15,7 @@ import java.util.List;
  * @author Matteo Vignocchi
  */
 public class LargeAdvStorageUnit extends Tile{
-    public List<Good> listOfGoods = new ArrayList<>();
+    private List<Good> listOfGoods = new ArrayList<>();
     final int max = 2;
 
     /**
@@ -53,5 +53,11 @@ public class LargeAdvStorageUnit extends Tile{
         }
         listOfGoods.remove(listOfGoods.get(index));
 
+    }
+    /**
+     * @return the list of goods that the storage contains
+     */
+    public List<Good> getListOfGoods(){
+        return listOfGoods;
     }
 }

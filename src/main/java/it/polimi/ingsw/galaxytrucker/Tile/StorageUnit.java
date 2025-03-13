@@ -16,7 +16,7 @@ import java.util.List;
  */
 
 public class StorageUnit extends Tile {
-    public List<Good> listOfGoods = new ArrayList<>();
+    private List<Good> listOfGoods = new ArrayList<>();
     final int max = 2;
 
     /**
@@ -47,5 +47,11 @@ public class StorageUnit extends Tile {
         }
 
         listOfGoods.add(g);
+    }
+    /**
+     * @return the list of goods that the storage contains
+     */
+    public List<Good> getListOfGoods(){
+        return listOfGoods;
     }
 }

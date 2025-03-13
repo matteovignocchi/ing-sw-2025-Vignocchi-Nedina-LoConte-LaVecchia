@@ -14,7 +14,7 @@ import it.polimi.ingsw.galaxytrucker.Token.Good;
  * @author Matteo Vignocchi
  */
 public class AdvStorageUnit extends Tile {
-    public List<Good> listOfGoods = new ArrayList<>();
+    private List<Good> listOfGoods = new ArrayList<>();
     final int max = 1;
 
     /**
@@ -56,7 +56,12 @@ public class AdvStorageUnit extends Tile {
             throw new InvalidIndex("The cell of the storage doesn't contains a Good");
         }
             listOfGoods.remove(listOfGoods.get(index));
+    }
 
-
+    /**
+     * @return the list of goods that the storage contains
+     */
+    public List<Good> getListOfGoods(){
+        return listOfGoods;
     }
 }
