@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker;
+package it.polimi.ingsw.galaxytrucker.Tile;
 
 /**
  * abstract class for the general structure of the tile and
@@ -16,8 +16,8 @@ package it.polimi.ingsw.galaxytrucker;
  */
 
 
-abstract class Tile {
-    private int[] corners = new int[4];
+public abstract class Tile {
+    public int[] corners = new int[4];
     public boolean isShown = false;
 
     /**
