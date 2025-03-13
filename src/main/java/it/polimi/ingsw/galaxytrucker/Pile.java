@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Pile {
-     public List<Tile> pile_of_tile = new ArrayList<>();
+     private List<Tile> pile_of_tile = new ArrayList<>();
 
     /**
      * @author Oleg Nedina
