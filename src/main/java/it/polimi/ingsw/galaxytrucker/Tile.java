@@ -10,7 +10,6 @@ package it.polimi.ingsw.galaxytrucker;
  * (all the child class will have a different instation)
  * 0 for no joint , 1 for 1 joint , 2 for 2 joint , 3 for universal , 4 for single cannon
  * 5 for double cannon , 6 for single engine , 7 for double engine and 8 for shield
- *
  * isShown determinates if the tile is revealed
  *
  */
@@ -59,7 +58,7 @@ abstract class Tile {
 
     /**
      * method that return the array "corners"
-     * @author Oleg Nedina & MAtteo Vignocchi
+     * @author Oleg Nedina & Matteo Vignocchi
      */
     public int[] getCorners() {
         return corners;
