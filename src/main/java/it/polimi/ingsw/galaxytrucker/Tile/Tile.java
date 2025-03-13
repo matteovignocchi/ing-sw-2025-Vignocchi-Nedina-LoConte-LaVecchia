@@ -18,6 +18,7 @@ package it.polimi.ingsw.galaxytrucker.Tile;
 public abstract class Tile {
     public int[] corners = new int[4];
     public boolean isShown = false;
+    public boolean isTake= false;
 
     /**
      * method to shift right the vector of corners by one position
@@ -52,8 +53,16 @@ public abstract class Tile {
      * @author Oleg Nedina & Matteo Vignocchi
      */
 
-    public void ShowTile(){
+    public void ShowTile()
+    {
         isShown = true;
+    }
+
+    public void takeTile(){
+        isTake = true;
+    }
+    public void giveTile(){
+        isTake = false;
     }
 
     /**
