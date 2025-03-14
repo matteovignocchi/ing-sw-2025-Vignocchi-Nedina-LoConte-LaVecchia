@@ -31,6 +31,14 @@ public class DoubleEngine extends Tile {
         isOn = false;
         power = 0;
     }
+    public int getPower() {
+        if(isOn){
+            return power;
+        }
+        else {
+            return 0;
+        }
+    }
 
     /**
      * @return return the status of the engine
