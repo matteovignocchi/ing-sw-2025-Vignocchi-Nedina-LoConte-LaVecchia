@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker;
+package it.polimi.ingsw.galaxytrucker.Tile;
 
 /**
  * abstract class for the general structure of the tile and
@@ -10,15 +10,15 @@ package it.polimi.ingsw.galaxytrucker;
  * (all the child class will have a different instation)
  * 0 for no joint , 1 for 1 joint , 2 for 2 joint , 3 for universal , 4 for single cannon
  * 5 for double cannon , 6 for single engine , 7 for double engine and 8 for shield
- *
  * isShown determinates if the tile is revealed
  *
  */
 
 
-abstract class Tile {
-    private int[] corners = new int[4];
+public abstract class Tile {
+    public int[] corners = new int[4];
     public boolean isShown = false;
+    public boolean isTake= false;
 
     /**
      * method to shift right the vector of corners by one position
@@ -53,13 +53,21 @@ abstract class Tile {
      * @author Oleg Nedina & Matteo Vignocchi
      */
 
-    public void ShowTile(){
+    public void ShowTile()
+    {
         isShown = true;
+    }
+
+    public void takeTile(){
+        isTake = true;
+    }
+    public void giveTile(){
+        isTake = false;
     }
 
     /**
      * method that return the array "corners"
-     * @author Oleg Nedina & MAtteo Vignocchi
+     * @author Oleg Nedina & Matteo Vignocchi
      */
     public int[] getCorners() {
         return corners;
