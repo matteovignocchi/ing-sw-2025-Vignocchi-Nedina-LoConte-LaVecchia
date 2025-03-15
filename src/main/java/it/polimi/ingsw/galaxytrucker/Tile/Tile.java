@@ -73,4 +73,7 @@ public abstract class Tile {
         return corners;
     }
 
+    public int controlCorners(int i){
+        return corners[i];
+    }
 }

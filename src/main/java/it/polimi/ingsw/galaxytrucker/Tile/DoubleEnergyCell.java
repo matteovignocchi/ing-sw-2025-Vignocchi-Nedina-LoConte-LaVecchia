@@ -1,6 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
 import it.polimi.ingsw.galaxytrucker.NoEnergyLeft;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+
+import java.util.Optional;
 
 /**
  * class for the energy cell with 2 slots
@@ -9,29 +13,47 @@ import it.polimi.ingsw.galaxytrucker.NoEnergyLeft;
  */
 public class DoubleEnergyCell extends Tile {
     private int energy;
-    public DoubleEnergyCell(int a,int b,int c,int d) {
-        corners[0]=a;
-        corners[1]=b;
-        corners[2]=c;
-        corners[3]=d;
+
+    public DoubleEnergyCell(int a, int b, int c, int d) {
+        corners[0] = a;
+        corners[1] = b;
+        corners[2] = c;
+        corners[3] = d;
         energy = 2;
     }
 
     /**
      * @return how many energy I have left
      */
-    public int getEnergy(){
+    public int getEnergy() {
         return energy;
     }
 
     /**
-     * remove a energy cell from the tile
+     * remove an energy cell from the tile
+     *
      * @throws NoEnergyLeft ricordarsi di gestire l'ecezione
      */
     public void removeEnergy() throws NoEnergyLeft {
-        if(energy == 0) throw new NoEnergyLeft("Nice try...\nYou are out of energy!");
+        if (energy == 0) throw new NoEnergyLeft("Nice try...\nYou are out of energy!");
         energy--;
 
     }
 
+    //metodo per decidere se spendere una energia
+    public boolean energyManagment() {
+        Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
+        choice.setTitle("Spend an energy?");
+        choice.setHeaderText(null);
+        choice.setContentText("Are you sure you want to spend an energy?");
+
+        Optional<ButtonType> result = choice.showAndWait();
+        if (result.get() == ButtonType.OK && result.isPresent()) {
+            removeEnergy();
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }

@@ -1,6 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
 import it.polimi.ingsw.galaxytrucker.NoEnergyLeft;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+
+import java.util.Optional;
 
 /**
  * class for the energy cell with 3 slots
@@ -33,4 +37,27 @@ public class TripleEnergyCell extends Tile {
         energy--;
 
     }
+    // metodo per conferma della spesa di una esergia
+
+    public boolean energyManagment(){
+        Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
+        choice.setTitle("Spend an energy?");
+        choice.setHeaderText(null);
+        choice.setContentText("Are you sure you want to spend an energy?");
+
+        Optional<ButtonType> result = choice.showAndWait();
+        if(result.get() == ButtonType.OK && result.isPresent()){
+            removeEnergy();
+            return true;
+        }else{
+            return false;
+        }
+
+
+
+
+
+    }
+
+
 }
