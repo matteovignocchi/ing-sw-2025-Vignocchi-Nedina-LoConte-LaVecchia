@@ -1,47 +1,63 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
+import it.polimi.ingsw.galaxytrucker.Token.BrownAlien;
 import it.polimi.ingsw.galaxytrucker.Token.Humans;
+import it.polimi.ingsw.galaxytrucker.Token.PurpleAlien;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * class for the housing unit designate to host humans
+ * max is the parameter for the slots
+ * @author Matteo Vignocchi
+ */
+
 public class HousingUnit extends Tile {
 
     private List<Humans> TotHumans = new ArrayList<>();
-    int max;
+    final int max = 2;
 
-
+    /**
+     * the values are standard, and they are given when the game starts from the application
+     * @param a
+     * @param b
+     * @param c
+     * @param d
+     */
     public HousingUnit(int a,int b,int c,int d) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
-        max=2;
     }
 
     /**
-     * add to the tile one uman till it reach the max capacity
+     * add to the tile one human till it reaches the max capacity
      * @param u new human to the house
      * @throws FullHousingList if the party is full
      */
-    public void AddHumans(Humans u) throws FullHousingList {
-        if (this.ReturnLenght() == max) throw new  FullHousingList("HousingList is full");
-            TotHumans.add(u);
+    public void AddHumans(Humans u) throws FullHousingList, IllegalArgumentException {
+        if (TotHumans.size() == max) {
+            throw new FullHousingList("HousingList is full");
+        }else if (u instanceof PurpleAlien || u instanceof BrownAlien) {
+            throw new IllegalArgumentException("Aliens can not stay in the human housing");
+        }
+        TotHumans.add(u);
     }
 
     /**
      * method for giving out a human
      * @param u human that will be kick out the party
-     * @throws EmptyHousingList
+     * @throws EmptyHousingList if the housing unit is empty
      */
     public void RemoveHumans(Humans u) throws EmptyHousingList {
-        if(this.ReturnLenght()==0) throw new EmptyHousingList("HousingList is empty");
+        if(TotHumans.isEmpty()) throw new EmptyHousingList("HousingList is empty");
         TotHumans.remove(u);
     }
 
     /**
-     *
-     * @return the number of human in the housingUnit
+     * @return the number of human in the housing unit
      */
     public int ReturnLenght(){
         return TotHumans.size();
