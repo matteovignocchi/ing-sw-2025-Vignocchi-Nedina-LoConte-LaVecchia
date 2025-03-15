@@ -56,9 +56,9 @@ public class DoubleCannon extends Tile {
     /**
      * @return the actual firepower
      */
-    public double getPower() {
+    public double getPower(boolean active) {
 
-        if(isOn){
+        if(active){
             return power+2;
         }
         else {
@@ -68,4 +68,7 @@ public class DoubleCannon extends Tile {
     public boolean getStatus(){
         return isOn;
     }
-}
+
+    }
+
+
