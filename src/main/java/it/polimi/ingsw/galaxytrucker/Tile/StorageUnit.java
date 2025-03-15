@@ -43,7 +43,7 @@ public class StorageUnit extends Tile {
         if (listOfGoods.size() == max) {
             throw new FullGoodsList("Storage is full, choose another one"); //ricordati di aggiungere gestione eccezione chiamata remove
         } else if ( g instanceof DangerousGood) {
-            throw new TooDangerous("Too Dangeroooous, do not even try!\nYou risk blowing up the ship");
+            throw new TooDangerous("Too Dangerous! Do not even try!\nYou risk blowing up the ship");
         }
 
         listOfGoods.add(g);

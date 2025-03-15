@@ -73,4 +73,8 @@ public class Shield extends Tile {
         protectedCorners[2] = protectedCorners[3];
         protectedCorners[3] = tmp2;
     }
+
+    public int getProtectedCorner(int x) {
+        return protectedCorners[x];
+    }
 }

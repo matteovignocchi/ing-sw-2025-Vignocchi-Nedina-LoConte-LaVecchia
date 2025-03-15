@@ -20,16 +20,13 @@ public class DoubleEngine extends Tile {
         power = 0;
     }
 
-    /**
-     * it changes the status of the engine and increase the power
-     */
-    public void Start(){
-        isOn = true;
-        power = 2;
-    }
-    public void TurnOf(){
-        isOn = false;
-        power = 0;
+    public int getPower(boolean activate) {
+        if(activate){
+            return power+2;
+        }
+        else {
+            return power;
+        }
     }
 
     /**
@@ -38,4 +35,7 @@ public class DoubleEngine extends Tile {
     public boolean getStatus(){
         return isOn;
     }
+
+
+
 }

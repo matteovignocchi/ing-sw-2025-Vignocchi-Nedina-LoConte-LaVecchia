@@ -9,8 +9,8 @@ public class Pile {
      private List<Tile> pile_of_tile = new ArrayList<>();
 
     /**
+     * constructor that initialize all the tile and create the list pile_of_tile randomized with all the different tile
      * @author Oleg Nedina
-     * costructor that inizialaized all the tile and create the list pile_of_tile randomized with all the different tile
      */
     public Pile() {
          Tile tmp ;
@@ -32,7 +32,7 @@ public class Pile {
          tmp = new MultiJoint(3,1,2,3);
          pile_of_tile.add(tmp);
 
-         tmp = new MultiJoint(3, 2, 0 , 3);
+         tmp = new MultiJoint(3, 2, 0 ,3);
          pile_of_tile.add(tmp);
 
          tmp = new MultiJoint(3,2,2,3);
@@ -470,6 +470,11 @@ public class Pile {
         Collections.shuffle(pile_of_tile);
      }
 
+     /**
+      * method for getting a tile from the pile
+      * @param i the index of the list were the tile wanted stays
+      * @throws InvalidIndex if the index is not present in the tile
+      */
      public void TakeFromPile (int i) throws InvalidIndex{
 
          if(i<=0 || i>=pile_of_tile.size()){
@@ -482,17 +487,16 @@ public class Pile {
 
     //qua manca la exception
     /**
-     * changin the flag for the state of a tile
-     * @author Oleg Nedina
-     * @param t ogìbject rigiven to the pile
+     * this method change the flag isTaken of tile the player chose
+     * @param t object given again to the pile
      */
-    public void AddToPile ( Tile t) {
+    public void AddToPile (Tile t) {
          t.giveTile();
     }
+
     /**
-     * changin the flag for the state of a tile
-     * @author Oleg Nedina
-     * @param t ogìbject taken from the pile
+     * this method change the flag isShown and isTaken of tile the player chose
+     * @param t object taken from the pile
      */
     public void takeFrom ( Tile t) {
         t.takeTile();
@@ -500,7 +504,6 @@ public class Pile {
 
     }
     /**
-     * @author Oleg Nedina
      * @return the list with all the different combination of tile
      */
     public List<Tile> getPile_of_tile() {

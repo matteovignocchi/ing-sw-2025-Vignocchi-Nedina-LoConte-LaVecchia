@@ -14,7 +14,7 @@ public class DoubleCannon extends Tile {
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
-        power = 2;
+        power = 0;
         isOn = false;
     }
     /**
@@ -56,10 +56,19 @@ public class DoubleCannon extends Tile {
     /**
      * @return the actual firepower
      */
-    public double getPower() {
-        return power;
+    public double getPower(boolean active) {
+
+        if(active){
+            return power+2;
+        }
+        else {
+            return power;
+        }
     }
     public boolean getStatus(){
         return isOn;
     }
-}
+
+    }
+
+
