@@ -89,7 +89,7 @@ public class FlightCardBoard {
     /**
      * The method moves the specified player's rocket on the board by x spaces (x can be positive
      * or negative).
-     * The method initially calculates the current final position of the rocket on the board "temp".
+     * The method initially calculates the current final position "temp" of the rocket on the board.
      * Inside the while loop, it calls the OverLap method (see above), and checks whether there
      * are any more other's rockets in the interval between its initial and final positions. If so, it
      * increases a counter for each one. Finally, it saves the final position in Player object.
