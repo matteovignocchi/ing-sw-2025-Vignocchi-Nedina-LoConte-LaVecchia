@@ -169,8 +169,6 @@ public class Player {
                         }
                     }
                 } else if (!tmp) {
-
-
                     a = Dash_Matrix[i][0].controlCorners(2);
                     b = Dash_Matrix[i+1][0].controlCorners(0);
                     if (a * b != 0) {
@@ -190,17 +188,14 @@ public class Player {
                             }
                         }
                     }
-
                 }
                 if (tmp) {
                     removeTile(i,0);
                 }
-
-
             }
         }
 
-        //controlla la colonna 4 della matrice
+        //controlla la colonna 6 della matrice
         for(int i=1;i<4;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[i][6] instanceof EmptySpace))){
@@ -213,8 +208,6 @@ public class Player {
                         }
                     }
                 } else if (!tmp) {
-
-
                     a = Dash_Matrix[i][6].controlCorners(2);
                     b = Dash_Matrix[i+1][6].controlCorners(0);
                     if (a * b != 0) {
@@ -234,13 +227,10 @@ public class Player {
                             }
                         }
                     }
-
                 }
                 if (tmp) {
                     removeTile(i,6);
                 }
-
-
             }
         }
 
@@ -248,8 +238,6 @@ public class Player {
         for(int i=1;i<6;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[0][i] instanceof EmptySpace))){
-
-
                 a = Dash_Matrix[0][i].controlCorners(3);
                 b = Dash_Matrix[0][i-1].controlCorners(1);
                 if (a * b != 0) {
@@ -259,8 +247,6 @@ public class Player {
                         }
                     }
                 } else if (!tmp) {
-
-
                     a = Dash_Matrix[0][i].controlCorners(1);
                     b = Dash_Matrix[0][i+1].controlCorners(3);
                     if (a * b != 0) {
@@ -280,7 +266,6 @@ public class Player {
                             }
                         }
                     }
-
                 }
                 if (tmp) {
                     removeTile(i,0);
@@ -291,9 +276,7 @@ public class Player {
         //controlla la riga 4 della matrice
         for(int i=1;i<6;i++){
             boolean tmp = false;
-            if(!((Dash_Matrix[0][i] instanceof EmptySpace))){
-
-
+            if(!((Dash_Matrix[4][i] instanceof EmptySpace))){
                 a = Dash_Matrix[4][i].controlCorners(3);
                 b = Dash_Matrix[4][i-1].controlCorners(1);
                 if (a * b != 0) {
@@ -303,8 +286,6 @@ public class Player {
                         }
                     }
                 } else if (!tmp) {
-
-
                     a = Dash_Matrix[4][i].controlCorners(1);
                     b = Dash_Matrix[4][i+1].controlCorners(3);
                     if (a * b != 0) {
@@ -324,14 +305,10 @@ public class Player {
                             }
                         }
                     }
-
                 }
                 if (tmp) {
                     removeTile(i,0);
                 }
-
-
-
             }
         }
 
@@ -408,7 +385,6 @@ public class Player {
                         }
                     }
                 }
-
             }
             if(tmp) {
                 removeTile(4,0);
@@ -442,9 +418,7 @@ public class Player {
                 removeTile(4,0);
             }
         }
-
     }
-
     /**
      * check if all the cannon ar display in the correct way
      */
@@ -507,7 +481,6 @@ public class Player {
                                 removeTile(i,j);
                             }
                         }
-
                     }
                 }
             }
@@ -539,7 +512,7 @@ public class Player {
 
     /**
      *
-     * @param d the direction of a small meteorite
+     * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
     public boolean isProtected(int d){
@@ -559,10 +532,8 @@ public class Player {
         return false;
     }
 
-
     //metodo controllo gestione delle batterie?
     //da capire come fare in modo che in energycell ci vadano le cordinate della matrice scelta
-
     public double getFirePower(){
         double tmp = 0;
         for(Tile[] row : Dash_Matrix){
@@ -595,7 +566,6 @@ public class Player {
                     scanner.close();
                     boolean activate = selectEnergyCell(x,y);
                     tmp = tmp + ((DoubleEngine) tile).getPower(activate);
-
                 }
             }
         }
@@ -604,9 +574,203 @@ public class Player {
     // i metodi prima chiamano selectEnergyCell,e se poi restituisce un true chiamano la activate dei doppio.
     //poi chiamano la getpowet e poi chiamano il turnof
 
+    public int countExposedConnectors(){
+        int tmp = 0;
+        //controlla connettori esposti nella matrice interna
+        for(int i=1; i<5; i++){
+            for(int j=1; j<7; j++){
+
+                int a,b;
+                if(!(Dash_Matrix[i][j] instanceof EmptySpace)){
+                    a = Dash_Matrix[i][j].controlCorners(0);
+                    b = Dash_Matrix[i-1][j].controlCorners(2);
+                    if((a<4 && a != 0) && (a+b==a)){
+                        tmp++;
+                    }
+                    a = Dash_Matrix[i][j].controlCorners(1);
+                    b = Dash_Matrix[i][j+1].controlCorners(3);
+                    if((a<4 && a != 0) && (a+b==a)){
+                        tmp++;
+                    }
+                    a = Dash_Matrix[i][j].controlCorners(2);
+                    b = Dash_Matrix[i+1][j].controlCorners(0);
+                    if((a<4 && a != 0) && (a+b==a)){
+                        tmp++;
+                    }
+                    a = Dash_Matrix[i][j].controlCorners(3);
+                    b = Dash_Matrix[i][j-1].controlCorners(1);
+                    if((a<4 && a != 0) && (a+b==a)){
+                        tmp++;
+                    }
+                }
+            }
+        }
+        //controlla connettori esposti nella prima riga
+        for(int i=1;i<6;i++){
+            int a,b;
+            if(!((Dash_Matrix[0][i] instanceof EmptySpace))){
+                a = Dash_Matrix[0][i].controlCorners(3);
+                b = Dash_Matrix[0][i-1].controlCorners(1);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[0][i].controlCorners(2);
+                b = Dash_Matrix[1][i].controlCorners(0);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[0][i].controlCorners(1);
+                b = Dash_Matrix[0][i+1].controlCorners(3);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[0][i].controlCorners(0);
+                if((a<4 && a != 0)){
+                    tmp++;
+                }
+
+
+            }
+        }
+        //controlla connettori esposti nell'ultima riga
+        for(int i=1;i<6;i++){
+            int a,b;
+            if(!((Dash_Matrix[4][i] instanceof EmptySpace))){
+                a = Dash_Matrix[4][i].controlCorners(3);
+                b = Dash_Matrix[4][i-1].controlCorners(1);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[4][i].controlCorners(0);
+                b = Dash_Matrix[3][i].controlCorners(2);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[4][i].controlCorners(1);
+                b = Dash_Matrix[4][i+1].controlCorners(3);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[4][i].controlCorners(2);
+                if((a<4 && a != 0)){
+                    tmp++;
+                }
+
+
+            }
+        }
+        //controlla connettori esposti nella prima colonna
+        for(int i=1;i<4;i++){
+            int a,b;
+            if(!((Dash_Matrix[i][0] instanceof EmptySpace))){
+                a = Dash_Matrix[i][0].controlCorners(0);
+                b = Dash_Matrix[i-1][0].controlCorners(2);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[i][0].controlCorners(1);
+                b = Dash_Matrix[i][1].controlCorners(3);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[i][0].controlCorners(2);
+                b = Dash_Matrix[i+1][0].controlCorners(0);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+
+                a = Dash_Matrix[i][0].controlCorners(3);
+                if(a<4 && a != 0){
+                    tmp++;
+                }
+
+
+
+            }
+        }
+        //controlla connettori esposti ultima colonna
+        for(int i=1;i<4;i++){
+            int a,b;
+            if(!((Dash_Matrix[i][6] instanceof EmptySpace))){
+                a = Dash_Matrix[i][6].controlCorners(0);
+                b = Dash_Matrix[i-1][6].controlCorners(2);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[i][6].controlCorners(3);
+                b = Dash_Matrix[i][5].controlCorners(1);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+                a = Dash_Matrix[i][6].controlCorners(2);
+                b = Dash_Matrix[i+1][6].controlCorners(0);
+                if((a<4 && a != 0) && (a+b==a)){
+                    tmp++;
+                }
+
+                a = Dash_Matrix[i][6].controlCorners(1);
+                if(a<4 && a != 0){
+                    tmp++;
+                }
+
+
+
+            }
+        }
+
+        int a,b;
+        //controllo le due pedine ai lati
+        if(!((Dash_Matrix[4][0] instanceof EmptySpace))){
+            a = Dash_Matrix[4][0].controlCorners(0);
+            b = Dash_Matrix[3][0].controlCorners(2);
+            if((a<4 && a != 0) && (a+b==a)){
+                tmp++;
+            }
+            a = Dash_Matrix[4][0].controlCorners(1);
+            b = Dash_Matrix[4][1].controlCorners(3);
+            if((a<4 && a != 0) && (a+b==a)){
+                tmp++;
+            }
+            a = Dash_Matrix[4][0].controlCorners(2);
+            if(a<4 && a != 0){
+                tmp++;
+            }
+            a = Dash_Matrix[4][0].controlCorners(3);
+            if(a<4 && a != 0){
+                tmp++;
+            }
+
+
+        }
+        if(!((Dash_Matrix[4][6] instanceof EmptySpace))){
+            a = Dash_Matrix[4][6].controlCorners(0);
+            b = Dash_Matrix[3][6].controlCorners(2);
+            if((a<4 && a != 0) && (a+b==a)){
+                tmp++;
+            }
+            a = Dash_Matrix[4][6].controlCorners(3);
+            b = Dash_Matrix[4][5].controlCorners(1);
+            if((a<4 && a != 0) && (a+b==a)){
+                tmp++;
+            }
+            a = Dash_Matrix[4][6].controlCorners(2);
+            if(a<4 && a != 0){
+                tmp++;
+            }
+            a = Dash_Matrix[4][6].controlCorners(1);
+            if(a<4 && a != 0){
+                tmp++;
+            }
+
+
+        }
+
+        //restituisco il numero di connettori esposti
+        return tmp;
+    }
+
     //mancano metodi per contare i connettori scoperti
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     //manca quindi metodo per ritorare una tile da una posizione x
     //per gli altri metodi ci pensiamo insieme, bisogna capire meglio le interazioni con le carte
-
 }
