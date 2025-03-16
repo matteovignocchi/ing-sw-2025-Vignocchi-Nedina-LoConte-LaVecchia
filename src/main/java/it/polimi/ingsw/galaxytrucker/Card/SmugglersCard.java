@@ -5,7 +5,7 @@ import it.polimi.ingsw.galaxytrucker.Token.Good;
 import java.util.ArrayList;
 import java.util.List;
 
-// DA FINIRE
+// DA COMMENTARE
 
 public class SmugglersCard implements Card{
     private final int days;
@@ -28,9 +28,14 @@ public class SmugglersCard implements Card{
 
         for (Player p : players){
             if(p.getFirePower() > fire_power){
-
+                if(p.askSmugglers(days, reward_goods)){ //Capire se modificare
+                    f.moveRocket(-days, p, players);
+                    p.addGoods(reward_goods);
+                }
+                break;
+            } else if (p.getFirePower() < fire_power){
+                p.removeGoods(num_removed_goods);
             }
         }
-
     }
 }

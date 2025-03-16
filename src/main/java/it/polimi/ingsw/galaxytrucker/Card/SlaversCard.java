@@ -39,7 +39,7 @@ public class SlaversCard implements Card{
 
         for(Player p : players){
             if(p.getFirePower() > fire_power){
-                if(p.askSlavers(days, credits)){
+                if(p.askSlavers(days, credits)){ //Capire se serve così, oppure unificare con altri metodi di altre carte
                     f.moveRocket(-days, p, players);
                     p.addCredits(credits);
                 }
