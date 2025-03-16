@@ -53,9 +53,10 @@ public class HousingUnit extends Tile implements Housing{
      * @throws EmptyHousingList if the housing unit is empty
      */
     @Override
-    public void RemoveHumans(Humans u) throws EmptyHousingList {
+    public int RemoveHumans(Humans u) throws EmptyHousingList {
         if(TotHumans.isEmpty()) throw new EmptyHousingList("HousingList is empty");
         TotHumans.remove(u);
+        return 1;
     }
 
     /**

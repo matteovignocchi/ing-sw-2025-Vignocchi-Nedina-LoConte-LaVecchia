@@ -31,9 +31,10 @@ public class CentralHousingUnit extends Tile {
         TotHumans.add(u);
     }
 
-    public void RemoveHumans(Humans u) throws EmptyHousingList {
+    public int RemoveHumans(Humans u) throws EmptyHousingList {
         if(TotHumans.size() == 1) this.destroy();
         TotHumans.remove(u);
+        return 1;
     }
 
     public boolean checkStatus() {

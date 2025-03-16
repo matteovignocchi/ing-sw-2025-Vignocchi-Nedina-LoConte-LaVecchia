@@ -46,6 +46,8 @@ public class Player {
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
+        purpleAlien = false;
+        brownAlien = false;
 
         /**
          * inizialized the matrix
@@ -834,7 +836,7 @@ public class Player {
         }
             return tmp;
     }
-
+    //1 umano normale, 2 viola, 3 marrone
     //si possono solo togliere, a ogni rimozione diminuisco di 1 fino a quando non arrivo a 0
     public void removeCrewmates(int i) {
         Scanner scanner = new Scanner(System.in);
@@ -851,7 +853,12 @@ public class Player {
             } else if (Dash_Matrix[x][y] instanceof Housing) {
                 while (((Housing) Dash_Matrix[x][y]).ReturnLenght() > 0) {
                     Humans tmp = new Humans();
-                    ((Housing) Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    int flag = ((Housing) Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    if(flag==2){
+                        purpleAlien = false;
+                    }else if(flag==3){
+                        brownAlien = false;
+                    }
                     i--;
                 }
             }
@@ -890,6 +897,15 @@ public class Player {
             good.remove(index);
         }
     }
+
+    public void setPurpleAlien(){
+        purpleAlien = true;
+    }
+
+    public void setBrownAlien(){
+        brownAlien = true;
+    }
+
 
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     //manca quindi metodo per ritorare una tile da una posizione x

@@ -65,14 +65,16 @@ public class BrownAlienUnit extends Tile implements Housing {
      * @throws EmptyHousingList if the unit is already empty
      */
     @Override
-    public void RemoveHumans(Humans u) throws EmptyHousingList {
+    public int RemoveHumans(Humans u) throws EmptyHousingList {
         if(TotHumans.isEmpty()) {
             throw new EmptyHousingList("HousingList is empty");
         }else if(u instanceof BrownAlien){
             TotHumans.remove(u);
             max = 2;
+            return 3;
         }
         TotHumans.remove(u);
+        return 1;
     }
 
     /**
