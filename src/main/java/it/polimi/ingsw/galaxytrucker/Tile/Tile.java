@@ -3,7 +3,6 @@ package it.polimi.ingsw.galaxytrucker.Tile;
 /**
  * abstract class for the general structure of the tile and
  * define the common methods to move it and return some information about the tile
- * @author Oleg Nedina & Matteo Vignocchi
  * corners is an array of 4 position, the index indicate the cardinal orientation
  * 0 is for nord, 1 is for est, 2 is for south , 3 is for west
  * the element in the index it depends on the instantation of the tile
@@ -11,7 +10,7 @@ package it.polimi.ingsw.galaxytrucker.Tile;
  * 0 for no joint , 1 for 1 joint , 2 for 2 joint , 3 for universal , 4 for single cannon
  * 5 for double cannon , 6 for single engine , 7 for double engine and 8 for shield
  * isShown determinates if the tile is revealed
- *
+ * @author Oleg Nedina & Matteo Vignocchi
  */
 
 
@@ -23,7 +22,6 @@ public abstract class Tile {
     /**
      * method to shift right the vector of corners by one position
      * works directly with the array corners of the class
-     * @author Oleg Nedina & Matteo Vignocchi
      */
     public void RotateRight(){
         int tmp ;
@@ -33,12 +31,11 @@ public abstract class Tile {
         corners[1] = corners[0];
         corners[0] = tmp;
     }
+
     /**
      * method to shift left the vector of corners by one position
      * works directly with the array corners of the class
-     * @author Oleg Nedina & Matteo Vignocchi
      */
-
     public void RotateLeft(){
         int tmp ;
         tmp = corners[0];
@@ -50,9 +47,7 @@ public abstract class Tile {
     /**
      * method to reveal the face of the card
      * works directly with the flag of the class
-     * @author Oleg Nedina & Matteo Vignocchi
      */
-
     public void ShowTile()
     {
         isShown = true;
@@ -67,7 +62,6 @@ public abstract class Tile {
 
     /**
      * method that return the array "corners"
-     * @author Oleg Nedina & Matteo Vignocchi
      */
     public int[] getCorners() {
         return corners;

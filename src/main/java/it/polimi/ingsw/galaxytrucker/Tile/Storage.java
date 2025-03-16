@@ -7,6 +7,7 @@ import java.util.List;
  * interface used for all the type of storages
  * in this way, all the methods common to all types of storages are available
  * all the methods are override in the classes and explained
+ * @author Matteo Vignocchi
  */
 public interface Storage {
     public void AddGood(Good good);
