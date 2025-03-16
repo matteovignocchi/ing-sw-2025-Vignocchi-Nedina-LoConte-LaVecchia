@@ -13,7 +13,7 @@ import java.util.List;
  * @author Matteo Vignocchi
  */
 
-public class HousingUnit extends Tile {
+public class HousingUnit extends Tile implements Housing{
 
     private List<Humans> TotHumans = new ArrayList<>();
     final int max = 2;
@@ -37,7 +37,8 @@ public class HousingUnit extends Tile {
      * @param u new human to the house
      * @throws FullHousingList if the party is full
      */
-    public void AddHumans(Humans u) throws FullHousingList, IllegalArgumentException {
+    @Override
+    public void AddHuman(Humans u) throws FullHousingList, IllegalArgumentException {
         if (TotHumans.size() == max) {
             throw new FullHousingList("HousingList is full");
         }else if (u instanceof PurpleAlien || u instanceof BrownAlien) {
@@ -51,6 +52,7 @@ public class HousingUnit extends Tile {
      * @param u human that will be kick out the party
      * @throws EmptyHousingList if the housing unit is empty
      */
+    @Override
     public void RemoveHumans(Humans u) throws EmptyHousingList {
         if(TotHumans.isEmpty()) throw new EmptyHousingList("HousingList is empty");
         TotHumans.remove(u);
@@ -59,6 +61,7 @@ public class HousingUnit extends Tile {
     /**
      * @return the number of human in the housing unit
      */
+    @Override
     public int ReturnLenght(){
         return TotHumans.size();
     }
@@ -67,8 +70,14 @@ public class HousingUnit extends Tile {
      * maybe we need the list of human
      * @return the list of token
      */
+    @Override
     public List<Humans> ReturnHumans(){
         return TotHumans;
+    }
+
+    @Override
+    public boolean getStatus(){
+        return false;
     }
 
 }

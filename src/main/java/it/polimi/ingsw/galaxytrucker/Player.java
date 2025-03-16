@@ -829,51 +829,33 @@ public class Player {
         int tmp = 0;
         for(Tile[] row : Dash_Matrix) {
             for (Tile tile : row) {
-                if (tile instanceof HousingUnit) {
-                    tmp = tmp + ((HousingUnit)tile).ReturnLenght();
-                } else if(tile instanceof BrownAlienUnit){
-                    tmp = tmp + ((BrownAlienUnit)tile).ReturnLenght();
-                } else if (tile instanceof PurpleAlienUnit) {
-                    tmp = tmp + ((PurpleAlienUnit)tile).ReturnLenght();
+                if (tile instanceof Housing) tmp = tmp + ((Housing) tile).ReturnLenght();
                 }
-            }
         }
             return tmp;
     }
 
     //si possono solo togliere, a ogni rimozione diminuisco di 1 fino a quando non arrivo a 0
-    public void removeCrewmates(int i){
+    public void removeCrewmates(int i) {
         Scanner scanner = new Scanner(System.in);
-        int x,y;
-
-        while(i!=0){
-            do{
+        int x, y;
+        while (i != 0) {
+            do {
                 x = scanner.nextInt();
                 y = scanner.nextInt();
                 scanner.close();
-            }while (!(Dash_Matrix[x][y] instanceof HousingUnit || Dash_Matrix[x][y] instanceof BrownAlienUnit || Dash_Matrix[x][y] instanceof PurpleAlienUnit));
-
-            if(Dash_Matrix[x][y] instanceof HousingUnit){
-                while(((HousingUnit)Dash_Matrix[x][y]).ReturnLenght()>0){
+            } while (!(Dash_Matrix[x][y] instanceof Housing) || (Dash_Matrix[x][y] instanceof CentralHousingUnit));
+            if (Dash_Matrix[x][y] instanceof CentralHousingUnit) {
+                Humans tmp = new Humans();
+                ((CentralHousingUnit) Dash_Matrix[x][y]).RemoveHumans(tmp);
+            } else if (Dash_Matrix[x][y] instanceof Housing) {
+                while (((Housing) Dash_Matrix[x][y]).ReturnLenght() > 0) {
                     Humans tmp = new Humans();
-                    ((HousingUnit)Dash_Matrix[x][y]).RemoveHumans(tmp);
-                    i--;
-                }
-            }else if(Dash_Matrix[x][y] instanceof BrownAlienUnit){
-                while(((BrownAlienUnit)Dash_Matrix[x][y]).ReturnLenght()>0){
-                    Humans tmp = new Humans();
-                    ((BrownAlienUnit)Dash_Matrix[x][y]).RemoveHumans(tmp);
-                    i--;
-                }
-            }else if(Dash_Matrix[x][y] instanceof PurpleAlienUnit){
-                while(((PurpleAlienUnit)Dash_Matrix[x][y]).ReturnLenght()>0) {
-                    Humans tmp = new Humans();
-                    ((PurpleAlienUnit) Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    ((Housing) Dash_Matrix[x][y]).RemoveHumans(tmp);
                     i--;
                 }
             }
         }
-
     }
 
     public int getCredit(){
