@@ -63,6 +63,7 @@ public class BrownAlienUnit extends Tile implements Housing {
      * it changes the max slots of the unit if we remove the brown alien
      * @param u human or alien we want to remove
      * @throws EmptyHousingList if the unit is already empty
+     * @return 3 when they remove a brown alien, 1 when they remove a human
      */
     @Override
     public int RemoveHumans(Humans u) throws EmptyHousingList {

@@ -51,6 +51,7 @@ public class HousingUnit extends Tile implements Housing{
      * method for giving out a human
      * @param u human that will be kick out the party
      * @throws EmptyHousingList if the housing unit is empty
+     * @return it always returns 1 because there are only humans
      */
     @Override
     public int RemoveHumans(Humans u) throws EmptyHousingList {

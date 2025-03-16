@@ -14,28 +14,25 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class Player {
-    //parte iniziale
+    //Beginning
     protected int id;
     private int credit;
-
-    //parte costruzione nave
+    //Ship building
     private boolean inReady;
     private boolean isComplete;
     private Tile[][] Dash_Matrix; //hashmap?
     private boolean[][] validPosition;
     private boolean purpleAlien;
     private boolean brownAlien;
-
-    //discsrdPile
+    //discard Pile
     private List<Tile> discardPile;
-
+    //In game values
     protected int lap;
     protected int position;
     private boolean isEliminated;
 
-
     /**
-     * constructor that initialize all the variable
+     * constructor that initialize all the variables
      * @param id
      * @param isDemo define the type of dashboard
      */
@@ -48,23 +45,17 @@ public class Player {
         credit = 0;
         purpleAlien = false;
         brownAlien = false;
-
-        /**
-         * inizialized the matrix
-         */
+        //initialize the matrix
         Dash_Matrix = new Tile[5][7];
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Dash_Matrix[i][j] = new EmptySpace();
             }
         }
-        /**
-         * place the central unit
-         */
+        //place the central unit
         Dash_Matrix[3][2] = new CentralHousingUnit();
-        /**
-         * initialized a matrix with the valid position of the ship
-         */
+
+        //initialized a matrix with the valid position of the ship
         validPosition = new boolean[5][7];
         if (isDemo) {
 
@@ -119,55 +110,69 @@ public class Player {
         }
 
     }
-
-    //metodi autoesplicativi
+    /**
+     * @return id of the player
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * @return how many laps the player did
+     */
     public int getLap() {
         return lap;
     }
 
+    /**
+     * @return the position where the player is
+     */
     public int getPos() {
         return position;
     }
-
-    public boolean getStatus() {
-        return isEliminated;
-    }
-
-    public void setStatus(boolean e) {
-        isEliminated = e;
-    }
-
+    /**
+     * this method changes the play order
+     * @param pos turn order placement
+     */
     public void setPos(int pos) {
         position = pos;
     }
 
+    /**
+     * this method changes if the player has done a new lap
+     * @param newLap number of lap
+     */
     public void setLap(int newLap) {
         lap = newLap;
     }
-
+    /**
+     * @return if the player is eliminated or in the game
+     */
     public boolean isEliminated(){
         return isEliminated;
     }
+    /**
+     * this method changes the status of the player, so when it is eliminated
+     */
     public void setEliminated() {
-        isEliminated = true;
-    }
-    public void centralHousingUnit_isdestroyed() {
         isEliminated = true;
     }
 
     /**
-     * control the placement of the tile in the matrix
+     * this method changes the status of the player to is eliminated, when the central unit it is destroyed
+     */
+    public void centralHousingUnitIsDestroyed() {
+        isEliminated = true;
+    }
+
+    /**
+     * this method controls if the ship that the player built is legal, checking every tile
      */
     public void controlAssembly(){
         int a,b;
         controlCannon();
         controlEngine();
-
-        //controlla la colonna 0 della matrice
+        //check the first column
         for(int i=1;i<4;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[i][0] instanceof EmptySpace))){
@@ -205,8 +210,7 @@ public class Player {
                 }
             }
         }
-
-        //controlla la colonna 6 della matrice
+        //check the last column
         for(int i=1;i<4;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[i][6] instanceof EmptySpace))){
@@ -244,8 +248,7 @@ public class Player {
                 }
             }
         }
-
-        //controlla la riga 0 della matrice
+        //check the first row
         for(int i=1;i<6;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[0][i] instanceof EmptySpace))){
@@ -283,8 +286,7 @@ public class Player {
                 }
             }
         }
-
-        //controlla la riga 4 della matrice
+        //check the last row
         for(int i=1;i<6;i++){
             boolean tmp = false;
             if(!((Dash_Matrix[4][i] instanceof EmptySpace))){
@@ -322,8 +324,7 @@ public class Player {
                 }
             }
         }
-
-        //controlla la matrice interna escludendo i lati
+        //inner matrix check
         for(int i = 1; i < 4; i++){
             for(int j = 1; j < 6; j++){
                 boolean tmp = false;
@@ -369,13 +370,10 @@ public class Player {
                         }
                     }
                 }
-
                 if(tmp) removeTile(i,j);
-
             }
         }
-
-        //controllo angolo in basso a sinistra
+        //check bottom left corner
         if(!(Dash_Matrix[4][0] instanceof EmptySpace)) {
             boolean tmp = false;
             a = Dash_Matrix[4][0].controlCorners(0);
@@ -401,8 +399,7 @@ public class Player {
                 removeTile(4,0);
             }
         }
-
-        //controllo angolo in basso a destra
+        //check bottom right corner
         if(!(Dash_Matrix[4][6] instanceof EmptySpace)) {
             boolean tmp = false;
             a = Dash_Matrix[4][6].controlCorners(0);
@@ -423,7 +420,6 @@ public class Player {
                         }
                     }
                 }
-
             }
             if(tmp) {
                 removeTile(4,0);
@@ -510,32 +506,8 @@ public class Player {
         }
     }
 
-    //metodo per controllare se ho un alieno viola
-    public boolean controlPurpleAlien(){
-        for(Tile[] row : Dash_Matrix) {
-            for (Tile tile : row) {
-                if (tile instanceof PurpleAlienUnit && ((PurpleAlienUnit)tile).getStatus()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    //metodo per controllare se ho un alieno viola
-    public boolean controlBrownAlien(){
-        for(Tile[] row : Dash_Matrix) {
-            for (Tile tile : row) {
-                if (tile instanceof BrownAlienUnit && ((BrownAlienUnit)tile).getStatus()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
     /**
-     * remove and sub. with empty space one tile
+     * remove and replace with empty space the tile
      * @param a raw of the matrix
      * @param b column of the matrix
      */
@@ -566,8 +538,13 @@ public class Player {
         return false;
     }
 
-    //metodo controllo gestione delle batterie?
-    //da capire come fare in modo che in energycell ci vadano le cordinate della matrice scelta
+    /**
+     * this method return the firepower, checking every tile
+     * this method checks even if there is a double cannon and ask the player if they want to activate it
+     * the method calls selectedEnergyCell, and when they return true, it activates it
+     * also it checks if there is the purple alien, with the flag on the player and adds the bonus
+     * @return the total amount of firepower
+     */
     public double getFirePower() {
         double tmp = 0;
         for (Tile[] row : Dash_Matrix) {
@@ -584,14 +561,20 @@ public class Player {
                 }
             }
         }
-        if (controlPurpleAlien()) {
+        if (purpleAlien) {
             return tmp + 2;
         } else {
             return tmp;
         }
     }
 
-    //aggiunta se presente un alieno
+    /**
+     * this method return the engine power, checking every tile
+     * this method checks even if there is a double engine and ask the player if they want to activate it
+     * the method calls selectedEnergyCell, and when they return true, it activates it
+     * also it checks if there is the brown alien, with the flag on the player and adds the bonus
+     * @return the total amount of engine power
+     */
     public int getPowerEngine(){
         int tmp = 0;
         for(Tile[] row : Dash_Matrix){
@@ -608,21 +591,24 @@ public class Player {
                 }
             }
         }
-        if (controlBrownAlien()) {
+        if (brownAlien) {
             return tmp + 2;
         } else {
             return tmp;
         }
     }
-    // i metodi prima chiamano selectEnergyCell,e se poi restituisce un true chiamano la activate dei doppio.
-    //poi chiamano la getpowet e poi chiamano il turnof
 
+    /**
+     * this method checks every exposed connectors on the ship
+     * first it checks the exposed connectors in the inner matrix,
+     * Not considering the first row, the first column, the last row, and the last column
+     * @return the amount of exposed connectors
+     */
     public int countExposedConnectors(){
         int tmp = 0;
-        //controlla connettori esposti nella matrice interna
+        //inner matrix check
         for(int i=1; i<5; i++){
             for(int j=1; j<7; j++){
-
                 int a,b;
                 if(!(Dash_Matrix[i][j] instanceof EmptySpace)){
                     a = Dash_Matrix[i][j].controlCorners(0);
@@ -648,7 +634,7 @@ public class Player {
                 }
             }
         }
-        //controlla connettori esposti nella prima riga
+        //first row check
         for(int i=1;i<6;i++){
             int a,b;
             if(!((Dash_Matrix[0][i] instanceof EmptySpace))){
@@ -671,11 +657,9 @@ public class Player {
                 if((a<4 && a != 0)){
                     tmp++;
                 }
-
-
             }
         }
-        //controlla connettori esposti nell'ultima riga
+        //last row check
         for(int i=1;i<6;i++){
             int a,b;
             if(!((Dash_Matrix[4][i] instanceof EmptySpace))){
@@ -698,11 +682,9 @@ public class Player {
                 if((a<4 && a != 0)){
                     tmp++;
                 }
-
-
             }
         }
-        //controlla connettori esposti nella prima colonna
+        //first column check
         for(int i=1;i<4;i++){
             int a,b;
             if(!((Dash_Matrix[i][0] instanceof EmptySpace))){
@@ -726,12 +708,9 @@ public class Player {
                 if(a<4 && a != 0){
                     tmp++;
                 }
-
-
-
             }
         }
-        //controlla connettori esposti ultima colonna
+        //last column check
         for(int i=1;i<4;i++){
             int a,b;
             if(!((Dash_Matrix[i][6] instanceof EmptySpace))){
@@ -755,14 +734,10 @@ public class Player {
                 if(a<4 && a != 0){
                     tmp++;
                 }
-
-
-
             }
         }
-
         int a,b;
-        //controllo le due pedine ai lati
+        //this checks the connectors of the tiles facing outward from the ship, not connected to any other tile
         if(!((Dash_Matrix[4][0] instanceof EmptySpace))){
             a = Dash_Matrix[4][0].controlCorners(0);
             b = Dash_Matrix[3][0].controlCorners(2);
@@ -782,8 +757,6 @@ public class Player {
             if(a<4 && a != 0){
                 tmp++;
             }
-
-
         }
         if(!((Dash_Matrix[4][6] instanceof EmptySpace))){
             a = Dash_Matrix[4][6].controlCorners(0);
@@ -804,11 +777,8 @@ public class Player {
             if(a<4 && a != 0){
                 tmp++;
             }
-
-
         }
-
-        //restituisco il numero di connettori esposti
+        //the result
         return tmp;
     }
 
@@ -836,11 +806,19 @@ public class Player {
         }
             return tmp;
     }
-    //1 umano normale, 2 viola, 3 marrone
-    //si possono solo togliere, a ogni rimozione diminuisco di 1 fino a quando non arrivo a 0
+
+    /**
+     * this method remove the humans or the aliens from the tile choose by the player
+     * every time they remove the token, it checks the output of the method removeHumans
+     * if the flag is 1, it means they removed a human, when it is 2, they removed a purple alien,
+     * when it is 3 it means they removed a brown alien
+     * when the flag is 2 or 3, the method changes the status of presence status of brown or purple aliens
+     * @param i amount of token will be removed
+     */
     public void removeCrewmates(int i) {
         Scanner scanner = new Scanner(System.in);
         int x, y;
+        //every time a token is remove, we decrease "i" by one until it is 0
         while (i != 0) {
             do {
                 x = scanner.nextInt();
@@ -865,14 +843,24 @@ public class Player {
         }
     }
 
+    /**
+     * @return amount of credits
+     */
     public int getCredit(){
         return credit;
     }
-
+    /**
+     * this method changes the amount of credits of the player
+     * @param credit the amount earned by the player
+     */
     public void addCredits(int credit){
         this.credit += credit;
     }
 
+    /**
+     * this method changes the amount of credits of the player
+     * @param credit the amount lost by the player
+     */
     public void removeCredits(int credit){
         this.credit -= credit;
     }
@@ -898,14 +886,18 @@ public class Player {
         }
     }
 
+    /**
+     * Change the flag that indicates the presence of a purple alien
+     */
     public void setPurpleAlien(){
         purpleAlien = true;
     }
-
+    /**
+     * Change the flag that indicates the presence of a brown alien
+     */
     public void setBrownAlien(){
         brownAlien = true;
     }
-
 
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     //manca quindi metodo per ritorare una tile da una posizione x
