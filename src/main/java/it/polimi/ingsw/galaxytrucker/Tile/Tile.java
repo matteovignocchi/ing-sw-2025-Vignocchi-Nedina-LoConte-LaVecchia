@@ -4,12 +4,12 @@ package it.polimi.ingsw.galaxytrucker.Tile;
  * abstract class for the general structure of the tile and
  * define the common methods to move it and return some information about the tile
  * corners is an array of 4 position, the index indicate the cardinal orientation
- * 0 is for nord, 1 is for est, 2 is for south , 3 is for west
- * the element in the index it depends on the instantation of the tile
- * (all the child class will have a different instation)
+ * 0 is for north, 1 is for est, 2 is for south , 3 is for west
+ * the element in the index it depends on the instantiation of the tile
+ * (all the child class will have a different instantiation)
  * 0 for no joint , 1 for 1 joint , 2 for 2 joint , 3 for universal , 4 for single cannon
  * 5 for double cannon , 6 for single engine , 7 for double engine and 8 for shield
- * isShown determinates if the tile is revealed
+ * isShown determinate if the tile is revealed
  * @author Oleg Nedina & Matteo Vignocchi
  */
 
