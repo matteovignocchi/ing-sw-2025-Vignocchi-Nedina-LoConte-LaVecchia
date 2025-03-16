@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
 import it.polimi.ingsw.galaxytrucker.FullGoodsList;
+import it.polimi.ingsw.galaxytrucker.InvalidIndex;
 import it.polimi.ingsw.galaxytrucker.Token.DangerousGood;
 import it.polimi.ingsw.galaxytrucker.Token.Good;
 import it.polimi.ingsw.galaxytrucker.TooDangerous;
@@ -14,7 +15,7 @@ import java.util.List;
  * and check if the good can be put in the storage
  * @author Matteo Vignocchi
  */
-public class LargeStorageUnit extends Tile {
+public class LargeStorageUnit extends Tile implements Storage {
     private List<Good> listOfGoods = new ArrayList<>();
     final int max = 3;
 
@@ -37,6 +38,7 @@ public class LargeStorageUnit extends Tile {
      * @throws FullGoodsList if the storage is full it says to the player
      * @throws TooDangerous if the good is dangerous
      */
+    @Override
     public void AddGood(Good g) throws FullGoodsList, TooDangerous {
         if (listOfGoods.size() == max) {
             throw new FullGoodsList("Storage is full, choose another one"); //ricordati di aggiungere gestione eccezione chiamata remove
@@ -47,8 +49,22 @@ public class LargeStorageUnit extends Tile {
         listOfGoods.add(g);
     }
     /**
+     * the method remove a good choose by the player from the storage
+     * @param index it's the index of the cell from the player want to remove
+     * @throws InvalidIndex if there is no good or there is empty
+     */
+    @Override
+    public void RemoveGood(int index) throws InvalidIndex {
+        if (listOfGoods.get(index) == null || listOfGoods.isEmpty()) {
+            throw new InvalidIndex("The cell of the storage doesn't contains a Good");
+        }
+        listOfGoods.remove(listOfGoods.get(index));
+
+    }
+    /**
      * @return the list of goods that the storage contains
      */
+    @Override
     public List<Good> getListOfGoods(){
         return listOfGoods;
     }

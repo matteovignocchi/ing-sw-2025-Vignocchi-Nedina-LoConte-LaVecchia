@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker;
 
 import it.polimi.ingsw.galaxytrucker.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Token.BrownAlien;
+import it.polimi.ingsw.galaxytrucker.Token.Good;
 import it.polimi.ingsw.galaxytrucker.Token.Humans;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -25,7 +26,7 @@ public class Player {
     private boolean purpleAlien;
     private boolean brownAlien;
 
-    //discsrdPIle
+    //discsrdPile
     private List<Tile> discardPile;
 
     protected int lap;
@@ -885,6 +886,27 @@ public class Player {
 
     public void removeCredits(int credit){
         this.credit -= credit;
+    }
+
+    public void addGoods(List<Good> good) throws FullGoodsList{
+        Scanner scanner = new Scanner(System.in);
+        int x,y,index;
+        while(good.size()!=0){ //manca opzione di stop quando il player non vuole aggiungere più roba
+            do {
+                x = scanner.nextInt();
+                y = scanner.nextInt();
+                scanner.close();
+            }while (!(Dash_Matrix[x][y] instanceof Storage));
+            index = scanner.nextInt();
+            scanner.close();
+            Good tmp = good.get(index);
+            try{
+                ((Storage)Dash_Matrix[x][y]).AddGood(tmp);
+            } catch (FullGoodsList | TooDangerous e){
+                //parte di gestione della eccezione
+            }
+            good.remove(index);
+        }
     }
 
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import it.polimi.ingsw.galaxytrucker.Token.Good;
  * the methods check if the slots are full, there is the "max" parameter for the slots
  * @author Matteo Vignocchi
  */
-public class AdvStorageUnit extends Tile {
+public class AdvStorageUnit extends Tile implements Storage{
     private List<Good> listOfGoods = new ArrayList<>();
     final int max = 1;
 
@@ -38,7 +39,7 @@ public class AdvStorageUnit extends Tile {
      * @throws FullGoodsList if the storage is full it says to the player
      */
 
-
+    @Override
     public void AddGood(Good g) throws FullGoodsList {
         if (listOfGoods.size() == max) {
             throw new FullGoodsList("Storage is full, choose another one"); //ricordati di aggiungere gestione eccezione
@@ -51,6 +52,7 @@ public class AdvStorageUnit extends Tile {
      * @param index it's the index of the cell from the player want to remove
      * @throws InvalidIndex if there is no good or there is empty
      */
+    @Override
     public void RemoveGood(int index) throws InvalidIndex {
         if (listOfGoods.get(index) == null || listOfGoods.isEmpty()) {
             throw new InvalidIndex("The cell of the storage doesn't contains a Good");
@@ -61,6 +63,7 @@ public class AdvStorageUnit extends Tile {
     /**
      * @return the list of goods that the storage contains
      */
+    @Override
     public List<Good> getListOfGoods(){
         return listOfGoods;
     }
