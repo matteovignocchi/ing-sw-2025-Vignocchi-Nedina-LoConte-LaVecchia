@@ -1,14 +1,21 @@
 package it.polimi.ingsw.galaxytrucker;
 
 import it.polimi.ingsw.galaxytrucker.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Token.BrownAlien;
+import it.polimi.ingsw.galaxytrucker.Token.Humans;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Player {
     //parte iniziale
     protected int id;
+    private int credit;
 
     //parte costruzione nave
     private boolean inReady;
@@ -37,6 +44,7 @@ public class Player {
         this.position = 0;
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
+        credit = 0;
 
         /**
          * inizialized the matrix
@@ -499,6 +507,30 @@ public class Player {
         }
     }
 
+    //metodo per controllare se ho un alieno viola
+    public boolean controlPurpleAlien(){
+        for(Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof PurpleAlienUnit && ((PurpleAlienUnit)tile).getStatus()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    //metodo per controllare se ho un alieno viola
+    public boolean controlBrownAlien(){
+        for(Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof BrownAlienUnit && ((BrownAlienUnit)tile).getStatus()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     /**
      * remove and sub. with empty space one tile
      * @param a raw of the matrix
@@ -511,7 +543,6 @@ public class Player {
     }
 
     /**
-     *
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
@@ -534,25 +565,30 @@ public class Player {
 
     //metodo controllo gestione delle batterie?
     //da capire come fare in modo che in energycell ci vadano le cordinate della matrice scelta
-    public double getFirePower(){
+    public double getFirePower() {
         double tmp = 0;
-        for(Tile[] row : Dash_Matrix){
-            for(Tile tile : row){
-                if(tile instanceof Cannon){
-                    tmp= tmp + ((Cannon) tile).getPower();
+        for (Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof Cannon) {
+                    tmp = tmp + ((Cannon) tile).getPower();
                 } else if (tile instanceof DoubleCannon) {
                     Scanner scanner = new Scanner(System.in);
                     int x = scanner.nextInt();
                     int y = scanner.nextInt();
                     scanner.close();
-                    boolean boh = selectEnergyCell(x,y);
+                    boolean boh = selectEnergyCell(x, y);
                     tmp = tmp + ((DoubleCannon) tile).getPower(boh);
                 }
             }
         }
-        return tmp;
+        if (controlPurpleAlien()) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
     }
 
+    //aggiunta se presente un alieno
     public int getPowerEngine(){
         int tmp = 0;
         for(Tile[] row : Dash_Matrix){
@@ -569,7 +605,11 @@ public class Player {
                 }
             }
         }
-        return tmp;
+        if (controlBrownAlien()) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
     }
     // i metodi prima chiamano selectEnergyCell,e se poi restituisce un true chiamano la activate dei doppio.
     //poi chiamano la getpowet e poi chiamano il turnof
@@ -769,7 +809,84 @@ public class Player {
         return tmp;
     }
 
-    //mancano metodi per contare i connettori scoperti
+    //scelta player molto generale
+    public boolean askPlayerDecision(){
+        ButtonType buttonYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.NO);
+        Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
+        choice.setTitle("Choose your action");
+        choice.setHeaderText(null);
+        Optional<ButtonType> result = choice.showAndWait();
+        return result.isPresent() && result.get().equals(buttonYes);
+
+    }
+
+    /**
+     * @return the total amount of human and alien tokens on the player's ship
+     */
+    public int getCrewmates(){
+        int tmp = 0;
+        for(Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof HousingUnit) {
+                    tmp = tmp + ((HousingUnit)tile).ReturnLenght();
+                } else if(tile instanceof BrownAlienUnit){
+                    tmp = tmp + ((BrownAlienUnit)tile).ReturnLenght();
+                } else if (tile instanceof PurpleAlienUnit) {
+                    tmp = tmp + ((PurpleAlienUnit)tile).ReturnLenght();
+                }
+            }
+        }
+            return tmp;
+    }
+
+    //si possono solo togliere, a ogni rimozione diminuisco di 1 fino a quando non arrivo a 0
+    public void removeCrewmates(int i){
+        Scanner scanner = new Scanner(System.in);
+        int x,y;
+
+        while(i!=0){
+            do{
+                x = scanner.nextInt();
+                y = scanner.nextInt();
+                scanner.close();
+            }while (!(Dash_Matrix[x][y] instanceof HousingUnit || Dash_Matrix[x][y] instanceof BrownAlienUnit || Dash_Matrix[x][y] instanceof PurpleAlienUnit));
+
+            if(Dash_Matrix[x][y] instanceof HousingUnit){
+                while(((HousingUnit)Dash_Matrix[x][y]).ReturnLenght()>0){
+                    Humans tmp = new Humans();
+                    ((HousingUnit)Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    i--;
+                }
+            }else if(Dash_Matrix[x][y] instanceof BrownAlienUnit){
+                while(((BrownAlienUnit)Dash_Matrix[x][y]).ReturnLenght()>0){
+                    Humans tmp = new Humans();
+                    ((BrownAlienUnit)Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    i--;
+                }
+            }else if(Dash_Matrix[x][y] instanceof PurpleAlienUnit){
+                while(((PurpleAlienUnit)Dash_Matrix[x][y]).ReturnLenght()>0) {
+                    Humans tmp = new Humans();
+                    ((PurpleAlienUnit) Dash_Matrix[x][y]).RemoveHumans(tmp);
+                    i--;
+                }
+            }
+        }
+
+    }
+
+    public int getCredit(){
+        return credit;
+    }
+
+    public void addCredits(int credit){
+        this.credit += credit;
+    }
+
+    public void removeCredits(int credit){
+        this.credit -= credit;
+    }
+
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     //manca quindi metodo per ritorare una tile da una posizione x
     //per gli altri metodi ci pensiamo insieme, bisogna capire meglio le interazioni con le carte

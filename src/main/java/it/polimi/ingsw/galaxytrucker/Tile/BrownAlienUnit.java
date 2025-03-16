@@ -88,6 +88,12 @@ public class BrownAlienUnit extends Tile {
         return TotHumans;
     }
 
+    /**
+     * @return if an alien is present
+     */
+    public boolean getStatus(){
+        return isPresent;
+    }
 
 
 
