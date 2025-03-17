@@ -17,7 +17,6 @@ public class SecondWarzoneCard implements Card {
     private final List<Boolean> shots_size;
 
     public SecondWarzoneCard(int days, int num_goods, List<Integer> shots_directions, List<Boolean> shots_size)throws IllegalArgumentException {
-        if
         this.days = days;
         this.num_goods = num_goods;
         this.shots_directions = new ArrayList<>(shots_directions);
