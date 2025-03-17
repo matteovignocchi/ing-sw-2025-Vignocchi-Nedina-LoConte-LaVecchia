@@ -866,7 +866,7 @@ public class Player {
     public void addGoods(List<Good> good) throws FullGoodsList {
         Scanner scanner = new Scanner(System.in);
         int x, y, index;
-        while (good.size() != 0) { //manca opzione di stop quando il player non vuole aggiungere più roba
+        while (!good.isEmpty()) { //manca opzione di stop quando il player non vuole aggiungere più roba
             do {
                 x = scanner.nextInt();
                 y = scanner.nextInt();
@@ -1037,7 +1037,7 @@ public class Player {
                         risultato = activate;
                     }
                 }
-                i--;
+                i++;
             }
         }
         return risultato;
@@ -1103,8 +1103,7 @@ public class Player {
         return risultato;
     }
 
-
-        public void defenceFromCannon (int dir, boolean type){
+    public void defenceFromCannon (int dir, boolean type){
             int tmp1, tmp2;
             int dir2;
             tmp1 = throwDice();
@@ -1116,29 +1115,32 @@ public class Player {
                         this.removeFrom0(dir2);
                     }
                 }
-            } else if (dir == 2) {
+            }else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type || (!isProtected(dir) && !type)) {
                         this.removeFrom2(dir2);
                     }
-                } else if (dir == 1) {
+                }
+            }else if (dir == 1) {
                     if (dir2 > 4 && dir2 < 10) {
                         if (type || (!isProtected(dir) && !type)) {
                             this.removeFrom1(dir2);
                         }
-                    } else if (dir == 3) {
+
+                    }
+            }else if (dir == 3) {
                         if (dir2 > 4 && dir2 < 10) {
                             if (type || (!isProtected(dir) && !type)) {
                                 this.removeFrom3(dir2);
                             }
                         }
                     }
-                }
-            }
+
+
 
         }
 
-        public void defenceFromMeteorite( int dir, boolean type){
+    public void defenceFromMeteorite( int dir, boolean type){
             int tmp1, tmp2;
             int dir2;
             tmp1 = throwDice();
