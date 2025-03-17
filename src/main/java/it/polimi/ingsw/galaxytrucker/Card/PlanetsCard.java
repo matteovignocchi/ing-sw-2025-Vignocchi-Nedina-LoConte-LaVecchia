@@ -29,7 +29,7 @@ public class PlanetsCard implements Card {
     /**
      * The method activates the card's effect: it scrolls through the players' list, in order starting from the leader.
      * He can decide whether he wants to go down to the first planet and take the goods (losing the indicated flight days)
-     * or not. If he decides to go down, the planet is occupied and you move on to the next one, otherwise it remains free.
+     * or not. If he decides to go down, the planet is occupied, and you move on to the next one, otherwise it remains free.
      * Once he has made his decision, you move on to the next player who in turn must choose.
      * If all the planets on the card are occupied by players, the method ends.
      * @param players Players list sorted by position, from the leader onwards
