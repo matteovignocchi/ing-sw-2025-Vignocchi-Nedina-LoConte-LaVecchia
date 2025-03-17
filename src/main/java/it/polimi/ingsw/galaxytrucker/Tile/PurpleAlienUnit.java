@@ -13,7 +13,7 @@ import java.util.List;
  *  max is the parameter for the slots, it changes when an alien is present
  *  @author Matteo Vignocchi
  */
-public class PurpleAlienUnit extends Tile {
+public class PurpleAlienUnit extends Tile implements Housing {
     private List<Humans> TotHumans = new ArrayList<>();
     int max;
     boolean isPresent;
@@ -42,7 +42,8 @@ public class PurpleAlienUnit extends Tile {
      * @throws FullHousingList if the housing unit is full
      * @throws IllegalArgumentException if the human given is a brown alien
      */
-    public void addHuman(Humans u) throws FullHousingList, IllegalArgumentException {
+    @Override
+    public void AddHuman(Humans u) throws FullHousingList, IllegalArgumentException {
         if(TotHumans.size() == max){
             throw new FullGoodsList("The housing is full");
         } else if (u instanceof PurpleAlien) {
@@ -59,19 +60,24 @@ public class PurpleAlienUnit extends Tile {
      * it changes the max slots of the unit if we remove the purple alien
      * @param u human or alien we want to remove
      * @throws EmptyHousingList if the unit is already empty
+     * @return 2 when they remove a purple alien, 1 when they remove a human
      */
-    public void RemoveHumans(Humans u) throws EmptyHousingList {
+    @Override
+    public int RemoveHumans(Humans u) throws EmptyHousingList {
         if(TotHumans.isEmpty()) {
             throw new EmptyHousingList("HousingList is empty");
         }else if(u instanceof PurpleAlien){
             TotHumans.remove(u);
             max = 2;
+            return 2;
         }
         TotHumans.remove(u);
+        return 1;
     }
     /**
      * @return the number of human in the housing unit
      */
+   @Override
     public int ReturnLenght(){
         return TotHumans.size();
     }
@@ -80,8 +86,17 @@ public class PurpleAlienUnit extends Tile {
      * maybe we need the list of human
      * @return the list of token
      */
+    @Override
     public List<Humans> ReturnHumans(){
         return TotHumans;
+    }
+
+    /**
+     * @return if an alien is present
+     */
+    @Override
+    public boolean getStatus(){
+        return isPresent;
     }
 
 }
