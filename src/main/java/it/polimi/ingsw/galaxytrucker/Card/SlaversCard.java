@@ -39,14 +39,22 @@ public class SlaversCard implements Card{
 
         for(Player p : players){
             if(p.getFirePower() > fire_power){
-                if(p.askSlavers(days, credits)){ //Capire se serve così, oppure unificare con altri metodi di altre carte
+                if(p.askPlayerDecision()){
                     f.moveRocket(-days, p, players);
                     p.addCredits(credits);
                 }
                 break;
             } else if(p.getFirePower() < fire_power){
-                p.addCrewmates(-num_crewmates);
+                p.removeCrewmates(num_crewmates);
             }
         }
     }
+
+    public int getDays(){ return days; }
+
+    public int getCredits(){ return credits; }
+
+    public int getNumCrewmates(){ return num_crewmates; }
+
+    public int getFirePower(){ return fire_power; }
 }
