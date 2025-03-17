@@ -41,7 +41,7 @@ public class DoubleEnergyCell extends Tile {
     }
 
     //metodo per decidere se spendere una energia
-    public boolean energyManagment() {
+    public boolean energyManagement() {
         Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
         choice.setTitle("Spend an energy?");
         choice.setHeaderText(null);

@@ -39,7 +39,7 @@ public class TripleEnergyCell extends Tile {
     }
     // metodo per conferma della spesa di una esergia
 
-    public boolean energyManagment(){
+    public boolean energyManagement(){
         Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
         choice.setTitle("Spend an energy?");
         choice.setHeaderText(null);

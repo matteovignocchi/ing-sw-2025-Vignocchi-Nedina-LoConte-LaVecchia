@@ -8,34 +8,21 @@ package it.polimi.ingsw.galaxytrucker.Tile;
  */
 
 public class DoubleEngine extends Tile {
-    private boolean isOn;
-    private int power;
 
     public DoubleEngine(int a,int b,int c,int d) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
-        isOn= false;
-        power = 0;
     }
 
     public int getPower(boolean activate) {
         if(activate){
-            return power+2;
+            return 2;
         }
         else {
-            return power;
+            return 0;
         }
     }
-
-    /**
-     * @return return the status of the engine
-     */
-    public boolean getStatus(){
-        return isOn;
-    }
-
-
 
 }
