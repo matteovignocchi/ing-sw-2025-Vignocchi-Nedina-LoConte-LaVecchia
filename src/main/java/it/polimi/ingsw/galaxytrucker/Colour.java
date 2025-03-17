@@ -6,6 +6,7 @@ package it.polimi.ingsw.galaxytrucker;
  * @author Gabriele La Vecchia & Francesco "El pibe de oro" Lo Conte
  */
 
+//PROVVISORIO
 public enum Colour {
     RED,
     BLUE,
