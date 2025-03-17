@@ -5,6 +5,7 @@ package it.polimi.ingsw.galaxytrucker;
  * @author Gabriele La Vecchia & Francesco Lo Conte
  */
 
+//PROVVISORIO
 public class Rocket {
     private final Colour colour;
     /**
