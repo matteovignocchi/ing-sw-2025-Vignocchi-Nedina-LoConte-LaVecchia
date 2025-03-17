@@ -39,7 +39,7 @@ public class AbandonedStationCard implements Card {
 
         for(Player p: players) {
             if(p.getCrewmates()>=num_crewmates){
-                if(p.askAbandonedStation(days, station_goods)){ //capire se modificare
+                if(p.askPlayerDecision()){
                     f.moveRocket(-days, p, players);
                     p.addGoods(station_goods);
                 }
@@ -47,4 +47,9 @@ public class AbandonedStationCard implements Card {
             }
         }
     }
+    public int getDays(){ return days; }
+
+    public int getNumCrewmates(){ return num_crewmates; }
+
+    public List<Good> getStationGoods(){ return new ArrayList<>(station_goods); }
 }

@@ -5,23 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lv. 2 "Warzone" adventure card description
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * This class describes the behavior of the "Warzone" adventure card at level 1.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class SecondWarzoneCard implements Card {
+public class FirstWarzoneCard implements Card {
     private final int days;
-    private final int num_goods;
+    private final int num_crewmates;
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
 
-    public SecondWarzoneCard(int days, int num_goods, List<Integer> shots_directions, List<Boolean> shots_size){
+    public FirstWarzoneCard(int days, int num_crewmates, List<Integer> shots_directions, List<Boolean> shots_size){
         if(shots_directions == null || shots_size == null) throw new NullPointerException("List is null");
         else if(shots_directions.isEmpty() || shots_size.isEmpty()) throw new IllegalArgumentException("List is empty");
         else if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
 
         this.days = days;
-        this.num_goods = num_goods;
+        this.num_crewmates = num_crewmates;
         this.shots_directions = new ArrayList<>(shots_directions);
         this.shots_size = new ArrayList<>(shots_size);
     }
@@ -36,31 +36,32 @@ public class SecondWarzoneCard implements Card {
      */
 
     @Override
-    public void activate (List<Player> players, FlightCardBoard f){
+    public void activate(List<Player> players, FlightCardBoard f){
         if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
         else if(f == null) throw new NullPointerException("Null flight card board");
 
-        int index_p_less_firepower = 0;
-        int index_p_less_powerengine = 0;
-        int index_p_less_crewmates = 0;
-        for(int i = 1; i < players.size(); i++) {
-            if(players.get(i).getFirePower() < players.get(index_p_less_firepower).getFirePower())
-                index_p_less_firepower = i;
-            if(players.get(i).getPowerEngine() < players.get(index_p_less_powerengine).getPowerEngine())
-                index_p_less_powerengine = i;
-            if(players.get(i).getCrewmates() < players.get(index_p_less_crewmates).getCrewmates())
-                index_p_less_crewmates = i;
+        int index_less_firepower = 0;
+        int index_less_crewmates = 0;
+        int index_less_powerengine = 0;
+
+        for(int i=1; i<players.size(); i++ ){
+            if(players.get(i).getCrewmates()<players.get(index_less_crewmates).getCrewmates())
+                index_less_crewmates = i;
+            if(players.get(i).getFirePower()<players.get(index_less_firepower).getFirePower())
+                index_less_firepower = i;
+            if(players.get(i).getPowerEngine()<players.get(index_less_powerengine).getPowerEngine())
+                index_less_powerengine = i;
         }
-        f.moveRocket(-days, players.get(index_p_less_firepower), players);
-        players.get(index_p_less_powerengine).removeGoods(num_goods);
+        f.moveRocket(-days, players.get(index_less_crewmates), players);
+        players.get(index_less_firepower).removeCrewmates(-num_crewmates);
         for (int i = 0; i < shots_directions.size(); i++) {
-            players.get(index_p_less_crewmates).defenseFromCannon(shots_directions.get(i), shots_size.get(i));
+            players.get(index_less_powerengine).defenseFromCannon(shots_directions.get(i), shots_size.get(i));
         }
     }
     public int getDays() {return days;}
 
-    public int getNumGoods() {return num_goods;}
+    public int getNum_crewmates() {return num_crewmates;}
 
     public List<Integer> getShots_directions() {return new ArrayList<>(shots_directions);}
 

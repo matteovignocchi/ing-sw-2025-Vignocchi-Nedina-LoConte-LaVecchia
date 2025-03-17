@@ -37,12 +37,18 @@ public class AbandonedShipCard implements Card{
         else if(f == null) throw new IllegalArgumentException("Null flight card board");
 
         for(Player p : players){
-            if(p.askAbandonedShip(days, credits, num_crewmates)) { //capire se modificare
+            if(p.askPlayerDecision()) {
                 f.moveRocket(-days, p, players);
                 p.addCredits(credits);
-                p.addCrewmates(-num_crewmates);
+                p.removeCrewmates(num_crewmates);
                 break;
             }
         }
     }
+
+    public int getDays(){ return days; }
+
+    public int getCredits(){ return credits; }
+
+    public int getNumCrewmates(){ return num_crewmates; }
 }
