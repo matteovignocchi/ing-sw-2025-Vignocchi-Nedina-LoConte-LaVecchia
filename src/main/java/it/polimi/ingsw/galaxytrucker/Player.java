@@ -26,6 +26,7 @@ public class Player {
     protected int lap;
     protected int position;
     private boolean isEliminated;
+    private int totalGoods;
 
     /**
      * constructor that initialize all the variables
@@ -40,6 +41,7 @@ public class Player {
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
+        totalGoods = 0;
         purpleAlien = false;
         brownAlien = false;
         //initialize the matrix
@@ -130,7 +132,6 @@ public class Player {
 
     /**
      * this method changes the play order
-     *
      * @param pos turn order placement
      */
     public void setPos(int pos) {
@@ -139,7 +140,6 @@ public class Player {
 
     /**
      * this method changes if the player has done a new lap
-     *
      * @param newLap number of lap
      */
     public void setLap(int newLap) {
@@ -424,6 +424,7 @@ public class Player {
 
     /**
      * check if all the cannon ar display in the correct way
+     * the value 4/5 involves that there is nothing ahead the cannon
      */
     public void controlCannon() {
         for (int i = 0; i < 5; i++) {
@@ -469,7 +470,9 @@ public class Player {
     }
 
     /**
-     * chech if al the engine are display in the correct way
+     * check if al the engine are display in the correct way
+     * the value 4/5 involves that there is nothing behind the engine
+     * every engine's value 6/7 it is not face to the index 2 of the orientation array, will be removed
      */
     public void controlEngine() {
         for (int i = 0; i < 5; i++) {
@@ -490,8 +493,12 @@ public class Player {
         }
     }
 
-    //metodo che prende in ingrsso le cordinate di una tile selezionata da utente e chiama i metodi per usare
-    //le batterie , ci dovrebbe essere una exception che mi permette di richiamare il metodo nel caso non sia un contenitore di esergie
+    /**
+     * method used for choosing if they want to use the energy, after choosing the energy cell type tile
+     * @param a row index
+     * @param b colum index
+     * @return true if the player spent a battery
+     */
     public boolean selectEnergyCell(int a, int b) {
         if (Dash_Matrix[a][b] instanceof TripleEnergyCell) {
             return ((TripleEnergyCell) Dash_Matrix[a][b]).energyManagement();
@@ -504,7 +511,6 @@ public class Player {
 
     /**
      * remove and replace with empty space the tile
-     *
      * @param a raw of the matrix
      * @param b column of the matrix
      */
@@ -514,10 +520,15 @@ public class Player {
         if (Dash_Matrix[a][b] instanceof CentralHousingUnit) {
             this.setEliminated();
         }
+        if(tmp instanceof Storage) {
+            totalGoods = totalGoods - ((Storage)tmp).getListOfGoods().size();
+        }
         discardPile.add(tmp);
     }
 
     /**
+     * method used for checking the protection of a ship side by shield,
+     * return true if it is protected and they want to use a battery
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
@@ -543,7 +554,6 @@ public class Player {
      * this method checks even if there is a double cannon and ask the player if they want to activate it
      * the method calls selectedEnergyCell, and when they return true, it activates it
      * also it checks if there is the purple alien, with the flag on the player and adds the bonus
-     *
      * @return the total amount of firepower
      */
     public double getFirePower() {
@@ -574,7 +584,6 @@ public class Player {
      * this method checks even if there is a double engine and ask the player if they want to activate it
      * the method calls selectedEnergyCell, and when they return true, it activates it
      * also it checks if there is the brown alien, with the flag on the player and adds the bonus
-     *
      * @return the total amount of engine power
      */
     public int getPowerEngine() {
@@ -604,7 +613,6 @@ public class Player {
      * this method checks every exposed connectors on the ship
      * first it checks the exposed connectors in the inner matrix,
      * Not considering the first row, the first column, the last row, and the last column
-     *
      * @return the amount of exposed connectors
      */
     public int countExposedConnectors() {
@@ -785,7 +793,10 @@ public class Player {
         return tmp;
     }
 
-    //scelta player molto generale
+    /**
+     * method used for asking the player if they want to undertake an action
+     * @return true if they want to do it
+     */
     public boolean askPlayerDecision() {
         ButtonType buttonYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
         ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.NO);
@@ -798,6 +809,8 @@ public class Player {
     }
 
     /**
+     * method used for counting human token the player has left
+     * it checks every tile instance of Housing and get the amount of humans left
      * @return the total amount of human and alien tokens on the player's ship
      */
     public int getCrewmates() {
@@ -811,12 +824,30 @@ public class Player {
     }
 
     /**
+     * method used for counting every energy the player has left
+     * it checks every tile instance of DoubleEnergyCell or TripleEnergyCell and get the amount of energy left
+     * @return the total of energy
+     */
+    public int getEnergy() {
+        int tmp = 0;
+        for (Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof DoubleEnergyCell) {
+                    tmp = tmp + ((DoubleEnergyCell) tile).getEnergy();
+                } else if (tile instanceof TripleEnergyCell) {
+                    tmp = tmp + ((TripleEnergyCell) tile).getEnergy();
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
      * this method remove the humans or the aliens from the tile choose by the player
      * every time they remove the token, it checks the output of the method removeHumans
      * if the flag is 1, it means they removed a human, when it is 2, they removed a purple alien,
      * when it is 3 it means they removed a brown alien
      * when the flag is 2 or 3, the method changes the status of presence status of brown or purple aliens
-     *
      * @param i amount of token will be removed
      */
     public void removeCrewmates(int i) {
@@ -856,14 +887,19 @@ public class Player {
 
     /**
      * this method changes the amount of credits of the player
-     *
      * @param credit the amount earned by the player
      */
     public void addCredits(int credit) {
         this.credit += credit;
     }
 
-    public void addGoods(List<Good> good) throws FullGoodsList {
+    /**
+     * the method take a list of good and give the player the decision if they intend to place them all on the ship
+     * @param good the list of goods
+     * @throws FullGoodsList
+     * @throws TooDangerous
+     */
+    public void addGoods(List<Good> good) throws FullGoodsList, TooDangerous{
         Scanner scanner = new Scanner(System.in);
         int x, y, index;
         while (!good.isEmpty()) { //manca opzione di stop quando il player non vuole aggiungere più roba
@@ -881,6 +917,7 @@ public class Player {
                 //parte di gestione della eccezione
             }
             good.remove(index);
+            totalGoods ++;
         }
     }
 
@@ -898,6 +935,13 @@ public class Player {
         brownAlien = true;
     }
 
+    /**
+     * this method adds the tile on the player's shipboard
+     * @param x row index
+     * @param y column index
+     * @param t Tile to be added
+     * @throws IllegalArgumentException if the player tries to place the tile in a illegal position
+     */
     public void addTile(int x, int y, Tile t) throws IllegalArgumentException {
 
         if (validityCheck(x, y)) {
@@ -908,22 +952,41 @@ public class Player {
         }
     }
 
+    /**
+     * the method returns if the position is valid
+     * @param x row index
+     * @param y column index
+     * @return true if the place is legal
+     */
     public boolean validityCheck(int x, int y) {
         return validPosition[x][y];
     }
 
+    /**
+     * the method return the tile in the position (x,y)
+     * @param x row index
+     * @param y column index
+     * @return the tile in the position (x,y)
+     */
     public Tile getTile(int x, int y) {
         return Dash_Matrix[x][y];
     }
 
+    /**
+     * @return a random number from 1 to 6
+     */
     public int throwDice() {
         Random random = new Random();
         return random.nextInt(6) + 1;
 
     }
 
+    /**
+     * Support method for verifying if the ship is being attacked and hit from north
+     * the method remove the first tile hit
+     * @param dir2 column index
+     */
     public void removeFrom0(int dir2) {
-
         boolean flag = true;
         int i = 0;
         while (flag && i < 5) {
@@ -936,6 +999,11 @@ public class Player {
 
     }
 
+    /**
+     * Support method for verifying if the ship is being attacked and hit from east
+     * the method remove the first tile hit
+     * @param dir2 row index
+     */
     public void removeFrom1(int dir2) {
         boolean flag = true;
         int i = 6;
@@ -947,7 +1015,11 @@ public class Player {
             i--;
         }
     }
-
+    /**
+     * Support method for verifying if the ship is being attacked and hit from south
+     * the method remove the first tile hit
+     * @param dir2 column index
+     */
     public void removeFrom2(int dir2) {
         boolean flag = true;
         int i = 4;
@@ -960,7 +1032,11 @@ public class Player {
         }
 
     }
-
+    /**
+     * Support method for verifying if the ship is being attacked and hit from west
+     * the method remove the first tile hit
+     * @param dir2 row index
+     */
     public void removeFrom3(int dir2) {
         boolean flag = true;
         int i = 0;
@@ -973,17 +1049,26 @@ public class Player {
         }
     }
 
+    /**
+     * the method controls if a small meteorite is going to hit or an empty space, or a small cannon
+     * and if it is a double cannon, if the player want to activate it
+     * @param x cardinal direction of the attack
+     * @param y the row or column of the attack
+     * @return true if the tile is protected
+     */
     public boolean checkProtection(int x, int y) {
-        boolean risultato = false;
+        boolean result = false;
+        //check the north side
         if (x == 0) {
+            //flag for exit from the while if they are protected
             boolean flag = true;
             int i = 0;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 5) {
                 if (!(Dash_Matrix[i][y] instanceof EmptySpace)) {
                     if (Dash_Matrix[i][y - 4] instanceof Cannon) {
                         flag = false;
-                        risultato = true;
-
+                        result = true;
                     } else if (Dash_Matrix[i][y - 4] instanceof DoubleCannon) {
                         Scanner scanner = new Scanner(System.in);
                         int a = scanner.nextInt();
@@ -991,21 +1076,22 @@ public class Player {
                         scanner.close();
                         boolean activate = selectEnergyCell(a, b);
                         flag = false;
-                        risultato = activate;
+                        result = activate;
                     }
-
                 }
                 i++;
             }
+            //check the east side
         } else if (x == 1) {
+            //flag for exit from the while if they are protected
             boolean flag = true;
             int i = 5;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i >= 1) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if(!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
-                        risultato = true;
-
+                        result = true;
                     } else if ((Dash_Matrix[y - 5][i] instanceof DoubleCannon) || (Dash_Matrix[y - 5][i + 1] instanceof DoubleCannon) || (Dash_Matrix[y - 5][i - 1] instanceof DoubleCannon)) {
                         Scanner scanner = new Scanner(System.in);
                         int a = scanner.nextInt();
@@ -1013,20 +1099,22 @@ public class Player {
                         scanner.close();
                         boolean activate = selectEnergyCell(a, b);
                         flag = false;
-                        risultato = activate;
+                        result = activate;
                     }
                 }
                 i--;
             }
+            //check the west side
         } else if (x == 3) {
+            //flag for exit from the while if they are protected
             boolean flag = true;
             int i = 1;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 6) {
                 if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
-                        risultato = true;
-
+                        result = true;
                     } else if ((Dash_Matrix[y - 5][i] instanceof DoubleCannon) || (Dash_Matrix[y - 5][i + 1] instanceof DoubleCannon) || (Dash_Matrix[y - 5][i - 1] instanceof DoubleCannon)) {
                         Scanner scanner = new Scanner(System.in);
                         int a = scanner.nextInt();
@@ -1034,75 +1122,91 @@ public class Player {
                         scanner.close();
                         boolean activate = selectEnergyCell(a, b);
                         flag = false;
-                        risultato = activate;
+                        result = activate;
                     }
                 }
                 i++;
             }
         }
-        return risultato;
+        return result;
     }
 
+    /**
+     * method that checks whether the first non-empty tile hit by a small meteorite has no exposed connectors
+     * @param x cardinal direction of the attack
+     * @param y the row or column of the attack
+     * @return true if there are no connectors exposed
+     */
     public boolean checkNoConnector(int x, int y) {
-        boolean risultato = false;
+        boolean result = false;
+        //check the north side
         if(x==0){
             boolean flag = true;
             int i = 0;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 5) {
                 if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
-                        risultato = true;
+                        result = true;
                     }
                 }
                 i++;
             }
-
         }
+        //check the east side
         if(x==1){
             boolean flag = true;
             int i = 6;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
                 if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(1)==0) {
-                        risultato = true;
+                        result = true;
                     }
                 }
                 i--;
             }
-
         }
+        //check the south side
         if(x==2){
             boolean flag = true;
             int i = 4;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
                 if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
-                        risultato = true;
+                        result = true;
                     }
                 }
                 i--;
             }
         }
+        //check the west side
         if(x==3){
             boolean flag = true;
             int i = 0;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 7) {
                 if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(3)==0) {
-                        risultato = true;
+                        result = true;
                     }
                 }
                 i++;
             }
-
         }
-        return risultato;
+        return result;
     }
 
+    /**
+     * this method evaluates the protection of the ship making use of the other methods
+     * @param dir cardinal direction of the attack
+     * @param type dimension of the attack, true if it is big
+     */
     public void defenceFromCannon (int dir, boolean type){
             int tmp1, tmp2;
             int dir2;
@@ -1122,24 +1226,24 @@ public class Player {
                     }
                 }
             }else if (dir == 1) {
-                    if (dir2 > 4 && dir2 < 10) {
-                        if (type || (!isProtected(dir) && !type)) {
-                            this.removeFrom1(dir2);
-                        }
-
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type || (!isProtected(dir) && !type)) {
+                        this.removeFrom1(dir2);
                     }
+                }
             }else if (dir == 3) {
-                        if (dir2 > 4 && dir2 < 10) {
-                            if (type || (!isProtected(dir) && !type)) {
-                                this.removeFrom3(dir2);
-                            }
-                        }
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type || (!isProtected(dir) && !type)) {
+                        this.removeFrom3(dir2);
                     }
-
-
-
-        }
-
+                }
+            }
+    }
+    /**
+     * this method evaluates the protection of the ship making use of the other methods
+     * @param dir cardinal direction of the attack
+     * @param type dimension of the attack, true if it is big
+     */
     public void defenceFromMeteorite( int dir, boolean type){
             int tmp1, tmp2;
             int dir2;
@@ -1193,17 +1297,80 @@ public class Player {
                     }
                 }
             }
+    }
 
-
+    /**
+     * the method removes the number of goods
+     * if the number of goods to eliminates it is bigger then the total goods of the player
+     * the number of remaining goods that have not been removed is deducted
+     * if the number of battery is smaller than the number left, it stops
+     * @param num number of good to be remove
+     */
+    public void removeGoods(int num) {
+        Scanner scanner = new Scanner(System.in);
+        int x, y, index;
+        int battery = this.getEnergy();
+        if (num > totalGoods) {
+            int tmp = num - totalGoods;
+            while (totalGoods != 0) {
+                do {
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+                    scanner.close();
+                } while (!(Dash_Matrix[x][y] instanceof Storage));
+                while (!((Storage) Dash_Matrix[x][y]).getListOfGoods().isEmpty()) {
+                    index = scanner.nextInt();
+                    ((Storage) Dash_Matrix[x][y]).RemoveGood(index);
+                }
+                totalGoods--;
+            }
+            if(battery>tmp) {
+                while (tmp != 0) {
+                    do {
+                        x = scanner.nextInt();
+                        y = scanner.nextInt();
+                        scanner.close();
+                    } while (!(Dash_Matrix[x][y] instanceof DoubleEnergyCell || Dash_Matrix[x][y] instanceof TripleEnergyCell));
+                    if (Dash_Matrix[x][y] instanceof DoubleEnergyCell) {
+                        ((DoubleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    } else {
+                        ((TripleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    }
+                }
+            }else{
+                while (battery != 0) {
+                    do {
+                        x = scanner.nextInt();
+                        y = scanner.nextInt();
+                        scanner.close();
+                    } while (!(Dash_Matrix[x][y] instanceof DoubleEnergyCell || Dash_Matrix[x][y] instanceof TripleEnergyCell));
+                    if (Dash_Matrix[x][y] instanceof DoubleEnergyCell) {
+                        ((DoubleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    } else {
+                        ((TripleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    }
+                }
+            }
+        } else {
+            while(num != 0){
+                do {
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+                    scanner.close();
+                } while (!(Dash_Matrix[x][y] instanceof Storage));
+                while (!((Storage) Dash_Matrix[x][y]).getListOfGoods().isEmpty()) {
+                    index = scanner.nextInt();
+                    ((Storage) Dash_Matrix[x][y]).RemoveGood(index);
+                }
+                num--;
+            }
         }
+    }
 
-
-
-
-    public void removeGoods(int rmv){}
-    //metodo che elimina un human da ogni housing unit che sia collegata a un'altra
-    //mi creo una lista che contiene un puntatore a tutte le housing unit già collegate tra loro, per oguna di
-    //essa verifico che la presenza di umani, e se c'è chiamo un metodo remove uman che me ne toglie uno
+    /**
+     * the method check and saves in a set all the housing unit connected at least to one housing unit
+     * thereafter it removes one human/alien from each of them
+     */
     public void startPlauge() {
             Set<Tile> tempList = new HashSet<>();
             //Inner matrix
@@ -1359,6 +1526,41 @@ public class Player {
                 ((Housing)tile).RemoveHumans(u);
             }
         }
+
+    /**
+     * this method evaluates the protection of the ship making use of the other methods
+     * @param dir cardinal direction of the attack
+     * @param dir2 row or column where the pirate will go to hit
+     * @param type dimension of the attack, true if it is big
+     */
+    public void defenceFromPirateCannon (int dir,int dir2, boolean type){
+        if (dir == 0){
+            if (dir2 > 3 && dir2 < 11) {
+                if (type || (!isProtected(dir) && !type)) {
+                    this.removeFrom0(dir2);
+                }
+            }
+        }else if (dir == 2) {
+            if (dir2 > 3 && dir2 < 11) {
+                if (type || (!isProtected(dir) && !type)) {
+                    this.removeFrom2(dir2);
+                }
+            }
+        }else if (dir == 1) {
+            if (dir2 > 4 && dir2 < 10) {
+                if (type || (!isProtected(dir) && !type)) {
+                    this.removeFrom1(dir2);
+                }
+            }
+        }else if (dir == 3) {
+            if (dir2 > 4 && dir2 < 10) {
+                if (type || (!isProtected(dir) && !type)) {
+                    this.removeFrom3(dir2);
+                }
+            }
+        }
+    }
+
     //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     }
 
