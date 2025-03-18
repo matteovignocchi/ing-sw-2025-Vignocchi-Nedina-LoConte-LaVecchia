@@ -23,7 +23,7 @@ public class PiratesCard implements Card {
         this.shots_size = new ArrayList<>(shots_size);
     }
 
-    //CAMBIARE E FINIRE
+
     @Override
     public void activate (List<Player> players, FlightCardBoard f) throws IllegalArgumentException{
         if(players == null) throw new IllegalArgumentException("Null players list");
@@ -39,7 +39,7 @@ public class PiratesCard implements Card {
                 break;
             } else if (p.getFirePower() < fire_power){
                 for(int i = 0; i < shots_directions.size(); i++){
-                    p.defenseFromCannons(shots_directions(i), shots_size(i));
+                    p.defenceFromCannon(shots_directions.get(i), shots_size.get(i));
                 }
             }
         }
