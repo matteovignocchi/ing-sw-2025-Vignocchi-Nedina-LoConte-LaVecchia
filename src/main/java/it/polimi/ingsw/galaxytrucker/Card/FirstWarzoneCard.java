@@ -56,7 +56,7 @@ public class FirstWarzoneCard implements Card {
         f.moveRocket(-days, players.get(index_less_crewmates), players);
         players.get(index_less_firepower).removeCrewmates(-num_crewmates);
         for (int i = 0; i < shots_directions.size(); i++) {
-            players.get(index_less_powerengine).defenseFromCannon(shots_directions.get(i), shots_size.get(i));
+            players.get(index_less_powerengine).defenceFromCannon(shots_directions.get(i), shots_size.get(i));
         }
     }
     public int getDays() {return days;}

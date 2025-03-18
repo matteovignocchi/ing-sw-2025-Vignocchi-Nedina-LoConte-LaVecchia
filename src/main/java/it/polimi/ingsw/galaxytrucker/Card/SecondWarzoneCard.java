@@ -55,7 +55,7 @@ public class SecondWarzoneCard implements Card {
         f.moveRocket(-days, players.get(index_p_less_firepower), players);
         players.get(index_p_less_powerengine).removeGoods(num_goods);
         for (int i = 0; i < shots_directions.size(); i++) {
-            players.get(index_p_less_crewmates).defenseFromCannon(shots_directions.get(i), shots_size.get(i));
+            players.get(index_p_less_crewmates).defenceFromCannon(shots_directions.get(i), shots_size.get(i));
         }
     }
     public int getDays() {return days;}
