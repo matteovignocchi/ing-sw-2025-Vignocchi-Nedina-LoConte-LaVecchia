@@ -29,7 +29,6 @@ public class SlaversCard implements Card{
      * If it has the same, nothing happens. In both cases the slavers attack the next player (we remain in the for loop)
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
     @Override
     public void activate(List<Player> players, FlightCardBoard f){

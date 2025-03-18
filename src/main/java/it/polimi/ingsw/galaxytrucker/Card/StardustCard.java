@@ -17,7 +17,6 @@ public class StardustCard implements Card {
      * and moves the rocket on the board by "-x" spaces.
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
     @Override
     public void activate(List<Player> players, FlightCardBoard f) {
