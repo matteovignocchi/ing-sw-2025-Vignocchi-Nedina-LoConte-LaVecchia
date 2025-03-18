@@ -1198,10 +1198,13 @@ public class Player {
         }
 
 
-        //metodo che elimina un human da ogni housing unit che sia collegata a un'altra
-        //mi creo una lista che contiene un puntatore a tutte le housing unit già collegate tra loro, per oguna di
-        //essa verifico che la presenza di umani, e se c'è chiamo un metodo remove uman che me ne toglie uno
-        public void startPlauge() {
+
+
+    public void removeGoods(int rmv){}
+    //metodo che elimina un human da ogni housing unit che sia collegata a un'altra
+    //mi creo una lista che contiene un puntatore a tutte le housing unit già collegate tra loro, per oguna di
+    //essa verifico che la presenza di umani, e se c'è chiamo un metodo remove uman che me ne toglie uno
+    public void startPlauge() {
             Set<Tile> tempList = new HashSet<>();
             //Inner matrix
             for (int i = 1; i < 4; i++) {
@@ -1356,6 +1359,6 @@ public class Player {
                 ((Housing)tile).RemoveHumans(u);
             }
         }
-        //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
+    //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     }
 
