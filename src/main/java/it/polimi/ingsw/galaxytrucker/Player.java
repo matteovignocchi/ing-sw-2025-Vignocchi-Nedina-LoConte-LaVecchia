@@ -1202,10 +1202,160 @@ public class Player {
         //mi creo una lista che contiene un puntatore a tutte le housing unit già collegate tra loro, per oguna di
         //essa verifico che la presenza di umani, e se c'è chiamo un metodo remove uman che me ne toglie uno
         public void startPlauge() {
-
+            Set<Tile> tempList = new HashSet<>();
+            //Inner matrix
+            for (int i = 1; i < 4; i++) {
+                for (int j = 1; j < 6; j++) {
+                    if (Dash_Matrix[i][j] instanceof Housing && Dash_Matrix[i + 1][j] instanceof Housing) {
+                        int tmp = Dash_Matrix[i][j].controlCorners(2) * Dash_Matrix[i + 1][j].controlCorners(0);
+                        if (tmp != 0) {
+                            tempList.add(Dash_Matrix[i][j]);
+                        }
+                    }
+                    if (Dash_Matrix[i][j] instanceof Housing && Dash_Matrix[i - 1][j] instanceof Housing) {
+                        int tmp = Dash_Matrix[i][j].controlCorners(0) * Dash_Matrix[i - 1][j].controlCorners(2);
+                        if (tmp != 0) {
+                            tempList.add(Dash_Matrix[i][j]);
+                        }
+                    }
+                    if (Dash_Matrix[i - 1][j] instanceof Housing && Dash_Matrix[i][j + 1] instanceof Housing) {
+                        int tmp = Dash_Matrix[i][j].controlCorners(1) * Dash_Matrix[i][j + 1].controlCorners(3);
+                        if (tmp != 0) {
+                            tempList.add(Dash_Matrix[i][j]);
+                        }
+                    }
+                    if (Dash_Matrix[i][j] instanceof Housing && Dash_Matrix[i][j - 1] instanceof Housing) {
+                        int tmp = Dash_Matrix[i][j].controlCorners(3) * Dash_Matrix[i][j - 1].controlCorners(1);
+                        if (tmp != 0) {
+                            tempList.add(Dash_Matrix[i][j]);
+                        }
+                    }
+                }
+            }
+            // check first column
+            for (int i = 1; i < 4; i++) {
+                if (Dash_Matrix[i][0] instanceof Housing && Dash_Matrix[i + 1][0] instanceof Housing){
+                    int tmp = Dash_Matrix[i][0].controlCorners(2) * Dash_Matrix[i + 1][0].controlCorners(0);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][0]);
+                    }
+                }
+                if (Dash_Matrix[i][0] instanceof Housing && Dash_Matrix[i - 1][0] instanceof Housing){
+                    int tmp = Dash_Matrix[i][0].controlCorners(0) * Dash_Matrix[i - 1][0].controlCorners(2);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][0]);
+                    }
+                }
+                if (Dash_Matrix[i][0] instanceof Housing && Dash_Matrix[i][1] instanceof Housing){
+                    int tmp = Dash_Matrix[i][0].controlCorners(1) * Dash_Matrix[i][0].controlCorners(3);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][0]);
+                    }
+                }
+            }
+            // check last column
+            for (int i = 1; i < 4; i++) {
+                if (Dash_Matrix[i][6] instanceof Housing && Dash_Matrix[i + 1][6] instanceof Housing){
+                    int tmp = Dash_Matrix[i][6].controlCorners(2) * Dash_Matrix[i + 1][6].controlCorners(0);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][6]);
+                    }
+                }
+                if (Dash_Matrix[i][6] instanceof Housing && Dash_Matrix[i - 1][6] instanceof Housing){
+                    int tmp = Dash_Matrix[i][6].controlCorners(0) * Dash_Matrix[i - 1][6].controlCorners(2);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][0]);
+                    }
+                }
+                if (Dash_Matrix[i][6] instanceof Housing && Dash_Matrix[i][5] instanceof Housing){
+                    int tmp = Dash_Matrix[i][6].controlCorners(1) * Dash_Matrix[i][5].controlCorners(3);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[i][6]);
+                    }
+                }
+            }
+            // check first row
+            for (int i = 1; i < 6; i++){
+                if (Dash_Matrix[0][i] instanceof Housing && Dash_Matrix[1][i] instanceof Housing){
+                    int tmp = Dash_Matrix[0][i].controlCorners(2) * Dash_Matrix[1][i].controlCorners(0);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[0][i]);
+                    }
+                }
+                if (Dash_Matrix[0][i] instanceof Housing && Dash_Matrix[0][i-1] instanceof Housing){
+                    int tmp = Dash_Matrix[0][i].controlCorners(3) * Dash_Matrix[0][i-1].controlCorners(1);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[0][i]);
+                    }
+                }
+                if (Dash_Matrix[0][i] instanceof Housing && Dash_Matrix[0][i+1] instanceof Housing){
+                    int tmp = Dash_Matrix[0][i].controlCorners(1) * Dash_Matrix[0][i+1].controlCorners(3);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[0][i]);
+                    }
+                }
+            }
+            // check last row
+            for (int i = 1; i < 6; i++){
+                if (Dash_Matrix[4][i] instanceof Housing && Dash_Matrix[3][i] instanceof Housing){
+                    int tmp = Dash_Matrix[4][i].controlCorners(0) * Dash_Matrix[3][i].controlCorners(2);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[4][i]);
+                    }
+                }
+                if (Dash_Matrix[4][i] instanceof Housing && Dash_Matrix[3][i-1] instanceof Housing){
+                    int tmp = Dash_Matrix[4][i].controlCorners(3) * Dash_Matrix[3][i-1].controlCorners(1);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[4][i]);
+                    }
+                }
+                if (Dash_Matrix[4][i] instanceof Housing && Dash_Matrix[3][i+1] instanceof Housing){
+                    int tmp = Dash_Matrix[4][i].controlCorners(1) * Dash_Matrix[3][i+1].controlCorners(3);
+                    if (tmp != 0) {
+                        tempList.add(Dash_Matrix[4][i]);
+                    }
+                }
+            }
+            //check bottom-left corner
+            if(Dash_Matrix[4][0] instanceof Housing){
+                if(Dash_Matrix[3][0] instanceof Housing){
+                    int tmp = Dash_Matrix[4][0].controlCorners(0) * Dash_Matrix[3][0].controlCorners(2);
+                    if(tmp != 0){
+                        tempList.add(Dash_Matrix[4][0]);
+                    }
+                }
+            }
+            if(Dash_Matrix[4][0] instanceof Housing){
+                if(Dash_Matrix[4][1] instanceof Housing){
+                    int tmp = Dash_Matrix[4][0].controlCorners(1) * Dash_Matrix[4][1].controlCorners(3);
+                    if(tmp != 0){
+                        tempList.add(Dash_Matrix[4][0]);
+                    }
+                }
+            }
+            //check bottom-right corner
+            if(Dash_Matrix[4][6] instanceof Housing){
+                if(Dash_Matrix[3][6] instanceof Housing){
+                    int tmp = Dash_Matrix[4][6].controlCorners(0) * Dash_Matrix[3][6].controlCorners(2);
+                    if(tmp != 0){
+                        tempList.add(Dash_Matrix[4][6]);
+                    }
+                }
+            }
+            if(Dash_Matrix[4][6] instanceof Housing){
+                if(Dash_Matrix[4][5] instanceof Housing){
+                    int tmp = Dash_Matrix[4][6].controlCorners(3) * Dash_Matrix[4][5].controlCorners(1);
+                    if(tmp != 0){
+                        tempList.add(Dash_Matrix[4][6]);
+                    }
+                }
+            }
+            //for each housing unit in the set, we remove one human
+            for( Tile tile : tempList){
+                Humans u = new Humans();
+                ((Housing)tile).RemoveHumans(u);
+            }
         }
-
-
         //mancono metodi per gestire se larrivo di un meteorite piccolo colpisce un connettore scoperto o no
     }
 
