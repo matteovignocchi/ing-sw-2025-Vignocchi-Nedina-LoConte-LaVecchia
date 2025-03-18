@@ -26,7 +26,7 @@ public class OpenSpaceCard implements Card {
         else if(f == null) throw new NullPointerException("Null flight card board");
 
         for(Player p : players){
-            int x = p.getPowerEngine(); //+ p.askDoubleEngine();
+            int x = p.getPowerEngine();
             f.moveRocket(x, p, players);
         }
     }
