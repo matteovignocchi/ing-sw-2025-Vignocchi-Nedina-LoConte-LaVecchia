@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
-import it.polimi.ingsw.galaxytrucker.FullGoodsList;
 import it.polimi.ingsw.galaxytrucker.Token.BrownAlien;
 import it.polimi.ingsw.galaxytrucker.Token.Humans;
 import it.polimi.ingsw.galaxytrucker.Token.PurpleAlien;
