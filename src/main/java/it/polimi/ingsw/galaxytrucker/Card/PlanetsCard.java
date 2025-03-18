@@ -13,8 +13,8 @@ public class PlanetsCard implements Card {
     private final List<List<Good>> reward_goods;
     private final int days;
 
-    public PlanetsCard(List<List<Good>> reward_goods, int days) throws IllegalArgumentException{
-        if(reward_goods == null) throw new IllegalArgumentException("List is null");
+    public PlanetsCard(List<List<Good>> reward_goods, int days) {
+        if(reward_goods == null) throw new NullPointerException("List is null");
         else if(reward_goods.isEmpty()) throw new IllegalArgumentException("List is empty");
 
         List<List<Good>> temp = new ArrayList<>(reward_goods.size());
@@ -34,13 +34,12 @@ public class PlanetsCard implements Card {
      * If all the planets on the card are occupied by players, the method ends.
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
     @Override
-    public void activate(List<Player> players, FlightCardBoard f) throws IllegalArgumentException{
-        if(players == null) throw new IllegalArgumentException("Null players list");
+    public void activate(List<Player> players, FlightCardBoard f) {
+        if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        else if(f == null) throw new IllegalArgumentException("Null flight card board");
+        else if(f == null) throw new NullPointerException("Null flight card board");
 
         int j = 0;
         for(Player p : players){

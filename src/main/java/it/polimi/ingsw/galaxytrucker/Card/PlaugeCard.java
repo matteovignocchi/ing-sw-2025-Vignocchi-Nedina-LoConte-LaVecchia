@@ -16,14 +16,13 @@ public class PlaugeCard implements Card {
      * (if there is at least one) 1 crew member (human or alien).
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException
      */
 
     @Override
-    public void activate(List<Player> players, FlightCardBoard f) throws IllegalArgumentException{
-        if(players == null) throw new IllegalArgumentException("Null players list");
+    public void activate(List<Player> players, FlightCardBoard f) {
+        if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        else if(f == null) throw new IllegalArgumentException("Null flight card board");
+        else if(f == null) throw new NullPointerException("Null flight card board");
 
         for(Player p : players){
             p.startPlauge();

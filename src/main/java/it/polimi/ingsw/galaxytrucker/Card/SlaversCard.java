@@ -32,10 +32,10 @@ public class SlaversCard implements Card{
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
     @Override
-    public void activate(List<Player> players, FlightCardBoard f) throws IllegalArgumentException{
-        if(players == null) throw new IllegalArgumentException("Null players list");
+    public void activate(List<Player> players, FlightCardBoard f){
+        if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        else if(f == null) throw new IllegalArgumentException("Null flight card board");
+        else if(f == null) throw new NullPointerException("Null flight card board");
 
         for(Player p : players){
             if(p.getFirePower() > fire_power){

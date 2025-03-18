@@ -17,14 +17,13 @@ public class OpenSpaceCard implements Card {
      * on the board by "x" spaces
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
 
     @Override
     public void activate(List<Player> players, FlightCardBoard f) throws IllegalArgumentException{
-        if(players == null) throw new IllegalArgumentException("Null players list");
+        if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        else if(f == null) throw new IllegalArgumentException("Null flight card board");
+        else if(f == null) throw new NullPointerException("Null flight card board");
 
         for(Player p : players){
             int x = p.getPowerEngine(); //+ p.askDoubleEngine();
