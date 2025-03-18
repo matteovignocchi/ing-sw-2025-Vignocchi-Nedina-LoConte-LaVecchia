@@ -11,41 +11,41 @@
 assets/*
 
 # User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+GalaxyTrucker/.idea/**/workspace.xml
+GalaxyTrucker/.idea/**/tasks.xml
+GalaxyTrucker/.idea/**/usage.statistics.xml
+GalaxyTrucker/.idea/**/dictionaries
+GalaxyTrucker/.idea/**/shelf
 
 # AWS User-specific
-.idea/**/aws.xml
+GalaxyTrucker/.idea/**/aws.xml
 
 # Generated files
-.idea/**/contentModel.xml
+GalaxyTrucker/.idea/**/contentModel.xml
 
 # Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xm
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
+GalaxyTrucker/.idea/**/dataSources/
+GalaxyTrucker/.idea/**/dataSources.ids
+GalaxyTrucker/.idea/**/dataSources.local.xml
+GalaxyTrucker/.idea/**/sqlDataSources.xm
+GalaxyTrucker/.idea/**/dynamic.xml
+GalaxyTrucker/.idea/**/uiDesigner.xml
+GalaxyTrucker/.idea/**/dbnavigator.xml
 
 # Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
+GalaxyTrucker/.idea/**/gradle.xml
+GalaxyTrucker/.idea/**/libraries
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
 # auto-import.
-.idea/artifacts
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/modules.xml
+GalaxyTrucker/.idea/artifacts
+GalaxyTrucker/.idea/compiler.xml
+GalaxyTrucker/.idea/jarRepositories.xml
+GalaxyTrucker/.idea/modules.xml
 .idea/*.iml
-.idea/modules
+GalaxyTrucker/.idea/modules
 *.iml
 *.ipr
 
@@ -53,13 +53,13 @@ assets/*
 cmake-build-*/
 
 # Mongo Explorer plugin
-.idea/**/mongoSettings.xml
+GalaxyTrucker/.idea/**/mongoSettings.xml
 
 # File-based project format
 *.iws
 
 # IntelliJ
-.idea/*
+GalaxyTrucker/.idea/*
 out/
 
 # mpeltonen/sbt-idea plugin
@@ -69,10 +69,10 @@ out/
 atlassian-ide-plugin.xml
 
 # Cursive Clojure plugin
-.idea/replstate.xml
+GalaxyTrucker/.idea/replstate.xml
 
 # SonarLint plugin
-.idea/sonarlint/
+GalaxyTrucker/.idea/sonarlint/
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
@@ -81,7 +81,7 @@ crashlytics-build.properties
 fabric.properties
 
 # Editor-based Rest Client
-.idea/httpRequests
+GalaxyTrucker/.idea/httpRequests
 
 # Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
+GalaxyTrucker/.idea/caches/build_file_checksums.ser

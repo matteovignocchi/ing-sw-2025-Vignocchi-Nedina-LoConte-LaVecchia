@@ -1244,7 +1244,7 @@ public class Player {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite( int dir, boolean type){
+    public void defenceFromMeteorite( int dir, int dir2, boolean type){
             int tmp1, tmp2;
             int dir2;
             tmp1 = throwDice();
