@@ -32,7 +32,6 @@ public class SmugglersCard implements Card{
      * attack the next player in the list (we remain in for loop).
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
-     * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
     @Override
     public void activate (List<Player> players, FlightCardBoard f){
