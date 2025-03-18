@@ -139,6 +139,7 @@ public class FlightCardBoard {
     public void eliminateOverlappedPlayers(List<Player> players) throws IllegalArgumentException{
         if(players==null) throw new IllegalArgumentException("Players list null");
         else if (players.isEmpty()) throw new IllegalArgumentException("Players list empty");
+
         for(Player p : players) {
             if(p.isEliminated()) continue;
             boolean overlapped = false;
