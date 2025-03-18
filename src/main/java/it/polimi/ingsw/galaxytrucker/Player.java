@@ -6,6 +6,7 @@ import it.polimi.ingsw.galaxytrucker.Token.Humans;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import org.w3c.dom.html.HTMLParagraphElement;
 
 import java.util.*;
 
@@ -26,6 +27,7 @@ public class Player {
     protected int lap;
     protected int position;
     private boolean isEliminated;
+    private int totalGoods;
 
     /**
      * constructor that initialize all the variables
@@ -40,6 +42,7 @@ public class Player {
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
+        totalGoods = 0;
         purpleAlien = false;
         brownAlien = false;
         //initialize the matrix
@@ -514,6 +517,9 @@ public class Player {
         if (Dash_Matrix[a][b] instanceof CentralHousingUnit) {
             this.setEliminated();
         }
+        if(tmp instanceof Storage) {
+            totalGoods = totalGoods - ((Storage)tmp).getListOfGoods().size();
+        }
         discardPile.add(tmp);
     }
 
@@ -809,6 +815,19 @@ public class Player {
         }
         return tmp;
     }
+    public int getEnergy() {
+        int tmp = 0;
+        for (Tile[] row : Dash_Matrix) {
+            for (Tile tile : row) {
+                if (tile instanceof DoubleEnergyCell) {
+                    tmp = tmp + ((DoubleEnergyCell) tile).getEnergy();
+                } else if (tile instanceof TripleEnergyCell) {
+                    tmp = tmp + ((TripleEnergyCell) tile).getEnergy();
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * this method remove the humans or the aliens from the tile choose by the player
@@ -881,6 +900,7 @@ public class Player {
                 //parte di gestione della eccezione
             }
             good.remove(index);
+            totalGoods ++;
         }
     }
 
@@ -1197,10 +1217,66 @@ public class Player {
 
         }
 
-
-
-
-    public void removeGoods(int rmv){}
+    public void removeGoods(int num) {
+        Scanner scanner = new Scanner(System.in);
+        int x, y, index;
+        int battery = this.getEnergy();
+        if (num > totalGoods) {
+            int tmp = num - totalGoods;
+            while (totalGoods != 0) {
+                do {
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+                    scanner.close();
+                } while (!(Dash_Matrix[x][y] instanceof Storage));
+                while (!((Storage) Dash_Matrix[x][y]).getListOfGoods().isEmpty()) {
+                    index = scanner.nextInt();
+                    ((Storage) Dash_Matrix[x][y]).RemoveGood(index);
+                }
+                totalGoods--;
+            }
+            if(battery>tmp) {
+                while (tmp != 0) {
+                    do {
+                        x = scanner.nextInt();
+                        y = scanner.nextInt();
+                        scanner.close();
+                    } while (!(Dash_Matrix[x][y] instanceof DoubleEnergyCell || Dash_Matrix[x][y] instanceof TripleEnergyCell));
+                    if (Dash_Matrix[x][y] instanceof DoubleEnergyCell) {
+                        ((DoubleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    } else {
+                        ((TripleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    }
+                }
+            }else{
+                while (battery != 0) {
+                    do {
+                        x = scanner.nextInt();
+                        y = scanner.nextInt();
+                        scanner.close();
+                    } while (!(Dash_Matrix[x][y] instanceof DoubleEnergyCell || Dash_Matrix[x][y] instanceof TripleEnergyCell));
+                    if (Dash_Matrix[x][y] instanceof DoubleEnergyCell) {
+                        ((DoubleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    } else {
+                        ((TripleEnergyCell) Dash_Matrix[x][y]).removeEnergy();
+                    }
+                }
+            }
+        } else {
+            while(num != 0){
+                do {
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+                    scanner.close();
+                } while (!(Dash_Matrix[x][y] instanceof Storage));
+                while (!((Storage) Dash_Matrix[x][y]).getListOfGoods().isEmpty()) {
+                    index = scanner.nextInt();
+                    ((Storage) Dash_Matrix[x][y]).RemoveGood(index);
+                }
+                num--;
+            }
+        }
+    }
     //metodo che elimina un human da ogni housing unit che sia collegata a un'altra
     //mi creo una lista che contiene un puntatore a tutte le housing unit già collegate tra loro, per oguna di
     //essa verifico che la presenza di umani, e se c'è chiamo un metodo remove uman che me ne toglie uno
