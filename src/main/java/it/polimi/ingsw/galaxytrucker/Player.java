@@ -17,7 +17,7 @@ public class Player {
     private boolean inReady;
     private boolean isComplete;
     private Tile[][] Dash_Matrix; //hashmap?
-    private boolean[][] validPosition;
+    private Status[][] validStatus;
     private boolean purpleAlien;
     private boolean brownAlien;
     //discard Pile
@@ -27,6 +27,8 @@ public class Player {
     protected int position;
     private boolean isEliminated;
     private int totalGoods;
+
+    //creare metodi che ridanno al controllore liste su cui applicare il modello visitor
 
     /**
      * constructor that initialize all the variables
@@ -55,56 +57,89 @@ public class Player {
         Dash_Matrix[3][2] = new CentralHousingUnit();
 
         //initialized a matrix with the valid position of the ship
-        validPosition = new boolean[5][7];
+        validStatus = new Status[5][7];
         if (isDemo) {
-
-            validPosition[0][3] = true;
-            validPosition[1][2] = true;
-            validPosition[1][3] = true;
-            validPosition[1][4] = true;
-            validPosition[2][1] = true;
-            validPosition[2][2] = true;
-            validPosition[2][3] = true;
-            validPosition[2][4] = true;
-            validPosition[2][5] = true;
-            validPosition[3][1] = true;
-            validPosition[3][2] = true;
-            validPosition[3][3] = true;
-            validPosition[3][4] = true;
-            validPosition[3][5] = true;
-            validPosition[4][1] = true;
-            validPosition[4][2] = true;
-            validPosition[4][4] = true;
-            validPosition[4][5] = true;
-
+            //first row
+            validStatus[0][0]  = Status.BLOCK;
+            validStatus[0][1]  = Status.BLOCK;
+            validStatus[0][2]  = Status.BLOCK;
+            validStatus[0][3]  = Status.FREE;
+            validStatus[0][4]  = Status.BLOCK;
+            validStatus[0][5]  = Status.BLOCK;
+            validStatus[0][6]  = Status.BLOCK;
+            //second row
+            validStatus[1][0]  = Status.BLOCK;
+            validStatus[1][1]  = Status.BLOCK;
+            validStatus[1][2]  = Status.FREE;
+            validStatus[1][3]  = Status.FREE;
+            validStatus[1][4]  = Status.FREE;
+            validStatus[1][5]  = Status.BLOCK;
+            validStatus[1][6]  = Status.BLOCK;
+            //third row
+            validStatus[2][0]  = Status.BLOCK;
+            validStatus[2][1]  = Status.FREE;
+            validStatus[2][2]  = Status.FREE;
+            validStatus[2][3]  = Status.FREE;
+            validStatus[2][4]  = Status.FREE;
+            validStatus[2][5]  = Status.FREE;
+            validStatus[2][6]  = Status.BLOCK;
+            //fourth row
+            validStatus[3][0]  = Status.BLOCK;
+            validStatus[3][1]  = Status.FREE;
+            validStatus[3][2]  = Status.FREE;
+            validStatus[3][3]  = Status.FREE;
+            validStatus[3][4]  = Status.FREE;
+            validStatus[3][5]  = Status.FREE;
+            validStatus[3][6]  = Status.BLOCK;
+            //fifth row
+            validStatus[4][0]  = Status.BLOCK;
+            validStatus[4][1]  = Status.FREE;
+            validStatus[4][2]  = Status.FREE;
+            validStatus[4][3]  = Status.BLOCK;
+            validStatus[4][4]  = Status.FREE;
+            validStatus[4][5]  = Status.FREE;
+            validStatus[4][6]  = Status.BLOCK;
         } else {
-            validPosition[0][2] = true;
-            validPosition[0][4] = true;
-            validPosition[1][0] = true;
-            validPosition[1][5] = true;
-            validPosition[1][2] = true;
-            validPosition[1][3] = true;
-            validPosition[1][4] = true;
-            validPosition[2][0] = true;
-            validPosition[2][1] = true;
-            validPosition[2][2] = true;
-            validPosition[2][3] = true;
-            validPosition[2][4] = true;
-            validPosition[2][5] = true;
-            validPosition[2][6] = true;
-            validPosition[3][0] = true;
-            validPosition[3][1] = true;
-            validPosition[3][2] = true;
-            validPosition[3][3] = true;
-            validPosition[3][4] = true;
-            validPosition[3][5] = true;
-            validPosition[3][6] = true;
-            validPosition[4][0] = true;
-            validPosition[4][1] = true;
-            validPosition[4][2] = true;
-            validPosition[4][4] = true;
-            validPosition[4][5] = true;
-            validPosition[4][6] = true;
+            //first row
+            validStatus[0][0]  = Status.BLOCK;
+            validStatus[0][1]  = Status.BLOCK;
+            validStatus[0][2]  = Status.FREE;
+            validStatus[0][3]  = Status.BLOCK;
+            validStatus[0][4]  = Status.FREE;
+            validStatus[0][5]  = Status.BLOCK;
+            validStatus[0][6]  = Status.BLOCK;
+            //second row
+            validStatus[1][0]  = Status.BLOCK;
+            validStatus[1][1]  = Status.FREE;
+            validStatus[1][2]  = Status.FREE;
+            validStatus[1][3]  = Status.FREE;
+            validStatus[1][4]  = Status.FREE;
+            validStatus[1][5]  = Status.FREE;
+            validStatus[1][6]  = Status.BLOCK;
+            //third row
+            validStatus[2][0]  = Status.FREE;
+            validStatus[2][1]  = Status.FREE;
+            validStatus[2][2]  = Status.FREE;
+            validStatus[2][3]  = Status.FREE;
+            validStatus[2][4]  = Status.FREE;
+            validStatus[2][5]  = Status.FREE;
+            validStatus[2][6]  = Status.FREE;
+            //fourth row
+            validStatus[3][0]  = Status.FREE;
+            validStatus[3][1]  = Status.FREE;
+            validStatus[3][2]  = Status.FREE;
+            validStatus[3][3]  = Status.FREE;
+            validStatus[3][4]  = Status.FREE;
+            validStatus[3][5]  = Status.FREE;
+            validStatus[3][6]  = Status.FREE;
+            //fifth row
+            validStatus[4][0]  = Status.FREE;
+            validStatus[4][1]  = Status.FREE;
+            validStatus[4][2]  = Status.FREE;
+            validStatus[4][3]  = Status.BLOCK;
+            validStatus[4][4]  = Status.FREE;
+            validStatus[4][5]  = Status.FREE;
+            validStatus[4][6]  = Status.FREE;
         }
 
     }
@@ -170,7 +205,7 @@ public class Player {
         //check the first column
         for (int i = 1; i < 4; i++) {
             boolean tmp = false;
-            if (!((Dash_Matrix[i][0] instanceof EmptySpace))) {
+            if (validStatus[i][0]==Status.USED) {
                 a = Dash_Matrix[i][0].controlCorners(0);
                 b = Dash_Matrix[i - 1][1].controlCorners(2);
                 if (a * b != 0) {
@@ -208,7 +243,7 @@ public class Player {
         //check the last column
         for (int i = 1; i < 4; i++) {
             boolean tmp = false;
-            if (!((Dash_Matrix[i][6] instanceof EmptySpace))) {
+            if (validStatus[i][6] == Status.USED) {
                 a = Dash_Matrix[i][6].controlCorners(0);
                 b = Dash_Matrix[i - 1][6].controlCorners(2);
                 if (a * b != 0) {
@@ -246,7 +281,7 @@ public class Player {
         //check the first row
         for (int i = 1; i < 6; i++) {
             boolean tmp = false;
-            if (!((Dash_Matrix[0][i] instanceof EmptySpace))) {
+            if (validStatus[0][i] == Status.USED) {
                 a = Dash_Matrix[0][i].controlCorners(3);
                 b = Dash_Matrix[0][i - 1].controlCorners(1);
                 if (a * b != 0) {
@@ -284,7 +319,7 @@ public class Player {
         //check the last row
         for (int i = 1; i < 6; i++) {
             boolean tmp = false;
-            if (!((Dash_Matrix[4][i] instanceof EmptySpace))) {
+            if (validStatus[4][i] == Status.USED) {
                 a = Dash_Matrix[4][i].controlCorners(3);
                 b = Dash_Matrix[4][i - 1].controlCorners(1);
                 if (a * b != 0) {
@@ -369,7 +404,7 @@ public class Player {
             }
         }
         //check bottom left corner
-        if (!(Dash_Matrix[4][0] instanceof EmptySpace)) {
+        if (validStatus[4][0] == Status.USED) {
             boolean tmp = false;
             a = Dash_Matrix[4][0].controlCorners(0);
             b = Dash_Matrix[3][0].controlCorners(2);
@@ -395,7 +430,7 @@ public class Player {
             }
         }
         //check bottom right corner
-        if (!(Dash_Matrix[4][6] instanceof EmptySpace)) {
+        if (validStatus[4][6] == Status.USED) {
             boolean tmp = false;
             a = Dash_Matrix[4][6].controlCorners(0);
             b = Dash_Matrix[3][6].controlCorners(2);
@@ -429,35 +464,31 @@ public class Player {
     public void controlCannon() {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                if (Dash_Matrix[i][j] instanceof Cannon || Dash_Matrix[i][j] instanceof DoubleCannon) {
+                int a = Dash_Matrix[i][j].controlCorners(0);
+                int b = Dash_Matrix[i][j].controlCorners(1);
+                int c = Dash_Matrix[i][j].controlCorners(2);
+                int d = Dash_Matrix[i][j].controlCorners(3);
+                if (a == 4 || a == 5 || b == 4 || b == 5 || c == 4 || c == 5 || d == 4 || d == 5) {
                     for (int x = 0; x < 4; x++) {
                         if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
                             if (x == 0) {
                                 for (int y = 0; y < i; y++) {
-                                    if (!(Dash_Matrix[y][j] instanceof EmptySpace)) {
-                                        removeTile(i, j);
-                                    }
+                                    removeTile(i, j);
                                 }
                             }
                             if (x == 1) {
                                 for (int y = 6; y > j; y--) {
-                                    if (!(Dash_Matrix[y][j] instanceof EmptySpace)) {
-                                        removeTile(i, j);
-                                    }
+                                    removeTile(i, j);
                                 }
                             }
                             if (x == 2) {
                                 for (int y = 4; y > i; y--) {
-                                    if (!(Dash_Matrix[y][j] instanceof EmptySpace)) {
-                                        removeTile(i, j);
-                                    }
+                                    removeTile(i, j);
                                 }
                             }
                             if (x == 3) {
                                 for (int y = 0; y < j; y++) {
-                                    if (!(Dash_Matrix[i][j] instanceof EmptySpace)) {
-                                        removeTile(i, j);
-                                    }
+                                    removeTile(i, j);
                                 }
                             }
                         }
@@ -477,15 +508,16 @@ public class Player {
     public void controlEngine() {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile tile = Dash_Matrix[i][j];
-                if (tile instanceof Engine || tile instanceof DoubleEngine) {
-                    if (tile.controlCorners(2) != 6 || tile.controlCorners(2) != 7) {
+                int a = Dash_Matrix[i][j].controlCorners(0);
+                int b = Dash_Matrix[i][j].controlCorners(1);
+                int c = Dash_Matrix[i][j].controlCorners(2);
+                int d = Dash_Matrix[i][j].controlCorners(3);
+                if (a == 4 || a == 5 || b == 4 || b == 5 || c == 4 || c == 5 || d == 4 || d == 5) {
+                    if (Dash_Matrix[i][j].controlCorners(2) != 6 || Dash_Matrix[i][j].controlCorners(2) != 7) {
                         removeTile(i, j);
                     } else {
                         for (int x = 4; x > i; x--) {
-                            if (!(Dash_Matrix[x][j] instanceof EmptySpace)) {
                                 removeTile(i, j);
-                            }
                         }
                     }
                 }
@@ -499,6 +531,9 @@ public class Player {
      * @param b colum index
      * @return true if the player spent a battery
      */
+    //devo chiamare solo make decision
+    //chiamato make decision chiamo removeEnergy(Dash_Matrix[a][b])
+    //quindi sistemo il mio energy cell a cui chiamo questo metodo
     public boolean selectEnergyCell(int a, int b) {
         if (Dash_Matrix[a][b] instanceof TripleEnergyCell) {
             return ((TripleEnergyCell) Dash_Matrix[a][b]).energyManagement();
@@ -507,6 +542,10 @@ public class Player {
         } else {
             return false;
         }
+    }
+    public void removeEnergy(DoubleEnergyCell e){
+        e.energyManagement();
+
     }
 
     /**
@@ -517,11 +556,9 @@ public class Player {
     public void removeTile(int a, int b) {
         Tile tmp = Dash_Matrix[a][b];
         Dash_Matrix[a][b] = new EmptySpace();
-        if (Dash_Matrix[a][b] instanceof CentralHousingUnit) {
+        validStatus[a][b] = Status.FREE;
+        if (a == 2 && b == 3) {
             this.setEliminated();
-        }
-        if(tmp instanceof Storage) {
-            totalGoods = totalGoods - ((Storage)tmp).getListOfGoods().size();
         }
         discardPile.add(tmp);
     }
@@ -560,9 +597,13 @@ public class Player {
         double tmp = 0;
         for (Tile[] row : Dash_Matrix) {
             for (Tile tile : row) {
-                if (tile instanceof Cannon) {
+                int a = tile.controlCorners(0);
+                int b = tile.controlCorners(1);
+                int c = tile.controlCorners(2);
+                int d = tile.controlCorners(3);
+                if (a == 4 || b==4 || c==4 || d==4) {
                     tmp = tmp + ((Cannon) tile).getPower();
-                } else if (tile instanceof DoubleCannon) {
+                } else if (a == 5 || b==5 || c==5 || d==5) {
                     Scanner scanner = new Scanner(System.in);
                     int x = scanner.nextInt();
                     int y = scanner.nextInt();
@@ -590,9 +631,13 @@ public class Player {
         int tmp = 0;
         for (Tile[] row : Dash_Matrix) {
             for (Tile tile : row) {
-                if (tile instanceof Engine) {
+                int a = tile.controlCorners(0);
+                int b = tile.controlCorners(1);
+                int c = tile.controlCorners(2);
+                int d = tile.controlCorners(3);
+                if (a == 6 || b == 6 || c == 6 || d == 6) {
                     tmp++;
-                } else if (tile instanceof DoubleEngine) {
+                } else if (a == 7 || b == 7 || c == 7 || d == 7) {
                     Scanner scanner = new Scanner(System.in);
                     int x = scanner.nextInt();
                     int y = scanner.nextInt();
@@ -621,7 +666,7 @@ public class Player {
         for (int i = 1; i < 5; i++) {
             for (int j = 1; j < 7; j++) {
                 int a, b;
-                if (!(Dash_Matrix[i][j] instanceof EmptySpace)) {
+                if (validStatus[i][j] == Status.USED) {
                     a = Dash_Matrix[i][j].controlCorners(0);
                     b = Dash_Matrix[i - 1][j].controlCorners(2);
                     if ((a < 4 && a != 0) && (a + b == a)) {
@@ -648,7 +693,7 @@ public class Player {
         //first row check
         for (int i = 1; i < 6; i++) {
             int a, b;
-            if (!((Dash_Matrix[0][i] instanceof EmptySpace))) {
+            if (validStatus[0][i] == Status.USED) {
                 a = Dash_Matrix[0][i].controlCorners(3);
                 b = Dash_Matrix[0][i - 1].controlCorners(1);
                 if ((a < 4 && a != 0) && (a + b == a)) {
@@ -673,7 +718,7 @@ public class Player {
         //last row check
         for (int i = 1; i < 6; i++) {
             int a, b;
-            if (!((Dash_Matrix[4][i] instanceof EmptySpace))) {
+            if (validStatus[4][i] == Status.USED) {
                 a = Dash_Matrix[4][i].controlCorners(3);
                 b = Dash_Matrix[4][i - 1].controlCorners(1);
                 if ((a < 4 && a != 0) && (a + b == a)) {
@@ -698,7 +743,7 @@ public class Player {
         //first column check
         for (int i = 1; i < 4; i++) {
             int a, b;
-            if (!((Dash_Matrix[i][0] instanceof EmptySpace))) {
+            if (validStatus[i][0] == Status.USED) {
                 a = Dash_Matrix[i][0].controlCorners(0);
                 b = Dash_Matrix[i - 1][0].controlCorners(2);
                 if ((a < 4 && a != 0) && (a + b == a)) {
@@ -724,7 +769,7 @@ public class Player {
         //last column check
         for (int i = 1; i < 4; i++) {
             int a, b;
-            if (!((Dash_Matrix[i][6] instanceof EmptySpace))) {
+            if (validStatus[i][6] == Status.USED) {
                 a = Dash_Matrix[i][6].controlCorners(0);
                 b = Dash_Matrix[i - 1][6].controlCorners(2);
                 if ((a < 4 && a != 0) && (a + b == a)) {
@@ -749,7 +794,7 @@ public class Player {
         }
         int a, b;
         //this checks the connectors of the tiles facing outward from the ship, not connected to any other tile
-        if (!((Dash_Matrix[4][0] instanceof EmptySpace))) {
+        if (validStatus[4][0] == Status.USED ) {
             a = Dash_Matrix[4][0].controlCorners(0);
             b = Dash_Matrix[3][0].controlCorners(2);
             if ((a < 4 && a != 0) && (a + b == a)) {
@@ -769,7 +814,7 @@ public class Player {
                 tmp++;
             }
         }
-        if (!((Dash_Matrix[4][6] instanceof EmptySpace))) {
+        if (validStatus[4][6] == Status.USED) {
             a = Dash_Matrix[4][6].controlCorners(0);
             b = Dash_Matrix[3][6].controlCorners(2);
             if ((a < 4 && a != 0) && (a + b == a)) {
@@ -944,8 +989,9 @@ public class Player {
      */
     public void addTile(int x, int y, Tile t) throws IllegalArgumentException {
 
-        if (validityCheck(x, y)) {
+        if (validStatus[x][y] == Status.FREE ) {
             Dash_Matrix[x][y] = t;
+            validStatus[x][y] = Status.USED;
 
         } else {
             throw new IllegalArgumentException("Position not valid");
@@ -958,8 +1004,8 @@ public class Player {
      * @param y column index
      * @return true if the place is legal
      */
-    public boolean validityCheck(int x, int y) {
-        return validPosition[x][y];
+    public Status validityCheck(int x, int y) {
+        return validStatus[x][y];
     }
 
     /**
@@ -990,7 +1036,7 @@ public class Player {
         boolean flag = true;
         int i = 0;
         while (flag && i < 5) {
-            if (!(Dash_Matrix[i][dir2 - 4] instanceof EmptySpace)) {
+            if (validStatus[i][dir2 - 4] == Status.USED) {
                 flag = false;
                 this.removeTile(i, dir2 - 4);
             }
@@ -1008,7 +1054,7 @@ public class Player {
         boolean flag = true;
         int i = 6;
         while (flag && i >= 0) {
-            if (!(Dash_Matrix[dir2 - 5][i] instanceof EmptySpace)) {
+            if (validStatus[dir2 - 5][i] == Status.USED) {
                 flag = false;
                 this.removeTile(dir2-5, i);
             }
@@ -1024,7 +1070,7 @@ public class Player {
         boolean flag = true;
         int i = 4;
         while (flag && i >= 0) {
-            if (!(Dash_Matrix[i][dir2 - 4] instanceof EmptySpace)) {
+            if (validStatus[i][dir2 - 4] == Status.USED) {
                 flag = false;
                 this.removeTile(i, dir2 - 4);
             }
@@ -1041,7 +1087,7 @@ public class Player {
         boolean flag = true;
         int i = 0;
         while (flag && i < 7) {
-            if (!(Dash_Matrix[dir2 - 5][i] instanceof EmptySpace)) {
+            if (validStatus[dir2 - 5][i] == Status.USED) {
                 flag = false;
                 this.removeTile(dir2-5, i);
             }
@@ -1065,7 +1111,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 5) {
-                if (!(Dash_Matrix[i][y] instanceof EmptySpace)) {
+                if (validStatus[i][y] == Status.USED) {
                     if (Dash_Matrix[i][y - 4] instanceof Cannon) {
                         flag = false;
                         result = true;
@@ -1088,7 +1134,7 @@ public class Player {
             int i = 5;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i >= 1) {
-                if(!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if(validStatus[y - 5][i] == Status.USED) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
                         result = true;
@@ -1111,7 +1157,7 @@ public class Player {
             int i = 1;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 6) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
                         result = true;
@@ -1145,7 +1191,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 5) {
-                if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
+                if (validStatus[i][y - 4] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
                         result = true;
@@ -1160,7 +1206,7 @@ public class Player {
             int i = 6;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(1)==0) {
                         result = true;
@@ -1175,7 +1221,7 @@ public class Player {
             int i = 4;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
-                if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
+                if (validStatus[i][y - 4] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
                         result = true;
@@ -1190,7 +1236,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 7) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(3)==0) {
                         result = true;
@@ -1207,12 +1253,7 @@ public class Player {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon (int dir, boolean type){
-            int tmp1, tmp2;
-            int dir2;
-            tmp1 = throwDice();
-            tmp2 = throwDice();
-            dir2 = tmp1 + tmp2;
+    public void defenceFromCannon (int dir, boolean type ,int dir2){
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type || (!isProtected(dir) && !type)) {
@@ -1244,12 +1285,7 @@ public class Player {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite( int dir, boolean type){
-            int tmp1, tmp2;
-            int dir2;
-            tmp1 = throwDice();
-            tmp2 = throwDice();
-            dir2 = tmp1 + tmp2;
+    public void defenceFromMeteorite( int dir, boolean type ,int dir2){
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir,dir2) ) {
