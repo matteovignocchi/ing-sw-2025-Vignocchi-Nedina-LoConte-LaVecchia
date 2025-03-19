@@ -66,7 +66,14 @@ public class HousingUnit extends Tile{
      */
     public int removeHumans(int index) throws EmptyHousingList {
         if(listOfToken.isEmpty()) throw new EmptyHousingList("HousingList is empty");
+        Human temp = listOfToken.get(index);
         listOfToken.remove(index);
+        if(temp == Human.BROWN_ALIEN){
+            return 2;
+        }
+        if(temp == Human.PURPLE_ALIEN){
+            return 3;
+        }
         return 1;
     }
 
