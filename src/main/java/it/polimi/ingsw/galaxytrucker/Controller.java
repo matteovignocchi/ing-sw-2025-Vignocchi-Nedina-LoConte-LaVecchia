@@ -216,4 +216,32 @@ public class Controller {
         }
     }
 
+
+    /**
+     * this method return the engine power, checking every tile
+     * this method checks even if there is a double engine and ask the player if they want to activate it
+     * the method calls selectedEnergyCell, and when they return true, it activates it
+     * also it checks if there is the brown alien, with the flag on the player and adds the bonus
+     * @return the total amount of engine power
+     */
+    public int getPowerEngine(Player p){
+        int tmp = 0;
+        for(int i =0; i<5; i++){
+            for(int j=0; j<5; j++){
+                int type = visitor.visit(p.getTile(i, j));
+                if(type == 11){
+                    tmp = tmp +1;
+                }else{
+                    tmp = tmp+ 2;
+                }
+
+            }
+        }
+        if (p.presenceBrownAlien()) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
+    }
+
 }

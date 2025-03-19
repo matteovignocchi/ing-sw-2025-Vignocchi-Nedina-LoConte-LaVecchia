@@ -181,7 +181,7 @@ public class Player {
      * Change the flag that indicates the presence of a purple alien
      */
     public void setPurpleAlien() {
-        purpleAlien = true;
+        purpleAlien = !purpleAlien;
     }
 
     public boolean presencePurpleAlien() { return this.purpleAlien; }
@@ -190,7 +190,7 @@ public class Player {
      * Change the flag that indicates the presence of a brown alien
      */
     public void setBrownAlien() {
-        brownAlien = true;
+        brownAlien = !brownAlien;
     }
 
     public boolean presenceBrownAlien() { return this.brownAlien; }
@@ -946,6 +946,27 @@ public class Player {
         return result.isPresent() && result.get().equals(buttonYes);
 
     }
+
+    public void removeEnergy(EnergyCell e){
+        e.useBattery();
+    }
+
+    public EnergyCell selectEnergyCell() {
+        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
+        EnergyCell e = new EnergyCell(1,2,3,4,2);
+        return e;
+    }
+    public StorageUnit seleStorageUnit() {
+        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
+        StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
+        return e;
+    }
+    public StorageUnit seòectHousingUnit() {
+        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
+        StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
+        return e;
+    }
+
 
 
 }
