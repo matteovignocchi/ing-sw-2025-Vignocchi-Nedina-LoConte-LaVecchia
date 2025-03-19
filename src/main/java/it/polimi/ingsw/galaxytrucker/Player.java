@@ -1036,7 +1036,7 @@ public class Player {
         boolean flag = true;
         int i = 0;
         while (flag && i < 5) {
-            if (!(Dash_Matrix[i][dir2 - 4] instanceof EmptySpace)) {
+            if (validStatus[i][dir2 - 4] == Status.USED) {
                 flag = false;
                 this.removeTile(i, dir2 - 4);
             }
@@ -1054,7 +1054,7 @@ public class Player {
         boolean flag = true;
         int i = 6;
         while (flag && i >= 0) {
-            if (!(Dash_Matrix[dir2 - 5][i] instanceof EmptySpace)) {
+            if (validStatus[dir2 - 5][i] == Status.USED) {
                 flag = false;
                 this.removeTile(dir2-5, i);
             }
@@ -1070,7 +1070,7 @@ public class Player {
         boolean flag = true;
         int i = 4;
         while (flag && i >= 0) {
-            if (!(Dash_Matrix[i][dir2 - 4] instanceof EmptySpace)) {
+            if (validStatus[i][dir2 - 4] == Status.USED) {
                 flag = false;
                 this.removeTile(i, dir2 - 4);
             }
@@ -1087,7 +1087,7 @@ public class Player {
         boolean flag = true;
         int i = 0;
         while (flag && i < 7) {
-            if (!(Dash_Matrix[dir2 - 5][i] instanceof EmptySpace)) {
+            if (validStatus[dir2 - 5][i] == Status.USED) {
                 flag = false;
                 this.removeTile(dir2-5, i);
             }
@@ -1111,7 +1111,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 5) {
-                if (!(Dash_Matrix[i][y] instanceof EmptySpace)) {
+                if (validStatus[i][y] == Status.USED) {
                     if (Dash_Matrix[i][y - 4] instanceof Cannon) {
                         flag = false;
                         result = true;
@@ -1134,7 +1134,7 @@ public class Player {
             int i = 5;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i >= 1) {
-                if(!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if(validStatus[y - 5][i] == Status.USED) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
                         result = true;
@@ -1157,7 +1157,7 @@ public class Player {
             int i = 1;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
             while (flag && i < 6) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     if ((Dash_Matrix[y - 5][i] instanceof Cannon) || (Dash_Matrix[y - 5][i + 1] instanceof Cannon) || (Dash_Matrix[y - 5][i - 1] instanceof Cannon)) {
                         flag = false;
                         result = true;
@@ -1191,7 +1191,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 5) {
-                if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
+                if (validStatus[i][y - 4] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
                         result = true;
@@ -1206,7 +1206,7 @@ public class Player {
             int i = 6;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(1)==0) {
                         result = true;
@@ -1221,7 +1221,7 @@ public class Player {
             int i = 4;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i >= 0) {
-                if (!(Dash_Matrix[i][y - 4] instanceof EmptySpace)) {
+                if (validStatus[i][y - 4] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
                         result = true;
@@ -1236,7 +1236,7 @@ public class Player {
             int i = 0;
             //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are unexposed
             while (flag && i < 7) {
-                if (!(Dash_Matrix[y - 5][i] instanceof EmptySpace)) {
+                if (validStatus[y - 5][i] == Status.USED) {
                     flag = false;
                     if(Dash_Matrix[y - 5][i].controlCorners(3)==0) {
                         result = true;
@@ -1253,12 +1253,7 @@ public class Player {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon (int dir, boolean type){
-            int tmp1, tmp2;
-            int dir2;
-            tmp1 = throwDice();
-            tmp2 = throwDice();
-            dir2 = tmp1 + tmp2;
+    public void defenceFromCannon (int dir, boolean type ,int dir2){
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type || (!isProtected(dir) && !type)) {
@@ -1290,12 +1285,7 @@ public class Player {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite( int dir, boolean type){
-            int tmp1, tmp2;
-            int dir2;
-            tmp1 = throwDice();
-            tmp2 = throwDice();
-            dir2 = tmp1 + tmp2;
+    public void defenceFromMeteorite( int dir, boolean type ,int dir2){
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir,dir2) ) {
