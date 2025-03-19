@@ -15,7 +15,7 @@ import java.util.Scanner;
 public class Controller {
 
     private List<Player> Players_in_Game;
-    private Visitor visitor = new Visitor;
+    private Visitor visitor = new Visitor();
     public Pile pileOfTile = new Pile();
 
 
