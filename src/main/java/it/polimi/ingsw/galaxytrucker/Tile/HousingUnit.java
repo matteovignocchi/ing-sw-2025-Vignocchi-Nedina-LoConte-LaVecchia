@@ -1,9 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
-import it.polimi.ingsw.galaxytrucker.Token.BrownAlien;
-import it.polimi.ingsw.galaxytrucker.Token.Humans;
-import it.polimi.ingsw.galaxytrucker.Token.PurpleAlien;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +9,12 @@ import java.util.List;
  * @author Matteo Vignocchi
  */
 
-public class HousingUnit extends Tile implements Housing{
+public class HousingUnit extends Tile{
+    private List<Human> listOfToken = new ArrayList<>();
+    private int max;
+    private Human isAlien;
+    private boolean isConnected;
 
-    private List<Humans> TotHumans = new ArrayList<>();
-    final int max = 2;
 
     /**
      * the values are standard, and they are given when the game starts from the application
@@ -25,61 +23,63 @@ public class HousingUnit extends Tile implements Housing{
      * @param c
      * @param d
      */
-    public HousingUnit(int a,int b,int c,int d) {
+    public HousingUnit(int a,int b,int c,int d, Human isAlien) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
+        this.isAlien=isAlien;
     }
 
     /**
      * add to the tile one human till it reaches the max capacity
-     * @param u new human to the house
+     * @param token new human or alien to the house
      * @throws FullHousingList if the party is full
      */
-    @Override
-    public void AddHuman(Humans u) throws FullHousingList, IllegalArgumentException {
-        if (TotHumans.size() == max) {
+    public void AddHuman(Human token) throws FullHousingList, IllegalArgumentException {
+        if (listOfToken.size() == max) {
             throw new FullHousingList("HousingList is full");
-        }else if (u instanceof PurpleAlien || u instanceof BrownAlien) {
+        }else if (isAlien == Human.HUMAN && token != Human.HUMAN){
             throw new IllegalArgumentException("Aliens can not stay in the human housing");
+        } else if (isAlien == Human.BROWN_ALIEN && !isConnected && token != Human.BROWN_ALIEN) {
+            throw new IllegalArgumentException("Wrong place!");
+        }else if (isAlien == Human.PURPLE_ALIEN && !isConnected && token != Human.PURPLE_ALIEN) {
+            throw new IllegalArgumentException("Wrong place!");
+        }else{
+            listOfToken.add(token);
         }
-        TotHumans.add(u);
+    }
+
+    public void setSize(int size){
+        max=size;
+    }
+
+    public Human getType(){
+        return isAlien;
     }
 
     /**
      * method for giving out a human
-     * @param u human that will be kick out the party
+     * @param index human that will be kick out the party
      * @throws EmptyHousingList if the housing unit is empty
      * @return it always returns 1 because there are only humans
      */
-    @Override
-    public int RemoveHumans(Humans u) throws EmptyHousingList {
-        if(TotHumans.isEmpty()) throw new EmptyHousingList("HousingList is empty");
-        TotHumans.remove(u);
+    public int RemoveHumans(int index) throws EmptyHousingList {
+        if(listOfToken.isEmpty()) throw new EmptyHousingList("HousingList is empty");
+        listOfToken.remove(index);
         return 1;
     }
 
     /**
      * @return the number of human in the housing unit
      */
-    @Override
     public int ReturnLenght(){
-        return TotHumans.size();
+        return listOfToken.size();
     }
-
-    /**
-     * maybe we need the list of human
-     * @return the list of token
-     */
-    @Override
-    public List<Humans> ReturnHumans(){
-        return TotHumans;
+    public void setConnected(boolean connected){
+        isConnected = connected;
     }
-
-    @Override
-    public boolean getStatus(){
-        return false;
+    public boolean isConnected(){
+        return isConnected;
     }
-
 }
