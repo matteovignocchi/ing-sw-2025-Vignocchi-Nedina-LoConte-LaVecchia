@@ -66,4 +66,7 @@ public class StorageUnit extends Tile {
         }
         listOfGoods.remove(listOfGoods.get(index));
     }
+    public int getListSize() {
+        return listOfGoods.size();
+    }
 }
