@@ -36,7 +36,7 @@ public class HousingUnit extends Tile{
      * @param token new human or alien to the house
      * @throws FullHousingList if the party is full
      */
-    public void AddHuman(Human token) throws FullHousingList, IllegalArgumentException {
+    public void addHuman(Human token) throws FullHousingList, IllegalArgumentException {
         if (listOfToken.size() == max) {
             throw new FullHousingList("HousingList is full");
         }else if (isAlien == Human.HUMAN && token != Human.HUMAN){
@@ -64,7 +64,7 @@ public class HousingUnit extends Tile{
      * @throws EmptyHousingList if the housing unit is empty
      * @return it always returns 1 because there are only humans
      */
-    public int RemoveHumans(int index) throws EmptyHousingList {
+    public int removeHumans(int index) throws EmptyHousingList {
         if(listOfToken.isEmpty()) throw new EmptyHousingList("HousingList is empty");
         listOfToken.remove(index);
         return 1;
@@ -73,7 +73,7 @@ public class HousingUnit extends Tile{
     /**
      * @return the number of human in the housing unit
      */
-    public int ReturnLenght(){
+    public int returnLenght(){
         return listOfToken.size();
     }
     public void setConnected(boolean connected){
