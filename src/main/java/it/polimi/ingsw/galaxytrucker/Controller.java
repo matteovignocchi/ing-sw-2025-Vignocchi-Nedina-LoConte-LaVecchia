@@ -14,9 +14,7 @@ import java.util.Scanner;
 public class Controller {
 
     private List<Player> Players_in_Game;
-    private ViewHousing Vh = new ViewHousing();
-    private ViewCannon Vc = new ViewCannon();
-    private ViewEngine Ve = new ViewEngine();
+    private Visitor visitor = new Visitor;
     public Pile pileOfTile = new Pile();
 
 
@@ -59,7 +57,7 @@ public class Controller {
         int tmp = 0;
         for(int i =0; i<5; i++){
             for(int j=0; j<5; j++){
-                tmp = tmp + Vh.visit(p.getTile(i, j));
+                tmp = tmp + visitor.visit(p.getTile(i, j));
 
             }
         }
@@ -70,7 +68,7 @@ public class Controller {
         double tmp = 0;
         for(int i =0; i<5; i++){
             for(int j=0; j<5; j++){
-                int type = Vc.visit(p.getTile(i, j));
+                int type = visitor.visit(p.getTile(i, j));
                 if(type == 1){
 
                     if(p.getTile(i,j).controlCorners(0)==4){
@@ -92,8 +90,12 @@ public class Controller {
             return tmp + 2;
         } else {
             return tmp;
-        }    }
+        }
+    }
 
 
+    public void removeGoods(Player player, int num) {
+        int
+    }
 
 }
