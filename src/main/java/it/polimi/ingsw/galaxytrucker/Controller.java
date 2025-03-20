@@ -59,10 +59,39 @@ public class Controller {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                tmp = tmp + visitor.visit(p.getTile(i, j)) - 100;
+                if(visitor.visit(p.getTile(i,j))>=100 && visitor.visit(p.getTile(i,j))<200)
+                    tmp = tmp + visitor.visit(p.getTile(i, j)) - 100;
             }
         }
         return tmp;
+    }
+
+
+    /**
+     * this method return the engine power, checking every tile
+     * this method checks even if there is a double engine and ask the player if they want to activate it
+     * the method calls selectedEnergyCell, and when they return true, it activates it
+     * also it checks if there is the brown alien, with the flag on the player and adds the bonus
+     * @return the total amount of engine power
+     */
+    public int getPowerEngine(Player p){
+        int tmp = 0;
+        for(int i =0; i<5; i++){
+            for(int j=0; j<5; j++){
+                int type = visitor.visit(p.getTile(i, j));
+                if(type == 11){
+                    tmp = tmp +1;
+                }else if(type == 22){
+                    tmp = tmp+ 2;
+                }
+
+            }
+        }
+        if (p.presenceBrownAlien() && tmp != 0) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
     }
 
     public double getFirePower(Player p) {
@@ -76,7 +105,7 @@ public class Controller {
                     } else {
                         tmp = tmp + 0.5;
                     }
-                } else {
+                } else if (type == 2) {
                     //MANCA LOGICA DI RICHIESTA E RISPOSTA
                     if (p.getTile(i, j).controlCorners(0) == 5) {
                         tmp = tmp + 2;
@@ -86,7 +115,7 @@ public class Controller {
                 }
             }
         }
-        if (p.presencePurpleAlien()) {
+        if (p.presencePurpleAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
@@ -177,6 +206,7 @@ public class Controller {
             //se è connessa -> mettere umani
         }
     }
+
     public void removeCrewmate(Player player, int num) {
         int totalCrew = getNumCrew(player);
         if(num > totalCrew) {
@@ -212,35 +242,125 @@ public class Controller {
             }
         }
         if(tmp == firstNumber){
-            player.setPurpleAlien();
+            player.setEliminated();
         }
     }
 
+    /**
+     * method used for checking the protection of a ship side by shield,
+     * return true if it is protected and they want to use a battery
+     * @param d the direction of a small meteorite of cannon_fire
+     * @return if the ship is safe
+     */
+    public boolean isProtected(Player p1, int d) {
+        boolean protection = false;
+        //il controller chiede al player se vuole usare uno scudo
+        //il player se vuole usare uno scudo fa partire unn ciclo in cui
+        //deve selezionare una tile, se il controller tramite il visitor osserva che
+        //è uno scudo,controlla che protegga il lato richiesto e passo al punto 2
+        //2: fa in modo di uscire dal ciclo e chiedere al player se vuole quindi usare una batteria
+        //se la vuole usare fa selezionare una energy cell
+        //il controller a questo punto se osserva come prima che è una energy cell fa in modo che si possa eliminare una batteria
+        //se si puo eliminare modifica il flag protection
+        //altrimenti chiede unaltra energy cell
+        Shield s = new Shield(1,2,3,4);
+        boolean x = p1.dashProtected(s,d);
+        if(x==true){
+            protection = true;
+        }
+        //logica sopra per controllo dell tile
+        return protection;
+    }
 
     /**
-     * this method return the engine power, checking every tile
-     * this method checks even if there is a double engine and ask the player if they want to activate it
-     * the method calls selectedEnergyCell, and when they return true, it activates it
-     * also it checks if there is the brown alien, with the flag on the player and adds the bonus
-     * @return the total amount of engine power
+     * this method evaluates the protection of the ship making use of the other methods
+     * @param dir cardinal direction of the attack
+     * @param type dimension of the attack, true if it is big
      */
-    public int getPowerEngine(Player p){
-        int tmp = 0;
-        for(int i =0; i<5; i++){
-            for(int j=0; j<5; j++){
-                int type = visitor.visit(p.getTile(i, j));
-                if(type == 11){
-                    tmp = tmp +1;
-                }else{
-                    tmp = tmp+ 2;
+    public void defenceFromCannon (int dir, boolean type ,int dir2) {
+        for (Player p : Players_in_Game) {
+            if (dir == 0) {
+                if (dir2 > 3 && dir2 < 11) {
+                    if (type || (!isProtected(p,dir) && !type)) {
+                        p.removeFrom0(dir2);
+                    }
                 }
-
+            } else if (dir == 2) {
+                if (dir2 > 3 && dir2 < 11) {
+                    if (type || (!isProtected(p,dir) && !type)) {
+                        p.removeFrom2(dir2);
+                    }
+                }
+            } else if (dir == 1) {
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type || (!isProtected(p,dir) && !type)) {
+                        p.removeFrom1(dir2);
+                    }
+                }
+            } else if (dir == 3) {
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type || (!isProtected(p,dir) && !type)) {
+                            p.removeFrom3(dir2);
+                    }
+                }
             }
         }
-        if (p.presenceBrownAlien()) {
-            return tmp + 2;
-        } else {
-            return tmp;
+    }
+
+    /**
+     * this method evaluates the protection of the ship making use of the other methods
+     * @param dir cardinal direction of the attack
+     * @param type dimension of the attack, true if it is big
+     */
+    public void defenceFromMeteorite( int dir, boolean type ,int dir2){
+        for(Player p : Players_in_Game) {
+            if (dir == 0) {
+                if (dir2 > 3 && dir2 < 11) {
+                    if (type && !p.checkProtection(dir, dir2)) {
+                        p.removeFrom0(dir2);
+                    }
+                    if (!type && p.checkNoConnector(dir, dir2)) {
+                        if (!isProtected(p,dir)) {
+                            p.removeFrom2(dir2);
+                        }
+                    }
+                }
+            } else if (dir == 2) {
+                if (dir2 > 3 && dir2 < 11) {
+                    if (type && !p.checkProtection(dir, dir2)) {
+                        p.removeFrom0(dir2);
+                    }
+                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                        if (!isProtected(p,dir)) {
+                            p.removeFrom2(dir2);
+                        }
+                    }
+
+                }
+            } else if (dir == 1) {
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type && !p.checkProtection(dir, dir2)) {
+                        p.removeFrom0(dir2);
+                    }
+                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                        if (!isProtected(p,dir)) {
+                            p.removeFrom2(dir2);
+                        }
+                    }
+                }
+
+            } else if (dir == 3) {
+                if (dir2 > 4 && dir2 < 10) {
+                    if (type && !p.checkProtection(dir, dir2)) {
+                        p.removeFrom0(dir2);
+                    }
+                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                        if (!isProtected(p,dir)) {
+                            p.removeFrom2(dir2);
+                        }
+                    }
+                }
+            }
         }
     }
 

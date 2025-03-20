@@ -15,7 +15,7 @@ public class Player {
     private boolean inReady;
     private boolean isComplete;
     private Tile[][] Dash_Matrix; //hashmap?
-    private Status[][] validStatus;
+    private final Status[][] validStatus;
     private boolean purpleAlien;
     private boolean brownAlien;
     //discard Pile
@@ -966,6 +966,93 @@ public class Player {
         StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
         return e;
     }
+
+    /**
+     * this method return true if the shield protect a specific direction
+     * @param s the tile shield to confront with the direction
+     * @param dir the direction
+     * @return true if the shield protect the direction dir
+     */
+    public boolean dashProtected(Shield s,int dir){
+        if(s.controlCorners(dir)==8){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean checkPresentValue(Tile t, int x){
+        boolean result = false;
+        for(int i = 0;i<4;i++){
+            if(t.controlCorners(i)==x) result = true;
+        }
+        return result;
+    }
+
+    public boolean checkProtection(int x, int y) {
+        boolean result = false;
+        //check the north side
+        if (x == 0) {
+            //flag for exit from the while if they are protected
+            boolean flag = true;
+            int i = 0;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
+            while (flag && i < 5) {
+                if (validStatus[i][y] == Status.USED) {
+                    if (Dash_Matrix[i][y - 4].controlCorners(0) == 4) {
+                        flag = false;
+                        result = true;
+                    } else if (Dash_Matrix[i][y - 4].controlCorners(5)==5) {
+                        //manca gestione di selezione di una tile e attivazione del double cannone
+                        flag = false;
+                        //result = activate;
+                    }
+                }
+                i++;
+            }
+            //check the east side
+        } else if (x == 1) {
+            //flag for exit from the while if they are protected
+            boolean flag = true;
+            int i = 5;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
+            while (flag && i >= 1) {
+                if(validStatus[y - 5][i] == Status.USED) {
+                    if ((Dash_Matrix[y - 5][i].controlCorners(1)==4) || (Dash_Matrix[y - 5][i + 1].controlCorners(1)==4) || (Dash_Matrix[y - 5][i - 1].controlCorners(1)==4)) {
+                        flag = false;
+                        result = true;
+                    } else if ((Dash_Matrix[y - 5][i].controlCorners(1)==5) || (Dash_Matrix[y - 5][i + 1].controlCorners(1)==5) || (Dash_Matrix[y - 5][i - 1].controlCorners(1)==5)) {
+                        //metodo gestione selezione e attivazione
+                        flag = false;
+                        result = true;
+                    }
+                }
+                i--;
+            }
+            //check the west side
+        } else if (x == 3) {
+            //flag for exit from the while if they are protected
+            boolean flag = true;
+            int i = 1;
+            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
+            while (flag && i < 6) {
+                if (validStatus[y - 5][i] == Status.USED) {
+                    if ((Dash_Matrix[y - 5][i].controlCorners(3)==4) || (Dash_Matrix[y - 5][i + 1].controlCorners(3)==4) || (Dash_Matrix[y - 5][i - 1].controlCorners(3)==4)) {
+                        flag = false;
+                        result = true;
+                    } else if ((Dash_Matrix[y - 5][i].controlCorners(3)==5) || (Dash_Matrix[y - 5][i + 1].controlCorners(3)==5) || (Dash_Matrix[y - 5][i - 1].controlCorners(3)==5)) {
+                        //metodo selezione e attivaione
+                        flag = false;
+                        result = true;
+                    }
+                }
+                i++;
+            }
+        }
+        return result;
+    }
+
+
+
 
 
 
