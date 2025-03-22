@@ -961,7 +961,7 @@ public class Player {
         StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
         return e;
     }
-    public StorageUnit seòectHousingUnit() {
+    public StorageUnit selectHousingUnit() {
         //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
         StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
         return e;
