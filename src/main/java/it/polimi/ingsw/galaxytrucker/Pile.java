@@ -38,7 +38,7 @@ public class Pile {
      * @param t object given again to the pile
      */
     public void AddToPile (Tile t) {
-         t.giveTile();
+         t.takeTile();
     }
 
     /**
@@ -47,7 +47,7 @@ public class Pile {
      */
     public void takeFrom ( Tile t) {
         t.takeTile();
-        t.ShowTile();
+        t.showTile();
 
     }
     /**

@@ -195,6 +195,13 @@ public class Player {
 
     public boolean presenceBrownAlien() { return this.brownAlien; }
 
+    public int checkDiscardPile(){
+        return discardPile.size();
+    }
+
+    public void addToDiscardPile(Tile tile){
+        discardPile.add(tile);
+    }
 
 
 
@@ -226,7 +233,7 @@ public class Player {
         if (a == 2 && b == 3) {
             this.setEliminated();
         }
-        discardPile.add(tmp);
+        addToDiscardPile(tmp);
     }
 
     /**

@@ -48,17 +48,15 @@ public abstract class Tile {
      * method to reveal the face of the card
      * works directly with the flag of the class
      */
-    public void ShowTile()
+    public void showTile()
     {
         isShown = true;
     }
 
     public void takeTile(){
-        isTake = true;
+        isTake = !isTake;
     }
-    public void giveTile(){
-        isTake = false;
-    }
+
 
     /**
      * method that return the array "corners"
@@ -69,5 +67,13 @@ public abstract class Tile {
 
     public int controlCorners(int i){
         return corners[i];
+    }
+
+    public boolean isShown() {
+        return isShown;
+    }
+
+    public boolean isTake() {
+        return isTake;
     }
 }
