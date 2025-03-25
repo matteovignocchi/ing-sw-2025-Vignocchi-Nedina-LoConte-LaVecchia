@@ -122,7 +122,7 @@ public class Controller {
         }
     }
 
-    public int geTotalEnergy(Player p) {
+    public int getTotalEnergy(Player p) {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -146,7 +146,7 @@ public class Controller {
 
 
     public void removeGoods(Player player, int num) {
-        int totalEnergy = geTotalEnergy(player);
+        int totalEnergy = getTotalEnergy(player);
         int totalGood = getTotalGood(player);
         if(num > totalGood) {
             int tmp1 = totalGood;

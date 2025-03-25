@@ -44,7 +44,7 @@ public class StorageUnit extends Tile {
     public void addGood(Colour good) throws FullGoodsList, TooDangerous {
         if (listOfGoods.size() == max) {
             throw new FullGoodsList("Storage is full, choose another one"); //ricordati di aggiungere gestione eccezione chiamata remove
-        } else if ( good == Colour.RED) {
+        } else if ( good == Colour.RED && !advanced) {
             throw new TooDangerous("Too Dangerous! Do not even try!\nYou risk blowing up the ship");
         }
         listOfGoods.add(good);
