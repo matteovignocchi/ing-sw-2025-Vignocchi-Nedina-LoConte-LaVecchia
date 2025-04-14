@@ -53,10 +53,9 @@ public class CardEffectVisitor implements CardVisitor {
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
         else if(f == null) throw new NullPointerException("Null flight card board");
         */
-
+        double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
             double player_fire_power = controller.getFirePower(p);
-            double slavers_fire_power = card.getFirePower();
             if(player_fire_power > slavers_fire_power) {
                 if(controller.askPlayerDecision()){ //modificare, passare messaggio come parametro
                     f.moveRocket(-1 * card.getDays(), p, players);
@@ -135,7 +134,26 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(SmugglersCard card) {}
+    public void visit(SmugglersCard card) {
+        /*
+        if(players == null) throw new NullPointerException("Null players list");
+        else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        else if(f == null) throw new NullPointerException("Null flight card board");
+         */
+        double smugglers_fire_power = card.getFirePower();
+        for(Player p : players) {
+            double player_fire_power = controller.getFirePower(p);
+            if(player_fire_power > smugglers_fire_power){
+                if(controller.askPlayerDecision()){
+                    f.moveRocket(-card.getDays(), p, players);
+                    controller.addGoods(p, card.getRewardGoods());
+                }
+                break;
+            } else if (player_fire_power < smugglers_fire_power) {
+                controller.removeGoods(p, card.getNumRemovedGoods());
+            }
+        }
+    }
 
     @Override
     public void visit(AbandonedShipCard card) {

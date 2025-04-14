@@ -13,5 +13,4 @@ public interface CardVisitor {
     void visit(PiratesCard card);
     void visit(PlanetsCard card);
     void visit(PlaugeCard card);
-    // inserire gli altri visit
 }
