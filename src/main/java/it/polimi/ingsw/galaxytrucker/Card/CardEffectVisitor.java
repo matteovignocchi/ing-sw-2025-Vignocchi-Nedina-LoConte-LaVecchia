@@ -137,4 +137,107 @@ public class CardEffectVisitor implements CardVisitor {
     @Override
     public void visit(SmugglersCard card) {}
 
+    @Override
+    public void visit(AbandonedShipCard card) {
+        //if(players == null) throw new NullPointerException("Null players list");
+        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //else if(f == null) throw new NullPointerException("Null flight card board");
+        for(Player p : players) {
+            if (controller.askPlayerDecision(p)) {
+                int days = card.getDays();
+                f.moveRocket(-days, p, players);
+                int credits = card.getCredits();
+                p.addCredits(credits); //assicurarsi che il metodo vada in player o in controller
+                int num_crewmates = card.getNumCrewmates();
+                controller.removeCrewmate(p, num_crewmates);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void visit(AbandonedStationCard card) {
+        //if(players == null) throw new NullPointerException("Null players list");
+        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //else if(f == null) throw new NullPointerException("Null flight card board");
+        for(Player p: players) {
+            int num_crewmates = card.getNumCrewmates();
+            if(controller.getNumCrew(p)>=num_crewmates){
+                if(controller.askPlayerDecision(p)){
+                    int days = card.getDays();
+                    f.moveRocket(-days, p, players);
+                    controller.addGoods(p, card.getStationGoods());
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void visit(MeteoritesRainCard card) {
+        //if(players == null) throw new NullPointerException("Null players list");
+        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //else if(f == null) throw new NullPointerException("Null flight card board");
+        for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
+            int res = players.getFirst().throwDice() + players.getFirst().throwDice();
+            for(Player p : players){
+                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+            }
+        }
+    }
+
+    @Override
+    public void visit(PiratesCard card) {
+        //if(players == null) throw new NullPointerException("Null players list");
+        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //else if(f == null) throw new NullPointerException("Null flight card board");
+        List<Player> losers = new ArrayList<>();
+        for(Player p : players) {
+            if(controller.getFirePower(p) > card.getFirePower()){
+                if(controller.askPlayerDecision(p)){
+                    int days = card.getDays();
+                    f.moveRocket(-days, p, players);
+                    int credits = card.getCredits();
+                    p.addCredits(credits);
+                }
+                break;
+            } else if (controller.getFirePower(p) < card.getFirePower())
+                losers.add(p);
+        }
+        if(losers.getFirst() != null){
+            int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
+            for(Player p : losers){
+                for(int i = 0; i < card.getShots_directions().size(); i++){
+                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void visit(PlanetsCard card) {
+        //if(players == null) throw new NullPointerException("Null players list");
+        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //else if(f == null) throw new NullPointerException("Null flight card board");
+        int z = 0;
+        for(Player p : players){
+            if(controller.askPlayerDecision(p)){
+                int days = card.getDays();
+                f.moveRocket(-days, p, players);
+                controller.addGoods(p, card.getRewardGoods().get(z));
+                z++;
+                if(z > card.getRewardGoods().size()) break;
+            }
+        }
+    }
+
+    @Override
+    public void visit(PlaugeCard card){
+        //if(players == null) throw new NullPointerException("Null players list");
+        //        else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+        //        else if(f == null) throw new NullPointerException("Null flight card board");
+        for(Player p : players){
+            controller.startPlauge(p);
+        }
+    }
 }
