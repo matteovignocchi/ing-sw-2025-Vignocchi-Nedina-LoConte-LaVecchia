@@ -13,16 +13,14 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(OpenSpaceCard card){
+    public void visit(OpenSpaceCard card) {
         /*
         if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
         else if(f == null) throw new NullPointerException("Null flight card board");
 
-        for(Player p : players){
-            int x = p.getPowerEngine();
-            f.moveRocket(x, p, players);
-        }
+        //gestire sempre le stesse eccezioni o creare quelle personalizzate
+
          */
         FlightCardBoard f = controller.getFlightCardBoard();
         List<Player> players = f.getOrderedPlayers();

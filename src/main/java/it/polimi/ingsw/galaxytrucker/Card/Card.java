@@ -11,14 +11,5 @@ import java.util.List;
 
 public interface Card {
 
-    /**
-     * Method header to activate a card. The body is defined by each class
-     * that implements the interface.
-     * @param players Players list sorted by position, from the leader onwards
-     * @param f FlightCardBoard
-     */
-    //eliminare
-    void activate (List<Player> players, FlightCardBoard f);
-
     void accept (CardVisitor visitor);
 }
