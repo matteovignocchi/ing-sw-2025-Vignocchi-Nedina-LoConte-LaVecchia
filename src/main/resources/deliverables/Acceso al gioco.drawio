@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" version="26.1.2">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36" version="26.2.12">
   <diagram name="Page-1" id="2YBvvXClWsGukQMizWep">
-    <mxGraphModel dx="1952" dy="1033" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="940" dy="503" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -112,9 +112,9 @@
           <mxGeometry x="290" y="600" width="930" height="840" as="geometry" />
         </mxCell>
         <mxCell id="uLrYTXcCRGbgXtRRE7eR-26" value="[enter in a existing game]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="420" y="615" width="160" height="30" as="geometry" />
+          <mxGeometry x="350" y="600" width="160" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="uLrYTXcCRGbgXtRRE7eR-27" value="accessGame()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
+        <mxCell id="uLrYTXcCRGbgXtRRE7eR-27" value="accessGame(param)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="426" y="588" as="sourcePoint" />
             <mxPoint x="1151" y="588" as="targetPoint" />
@@ -337,16 +337,16 @@
         <mxCell id="uLrYTXcCRGbgXtRRE7eR-92" value="[until the game is created]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="420" y="1233" width="160" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="7n1Iie6G5p8JxJWSJT1o-1" value="loop" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" vertex="1" parent="1">
+        <mxCell id="7n1Iie6G5p8JxJWSJT1o-1" value="loop" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" parent="1" vertex="1">
           <mxGeometry x="290" y="400" width="930" height="170" as="geometry" />
         </mxCell>
-        <mxCell id="7n1Iie6G5p8JxJWSJT1o-2" value="[until login is succesfull]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="7n1Iie6G5p8JxJWSJT1o-2" value="[until login is succesfull]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="342" y="400" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="7n1Iie6G5p8JxJWSJT1o-3" value="loop" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" vertex="1" parent="1">
+        <mxCell id="7n1Iie6G5p8JxJWSJT1o-3" value="loop" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;" parent="1" vertex="1">
           <mxGeometry x="300" y="710" width="900" height="340" as="geometry" />
         </mxCell>
-        <mxCell id="7n1Iie6G5p8JxJWSJT1o-4" value="[until success]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+        <mxCell id="7n1Iie6G5p8JxJWSJT1o-4" value="[until success]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="360" y="710" width="100" height="30" as="geometry" />
         </mxCell>
       </root>
