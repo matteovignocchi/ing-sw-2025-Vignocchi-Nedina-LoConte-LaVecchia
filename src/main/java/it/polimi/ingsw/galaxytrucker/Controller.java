@@ -1,10 +1,12 @@
 package it.polimi.ingsw.galaxytrucker;
 
 
+import it.polimi.ingsw.galaxytrucker.Card.*;
 import it.polimi.ingsw.galaxytrucker.Tile.*;
 import kotlin.Unit;
 import org.w3c.dom.html.HTMLParagraphElement;
 
+import java.util.ArrayList;
 import java.util.List;//support for changes method in player
 import java.util.Scanner;
 //List<Player> players
@@ -17,10 +19,12 @@ public class Controller {
     private List<Player> Players_in_Game;
     private Visitor visitor = new Visitor();
     public Pile pileOfTile = new Pile();
+    private FlightCardBoard f_board;
 
 
-    public Controller(List<Player> Players_in_Game) {
+    public Controller(List<Player> Players_in_Game, FlightCardBoard f) {
         this.Players_in_Game = Players_in_Game;
+        this.f_board = f;
     }
 
     public void usage(Cannon cannon) {
@@ -363,5 +367,20 @@ public class Controller {
             }
         }
     }
+
+
+
+
+
+    ///////////////////////////////////////////////////////////////////
+
+    public FlightCardBoard getFlightCardBoard(){ return f_board;}
+
+    public void activateCard(Card card){
+        CardEffectVisitor visitor = new CardEffectVisitor(this);
+        card.accept(visitor);
+    }
+
+
 
 }

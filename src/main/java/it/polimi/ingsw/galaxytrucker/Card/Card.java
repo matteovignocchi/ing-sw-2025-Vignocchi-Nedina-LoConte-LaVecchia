@@ -17,5 +17,8 @@ public interface Card {
      * @param players Players list sorted by position, from the leader onwards
      * @param f FlightCardBoard
      */
+    //eliminare
     void activate (List<Player> players, FlightCardBoard f);
+
+    void accept (CardVisitor visitor);
 }

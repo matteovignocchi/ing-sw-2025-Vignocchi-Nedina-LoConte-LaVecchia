@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker;
 import it.polimi.ingsw.galaxytrucker.Card.InvalidPlayerException;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,6 +16,7 @@ public class FlightCardBoard {
     protected int bonus_second_position;
     protected int bonus_third_position;
     protected int bonus_fourth_position;
+    protected List<Player> orderedPlayers;
 
     /**
      * Sets bonuses for placements, for the best ship and the number of spaces on the board for
@@ -27,6 +30,7 @@ public class FlightCardBoard {
         this.bonus_third_position = 2;
         this.bonus_fourth_position = 1;
         this.bonus_MostBeautifulShip = 2;
+        this.orderedPlayers = new ArrayList<Player>();
     }
 
     public int getBonusRedCargo() {
@@ -69,6 +73,11 @@ public class FlightCardBoard {
         return bonus_fourth_position;
     }
 
+    public List<Player> getOrderedPlayers(){ return new ArrayList<>(orderedPlayers); }
+
+    //Scrivere metodi per la gestione della lista orderedPlayers (inserimento, modifica ecc..), capire come gestirla
+    //anche nel controller dopo modifiche ecc..
+
     /**
      * The method sees if the player has a  position on the board beyond the last space.
      * If so, it calculates the correct position (the board has a cyclic structure) and
@@ -102,6 +111,7 @@ public class FlightCardBoard {
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      * @throws InvalidPlayerException exception thrown if (see conditions below)
      */
+    //aggiornare la lista dei giocatori in ordine in base agli spostamenti fatti (?)
     public void moveRocket(int x, Player p, List<Player> players) throws IllegalArgumentException, InvalidPlayerException {
         if(p==null) throw new IllegalArgumentException("Player null");
         else if(players==null) throw new IllegalArgumentException("Players list null");

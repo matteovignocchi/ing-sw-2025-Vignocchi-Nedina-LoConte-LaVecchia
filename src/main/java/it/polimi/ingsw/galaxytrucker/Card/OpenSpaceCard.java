@@ -30,4 +30,10 @@ public class OpenSpaceCard implements Card {
             f.moveRocket(x, p, players);
         }
     }
+
+
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
+    }
 }
