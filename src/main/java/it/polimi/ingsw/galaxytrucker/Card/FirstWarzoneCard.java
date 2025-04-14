@@ -60,6 +60,12 @@ public class FirstWarzoneCard implements Card {
             players.get(index_less_powerengine).defenceFromCannon(shots_directions.get(i), shots_size.get(i), res);
         }
     }
+
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
+    }
+
     public int getDays() {return days;}
 
     public int getNum_crewmates() {return num_crewmates;}

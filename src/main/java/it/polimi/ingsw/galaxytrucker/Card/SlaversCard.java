@@ -49,6 +49,11 @@ public class SlaversCard implements Card{
         }
     }
 
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
+    }
+
     public int getDays(){ return days; }
 
     public int getCredits(){ return credits; }

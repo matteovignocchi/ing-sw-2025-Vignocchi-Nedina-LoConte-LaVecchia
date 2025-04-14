@@ -52,6 +52,11 @@ public class SmugglersCard implements Card{
         }
     }
 
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
+    }
+
     public int getDays(){ return days; }
 
     public int getFirePower(){ return fire_power; }

@@ -10,6 +10,5 @@ import java.util.List;
  */
 
 public interface Card {
-
     void accept (CardVisitor visitor);
 }

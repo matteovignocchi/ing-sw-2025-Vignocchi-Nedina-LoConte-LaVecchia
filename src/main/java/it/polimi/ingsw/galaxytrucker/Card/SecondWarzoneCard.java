@@ -59,6 +59,12 @@ public class SecondWarzoneCard implements Card {
             players.get(index_p_less_crewmates).defenceFromCannon(shots_directions.get(i), shots_size.get(i), res);
         }
     }
+
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
+    }
+
     public int getDays() {return days;}
 
     public int getNumGoods() {return num_goods;}
