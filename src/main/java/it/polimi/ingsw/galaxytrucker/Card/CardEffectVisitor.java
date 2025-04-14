@@ -181,7 +181,7 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = players.getFirst().throwDice() + players.getFirst().throwDice();
             for(Player p : players){
-                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, p);
+                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
             }
         }
     }
