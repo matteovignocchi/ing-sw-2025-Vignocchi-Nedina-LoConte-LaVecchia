@@ -181,7 +181,7 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = players.getFirst().throwDice() + players.getFirst().throwDice();
             for(Player p : players){
-                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, p);
             }
         }
     }
@@ -208,7 +208,7 @@ public class CardEffectVisitor implements CardVisitor {
             int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
             for(Player p : losers){
                 for(int i = 0; i < card.getShots_directions().size(); i++){
-                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res);
+                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
             }
         }
