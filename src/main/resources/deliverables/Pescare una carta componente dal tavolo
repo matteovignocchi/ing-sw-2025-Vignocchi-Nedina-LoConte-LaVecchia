@@ -123,9 +123,6 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="pQdSwvlou7CcbERhzEMk-2" value="aggiungere scelta da mucchio a prenotate" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="532" y="10" width="250" height="30" as="geometry" />
-        </mxCell>
         <mxCell id="-wFEeW9Cr1ct2WFZFmTp-3" value="TakeFromPile(i)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="502" y="406" as="sourcePoint" />
