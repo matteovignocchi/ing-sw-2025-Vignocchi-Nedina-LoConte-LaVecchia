@@ -65,7 +65,6 @@ public class CardEffectVisitor implements CardVisitor {
             }
         }
          */
-        for()
     }
 
     @Override
