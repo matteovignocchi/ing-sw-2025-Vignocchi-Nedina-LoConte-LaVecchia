@@ -1,5 +1,10 @@
 package it.polimi.ingsw.galaxytrucker;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+
+import java.util.Optional;
 import java.util.Scanner;
 
 public class PlayerView {
@@ -54,5 +59,15 @@ public class PlayerView {
     }
 
 
+
+    //public boolean askPlayerDecision() {
+    // ButtonType buttonYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+    //    ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.NO);
+    //    Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
+    //    choice.setTitle("Choose your action");
+    //    choice.setHeaderText(null);
+    //    Optional<ButtonType> result = choice.showAndWait();
+    //    return result.isPresent() && result.get().equals(buttonYes);
+    //}
 
 }

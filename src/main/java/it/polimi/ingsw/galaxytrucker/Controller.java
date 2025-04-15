@@ -17,35 +17,35 @@ import java.util.Scanner;
 public class Controller {
 
     private List<Player> Players_in_Game;
-    private Visitor visitor = new Visitor();
     public Pile pileOfTile = new Pile();
     public Pile shownPile = new Pile();
     private FlightCardBoard f_board;
     private List<PlayerView> Players_views;
 
-
+     // da cambiare
     public Controller(List<Player> Players_in_Game, FlightCardBoard f) {
         this.Players_in_Game = Players_in_Game;
         this.f_board = f;
     }
 
-    public void addPlayer(int id , boolean isDemo) {
+    public void addPlayer(int id, boolean isDemo) {
         Player p = new Player(id, isDemo);
         Players_in_Game.add(p);
         PlayerView p2 = new PlayerView(id);
         Players_views.add(p2);
     }
+
     public int checkNumberOfPlayers() {
         return Players_in_Game.size();
     }
 
 
     //switch (t) {
-     //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
-      //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
-       // default        -> ;
+    //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
+    //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
+    // default        -> ;
 
-   // }
+    // }
 
     //matrici da i=4 j=6
     // metodo che restituisce il numero di crewMate nella nave
@@ -55,11 +55,11 @@ public class Controller {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
                 switch (y) {
-                    case HousingUnit c  -> tmp = tmp + c.returnLenght();
+                    case HousingUnit c -> tmp = tmp + c.returnLenght();
                     default -> tmp = tmp;
-                    }
                 }
             }
+        }
         return tmp;
     }
 
@@ -68,23 +68,24 @@ public class Controller {
      * this method checks even if there is a double engine and ask the player if they want to activate it
      * the method calls selectedEnergyCell, and when they return true, it activates it
      * also it checks if there is the brown alien, with the flag on the player and adds the bonus
+     *
      * @return the total amount of engine power
      */
-    public int getPowerEngine(Player p){
+    public int getPowerEngine(Player p) {
         int tmp = 0;
-        for(int i =0; i<5; i++){
-            for(int j=0; j<5; j++){
-                Tile y = p.getTile(i,j);
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                Tile y = p.getTile(i, j);
                 Boolean var = false;
                 switch (y) {
-                    case Engine c ->{
+                    case Engine c -> {
                         var = c.isDouble();
-                        if(var){
+                        if (var) {
                             boolean activate = manageEnergyCell(p);
-                            if(activate){
+                            if (activate) {
                                 tmp = tmp + 2;
                             }
-                        }else{
+                        } else {
                             tmp = tmp + 1;
                         }
                     }
@@ -106,16 +107,16 @@ public class Controller {
                 Tile y = p.getTile(i, j);
                 boolean var = false;
                 switch (y) {
-                    case Engine c ->{
+                    case Engine c -> {
                         var = c.isDouble();
-                        if(var){
+                        if (var) {
                             boolean activate = manageEnergyCell(p);
-                            if(activate){
-                                if(c.controlCorners(0) != 5) tmp = tmp + 1;
+                            if (activate) {
+                                if (c.controlCorners(0) != 5) tmp = tmp + 1;
                                 else tmp = tmp + 2;
                             }
-                        }else{
-                            if(c.controlCorners(0) != 4) tmp = tmp + 0.5;
+                        } else {
+                            if (c.controlCorners(0) != 4) tmp = tmp + 0.5;
                             else tmp = tmp + 1;
                         }
                     }
@@ -136,33 +137,33 @@ public class Controller {
     }
 
     public int getTotalGood(Player p) {
-      return p.getTotalGood();
+        return p.getTotalGood();
     }
 
     public void removeGoods(Player player, int num) {
         int totalEnergy = getTotalEnergy(player);
         int totalGood = getTotalGood(player);
-        if(num > totalGood) {
+        if (num > totalGood) {
             int tmp1 = totalGood;
-            while (tmp1!=0) {
+            while (tmp1 != 0) {
                 //select StorageUnit t = p.selectStorageUnit
                 //se contiene almeno 1 merce
                 //dentro un if
                 //t.removeGood
                 //tmp2--;
             }
-            if( num - totalGood > totalEnergy ) {
+            if (num - totalGood > totalEnergy) {
                 int tmp2 = totalEnergy;
-                while (tmp2!=0) {
+                while (tmp2 != 0) {
                     //select EnergyCell t = p.selectEnergyCell
                     //se contiene almeno 1 merce
                     //dentro un if
                     //t.removeGood
                     //tmp2--;
                 }
-            }else{
-                int tmp3 = num-totalGood;
-                while (tmp3!=0) {
+            } else {
+                int tmp3 = num - totalGood;
+                while (tmp3 != 0) {
                     //select StorageUnit t = p.selectStorageUnit
                     //se contiene almeno 1 merce
                     //dentro un if
@@ -170,8 +171,8 @@ public class Controller {
                     //tmp4--;
                 }
             }
-        }else{
-            while (num!=0) {
+        } else {
+            while (num != 0) {
                 //select StorageUnit t = p.selectStorageUnit
                 //se contiene almeno 1 merce
                 //dentro un if
@@ -183,7 +184,7 @@ public class Controller {
 
     public void addGoods(Player player, List<Colour> list) {
         boolean flag = true;
-        while(list.size()!=0 && flag == true) {
+        while (list.size() != 0 && flag == true) {
             //select storage Unit
             //selecton indice lista che sto passando dentro
             //t.addGood
@@ -193,8 +194,8 @@ public class Controller {
         }
     }
 
-    public void addHuman(){
-        for( Player p : Players_in_Game ) {
+    public void addHuman() {
+        for (Player p : Players_in_Game) {
             //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
@@ -203,10 +204,10 @@ public class Controller {
 
     public void removeCrewmate(Player player, int num) {
         int totalCrew = getNumCrew(player);
-        if(num > totalCrew) {
+        if (num > totalCrew) {
             player.isEliminated();
-        }else{
-            while (num!=0) {
+        } else {
+            while (num != 0) {
                 //select HousinUnit t = p.selectHousingUnit
                 //se contiene almeno 1 persona
                 //dentro un if
@@ -227,16 +228,17 @@ public class Controller {
                 boolean var = false;
                 switch (y) {
                     case HousingUnit c -> {
-                        if(c.isConnected()){
+                        if (c.isConnected()) {
                             //il player seleziona l'indice
                             int x = c.removeHumans(1);
-                            tmp ++;
-                            if( x == 2 ) player.setBrownAlien();
-                            if(x == 3) player.setPurpleAlien();
+                            tmp++;
+                            if (x == 2) player.setBrownAlien();
+                            if (x == 3) player.setPurpleAlien();
                         }
 
                     }
-                    default ->{}
+                    default -> {
+                    }
                 }
             }
             if (tmp == firstNumber) {
@@ -248,32 +250,33 @@ public class Controller {
     /**
      * method used for checking the protection of a ship side by shield,
      * return true if it is protected and they want to use a battery
+     *
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
     public boolean isProtected(Player p1, int d) {
         boolean flag = false;
         PlayerView x = getPlayerView(p1.getId());
-            while(!flag){
-                if(x.ask("vuoi usare uno scudo?")) {
-                    int[] coordinate = x.askCoordinate();
-                    Tile y = p1.getTile(coordinate[0], coordinate[1]);
-                    switch (y) {
-                        case Shield shield -> {
-                            if (!(shield.getProtectedCorner(d) == 8)){
-                                x.inform("seleziona un'altro scudo");
-                            }else{
-                                return manageEnergyCell(p1);
-                            }
+        while (!flag) {
+            if (x.ask("vuoi usare uno scudo?")) {
+                int[] coordinate = x.askCoordinate();
+                Tile y = p1.getTile(coordinate[0], coordinate[1]);
+                switch (y) {
+                    case Shield shield -> {
+                        if (!(shield.getProtectedCorner(d) == 8)) {
+                            x.inform("seleziona un'altro scudo");
+                        } else {
+                            return manageEnergyCell(p1);
                         }
-                        default -> x.inform("cella non valida");
-
                     }
-                }else{
-                    flag = true;
+                    default -> x.inform("cella non valida");
+
                 }
+            } else {
+                flag = true;
             }
-            return false;
+        }
+        return false;
         //il controller chiede al player se vuole usare uno scudo
         //il player se vuole usare uno scudo fa partire unn ciclo in cui
         //deve selezionare una tile, se il controller tramite il visitor osserva che
@@ -287,62 +290,65 @@ public class Controller {
 
     /**
      * this method evaluates the protection of the ship making use of the other methods
-     * @param dir cardinal direction of the attack
+     *
+     * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon (int dir, boolean type ,int dir2 , Player p) {
-            if (dir == 0) {
-                if (dir2 > 3 && dir2 < 11) {
-                    if (type || (!isProtected(p,dir) && !type)) {
-                        p.removeFrom0(dir2);
-                    }
-                }
-            } else if (dir == 2) {
-                if (dir2 > 3 && dir2 < 11) {
-                    if (type || (!isProtected(p,dir) && !type)) {
-                        p.removeFrom2(dir2);
-                    }
-                }
-            } else if (dir == 1) {
-                if (dir2 > 4 && dir2 < 10) {
-                    if (type || (!isProtected(p,dir) && !type)) {
-                        p.removeFrom1(dir2);
-                    }
-                }
-            } else if (dir == 3) {
-                if (dir2 > 4 && dir2 < 10) {
-                    if (type || (!isProtected(p,dir) && !type)) {
-                            p.removeFrom3(dir2);
-                    }
+    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) {
+        if (dir == 0) {
+            if (dir2 > 3 && dir2 < 11) {
+                if (type || (!isProtected(p, dir) && !type)) {
+                    p.removeFrom0(dir2);
                 }
             }
+        } else if (dir == 2) {
+            if (dir2 > 3 && dir2 < 11) {
+                if (type || (!isProtected(p, dir) && !type)) {
+                    p.removeFrom2(dir2);
+                }
+            }
+        } else if (dir == 1) {
+            if (dir2 > 4 && dir2 < 10) {
+                if (type || (!isProtected(p, dir) && !type)) {
+                    p.removeFrom1(dir2);
+                }
+            }
+        } else if (dir == 3) {
+            if (dir2 > 4 && dir2 < 10) {
+                if (type || (!isProtected(p, dir) && !type)) {
+                    p.removeFrom3(dir2);
+                }
+            }
+        }
+
     }
 
     /**
      * this method evaluates the protection of the ship making use of the other methods
-     * @param dir cardinal direction of the attack
+     *
+     * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite( int dir, boolean type ,int dir2){
-        for(Player p : Players_in_Game) {
+    public void defenceFromMeteorite(int dir, boolean type, int dir2) {
+        for (Player p : Players_in_Game) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
-                    if (type && !p.checkProtection(dir, dir2)) {
+                    if (type && !checkProtection(dir, dir2, p)) {
                         p.removeFrom0(dir2);
                     }
                     if (!type && p.checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p,dir)) {
+                        if (!isProtected(p, dir)) {
                             p.removeFrom2(dir2);
                         }
                     }
                 }
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
-                    if (type && !p.checkProtection(dir, dir2)) {
+                    if (type && checkProtection(dir, dir2, p)) {
                         p.removeFrom0(dir2);
                     }
                     if (!type && !p.checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p,dir)) {
+                        if (!isProtected(p, dir)) {
                             p.removeFrom2(dir2);
                         }
                     }
@@ -350,11 +356,11 @@ public class Controller {
                 }
             } else if (dir == 1) {
                 if (dir2 > 4 && dir2 < 10) {
-                    if (type && !p.checkProtection(dir, dir2)) {
+                    if (type && !checkProtection(dir, dir2, p)) {
                         p.removeFrom0(dir2);
                     }
                     if (!type && !p.checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p,dir)) {
+                        if (!isProtected(p, dir)) {
                             p.removeFrom2(dir2);
                         }
                     }
@@ -362,11 +368,11 @@ public class Controller {
 
             } else if (dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
-                    if (type && !p.checkProtection(dir, dir2)) {
+                    if (type && !checkProtection(dir, dir2, p)) {
                         p.removeFrom0(dir2);
                     }
                     if (!type && !p.checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p,dir)) {
+                        if (!isProtected(p, dir)) {
                             p.removeFrom2(dir2);
                         }
                     }
@@ -375,11 +381,11 @@ public class Controller {
         }
     }
 
-    ///////////////////////////////////////////////////////////////////
+    public FlightCardBoard getFlightCardBoard() {
+        return f_board;
+    }
 
-    public FlightCardBoard getFlightCardBoard(){ return f_board;}
-
-    public void activateCard(Card card){
+    public void activateCard(Card card) {
         CardEffectVisitor visitor = new CardEffectVisitor(this);
 
         //ricorda che le eccezioni personalizzate vanno gestite con un try-catch qui.
@@ -388,12 +394,12 @@ public class Controller {
         card.accept(visitor);
     }
 
-    public boolean askPlayerDecision(String condition , Player id){
+    public boolean askPlayerDecision(String condition, Player id) {
         PlayerView x = getPlayerView(id.getId());
         return x.ask(condition);
     }
 
-    public void addCreditToPlayer(int credits , Player player){
+    public void addCreditToPlayer(int credits, Player player) {
         player.addCredits(credits);
     }
 
@@ -405,27 +411,27 @@ public class Controller {
 
         //ricordarsi di mettere la catch per gestione null;
         boolean use = x.ask("Vuoi usare una batteria?");
-        if (!use){
+        if (!use) {
             return false;
-        }else{
+        } else {
             while (!exits) {
                 coordinate = x.askCoordinate();
                 Tile p = player.getTile(coordinate[0], coordinate[1]);
                 switch (p) {
-                    case EnergyCell c ->{
+                    case EnergyCell c -> {
                         int capacity = c.getCapacity();
                         if (capacity == 0) {
-                            if(!x.ask("Vuoi selezionare un'altra cella?")){
+                            if (!x.ask("Vuoi selezionare un'altra cella?")) {
                                 return false;
                             }
-                        }else{
+                        } else {
                             c.useBattery();
                             return true;
                         }
                     }
                     default -> {
                         System.out.println("cella non valida");
-                        if(!x.ask("vuoi selezionare un'altra cella?")){
+                        if (!x.ask("vuoi selezionare un'altra cella?")) {
                             exits = true;
                         }
                     }
@@ -436,15 +442,13 @@ public class Controller {
         }
     }
 
-    private boolean manageHousingUnit(Player player){
+    private boolean manageHousingUnit(Player player) {
         PlayerView x = getPlayerView(player.getId());
 
-
+        return true;
     }
 
-
-
-    private PlayerView getPlayerView(int id){
+    private PlayerView getPlayerView(int id) {
         PlayerView x = null;
         for (PlayerView p : Players_views) {
             if (id == p.getId()) {
@@ -455,13 +459,147 @@ public class Controller {
     }
 
     //switch (t) {
-        //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
-        //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
-        // default        -> ;
+    //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
+    //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
+    // default        -> ;
 
-        // }
+    // }
 
+    public boolean checkProtection(int dir, int dir2, Player player) {
+        boolean result = false;
+        if (dir == 0) {
+            boolean flag = true;
+            int i = 0;
+            while (flag && i < 5) {
+                if (player.validityCheck(i, dir2 - 4) == Status.USED) {
+                    Tile y = player.getTile(i, dir2 - 4);
+                    switch (y) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                return manageEnergyCell(player);
+                            }
+                        }
+                        default -> {
+                            return false;
+                        }
+                    }
+                }
+                i++;
 
+            }
+            return result;
+        } else if (dir == 1) {
+            boolean flag = true;
+            int i = 5;
+            while (flag && i >= 1) {
+                if (player.validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = player.getTile(dir2 - 5, i);
+                    Tile y2 = player.getTile(dir2 - 5, i + 1);
+                    Tile y3 = player.getTile(dir2 - 5, i - 1);
+                    switch (y1) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    switch (y2) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    switch (y3) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    flag = false;
 
+                }
+                i--;
+            }
+            return result;
+        }else if (dir == 3) {
+            boolean flag = true;
+            int i = 1;
+            while (flag && i<6) {
+                if (player.validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = player.getTile(dir2 - 5, i);
+                    Tile y2 = player.getTile(dir2 - 5, i + 1);
+                    Tile y3 = player.getTile(dir2 - 5, i - 1);
+                    switch (y1) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    switch (y2) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    switch (y3) {
+                        case Cannon c -> {
+                            if (!c.isDouble()) {
+                                return true;
+                            } else {
+                                if (manageEnergyCell(player)) {
+                                    return true;
+                                }
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    flag = false;
 
+                }
+                i++;
+            }
+            return result;
+
+        }
+        return false;
+    }
 }
+
+

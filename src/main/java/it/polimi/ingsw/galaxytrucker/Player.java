@@ -12,7 +12,7 @@ public class Player {
     protected int id;
     private int credit;
     //Ship building
-    private boolean inReady;
+    private boolean isReady;
     private boolean isComplete;
     private Tile[][] Dash_Matrix; //hashmap?
     private final Status[][] validStatus;
@@ -24,7 +24,6 @@ public class Player {
     protected int lap;
     protected int position;
     private boolean isEliminated;
-    private int totalGoods;
 
     /**
      * constructor that initialize all the variables
@@ -39,9 +38,10 @@ public class Player {
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
-        totalGoods = 0;
         purpleAlien = false;
         brownAlien = false;
+        isComplete = false;
+        isReady = false;
         //initialize the matrix
         Dash_Matrix = new Tile[5][7];
         for (int i = 0; i < 5; i++) {
@@ -140,6 +140,19 @@ public class Player {
 
     }
 
+    public void setIsReady(){
+        isReady = true;
+    }
+    public boolean isReady(){
+        return isReady;
+    }
+    public void setComplete(){
+        isReady = true;
+    }
+    public boolean isComplete(){
+        return isReady;
+    }
+
     /**
      * @return id of the player
      */
@@ -159,6 +172,10 @@ public class Player {
      */
     public int getPos() {
         return position;
+    }
+
+    public int getCredit(){
+        return credit;
     }
 
     /**
@@ -323,18 +340,18 @@ public class Player {
     public void controlEngine() {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                int a = Dash_Matrix[i][j].controlCorners(0);
-                int b = Dash_Matrix[i][j].controlCorners(1);
-                int c = Dash_Matrix[i][j].controlCorners(2);
-                int d = Dash_Matrix[i][j].controlCorners(3);
-                if (a == 4 || a == 5 || b == 4 || b == 5 || c == 4 || c == 5 || d == 4 || d == 5) {
-                    if (Dash_Matrix[i][j].controlCorners(2) != 6 || Dash_Matrix[i][j].controlCorners(2) != 7) {
-                        removeTile(i, j);
-                    } else {
-                        for (int x = 4; x > i; x--) {
+                Tile y = Dash_Matrix[i][j];
+                switch (y){
+                    case Engine e ->{
+                        if(e.controlCorners(2) != 7 && e.controlCorners(2) != 6){
                             removeTile(i, j);
+                        }else {
+                            for (int x = 4; x > i; x--) {
+                                removeTile(i, j);
+                            }
                         }
                     }
+                    default -> {}
                 }
             }
         }
@@ -344,41 +361,39 @@ public class Player {
      * check if all the cannon ar display in the correct way
      * the value 4/5 involves that there is nothing ahead the cannon
      */
-    public void controlCannon() {
+    public void controlCannon(){
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                int a = Dash_Matrix[i][j].controlCorners(0);
-                int b = Dash_Matrix[i][j].controlCorners(1);
-                int c = Dash_Matrix[i][j].controlCorners(2);
-                int d = Dash_Matrix[i][j].controlCorners(3);
-                if (a == 4 || a == 5 || b == 4 || b == 5 || c == 4 || c == 5 || d == 4 || d == 5) {
-                    for (int x = 0; x < 4; x++) {
-                        if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
-                            if (x == 0) {
-                                for (int y = 0; y < i; y++) {
-                                    removeTile(i, j);
+                Tile c = Dash_Matrix[i][j];
+                switch (c){
+                    case Cannon e ->{
+                        for (int x = 0; x < 4; x++) {
+                            if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
+                                if (x == 0) {
+                                    for (int y = 0; y < i; y++) {
+                                        removeTile(i, j);
+                                    }
                                 }
-                            }
-                            if (x == 1) {
-                                for (int y = 6; y > j; y--) {
-                                    removeTile(i, j);
+                                if (x == 1) {
+                                    for (int y = 6; y > j; y--) {
+                                        removeTile(i, j);
+                                    }
                                 }
-                            }
-                            if (x == 2) {
-                                for (int y = 4; y > i; y--) {
-                                    removeTile(i, j);
+                                if (x == 2) {
+                                    for (int y = 4; y > i; y--) {
+                                        removeTile(i, j);
+                                    }
                                 }
-                            }
-                            if (x == 3) {
-                                for (int y = 0; y < j; y++) {
-                                    removeTile(i, j);
+                                if (x == 3) {
+                                    for (int y = 0; y < j; y++) {
+                                        removeTile(i, j);
+                                    }
                                 }
                             }
                         }
                     }
-
+                    default -> {}
                 }
-
             }
         }
     }
@@ -968,124 +983,10 @@ public class Player {
         return result;
     }
 
-    //parti di interazioni con il controller
-    /**
-     * method used for asking the player if they want to undertake an action
-     * @return true if they want to do it
-     */
-    public boolean askPlayerDecision() {
-        ButtonType buttonYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-        ButtonType buttonNo = new ButtonType("No", ButtonBar.ButtonData.NO);
-        Alert choice = new Alert(Alert.AlertType.CONFIRMATION);
-        choice.setTitle("Choose your action");
-        choice.setHeaderText(null);
-        Optional<ButtonType> result = choice.showAndWait();
-        return result.isPresent() && result.get().equals(buttonYes);
-
-    }
-
-    public void removeEnergy(EnergyCell e){
-        e.useBattery();
-    }
-
-    public EnergyCell selectEnergyCell() {
-        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
-        EnergyCell e = new EnergyCell(1,2,3,4,2);
-        return e;
-    }
-
-    public StorageUnit seleStorageUnit() {
-        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
-        StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
-        return e;
-    }
-
-    public StorageUnit selectHousingUnit() {
-        //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
-        StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
-        return e;
-    }
-
-    /**
-     * this method return true if the shield protect a specific direction
-     * @param s the tile shield to confront with the direction
-     * @param dir the direction
-     * @return true if the shield protect the direction dir
-     */
-    public boolean dashProtected(Shield s,int dir){
-        if(s.controlCorners(dir)==8){
-            return true;
-        }
-        return false;
-    }
-
     public boolean checkPresentValue(Tile t, int x){
         boolean result = false;
         for(int i = 0;i<4;i++){
             if(t.controlCorners(i)==x) result = true;
-        }
-        return result;
-    }
-
-    public boolean checkProtection(int x, int y) {
-        boolean result = false;
-        //check the north side
-        if (x == 0) {
-            //flag for exit from the while if they are protected
-            boolean flag = true;
-            int i = 0;
-            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
-            while (flag && i < 5) {
-                if (validStatus[i][y] == Status.USED) {
-                    if (Dash_Matrix[i][y - 4].controlCorners(0) == 4) {
-                        flag = false;
-                        result = true;
-                    } else if (Dash_Matrix[i][y - 4].controlCorners(5)==5) {
-                        //manca gestione di selezione di una tile e attivazione del double cannone
-                        flag = false;
-                        //result = activate;
-                    }
-                }
-                i++;
-            }
-            //check the east side
-        } else if (x == 1) {
-            //flag for exit from the while if they are protected
-            boolean flag = true;
-            int i = 5;
-            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
-            while (flag && i >= 1) {
-                if(validStatus[y - 5][i] == Status.USED) {
-                    if ((Dash_Matrix[y - 5][i].controlCorners(1)==4) || (Dash_Matrix[y - 5][i + 1].controlCorners(1)==4) || (Dash_Matrix[y - 5][i - 1].controlCorners(1)==4)) {
-                        flag = false;
-                        result = true;
-                    } else if ((Dash_Matrix[y - 5][i].controlCorners(1)==5) || (Dash_Matrix[y - 5][i + 1].controlCorners(1)==5) || (Dash_Matrix[y - 5][i - 1].controlCorners(1)==5)) {
-                        //metodo gestione selezione e attivazione
-                        flag = false;
-                        result = true;
-                    }
-                }
-                i--;
-            }
-            //check the west side
-        } else if (x == 3) {
-            //flag for exit from the while if they are protected
-            boolean flag = true;
-            int i = 1;
-            //it iterates, searching for the first non-empty tile, evaluating whether it is a cannon to determine if they are protected
-            while (flag && i < 6) {
-                if (validStatus[y - 5][i] == Status.USED) {
-                    if ((Dash_Matrix[y - 5][i].controlCorners(3)==4) || (Dash_Matrix[y - 5][i + 1].controlCorners(3)==4) || (Dash_Matrix[y - 5][i - 1].controlCorners(3)==4)) {
-                        flag = false;
-                        result = true;
-                    } else if ((Dash_Matrix[y - 5][i].controlCorners(3)==5) || (Dash_Matrix[y - 5][i + 1].controlCorners(3)==5) || (Dash_Matrix[y - 5][i - 1].controlCorners(3)==5)) {
-                        //metodo selezione e attivaione
-                        flag = false;
-                        result = true;
-                    }
-                }
-                i++;
-            }
         }
         return result;
     }
