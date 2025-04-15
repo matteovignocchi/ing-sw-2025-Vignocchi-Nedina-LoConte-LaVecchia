@@ -16,16 +16,19 @@ import java.util.Scanner;
 //method for select the energy cell
 public class Controller {
 
-    private List<Player> Players_in_Game;
+    private List<Player> Players_in_Game = new ArrayList<>();
     public Pile pileOfTile = new Pile();
-    public Pile shownPile = new Pile();
+    public List<Tile> shownTile = new ArrayList<>();
     private FlightCardBoard f_board;
-    private List<PlayerView> Players_views;
+    private List<PlayerView> Players_views = new ArrayList<>();
 
      // da cambiare
-    public Controller(List<Player> Players_in_Game, FlightCardBoard f) {
-        this.Players_in_Game = Players_in_Game;
-        this.f_board = f;
+    public Controller(boolean isDemo) {
+        //if(isDemo) {
+        //    f_board = new FlightCardBoard();
+        //}else{
+        //    f_board = new FlightCardBoard2();
+        //}
     }
 
     public void addPlayer(int id, boolean isDemo) {
@@ -105,7 +108,7 @@ public class Controller {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
-                boolean var = false;
+                boolean var;
                 switch (y) {
                     case Engine c -> {
                         var = c.isDouble();
@@ -140,17 +143,178 @@ public class Controller {
         return p.getTotalGood();
     }
 
+    public void removeGoods2(Player p, int num) {
+        int totalEnergy = getTotalEnergy(p);
+        int totalGood = getTotalGood(p);
+        PlayerView pview = getPlayerView(p.getId());
+        List<Colour> TotalGood = p.getTotalListofGood();
+        int r = 0;
+        int g = 0;
+        int b = 0;
+        int v = 0;
+        for(Colour co : TotalGood) {
+            switch (co) {
+                case RED -> r++;
+                case BLUE -> b++;
+                case GREEN -> v++;
+                case YELLOW -> g++;
+            }
+        }
+        if(num == totalGood){
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 7; j++){
+                  Tile y = p.getTile(i, j);
+                  switch (y){
+                      case StorageUnit c -> {
+                          for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
+                      }
+                      default -> {}
+                  }
+                }
+            }
+        }
+        if(num < totalGood){
+            while(num != 0){
+                if(r != 0){
+                    pview.inform("selezionare cella ed eliminare rosso");
+                    int[] vari = pview.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case StorageUnit c -> {
+                            for(Colour co : c.getListOfGoods()) {
+                                if (co == Colour.RED) {
+                                    r--;
+                                    num--;
+                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                                }
+                            }
+                        }
+                        default -> {}
+                    }
+
+                }
+                if(r == 0 && num!=0 && g != 0){
+                    pview.inform("selezionare cella ed eliminare giallo");
+                    int[] vari = pview.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case StorageUnit c -> {
+                            for(Colour co : c.getListOfGoods()) {
+                                if (co == Colour.YELLOW) {
+                                    g--;
+                                    num--;
+                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                                }
+                            }
+                        }
+                        default -> {}
+                    }
+
+                }
+                if(r == 0 && g == 0 && v != 0 && num!=0){
+                    pview.inform("selezionare cella ed eliminare verde");
+                    int[] vari = pview.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case StorageUnit c -> {
+                            for(Colour co : c.getListOfGoods()) {
+                                if (co == Colour.GREEN) {
+                                    v--;
+                                    num--;
+                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                                }
+                            }
+                        }
+                        default -> {}
+                    }
+
+                }
+                if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
+                    pview.inform("selezionare cella ed eliminare blu");
+                    int[] vari = pview.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case StorageUnit c -> {
+                            for(Colour co : c.getListOfGoods()) {
+                                if (co == Colour.BLUE) {
+                                    b--;
+                                    num--;
+                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                                }
+                            }
+                        }
+                        default -> {}
+                    }
+
+                }
+            }
+        }
+        if(num > totalGood){
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 7; j++){
+                    Tile y = p.getTile(i, j);
+                    switch (y){
+                        case StorageUnit c -> {
+                            for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
+                        }
+                        default -> {}
+                    }
+                }
+            }
+            int finish = num-totalGood;
+            if(finish < totalEnergy){
+                while(finish > 0){
+                    pview.inform("selezionare cella ed eliminare una batteria");
+                    int[] vari = pview.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case EnergyCell c -> {
+                            if(c.getCapacity() != 0) c.useBattery();
+                            }
+                        default -> {}
+
+                    }
+                 }
+
+                }else{
+                for (int i = 0; i < 5; i++) {
+                    for (int j = 0; j < 7; j++){
+                        Tile y = p.getTile(i, j);
+                        switch (y){
+                            case EnergyCell c -> {
+                                for(int bb = 0 ; bb < c.getCapacity() ; i++) c.useBattery();
+                            }
+                            default -> {}
+                        }
+                    }
+                }
+
+
+            }
+            }
+        }
+
+
+
+
+
     public void removeGoods(Player player, int num) {
         int totalEnergy = getTotalEnergy(player);
         int totalGood = getTotalGood(player);
         if (num > totalGood) {
             int tmp1 = totalGood;
             while (tmp1 != 0) {
+                List<Colour> totg = x.getTotalListofGood();
+
                 //select StorageUnit t = p.selectStorageUnit
                 //se contiene almeno 1 merce
                 //dentro un if
                 //t.removeGood
                 //tmp2--;
+
+
+
+
             }
             if (num - totalGood > totalEnergy) {
                 int tmp2 = totalEnergy;
@@ -445,6 +609,16 @@ public class Controller {
 
     private boolean manageHousingUnit(Player player) {
         PlayerView x = getPlayerView(player.getId());
+        x.inform("selezionare una HOusingUnit");
+        int[] var = x.askCoordinate();
+        while (true){
+            Tile p = player.getTile(var[0], var[1]);
+            switch (p){
+                case HousingUnit h->{
+
+                }
+            }
+        }
 
         return true;
     }
@@ -601,6 +775,13 @@ public class Controller {
         }
         return false;
     }
+
+
+
+
+
+
+
 }
 
 
