@@ -203,7 +203,33 @@ public class Player {
         discardPile.add(tile);
     }
 
+    public int getTotalEnergy(){
+        int tmp = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case EnergyCell c  -> tmp = tmp + c.getCapacity();
+                    default -> tmp = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
+    public int getTotalGood() {
+        int tmp = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case StorageUnit c  -> tmp = tmp + c.getListSize();
+                    default -> tmp = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
     /**
      * this method changes the status of the player, so when it is eliminated
@@ -217,6 +243,10 @@ public class Player {
      */
     public boolean isEliminated() {
         return isEliminated;
+    }
+
+    public void addCredits(int credits) {
+        this.credit = this.credit + credits;
     }
 
     //metodi di inserimento e posizionamento delle tessere
@@ -963,11 +993,13 @@ public class Player {
         EnergyCell e = new EnergyCell(1,2,3,4,2);
         return e;
     }
+
     public StorageUnit seleStorageUnit() {
         //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
         StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
         return e;
     }
+
     public StorageUnit selectHousingUnit() {
         //momemnto bisogna gestire con un ciclo while la exception e capire come mi interfaccio con la view
         StorageUnit e = new StorageUnit(1,2,3,4,2 , true);
@@ -1057,11 +1089,6 @@ public class Player {
         }
         return result;
     }
-
-
-
-
-
 
 }
 

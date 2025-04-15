@@ -378,13 +378,14 @@ public class Controller {
     public FlightCardBoard getFlightCardBoard(){ return f_board;}
 
     public void activateCard(Card card){
+        CardEffectVisitor visitor = new CardEffectVisitor(this);
 
-        try{
-            CardEffectVisitor visitor = new CardEffectVisitor(this);
-            card.accept(visitor);
-        } catch (CardEffectException e){
-            System.err.println("Error: " + e.getMessage());
-            //si potrebbe anche comunicare al giocatore con view.notifyPlayer, ma per adesso lasciamo cosi
-        }
+        //ricorda che le eccezioni personalizzate vanno gestite con un try-catch qui.
+        //se non ricordi bene vedi chatgpt
+
+        card.accept(visitor);
     }
+
+
+
 }
