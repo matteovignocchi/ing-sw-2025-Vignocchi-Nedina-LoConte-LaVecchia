@@ -19,7 +19,9 @@ public class Controller {
     private List<Player> Players_in_Game;
     private Visitor visitor = new Visitor();
     public Pile pileOfTile = new Pile();
+    public Pile shownPile = new Pile();
     private FlightCardBoard f_board;
+    private List<PlayerView> Players_views;
 
 
     public Controller(List<Player> Players_in_Game, FlightCardBoard f) {
@@ -27,35 +29,23 @@ public class Controller {
         this.f_board = f;
     }
 
-    public void usage(Cannon cannon) {
+    public void addPlayer(int id , boolean isDemo) {
+        Player p = new Player(id, isDemo);
+        Players_in_Game.add(p);
+        PlayerView p2 = new PlayerView(id);
+        Players_views.add(p2);
+    }
+    public int checkNumberOfPlayers() {
+        return Players_in_Game.size();
     }
 
-    public void usage(Engine engine) {
 
-    }
+    //switch (t) {
+     //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
+      //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
+       // default        -> ;
 
-    public void usage(StorageUnit unit) {
-
-    }
-
-    public void usage(EnergyCell energyCell) {
-
-    }
-
-    public void usage(EmptySpace emptySpace) {
-
-    }
-
-    public void usage(Shield shield) {
-    }
-
-    public void usage(HousingUnit housingUnit) {
-
-    }
-
-    public void usage(MultiJoint joint) {
-
-    }
+   // }
 
     //matrici da i=4 j=6
     // metodo che restituisce il numero di crewMate nella nave
@@ -63,13 +53,15 @@ public class Controller {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                if(visitor.visit(p.getTile(i,j))>=100 && visitor.visit(p.getTile(i,j))<200)
-                    tmp = tmp + visitor.visit(p.getTile(i, j)) - 100;
+                Tile y = p.getTile(i, j);
+                switch (y) {
+                    case HousingUnit c  -> tmp = tmp + c.returnLenght();
+                    default -> tmp = tmp;
+                    }
+                }
             }
-        }
         return tmp;
     }
-
 
     /**
      * this method return the engine power, checking every tile
@@ -82,13 +74,22 @@ public class Controller {
         int tmp = 0;
         for(int i =0; i<5; i++){
             for(int j=0; j<5; j++){
-                int type = visitor.visit(p.getTile(i, j));
-                if(type == 11){
-                    tmp = tmp +1;
-                }else if(type == 22){
-                    tmp = tmp+ 2;
+                Tile y = p.getTile(i,j);
+                Boolean var = false;
+                switch (y) {
+                    case Engine c ->{
+                        var = c.isDouble();
+                        if(var){
+                            boolean activate = manageEnergyCell(p);
+                            if(activate){
+                                tmp = tmp + 2;
+                            }
+                        }else{
+                            tmp = tmp + 1;
+                        }
+                    }
+                    default -> tmp = tmp;
                 }
-
             }
         }
         if (p.presenceBrownAlien() && tmp != 0) {
@@ -102,21 +103,25 @@ public class Controller {
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                int type = visitor.visit(p.getTile(i, j));
-                if (type == 1) {
-                    if (p.getTile(i, j).controlCorners(0) == 4) {
-                        tmp = tmp + 1;
-                    } else {
-                        tmp = tmp + 0.5;
+                Tile y = p.getTile(i, j);
+                boolean var = false;
+                switch (y) {
+                    case Engine c ->{
+                        var = c.isDouble();
+                        if(var){
+                            boolean activate = manageEnergyCell(p);
+                            if(activate){
+                                if(c.controlCorners(0) != 5) tmp = tmp + 1;
+                                else tmp = tmp + 2;
+                            }
+                        }else{
+                            if(c.controlCorners(0) != 4) tmp = tmp + 0.5;
+                            else tmp = tmp + 1;
+                        }
                     }
-                } else if (type == 2) {
-                    //MANCA LOGICA DI RICHIESTA E RISPOSTA
-                    if (p.getTile(i, j).controlCorners(0) == 5) {
-                        tmp = tmp + 2;
-                    } else {
-                        tmp = tmp + 1;
-                    }
+                    default -> tmp = tmp;
                 }
+
             }
         }
         if (p.presencePurpleAlien() && tmp != 0) {
@@ -127,27 +132,12 @@ public class Controller {
     }
 
     public int getTotalEnergy(Player p) {
-        int tmp = 0;
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 7; j++) {
-                int type = visitor.visit(p.getTile(i, j));
-                if (type >= 300) tmp = type - 300;
-            }
-        }
-        return tmp;
+        return p.getTotalEnergy();
     }
 
     public int getTotalGood(Player p) {
-        int tmp = 0;
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 7; j++) {
-                int type = visitor.visit(p.getTile(i, j));
-                if (type >= 200 && type < 300) tmp = type - 200;
-            }
-        }
-        return tmp;
+      return p.getTotalGood();
     }
-
 
     public void removeGoods(Player player, int num) {
         int totalEnergy = getTotalEnergy(player);
@@ -231,22 +221,27 @@ public class Controller {
     public void startPlauge(Player player) {
         int firstNumber = getNumCrew(player);
         int tmp = 0;
-        for(int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                if(visitor.visit(player.getTile(i,j)) > 100 && visitor.visit(player.getTile(i,j)) < 200 ) {
-                   HousingUnit unit = (HousingUnit) player.getTile(i,j);
-                   if(unit.isConnected()){
-                       //il player seleziona l'indice
-                       int x = unit.removeHumans(1);
-                       tmp ++;
-                       if( x == 2 ) player.setBrownAlien();
-                       if(x == 3) player.setPurpleAlien();
-                   }
+                Tile y = player.getTile(i, j);
+                boolean var = false;
+                switch (y) {
+                    case HousingUnit c -> {
+                        if(c.isConnected()){
+                            //il player seleziona l'indice
+                            int x = c.removeHumans(1);
+                            tmp ++;
+                            if( x == 2 ) player.setBrownAlien();
+                            if(x == 3) player.setPurpleAlien();
+                        }
+
+                    }
+                    default ->{}
                 }
             }
-        }
-        if(tmp == firstNumber){
-            player.setEliminated();
+            if (tmp == firstNumber) {
+                player.setEliminated();
+            }
         }
     }
 
@@ -257,7 +252,28 @@ public class Controller {
      * @return if the ship is safe
      */
     public boolean isProtected(Player p1, int d) {
-        boolean protection = false;
+        boolean flag = false;
+        PlayerView x = getPlayerView(p1.getId());
+            while(!flag){
+                if(x.ask("vuoi usare uno scudo?")) {
+                    int[] coordinate = x.askCoordinate();
+                    Tile y = p1.getTile(coordinate[0], coordinate[1]);
+                    switch (y) {
+                        case Shield shield -> {
+                            if (!(shield.getProtectedCorner(d) == 8)){
+                                x.inform("seleziona un'altro scudo");
+                            }else{
+                                return manageEnergyCell(p1);
+                            }
+                        }
+                        default -> x.inform("cella non valida");
+
+                    }
+                }else{
+                    flag = true;
+                }
+            }
+            return false;
         //il controller chiede al player se vuole usare uno scudo
         //il player se vuole usare uno scudo fa partire unn ciclo in cui
         //deve selezionare una tile, se il controller tramite il visitor osserva che
@@ -267,13 +283,6 @@ public class Controller {
         //il controller a questo punto se osserva come prima che è una energy cell fa in modo che si possa eliminare una batteria
         //se si puo eliminare modifica il flag protection
         //altrimenti chiede unaltra energy cell
-        Shield s = new Shield(1,2,3,4);
-        boolean x = p1.dashProtected(s,d);
-        if(x==true){
-            protection = true;
-        }
-        //logica sopra per controllo dell tile
-        return protection;
     }
 
     /**
@@ -281,8 +290,7 @@ public class Controller {
      * @param dir cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon (int dir, boolean type ,int dir2) {
-        for (Player p : Players_in_Game) {
+    public void defenceFromCannon (int dir, boolean type ,int dir2 , Player p) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type || (!isProtected(p,dir) && !type)) {
@@ -308,7 +316,6 @@ public class Controller {
                     }
                 }
             }
-        }
     }
 
     /**
@@ -368,11 +375,6 @@ public class Controller {
         }
     }
 
-
-
-
-
-
     ///////////////////////////////////////////////////////////////////
 
     public FlightCardBoard getFlightCardBoard(){ return f_board;}
@@ -385,6 +387,80 @@ public class Controller {
 
         card.accept(visitor);
     }
+
+    public boolean askPlayerDecision(String condition , Player id){
+        PlayerView x = getPlayerView(id.getId());
+        return x.ask(condition);
+    }
+
+    public void addCreditToPlayer(int credits , Player player){
+        player.addCredits(credits);
+    }
+
+    private boolean manageEnergyCell(Player player) {
+
+        PlayerView x = getPlayerView(player.getId());
+        int[] coordinate = new int[2];
+        boolean exits = false;
+
+        //ricordarsi di mettere la catch per gestione null;
+        boolean use = x.ask("Vuoi usare una batteria?");
+        if (!use){
+            return false;
+        }else{
+            while (!exits) {
+                coordinate = x.askCoordinate();
+                Tile p = player.getTile(coordinate[0], coordinate[1]);
+                switch (p) {
+                    case EnergyCell c ->{
+                        int capacity = c.getCapacity();
+                        if (capacity == 0) {
+                            if(!x.ask("Vuoi selezionare un'altra cella?")){
+                                return false;
+                            }
+                        }else{
+                            c.useBattery();
+                            return true;
+                        }
+                    }
+                    default -> {
+                        System.out.println("cella non valida");
+                        if(!x.ask("vuoi selezionare un'altra cella?")){
+                            exits = true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+    }
+
+    private boolean manageHousingUnit(Player player){
+        PlayerView x = getPlayerView(player.getId());
+
+
+    }
+
+
+
+    private PlayerView getPlayerView(int id){
+        PlayerView x = null;
+        for (PlayerView p : Players_views) {
+            if (id == p.getId()) {
+                x = p;
+            }
+        }
+        return x;
+    }
+
+    //switch (t) {
+        //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
+        //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
+        // default        -> ;
+
+        // }
+
 
 
 
