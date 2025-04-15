@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker;
+import it.polimi.ingsw.galaxytrucker.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Card.InvalidPlayerException;
 
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class FlightCardBoard {
      * @throws InvalidPlayerException exception thrown if (see conditions below)
      */
     //aggiornare la lista dei giocatori in ordine in base agli spostamenti fatti (?)
-    public void moveRocket(int x, Player p, List<Player> players) throws IllegalArgumentException, InvalidPlayerException {
+    public void moveRocket(int x, Player p, List<Player> players)  {
         if(p==null) throw new IllegalArgumentException("Player null");
         else if(players==null) throw new IllegalArgumentException("Players list null");
         else if(players.isEmpty()) throw new IllegalArgumentException("Players list empty");

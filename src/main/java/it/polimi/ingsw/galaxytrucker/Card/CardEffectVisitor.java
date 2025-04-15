@@ -3,17 +3,26 @@ package it.polimi.ingsw.galaxytrucker.Card;
 import it.polimi.ingsw.galaxytrucker.Controller;
 import it.polimi.ingsw.galaxytrucker.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Player;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class CardEffectVisitor implements CardVisitor {
-    private Controller controller;
-    private FlightCardBoard f;
-    private List<Player> players;
+    private final Controller controller;
+    private final FlightCardBoard f;
+    private final List<Player> players;
 
-    public CardEffectVisitor(Controller controller) {
+    public CardEffectVisitor(Controller controller) throws CardEffectException {
+
         this.controller = controller;
         this.f = controller.getFlightCardBoard();
         this.players = f.getOrderedPlayers();
+
+        if(players == null || players.isEmpty()) throw new InvalidPlayerException("Players cannot be null or empty");
+        //chiedere a chat se f==null e controller==null va gestito
+        //i singoli player in players sono tutti diversi da null, vero? Altrimenti devo fare un'altra eccezione
+        //Questa cosa, se è vera, andrà fatta in tutti i casi in cui inizializziamo delle liste,
+        //ad esempio, in planets
     }
 
     @Override
@@ -134,7 +143,7 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(SmugglersCard card) {
+    public void visit(SmugglersCard card) throws CardEffectException{
         /*
         if(players == null) throw new NullPointerException("Null players list");
         else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
@@ -145,7 +154,8 @@ public class CardEffectVisitor implements CardVisitor {
             double player_fire_power = controller.getFirePower(p);
             if(player_fire_power > smugglers_fire_power){
                 if(controller.askPlayerDecision()){
-                    f.moveRocket(-card.getDays(), p, players);
+                    int days = card.getDays();
+                    f.moveRocket(-days, p, players);
                     controller.addGoods(p, card.getRewardGoods());
                 }
                 break;
@@ -156,10 +166,9 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(AbandonedShipCard card) {
-        //if(players == null) throw new NullPointerException("Null players list");
-        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(AbandonedShipCard card) throws CardEffectException{
+        if(card == null) throw new InvalidCardException("Card cannot be null");
+
         for(Player p : players) {
             if (controller.askPlayerDecision(p)) {
                 int days = card.getDays();
@@ -174,10 +183,9 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(AbandonedStationCard card) {
-        //if(players == null) throw new NullPointerException("Null players list");
-        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(AbandonedStationCard card) throws CardEffectException {
+        if(card == null) throw new InvalidCardException("Card cannot be null");
+
         for(Player p: players) {
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
@@ -192,10 +200,10 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(MeteoritesRainCard card) {
-        //if(players == null) throw new NullPointerException("Null players list");
-        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(MeteoritesRainCard card) throws CardEffectException {
+        if(card == null) throw new InvalidCardException("Card cannot be null");
+        if(card.getMeteorites_directions().size() != card.getMeteorites_size().size()) throw new InvalidSizeException("Lists cannot have different size");
+
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = players.getFirst().throwDice() + players.getFirst().throwDice();
             for(Player p : players){
@@ -205,10 +213,10 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(PiratesCard card) {
-        //if(players == null) throw new NullPointerException("Null players list");
-        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(PiratesCard card) throws CardEffectException {
+        if(card == null) throw new InvalidCardException("Card cannot be null");
+        if(card.getShots_directions().size() != card.getShots_size().size()) throw new InvalidSizeException("Lists cannot have different size");
+
         List<Player> losers = new ArrayList<>();
         for(Player p : players) {
             if(controller.getFirePower(p) > card.getFirePower()){
@@ -222,7 +230,7 @@ public class CardEffectVisitor implements CardVisitor {
             } else if (controller.getFirePower(p) < card.getFirePower())
                 losers.add(p);
         }
-        if(losers.getFirst() != null){
+        if(!losers.isEmpty()){
             int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
             for(Player p : losers){
                 for(int i = 0; i < card.getShots_directions().size(); i++){
@@ -233,10 +241,9 @@ public class CardEffectVisitor implements CardVisitor {
     }
 
     @Override
-    public void visit(PlanetsCard card) {
-        //if(players == null) throw new NullPointerException("Null players list");
-        //else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(PlanetsCard card) throws CardEffectException {
+        if(card == null) throw new InvalidCardException("Card cannot be null");
+
         int z = 0;
         for(Player p : players){
             if(controller.askPlayerDecision(p)){
@@ -244,16 +251,14 @@ public class CardEffectVisitor implements CardVisitor {
                 f.moveRocket(-days, p, players);
                 controller.addGoods(p, card.getRewardGoods().get(z));
                 z++;
-                if(z > card.getRewardGoods().size()) break;
+                if(z >= card.getRewardGoods().size()) break;
             }
         }
     }
 
     @Override
-    public void visit(PlaugeCard card){
-        //if(players == null) throw new NullPointerException("Null players list");
-        //        else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        //        else if(f == null) throw new NullPointerException("Null flight card board");
+    public void visit(PlaugeCard card) throws CardEffectException {
+
         for(Player p : players){
             controller.startPlauge(p);
         }

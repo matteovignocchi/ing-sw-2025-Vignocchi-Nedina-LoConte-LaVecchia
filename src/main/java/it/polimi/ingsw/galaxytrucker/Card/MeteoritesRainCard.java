@@ -5,16 +5,15 @@ import java.util.List;
 
 /**
  * "MeteoritesRain" adventure card description
- * @author Gabriele La Vecchia && Francesco "El Matador" Lo Conte
+ * @author Gabriele La Vecchia && Francesco Lo Conte
  */
 public class MeteoritesRainCard implements Card{
     private final List<Integer> directions;
     private final List<Boolean> size;
 
     public MeteoritesRainCard(List<Integer> directions, List<Boolean> size) {
-        if(directions == null || size == null) throw new NullPointerException("List is null");
-        else if(directions.isEmpty() || size.isEmpty()) throw new IllegalArgumentException("List is empty");
-        else if(directions.size() != size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
+        if(directions == null || directions.isEmpty()) throw new IllegalArgumentException("List directions cannot be empty or null");
+        if(size == null || size.isEmpty()) throw new IllegalArgumentException("List size cannot be empty or null");
 
         this.directions = new ArrayList<>(directions);
         this.size = new ArrayList<>(size);
@@ -35,8 +34,8 @@ public class MeteoritesRainCard implements Card{
     //}
 
     @Override
-    public void accept(CardVisitor visitor){
-        visitor.visit(this);
+    public void accept(CardVisitor visitor) throws CardEffectException{
+            visitor.visit(this);
     }
 
     public List<Integer> getMeteorites_directions(){ return new ArrayList<>(directions); }

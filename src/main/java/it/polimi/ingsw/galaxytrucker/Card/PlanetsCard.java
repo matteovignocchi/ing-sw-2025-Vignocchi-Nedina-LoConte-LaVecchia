@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Card;
 import it.polimi.ingsw.galaxytrucker.Colour;
+
+import javax.smartcardio.CardException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +14,12 @@ public class PlanetsCard implements Card {
     private final int days;
 
     public PlanetsCard(List<List<Colour>> reward_goods, int days) {
-        if(reward_goods == null) throw new NullPointerException("List is null");
-        else if(reward_goods.isEmpty()) throw new IllegalArgumentException("List is empty");
+        if(reward_goods == null || reward_goods.isEmpty()) throw new IllegalArgumentException("reward_goods is null");
+        if(days < 0) throw new IllegalArgumentException("days cannot be negative");
 
         List<List<Colour>> temp = new ArrayList<>(reward_goods.size());
         for(List<Colour> innerList : reward_goods) {
-            if(innerList.isEmpty()) throw new IllegalArgumentException("List is empty");
+            if(innerList.isEmpty()) throw new IllegalArgumentException("Null innerList in reward_goods");
             else temp.add(innerList);
         }
         this.reward_goods = temp;
@@ -49,8 +51,8 @@ public class PlanetsCard implements Card {
     //   }
 
     @Override
-    public void accept(CardVisitor visitor){
-        visitor.visit(this);
+    public void accept(CardVisitor visitor) throws CardEffectException {
+            visitor.visit(this);
     }
 
     public int getDays() {return days;}
