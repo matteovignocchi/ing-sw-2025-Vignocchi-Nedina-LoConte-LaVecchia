@@ -10,5 +10,5 @@ import java.util.List;
  */
 
 public interface Card {
-    void accept (CardVisitor visitor);
+    void accept (CardVisitor visitor) throws CardEffectException;
 }

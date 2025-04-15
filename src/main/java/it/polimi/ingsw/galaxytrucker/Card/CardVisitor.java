@@ -1,16 +1,16 @@
 package it.polimi.ingsw.galaxytrucker.Card;
 
 public interface CardVisitor {
-    void visit(OpenSpaceCard card);
-    void visit(StardustCard card);
-    void visit(SmugglersCard card);
-    void visit(SlaversCard card);
-    void visit(SecondWarzoneCard card);
-    void visit(FirstWarzoneCard card);
-    void visit(AbandonedShipCard card);
-    void visit(AbandonedStationCard card);
-    void visit(MeteoritesRainCard card);
-    void visit(PiratesCard card);
-    void visit(PlanetsCard card);
-    void visit(PlaugeCard card);
+    void visit(OpenSpaceCard card) throws CardEffectException;
+    void visit(StardustCard card) throws CardEffectException;
+    void visit(SmugglersCard card) throws CardEffectException;
+    void visit(SlaversCard card) throws CardEffectException;
+    void visit(SecondWarzoneCard card) throws CardEffectException;
+    void visit(FirstWarzoneCard card) throws CardEffectException;
+    void visit(AbandonedShipCard card) throws CardEffectException;
+    void visit(AbandonedStationCard card) throws CardEffectException;
+    void visit(MeteoritesRainCard card) throws CardEffectException;
+    void visit(PiratesCard card) throws CardEffectException;
+    void visit(PlanetsCard card) throws CardEffectException;
+    void visit(PlaugeCard card) throws CardEffectException;
 }

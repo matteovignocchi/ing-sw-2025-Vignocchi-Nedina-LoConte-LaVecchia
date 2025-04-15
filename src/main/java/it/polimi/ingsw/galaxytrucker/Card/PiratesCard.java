@@ -16,9 +16,11 @@ public class PiratesCard implements Card {
     private final List<Boolean> shots_size;
 
     public PiratesCard(int fire_power, int days, int credits, List<Integer> shots_directions, List<Boolean> shots_size){
-        if(shots_directions == null || shots_size == null) throw new NullPointerException("List is null");
-        else if(shots_directions.isEmpty() || shots_size.isEmpty()) throw new IllegalArgumentException("List is empty");
-        else if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
+        if(shots_directions == null || shots_directions.isEmpty()) throw new IllegalArgumentException("List shots_directions cannot be null or empty");
+        if(shots_size == null || shots_size.isEmpty()) throw new IllegalArgumentException("List shots_size cannot be null or empty");
+        if(fire_power < 0) throw new IllegalArgumentException("fire_power cannot be negative");
+        if(days < 0) throw new IllegalArgumentException("days cannot be negative");
+        if(credits < 0) throw new IllegalArgumentException("credits cannot be negative");
 
         this.fire_power = fire_power;
         this.days = days;
@@ -64,8 +66,8 @@ public class PiratesCard implements Card {
     // }
 
     @Override
-    public void accept(CardVisitor visitor){
-        visitor.visit(this);
+    public void accept(CardVisitor visitor) throws CardEffectException{
+            visitor.visit(this);
     }
 
     public int getFirePower(){return fire_power;}
