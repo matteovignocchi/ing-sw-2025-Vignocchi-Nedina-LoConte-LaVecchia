@@ -9,7 +9,7 @@ package it.polimi.ingsw.galaxytrucker;
 //PROVVISORIO
 public enum Colour {
     RED,
-    BLUE,
+    YELLOW,
     GREEN,
-    YELLOW;
+    BLUE;
 }

@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * class for the housing unit designate to host humans
+ * class for the housing unit
  * max is the parameter for the slots
+ * Human is a flag that gives the information of which token can be placed in the unit
  * @author Matteo Vignocchi
  */
 
@@ -14,14 +15,13 @@ public class HousingUnit extends Tile{
     private int max;
     private Human isAlien;
     private boolean isConnected;
-
-
     /**
      * the values are standard, and they are given when the game starts from the application
      * @param a
      * @param b
      * @param c
      * @param d
+     * @param isAlien is the type of housing unit
      */
     public HousingUnit(int a,int b,int c,int d, Human isAlien) {
         corners[0]=a;
@@ -32,7 +32,7 @@ public class HousingUnit extends Tile{
     }
 
     /**
-     * add to the tile one human till it reaches the max capacity
+     * add to the tile one token till it reaches the max capacity
      * @param token new human or alien to the house
      * @throws FullHousingList if the party is full
      */
@@ -50,10 +50,16 @@ public class HousingUnit extends Tile{
         }
     }
 
+    /**
+     * @param size when a alien is placed on the tile, it sets a different max size
+     */
     public void setSize(int size){
         max=size;
     }
 
+    /**
+     * @return the type of token on the tile
+     */
     public Human getType(){
         return isAlien;
     }
@@ -83,9 +89,17 @@ public class HousingUnit extends Tile{
     public int returnLenght(){
         return listOfToken.size();
     }
+
+    /**
+     * @param connected set true if is connected to another housing unit
+     */
     public void setConnected(boolean connected){
         isConnected = connected;
     }
+
+    /**
+     * @return true if it is connected
+     */
     public boolean isConnected(){
         return isConnected;
     }

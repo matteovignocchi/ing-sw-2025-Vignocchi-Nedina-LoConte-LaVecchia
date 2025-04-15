@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * class for the pile of all the tile in the game
+ * @author Oleg Nedina
+ */
 public class Pile {
      private List<Tile> pile_of_tile = new ArrayList<>();
 
@@ -23,7 +27,6 @@ public class Pile {
       * @throws InvalidIndex if the index is not present in the tile
       */
     public void TakeFromPile (int i) throws InvalidIndex{
-
          if(i<=0 || i>=pile_of_tile.size()){
             throw new InvalidIndex("Invalid index, chose another tile");
          }
