@@ -2,7 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Tile;
 
 /**
  * class for the shields
- * the orientation of the protected corners is standard and it is given by the new array protectedCorners
+ * the orientation of the protected corners is standard, and it is given by the new array protectedCorners
  * it is always on north and east
  * @author Matteo Vignocchi
  *
@@ -34,7 +34,6 @@ public class Shield extends Tile {
      * method to shift right the vector of corners by one position and rotates
      * the orientation of the shield
      * works directly with the array corners of the class
-     *
      * @author Oleg Nedina & Matteo Vignocchi
      */
     @Override
@@ -56,7 +55,6 @@ public class Shield extends Tile {
      * method to shift left the vector of corners by one position and rotates
      * the orientation of the shield
      * works directly with the array corners of the class
-     *
      * @author Oleg Nedina & Matteo Vignocchi
      */
     @Override
@@ -74,6 +72,10 @@ public class Shield extends Tile {
         protectedCorners[3] = tmp2;
     }
 
+    /**
+     * @param x is the orientation index
+     * @return the value of the protected corners, 8 it means it is protected
+     */
     public int getProtectedCorner(int x) {
         return protectedCorners[x];
     }

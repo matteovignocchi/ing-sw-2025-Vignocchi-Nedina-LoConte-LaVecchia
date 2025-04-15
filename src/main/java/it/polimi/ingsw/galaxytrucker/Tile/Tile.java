@@ -53,6 +53,9 @@ public abstract class Tile {
         isShown = true;
     }
 
+    /**
+     * the method changes the status of the tile
+     */
     public void takeTile(){
         isTake = !isTake;
     }
@@ -65,14 +68,24 @@ public abstract class Tile {
         return corners;
     }
 
+    /**
+     * @param i index of the orientation array
+     * @return the value of the checked corner
+     */
     public int controlCorners(int i){
         return corners[i];
     }
 
+    /**
+     * @return the flag isShown
+     */
     public boolean isShown() {
         return isShown;
     }
 
+    /**
+     * @return the flag isTake
+     */
     public boolean isTake() {
         return isTake;
     }

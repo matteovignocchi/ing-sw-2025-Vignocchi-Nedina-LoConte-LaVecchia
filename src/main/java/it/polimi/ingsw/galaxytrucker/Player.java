@@ -7,6 +7,11 @@ import javafx.scene.control.ButtonType;
 
 import java.util.*;
 
+/**
+ * class for the ship dashboard of the player
+ * it has all the information for the game
+ * @author Matteo Vignocchi & Oleg Nedina
+ */
 public class Player {
     //Beginning
     protected int id;
@@ -14,7 +19,7 @@ public class Player {
     //Ship building
     private boolean isReady;
     private boolean isComplete;
-    private Tile[][] Dash_Matrix; //hashmap?
+    private Tile[][] Dash_Matrix;
     private final Status[][] validStatus;
     private boolean purpleAlien;
     private boolean brownAlien;
@@ -27,8 +32,8 @@ public class Player {
 
     /**
      * constructor that initialize all the variables
-     *
-     * @param id
+     * it initializes the mask for the dashboard
+     * @param id of the player
      * @param isDemo define the type of dashboard
      */
     public Player(int id, boolean isDemo) {
@@ -140,17 +145,32 @@ public class Player {
 
     }
 
+    /**
+     * set true when the player is ready to play
+     */
     public void setIsReady(){
         isReady = true;
     }
+
+    /**
+     * @return the status
+     */
     public boolean isReady(){
         return isReady;
     }
+
+    /**
+     * set if the player has completed the ship
+     */
     public void setComplete(){
-        isReady = true;
+        isComplete = true;
     }
+
+    /**
+     * @return the status
+     */
     public boolean isComplete(){
-        return isReady;
+        return isComplete;
     }
 
     /**
@@ -174,6 +194,9 @@ public class Player {
         return position;
     }
 
+    /**
+     * @return how many credits has the player
+     */
     public int getCredit(){
         return credit;
     }
@@ -201,6 +224,9 @@ public class Player {
         purpleAlien = !purpleAlien;
     }
 
+    /**
+     * @return true if the alien is present
+     */
     public boolean presencePurpleAlien() { return this.purpleAlien; }
 
     /**
@@ -210,16 +236,31 @@ public class Player {
         brownAlien = !brownAlien;
     }
 
+    /**
+     * @return true if the alien is present
+     */
     public boolean presenceBrownAlien() { return this.brownAlien; }
 
+    /**
+     * @return number of tile in the discard pile
+     */
     public int checkDiscardPile(){
         return discardPile.size();
     }
 
+    /**
+     * the method add the tile in the discard pile
+     * @param tile
+     */
     public void addToDiscardPile(Tile tile){
         discardPile.add(tile);
     }
 
+    /**
+     * this method checks every tile in the dashboard
+     * if the tile is an energy cell, it gets the capacity left
+     * @return the total amount of energy cell left of the player
+     */
     public int getTotalEnergy(){
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
@@ -234,6 +275,11 @@ public class Player {
         return tmp;
     }
 
+    /**
+     * this method checks every tile in the dashboard
+     * if the tile is a storage unit, it gets how many goods are in the unit
+     * @return the total amount of goods held by the player
+     */
     public int getTotalGood() {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
@@ -262,11 +308,15 @@ public class Player {
         return isEliminated;
     }
 
+    /**
+     * the method adds the credits passed as input to the function.
+     * @param credits amount of credit
+     */
     public void addCredits(int credits) {
         this.credit = this.credit + credits;
     }
 
-    //metodi di inserimento e posizionamento delle tessere
+    //Tile insertion and placement methods
 
     /**
      * remove and replace with empty space the tile
@@ -303,10 +353,10 @@ public class Player {
     }
 
     /**
-     * the method returns if the position is valid
+     * the method returns the validity flag
      * @param x row index
      * @param y column index
-     * @return true if the place is legal
+     * @return the status flag of the tile
      */
     public Status validityCheck(int x, int y) {
         return validStatus[x][y];
@@ -330,12 +380,12 @@ public class Player {
         }
     }
 
-    //metodi di controllo del posizionamento delle tessere
+    //tile placement validation methods
 
     /**
      * check if al the engine are display in the correct way
-     * the value 4/5 involves that there is nothing behind the engine
      * every engine's value 6/7 it is not face to the index 2 of the orientation array, will be removed
+     * if there is a tile under the index 2 of the orientation array, it will be removed
      */
     public void controlEngine() {
         for (int i = 0; i < 5; i++) {
@@ -358,8 +408,8 @@ public class Player {
     }
 
     /**
-     * check if all the cannon ar display in the correct way
-     * the value 4/5 involves that there is nothing ahead the cannon
+     * check if all the cannon is display in the correct way
+     * it checks whether any cannons are facing inward toward the ship, if so, they are removed
      */
     public void controlCannon(){
         for (int i = 0; i < 5; i++) {
@@ -844,7 +894,7 @@ public class Player {
         return tmp;
     }
 
-    //metodi per rimuovere da una direzione specifica
+    //directional removal methods
     /**
      * Support method for verifying if the ship is being attacked and hit from north
      * the method remove the first tile hit
@@ -862,6 +912,7 @@ public class Player {
         }
 
     }
+
     /**
      * Support method for verifying if the ship is being attacked and hit from east
      * the method remove the first tile hit
@@ -878,6 +929,7 @@ public class Player {
             i--;
         }
     }
+
     /**
      * Support method for verifying if the ship is being attacked and hit from south
      * the method remove the first tile hit
@@ -893,8 +945,8 @@ public class Player {
             }
             i--;
         }
-
     }
+
     /**
      * Support method for verifying if the ship is being attacked and hit from west
      * the method remove the first tile hit
@@ -983,6 +1035,12 @@ public class Player {
         return result;
     }
 
+    /**
+     * the method checks whether the value passed to the function is present at the specified index of the orientation array
+     * @param t tile under consideration
+     * @param x value we want to compare
+     * @return true if the values matches
+     */
     public boolean checkPresentValue(Tile t, int x){
         boolean result = false;
         for(int i = 0;i<4;i++){
@@ -991,6 +1049,28 @@ public class Player {
         return result;
     }
 
+    /**
+     * this method collects all the goods lists from each storage unit on the player's ship
+     * it merges them into a single list
+     * @return the list of goods ordered by value
+     */
+    public List<Colour> getTotalListOfGood(){
+        List<Colour> tmp = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case StorageUnit c  -> {
+                        List<Colour> colours = c.getListOfGoods();
+                        tmp.addAll(colours);
+                    }
+                    default -> {}
+                }
+            }
+        }
+        Collections.<Colour>sort(tmp);
+        return tmp;
+    }
 }
 
 

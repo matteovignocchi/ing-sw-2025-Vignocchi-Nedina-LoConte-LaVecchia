@@ -15,6 +15,11 @@ public class SmugglersCard implements Card{
     private final List<Colour> reward_goods;
 
     public SmugglersCard(int days, int fire_power, int r_goods, List<Colour> reward_goods) {
+        if(days <= 0) throw new IllegalArgumentException("days must be greater than 0");
+        if(fire_power <= 0) throw new IllegalArgumentException("fire_power must be greater than 0");
+        if(r_goods <= 0) throw new IllegalArgumentException("num_removed_goods must be greater than 0");
+        if(reward_goods == null || reward_goods.isEmpty()) throw new IllegalArgumentException("reward_goods list is null or empty");
+
         this.days = days;
         this.fire_power = fire_power;
         this.num_removed_goods = r_goods;
@@ -22,7 +27,7 @@ public class SmugglersCard implements Card{
     }
 
     @Override
-    public void accept(CardVisitor visitor){
+    public void accept(CardVisitor visitor)throws CardEffectException{
         visitor.visit(this);
     }
 

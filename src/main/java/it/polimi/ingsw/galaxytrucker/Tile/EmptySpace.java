@@ -1,5 +1,9 @@
 package it.polimi.ingsw.galaxytrucker.Tile;
 
+/**
+ * class for empty space, where there is not a tile
+ * @author Matteo Vignocchi
+ */
 public class EmptySpace extends Tile {
     public EmptySpace() {
         corners[0]=0;

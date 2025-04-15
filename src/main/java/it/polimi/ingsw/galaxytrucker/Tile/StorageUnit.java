@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * class for the storage unit with 2 slots
+ * class for the storage unit with
  * the methods check if the slots are full, there is the "max" parameter for the slots
  * and check if the good can be put in the storage
  * @author Matteo Vignocchi
@@ -25,6 +25,8 @@ public class StorageUnit extends Tile {
      * @param b
      * @param c
      * @param d
+     * @param max
+     * @param advanced
      */
     public StorageUnit(int a, int b, int c, int d, int max, boolean advanced) {
         corners[0] = a;
@@ -66,6 +68,10 @@ public class StorageUnit extends Tile {
         }
         listOfGoods.remove(listOfGoods.get(index));
     }
+
+    /**
+     * @return how many goods there are in the storage
+     */
     public int getListSize() {
         return listOfGoods.size();
     }
