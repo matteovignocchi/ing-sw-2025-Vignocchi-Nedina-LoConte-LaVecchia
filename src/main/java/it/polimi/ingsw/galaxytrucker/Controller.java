@@ -143,11 +143,11 @@ public class Controller {
         return p.getTotalGood();
     }
 
-    public void removeGoods2(Player p, int num) {
+    public void removeGoods(Player p, int num) {
         int totalEnergy = getTotalEnergy(p);
         int totalGood = getTotalGood(p);
         PlayerView pview = getPlayerView(p.getId());
-        List<Colour> TotalGood = p.getTotalListofGood();
+        List<Colour> TotalGood = p.getTotalListOfGood();
         int r = 0;
         int g = 0;
         int b = 0;
@@ -293,58 +293,6 @@ public class Controller {
             }
             }
         }
-
-
-
-
-
-    public void removeGoods(Player player, int num) {
-        int totalEnergy = getTotalEnergy(player);
-        int totalGood = getTotalGood(player);
-        if (num > totalGood) {
-            int tmp1 = totalGood;
-            while (tmp1 != 0) {
-                List<Colour> totg = x.getTotalListofGood();
-
-                //select StorageUnit t = p.selectStorageUnit
-                //se contiene almeno 1 merce
-                //dentro un if
-                //t.removeGood
-                //tmp2--;
-
-
-
-
-            }
-            if (num - totalGood > totalEnergy) {
-                int tmp2 = totalEnergy;
-                while (tmp2 != 0) {
-                    //select EnergyCell t = p.selectEnergyCell
-                    //se contiene almeno 1 merce
-                    //dentro un if
-                    //t.removeGood
-                    //tmp2--;
-                }
-            } else {
-                int tmp3 = num - totalGood;
-                while (tmp3 != 0) {
-                    //select StorageUnit t = p.selectStorageUnit
-                    //se contiene almeno 1 merce
-                    //dentro un if
-                    //t.removeGood
-                    //tmp4--;
-                }
-            }
-        } else {
-            while (num != 0) {
-                //select StorageUnit t = p.selectStorageUnit
-                //se contiene almeno 1 merce
-                //dentro un if
-                //t.removeGood
-                //tmp2--;
-            }
-        }
-    }
 
     public void addGoods(Player player, List<Colour> list) {
         boolean flag = true;
@@ -611,16 +559,7 @@ public class Controller {
         PlayerView x = getPlayerView(player.getId());
         x.inform("selezionare una HOusingUnit");
         int[] var = x.askCoordinate();
-        while (true){
-            Tile p = player.getTile(var[0], var[1]);
-            switch (p){
-                case HousingUnit h->{
-
-                }
-            }
-        }
-
-        return true;
+  return true;
     }
 
     private PlayerView getPlayerView(int id) {
