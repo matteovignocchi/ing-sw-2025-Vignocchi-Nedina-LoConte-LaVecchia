@@ -14,9 +14,11 @@ public class SecondWarzoneCard implements Card {
     private final List<Boolean> shots_size;
 
     public SecondWarzoneCard(int days, int num_goods, List<Integer> shots_directions, List<Boolean> shots_size){
-        if(shots_directions == null || shots_size == null) throw new NullPointerException("List is null");
-        else if(shots_directions.isEmpty() || shots_size.isEmpty()) throw new IllegalArgumentException("List is empty");
-        else if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
+        if(shots_directions == null || shots_directions.isEmpty()) throw new NullPointerException("List shots_directions is null or empty");
+        if(shots_size == null || shots_size.isEmpty()) throw new NullPointerException("List shots_size is null or empty");
+        if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
+        if(days <= 0) throw new IllegalArgumentException("Days must be greater than 0");
+        if(num_goods <= 0) throw new IllegalArgumentException("Number of goods must be greater than 0");
 
         this.days = days;
         this.num_goods = num_goods;
@@ -25,7 +27,7 @@ public class SecondWarzoneCard implements Card {
     }
 
     @Override
-    public void accept(CardVisitor visitor){
+    public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }
 

@@ -18,9 +18,10 @@ public class PiratesCard implements Card {
     public PiratesCard(int fire_power, int days, int credits, List<Integer> shots_directions, List<Boolean> shots_size){
         if(shots_directions == null || shots_directions.isEmpty()) throw new IllegalArgumentException("List shots_directions cannot be null or empty");
         if(shots_size == null || shots_size.isEmpty()) throw new IllegalArgumentException("List shots_size cannot be null or empty");
-        if(fire_power < 0) throw new IllegalArgumentException("fire_power cannot be negative");
-        if(days < 0) throw new IllegalArgumentException("days cannot be negative");
-        if(credits < 0) throw new IllegalArgumentException("credits cannot be negative");
+        if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("List shots_directions and shots_size must be the same size");
+        if(fire_power <= 0) throw new IllegalArgumentException("fire_power cannot be negative");
+        if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
+        if(credits <= 0) throw new IllegalArgumentException("credits cannot be negative");
 
         this.fire_power = fire_power;
         this.days = days;
