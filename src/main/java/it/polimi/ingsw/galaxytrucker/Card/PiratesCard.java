@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Card;
 
-import it.polimi.ingsw.galaxytrucker.FlightCardBoard;
-import it.polimi.ingsw.galaxytrucker.Player;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,35 +34,38 @@ public class PiratesCard implements Card {
      * he is added to the list of the defeated. Once the pirates are defeated (or the list of players is finished),
      * the first defeated player rolls the dice and determines the row and/or column that will be attacked by the cannons.
      * This column and/or row is valid for each defeated player.
-     * @param players Players list sorted by position, from the leader onwards
-     * @param f FlightCardBoard
      */
 
-    @Override
-    public void activate (List<Player> players, FlightCardBoard f){
-        if(players == null) throw new NullPointerException("Null players list");
-        else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-        else if(f == null) throw new NullPointerException("Null flight card board");
+    // @Override
+    // public void activate (List<Player> players, FlightCardBoard f){
+    // if(players == null) throw new NullPointerException("Null players list");
+    // else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
+    // else if(f == null) throw new NullPointerException("Null flight card board");
+    //
+    // List<Player> losers = new ArrayList<>();
+    // for(Player p : players) {
+    // if(p.getFirePower() > fire_power){
+    // if(p.askPlayerDecision()){
+    // f.moveRocket(-days, p, players);
+    // p.addCredits(credits);
+    // }
+    // break;
+    // } else if (p.getFirePower() < fire_power)
+    // losers.add(p);
+    // }
+    // if(losers.getFirst() != null){
+    // int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
+    // for(Player p : losers){
+    // for(int i = 0; i < shots_directions.size(); i++){
+    // p.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res);
+    // }
+    // }
+    // }
+    // }
 
-        List<Player> losers = new ArrayList<>();
-        for(Player p : players) {
-            if(p.getFirePower() > fire_power){
-                if(p.askPlayerDecision()){
-                    f.moveRocket(-days, p, players);
-                    p.addCredits(credits);
-                }
-                break;
-            } else if (p.getFirePower() < fire_power)
-                losers.add(p);
-        }
-        if(losers.getFirst() != null){
-            int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
-            for(Player p : losers){
-                for(int i = 0; i < shots_directions.size(); i++){
-                    p.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res);
-                }
-            }
-        }
+    @Override
+    public void accept(CardVisitor visitor){
+        visitor.visit(this);
     }
 
     public int getFirePower(){return fire_power;}

@@ -4,8 +4,13 @@ public interface CardVisitor {
     void visit(OpenSpaceCard card);
     void visit(StardustCard card);
     void visit(SmugglersCard card);
-    void visit (SlaversCard card);
+    void visit(SlaversCard card);
     void visit(SecondWarzoneCard card);
     void visit(FirstWarzoneCard card);
-    // inserire gli altri visit
+    void visit(AbandonedShipCard card);
+    void visit(AbandonedStationCard card);
+    void visit(MeteoritesRainCard card);
+    void visit(PiratesCard card);
+    void visit(PlanetsCard card);
+    void visit(PlaugeCard card);
 }
