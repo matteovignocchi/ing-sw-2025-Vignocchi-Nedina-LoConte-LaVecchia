@@ -385,13 +385,14 @@ public class Controller {
         return f_board;
     }
 
-    public void activateCard(Card card) {
-        CardEffectVisitor visitor = new CardEffectVisitor(this);
-
-        //ricorda che le eccezioni personalizzate vanno gestite con un try-catch qui.
-        //se non ricordi bene vedi chatgpt
-
-        card.accept(visitor);
+    public void activateCard(Card card){
+        try{
+            CardEffectVisitor visitor = new CardEffectVisitor(this);
+            card.accept(visitor);
+        } catch (CardEffectException e) {
+            System.err.println("Error: " + e.getMessage());
+            //poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
+        }
     }
 
     public boolean askPlayerDecision(String condition, Player id) {
