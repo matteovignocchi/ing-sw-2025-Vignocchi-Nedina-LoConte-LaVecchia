@@ -15,7 +15,7 @@ public class PlanetsCard implements Card {
 
     public PlanetsCard(List<List<Colour>> reward_goods, int days) {
         if(reward_goods == null || reward_goods.isEmpty()) throw new IllegalArgumentException("reward_goods is null");
-        if(days < 0) throw new IllegalArgumentException("days cannot be negative");
+        if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
 
         List<List<Colour>> temp = new ArrayList<>(reward_goods.size());
         for(List<Colour> innerList : reward_goods) {

@@ -8,7 +8,7 @@ package it.polimi.ingsw.galaxytrucker.Card;
 public class OpenSpaceCard implements Card {
 
     @Override
-    public void accept(CardVisitor visitor){
+    public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }
 }

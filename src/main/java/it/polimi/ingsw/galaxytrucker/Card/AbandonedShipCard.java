@@ -11,9 +11,9 @@ public class AbandonedShipCard implements Card{
     private final int num_crewmates;
 
     public AbandonedShipCard(int days, int credits, int num_crewmates) {
-        if(num_crewmates < 0) throw new IllegalArgumentException("num_crewmates cannot be negative");
-        if(days < 0) throw new IllegalArgumentException("days cannot be negative");
-        if(credits < 0) throw new IllegalArgumentException("credits cannot be negative");
+        if(num_crewmates <= 0) throw new IllegalArgumentException("num_crewmates cannot be negative");
+        if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
+        if(credits <= 0) throw new IllegalArgumentException("credits cannot be negative");
 
         this.days = days;
         this.credits = credits;

@@ -14,7 +14,7 @@ public class MeteoritesRainCard implements Card{
     public MeteoritesRainCard(List<Integer> directions, List<Boolean> size) {
         if(directions == null || directions.isEmpty()) throw new IllegalArgumentException("List directions cannot be empty or null");
         if(size == null || size.isEmpty()) throw new IllegalArgumentException("List size cannot be empty or null");
-
+        if(directions.size() != size.size()) throw new IllegalArgumentException("List directions size does not match size size");
         this.directions = new ArrayList<>(directions);
         this.size = new ArrayList<>(size);
     }
