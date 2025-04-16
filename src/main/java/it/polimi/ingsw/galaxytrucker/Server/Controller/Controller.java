@@ -17,7 +17,6 @@ import java.util.List;//support for changes method in player
 //method for select the energy cell
 public class Controller {
 
-    //CAMBIARE TUTTI QUESTI ATTRIBUTI CON IL RIFERIMENTO ALLA CLASSE GAMEMODEL (DOVE VERRANO SALVATI)
     private List<Player> Players_in_Game = new ArrayList<>();
     public Pile pileOfTile = new Pile();
     public List<Tile> shownTile = new ArrayList<>();

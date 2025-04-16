@@ -13,6 +13,7 @@ public class FirstWarzoneCard implements Card {
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
 
+    //Eccezioni in costruttori così? oppure prima diversamente? o dopo?
     public FirstWarzoneCard(int days, int num_crewmates, List<Integer> shots_directions, List<Boolean> shots_size){
         if(shots_directions == null || shots_directions.isEmpty()) throw new IllegalArgumentException("List shots_directions is null or empty");
         if(shots_size == null || shots_size.isEmpty()) throw new IllegalArgumentException("List shots_size is null or empty");

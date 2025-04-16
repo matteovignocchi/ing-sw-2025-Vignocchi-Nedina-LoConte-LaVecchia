@@ -79,6 +79,11 @@ public class FlightCardBoard {
     //Scrivere metodi per la gestione della lista orderedPlayers (inserimento, modifica ecc..), capire come gestirla
     //anche nel controller dopo modifiche ecc..
 
+    public void addPlayer(Player p) {
+        if(p == null) throw new IllegalArgumentException("Player cannot be null");
+        orderedPlayers.add(p);
+    }
+
     /**
      * The method sees if the player has a  position on the board beyond the last space.
      * If so, it calculates the correct position (the board has a cyclic structure) and
