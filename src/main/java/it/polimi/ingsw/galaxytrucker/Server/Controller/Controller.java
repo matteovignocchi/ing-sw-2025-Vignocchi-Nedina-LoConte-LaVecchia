@@ -35,8 +35,8 @@ public class Controller {
     public void addPlayer(int id, boolean isDemo) {
         Player p = new Player(id, isDemo);
         Players_in_Game.add(p);
-        //PlayerView p2 = new PlayerView(id); controllare
-        //Players_views.add(p2);
+        PlayerView p2 = new PlayerView(id);
+        Players_views.add(p2);
     }
 
     public int checkNumberOfPlayers() {

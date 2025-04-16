@@ -12,7 +12,7 @@ public class PlayerView {
     private int idPlayer;
     private  Scanner scanner = new Scanner(System.in);
 
-    PlayerView(int idPlayer) {
+    public PlayerView(int idPlayer) {
         this.idPlayer = idPlayer;
     }
     public int getId() {
