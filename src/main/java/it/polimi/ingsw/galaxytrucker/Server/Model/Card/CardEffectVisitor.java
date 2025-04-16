@@ -37,7 +37,8 @@ public class CardEffectVisitor implements CardVisitor {
 
         for (Player p : players) {
             int x = controller.getPowerEngine(p);
-            f.moveRocket(x, p, players);
+            //f.moveRocket(x, p, players);
+            f.moveRocket(x, p);
         }
     }
 
@@ -48,7 +49,8 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i = players.size() - 1; i >= 0; i--) {
             Player p = players.get(i);
             int x = p.countExposedConnectors();
-            f.moveRocket(-x, p, players);
+            //f.moveRocket(-x, p, players);
+            f.moveRocket(-x, p);
         }
     }
 
@@ -61,7 +63,8 @@ public class CardEffectVisitor implements CardVisitor {
             double player_fire_power = controller.getFirePower(p);
             if(player_fire_power > slavers_fire_power) {
                 if(controller.askPlayerDecision()){ //modificare, passare messaggio come parametro
-                    f.moveRocket(-1 * card.getDays(), p, players);
+                    //f.moveRocket(-1 * card.getDays(), p, players);
+                    f.moveRocket(-1 * card.getDays(), p);
                     p.addCredits(card.getCredits());
                 }
                 break;
@@ -88,7 +91,8 @@ public class CardEffectVisitor implements CardVisitor {
                 i_less_powerengine = i;
         }
 
-        f.moveRocket(-card.getDays(), players.get(i_less_crewmates), players);
+        //f.moveRocket(-card.getDays(), players.get(i_less_crewmates), players);
+        f.moveRocket(-card.getDays(), players.get(i_less_crewmates));
         controller.removeCrewmate(players.get(i_less_firepower), card.getNumCrewmates());
         Player p = players.get(i_less_powerengine);
         List<Integer> shots_directions = card.getShotsDirections();
@@ -116,7 +120,8 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(i_less_powerengine)))
                 i_less_powerengine = i;
         }
-        f.moveRocket(-card.getDays(), players.get(i_less_firepower), players);
+        //f.moveRocket(-card.getDays(), players.get(i_less_firepower), players);
+        f.moveRocket(-card.getDays(), players.get(i_less_firepower));
         controller.removeGoods(players.get(i_less_powerengine), card.getNumGoods());
         Player p = players.get(i_less_crewmates);
         List<Integer> shots_directions = card.getShotsDirections();
@@ -138,7 +143,8 @@ public class CardEffectVisitor implements CardVisitor {
             if(player_fire_power > smugglers_fire_power){
                 if(controller.askPlayerDecision()){
                     int days = card.getDays();
-                    f.moveRocket(-days, p, players);
+                    //f.moveRocket(-days, p, players);
+                    f.moveRocket(-days, p);
                     controller.addGoods(p, card.getRewardGoods());
                 }
                 break;
@@ -155,7 +161,8 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players) {
             if (controller.askPlayerDecision(p)) {
                 int days = card.getDays();
-                f.moveRocket(-days, p, players);
+                //f.moveRocket(-days, p, players);
+                f.moveRocket(-days, p);
                 int credits = card.getCredits();
                 p.addCredits(credits); //assicurarsi che il metodo vada in player o in controller
                 int num_crewmates = card.getNumCrewmates();
@@ -174,7 +181,8 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.getNumCrew(p)>=num_crewmates){
                 if(controller.askPlayerDecision(p)){
                     int days = card.getDays();
-                    f.moveRocket(-days, p, players);
+                    //f.moveRocket(-days, p, players);
+                    f.moveRocket(-days, p);
                     controller.addGoods(p, card.getStationGoods());
                 }
                 break;
@@ -203,7 +211,8 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.getFirePower(p) > card.getFirePower()){
                 if(controller.askPlayerDecision(p)){
                     int days = card.getDays();
-                    f.moveRocket(-days, p, players);
+                    //f.moveRocket(-days, p, players);
+                    f.moveRocket(-days, p);
                     int credits = card.getCredits();
                     p.addCredits(credits);
                 }
@@ -229,7 +238,8 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players){
             if(controller.askPlayerDecision(p)){
                 int days = card.getDays();
-                f.moveRocket(-days, p, players);
+                //f.moveRocket(-days, p, players);
+                f.moveRocket(-days, p);
                 controller.addGoods(p, card.getRewardGoods().get(z));
                 z++;
                 if(z >= card.getRewardGoods().size()) break;

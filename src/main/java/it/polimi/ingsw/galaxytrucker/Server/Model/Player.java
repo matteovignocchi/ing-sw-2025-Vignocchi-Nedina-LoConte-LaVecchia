@@ -25,7 +25,7 @@ public class Player {
     //In game values
     protected int lap;
     protected int position;
-    private boolean isEliminated;
+    private boolean isEliminated; //eliminabile
 
     /**
      * constructor that initialize all the variables
