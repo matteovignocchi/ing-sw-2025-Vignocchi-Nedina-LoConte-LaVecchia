@@ -25,7 +25,7 @@ public class Player {
     //In game values
     protected int lap;
     protected int position;
-    private boolean isEliminated;
+    private boolean isEliminated; //eliminabile
 
     /**
      * constructor that initialize all the variables
@@ -417,23 +417,23 @@ public class Player {
                         for (int x = 0; x < 4; x++) {
                             if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
                                 if (x == 0) {
-                                    for (int y = 0; y < i; y++) {
-                                        removeTile(i, j);
+                                    for (int y = i-1; y != 0; y--) {
+                                        removeTile(y, j);
                                     }
                                 }
                                 if (x == 1) {
-                                    for (int y = 6; y > j; y--) {
-                                        removeTile(i, j);
+                                    for (int y = j+1; y < 7; y++) {
+                                        removeTile(i, y);
                                     }
                                 }
                                 if (x == 2) {
-                                    for (int y = 4; y > i; y--) {
-                                        removeTile(i, j);
+                                    for (int y = i+1; y < 5; y++) {
+                                        removeTile(y, j);
                                     }
                                 }
                                 if (x == 3) {
-                                    for (int y = 0; y < j; y++) {
-                                        removeTile(i, j);
+                                    for (int y = j-1; y != 0; y--) {
+                                        removeTile(i, y);
                                     }
                                 }
                             }
@@ -1007,7 +1007,7 @@ public class Player {
             while (flag && i >= 0) {
                 if (validStatus[i][y - 4] == Status.USED) {
                     flag = false;
-                    if(Dash_Matrix[i][y - 4].controlCorners(0)==0) {
+                    if(Dash_Matrix[i][y - 4].controlCorners(2)==0) {
                         result = true;
                     }
                 }

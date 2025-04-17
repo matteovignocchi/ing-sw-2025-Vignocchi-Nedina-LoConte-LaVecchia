@@ -1,5 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-//FARE
+//Necessaria? per il momento lasciata così.
 public class GameModel {
 }

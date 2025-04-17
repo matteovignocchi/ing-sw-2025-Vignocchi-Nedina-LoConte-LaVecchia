@@ -1,14 +1,12 @@
 package it.polimi.ingsw.galaxytrucker.Server.Controller;
 
-
 import it.polimi.ingsw.galaxytrucker.Server.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.FlightCardBoard;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Pile.Pile;
-import it.polimi.ingsw.galaxytrucker.PlayerView;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.*;
+import it.polimi.ingsw.galaxytrucker.Server.Model.Pile.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Server.Model.*;
 
+import it.polimi.ingsw.galaxytrucker.PlayerView;
 import java.util.ArrayList;
 import java.util.List;//support for changes method in player
 
@@ -17,31 +15,33 @@ import java.util.List;//support for changes method in player
 //method for select the energy cell
 public class Controller {
 
-    //CAMBIARE TUTTI QUESTI ATTRIBUTI CON IL RIFERIMENTO ALLA CLASSE GAMEMODEL (DOVE VERRANO SALVATI)
-    private List<Player> Players_in_Game = new ArrayList<>();
+    private List<Player> players_in_Game = new ArrayList<>();
     public Pile pileOfTile = new Pile();
     public List<Tile> shownTile = new ArrayList<>();
-    private FlightCardBoard f_board;
-    private List<PlayerView> Players_views = new ArrayList<>();
+    private final FlightCardBoard f_board;
+    private List<PlayerView> players_views = new ArrayList<>();
 
-     // da cambiare
+     // da finire: creazione tutti altri elementi del model()
     public Controller(boolean isDemo) {
-        //if(isDemo) {
-        //    f_board = new FlightCardBoard();
-        //}else{
-        //    f_board = new FlightCardBoard2();
-        //}
+        if(isDemo) {
+            f_board = new FlightCardBoard();
+        }else{
+            f_board = new FlightCardBoard2();
+        }
     }
 
     public void addPlayer(int id, boolean isDemo) {
+        //capire se gestirla con una cheked che evita di inserire troppi players
+        if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");
+
         Player p = new Player(id, isDemo);
-        Players_in_Game.add(p);
+        players_in_Game.add(p);
         PlayerView p2 = new PlayerView(id);
-        Players_views.add(p2);
+        players_views.add(p2);
     }
 
     public int checkNumberOfPlayers() {
-        return Players_in_Game.size();
+        return players_in_Game.size();
     }
 
 
@@ -336,7 +336,7 @@ public class Controller {
     }
 
     public void addHuman() {
-        for (Player p : Players_in_Game) {
+        for (Player p : players_in_Game) {
             //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
@@ -471,7 +471,7 @@ public class Controller {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) {
-        for (Player p : Players_in_Game) {
+        for (Player p : players_in_Game) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, p)) {
@@ -519,20 +519,6 @@ public class Controller {
                     }
                 }
             }
-        }
-    }
-
-    public FlightCardBoard getFlightCardBoard() {
-        return f_board;
-    }
-
-    public void activateCard(Card card){
-        try{
-            CardEffectVisitor visitor = new CardEffectVisitor(this);
-            card.accept(visitor);
-        } catch (CardEffectException e) {
-            System.err.println("Error: " + e.getMessage());
-            //poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
         }
     }
 
@@ -593,7 +579,7 @@ public class Controller {
 
     private PlayerView getPlayerView(int id) {
         PlayerView x = null;
-        for (PlayerView p : Players_views) {
+        for (PlayerView p : players_views) {
             if (id == p.getId()) {
                 x = p;
             }
@@ -742,6 +728,30 @@ public class Controller {
 
         }
         return false;
+    }
+
+
+    //////////////////////////////////////////////////////////////////
+    //METTIAMO METODI OLEG-TEO SOPRA, MIEI-FRA SOTTO, MIA MAGGIORE CHIAREZZA, SCUSATE SONO AUTISTICO
+
+    public FlightCardBoard getFlightCardBoard() {
+        return f_board;
+    }
+
+    public void activateCard(Card card){
+        try{
+            CardEffectVisitor visitor = new CardEffectVisitor(this);
+            card.accept(visitor);
+            f_board.eliminateOverlappedPlayers();
+            f_board.orderPlayersInFlightList();
+        } catch (CardEffectException e) {
+            System.err.println("Error: " + e.getMessage());
+            //poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
+        }
+    }
+
+    public void createFlightCardBoard (){
+
     }
 
 
