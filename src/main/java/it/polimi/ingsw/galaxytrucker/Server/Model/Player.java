@@ -448,265 +448,358 @@ public class Player {
     /**
      * this method controls if the ship that the player built is legal, checking every tile
      */
-    public void controlAssembly() {
+    public boolean checkFirstColumn() {
+        boolean result = false;
         int a, b;
-        controlCannon();
-        controlEngine();
-        //check the first column
         for (int i = 1; i < 4; i++) {
-            boolean tmp = false;
-            if (validStatus[i][0]==Status.USED) {
-                a = Dash_Matrix[i][0].controlCorners(0);
-                b = Dash_Matrix[i - 1][1].controlCorners(2);
-                if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
-                        if (a != 3 && b != 3) {
-                            tmp = true;
+            boolean flag = true;
+            if (validStatus[i][0] == Status.USED) {
+
+                if (validStatus[i + 1][0] == Status.FREE && validStatus[i - 1][0] == Status.FREE && validStatus[i][1] == Status.FREE)
+                    flag = false;
+
+                if (flag) {
+                    a = Dash_Matrix[i][0].controlCorners(0);
+                    b = Dash_Matrix[i - 1][0].controlCorners(2);
+                    if (a * b != 0) {
+                        if ((a-b) != 0) {
+                            if (a != 3 && b != 3) {
+                                flag = false;
+                            }
                         }
                     }
-                } else if (!tmp) {
+                } else if (flag) {
                     a = Dash_Matrix[i][0].controlCorners(2);
                     b = Dash_Matrix[i + 1][0].controlCorners(0);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                } else if (!tmp) {
-                    a = Dash_Matrix[i][0].controlCorners(3);
-                    b = Dash_Matrix[i][1].controlCorners(1);
+                } else if (flag) {
+                    a = Dash_Matrix[i][0].controlCorners(1);
+                    b = Dash_Matrix[i][1].controlCorners(3);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
                 }
-                if (tmp) {
-                    removeTile(i, 0);
-                }
+
+            }
+            if (!flag) {
+                result = true;
+                removeTile(i, 0);
             }
         }
-        //check the last column
+        return result;
+    }
+
+    public boolean checkLastColumn() {
+        boolean result = false;
+        int a, b;
         for (int i = 1; i < 4; i++) {
-            boolean tmp = false;
+            boolean flag = true;
             if (validStatus[i][6] == Status.USED) {
-                a = Dash_Matrix[i][6].controlCorners(0);
-                b = Dash_Matrix[i - 1][6].controlCorners(2);
-                if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
-                        if (a != 3 && b != 3) {
-                            tmp = true;
+
+                if (validStatus[i + 1][6] == Status.FREE && validStatus[i - 1][6] == Status.FREE && validStatus[i][5] == Status.FREE)
+                    flag = false;
+
+                if (flag) {
+                    a = Dash_Matrix[i][6].controlCorners(0);
+                    b = Dash_Matrix[i - 1][6].controlCorners(2);
+                    if (a * b != 0) {
+                        if ((a - b) != 0) {
+                            if (a != 3 && b != 3) {
+                                flag = false;
+                            }
                         }
                     }
-                } else if (!tmp) {
+                } else if (flag) {
                     a = Dash_Matrix[i][6].controlCorners(2);
                     b = Dash_Matrix[i + 1][6].controlCorners(0);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                } else if (!tmp) {
+                } else if (flag) {
                     a = Dash_Matrix[i][6].controlCorners(3);
                     b = Dash_Matrix[i][5].controlCorners(1);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
                 }
-                if (tmp) {
-                    removeTile(i, 6);
+
+            }
+            if (!flag) {
+                result = true;
+                removeTile(i, 6);
+            }
+        }
+        return result;
+    }
+
+    public boolean checkInnerMatrix() {
+        boolean result = false;
+        int a, b;
+        for (int i = 1; i < 4; i++) {
+            for (int j = 1; j < 6; j++) {
+
+                boolean flag = true;
+
+                if (validStatus[i][j] == Status.USED) {
+                    if (validStatus[i - 1][j] == Status.FREE && validStatus[i+1][j] == Status.FREE && validStatus[i][j+1] == Status.FREE && validStatus[i][j-1] == Status.FREE) flag = false;
+
+                    if(flag){
+                        a = Dash_Matrix[i][j].controlCorners(0);
+                        b = Dash_Matrix[i - 1][j].controlCorners(2);
+                        if (a * b != 0) {
+                            if ((a - b) != 0) {
+                                if (a != 3 && b != 3) {
+                                    flag = false;
+                                }
+                            }
+                        }
+                    }
+                    else if (flag) {
+                        a = Dash_Matrix[i][j].controlCorners(2);
+                        b = Dash_Matrix[i + 1][j].controlCorners(0);
+                        if (a * b != 0) {
+                            if ((a - b) != 0) {
+                                if(a != 3 && b != 3){
+                                    flag = false;
+                                }
+                            }
+                        }
+
+                    }
+                    else if (flag) {
+                        a = Dash_Matrix[i][j].controlCorners(3);
+                        b = Dash_Matrix[i][j-1].controlCorners(1);
+                        if (a * b != 0) {
+                            if ((a - b) != 0) {
+                                if (a != 3 && b != 3) {
+                                    flag = false;
+                                }
+                            }
+                        }
+
+                    }
+                    else if (flag) {
+                        a = Dash_Matrix[i][j].controlCorners(1);
+                        b = Dash_Matrix[i][j+1].controlCorners(3);
+                        if (a * b != 0) {
+                            if ((a - b) != 0) {
+                                if (a != 3 && b != 3) {
+                                    flag = false;
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                if (!flag) {
+                    result = true;
+                    removeTile(i, j);
                 }
             }
         }
-        //check the first row
+        return result;
+    }
+
+    public boolean checkFirstRow(){
+        boolean result = false;
+        int a, b;
         for (int i = 1; i < 6; i++) {
-            boolean tmp = false;
-            if (validStatus[0][i] == Status.USED) {
-                a = Dash_Matrix[0][i].controlCorners(3);
-                b = Dash_Matrix[0][i - 1].controlCorners(1);
-                if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
-                        if (a != 3 && b != 3) {
-                            tmp = true;
-                        }
-                    }
-                } else if (!tmp) {
-                    a = Dash_Matrix[0][i].controlCorners(1);
-                    b = Dash_Matrix[0][i + 1].controlCorners(3);
+            boolean flag = true;
+            if(validStatus[0][i] == Status.USED){
+                if(validStatus[0][i-1] == Status.FREE && validStatus[0][i+1] == Status.FREE && validStatus[1][i] == Status.FREE) flag = false;
+
+                if(flag){
+                    a = Dash_Matrix[0][i].controlCorners(3);
+                    b = Dash_Matrix[0][i-1].controlCorners(1);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                } else if (!tmp) {
+                } else if (flag) {
+                    a = Dash_Matrix[0][i].controlCorners(1);
+                    b = Dash_Matrix[0][i+1].controlCorners(3);
+                    if (a * b != 0) {
+                        if ((a - b) != 0) {
+                            if (a != 3 && b != 3) {
+                                flag = false;
+                            }
+                        }
+                    }
+
+                } else if (flag) {
                     a = Dash_Matrix[0][i].controlCorners(2);
                     b = Dash_Matrix[1][i].controlCorners(0);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                }
-                if (tmp) {
-                    removeTile(i, 0);
-                }
-            }
-        }
-        //check the last row
-        for (int i = 1; i < 6; i++) {
-            boolean tmp = false;
-            if (validStatus[4][i] == Status.USED) {
-                a = Dash_Matrix[4][i].controlCorners(3);
-                b = Dash_Matrix[4][i - 1].controlCorners(1);
-                if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
-                        if (a != 3 && b != 3) {
-                            tmp = true;
-                        }
-                    }
-                } else if (!tmp) {
-                    a = Dash_Matrix[4][i].controlCorners(1);
-                    b = Dash_Matrix[4][i + 1].controlCorners(3);
-                    if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
-                            if (a != 3 && b != 3) {
-                                tmp = true;
-                            }
-                        }
-                    }
-                } else if (!tmp) {
-                    a = Dash_Matrix[4][i].controlCorners(2);
-                    b = Dash_Matrix[3][i].controlCorners(2);
-                    if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
-                            if (a != 3 && b != 3) {
-                                tmp = true;
-                            }
-                        }
-                    }
-                }
-                if (tmp) {
-                    removeTile(i, 0);
-                }
-            }
-        }
-        //inner matrix check
-        for (int i = 1; i < 4; i++) {
-            for (int j = 1; j < 6; j++) {
-                boolean tmp = false;
 
-                if (!tmp) {
-                    a = Dash_Matrix[i][j].controlCorners(0);
-                    b = Dash_Matrix[i - 1][j].controlCorners(2);
+                }
+            }
+            if (!flag) {
+                result = true;
+                removeTile(0, i);
+            }
+
+        }
+        return result;
+    }
+
+    public boolean checkLastRow(){
+        boolean result = false;
+        int a, b;
+        for (int i = 1; i < 6; i++) {
+            boolean flag = true;
+            if(validStatus[4][i] == Status.USED){
+                if(validStatus[4][i-1] == Status.FREE && validStatus[4][i+1] == Status.FREE && validStatus[3][i] == Status.FREE) flag = false;
+                if(flag){
+                    a = Dash_Matrix[4][i].controlCorners(1);
+                    b = Dash_Matrix[4][i+1].controlCorners(3);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                } else if (!tmp) {
-                    a = Dash_Matrix[i][j].controlCorners(1);
-                    b = Dash_Matrix[i][j + 1].controlCorners(3);
+                } else if (flag) {
+                    a = Dash_Matrix[4][i].controlCorners(3);
+                    b = Dash_Matrix[4][i-1].controlCorners(1);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
-                } else if (!tmp) {
-                    a = Dash_Matrix[i][j].controlCorners(2);
-                    b = Dash_Matrix[i + 1][j].controlCorners(0);
+
+                }else if (flag) {
+                    a = Dash_Matrix[4][i].controlCorners(2);
+                    b = Dash_Matrix[3][i].controlCorners(0);
                     if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
+                        if ((a - b) != 0) {
                             if (a != 3 && b != 3) {
-                                tmp = true;
-                            }
-                        }
-                    }
-                } else if (!tmp) {
-                    a = Dash_Matrix[i][j].controlCorners(3);
-                    b = Dash_Matrix[i][j - 1].controlCorners(1);
-                    if (a * b != 0) {
-                        if ((a + b) / 2 != a) {
-                            if (a != 3 && b != 3) {
-                                tmp = true;
+                                flag = false;
                             }
                         }
                     }
                 }
-                if (tmp) removeTile(i, j);
+            }
+            if (!flag) {
+                result = true;
+                removeTile(4, i);
             }
         }
-        //check bottom left corner
-        if (validStatus[4][0] == Status.USED) {
-            boolean tmp = false;
-            a = Dash_Matrix[4][0].controlCorners(0);
-            b = Dash_Matrix[3][0].controlCorners(2);
-            if (a * b != 0) {
-                if ((a + b) / 2 != a) {
-                    if (a != 3 && b != 3) {
-                        tmp = true;
-                    }
-                }
-            } else if (!tmp) {
+        return result;
+    }
+
+    public boolean checkSx(){
+        boolean result = false;
+        int a, b;
+        boolean flag = true;
+        if(validStatus[4][0] == Status.USED){
+            if(validStatus[4][1] == Status.FREE && validStatus[3][0] == Status.FREE) flag = false;
+            if(flag){
                 a = Dash_Matrix[4][0].controlCorners(1);
                 b = Dash_Matrix[4][1].controlCorners(3);
                 if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
+                    if ((a - b) != 0) {
                         if (a != 3 && b != 3) {
-                            tmp = true;
+                            flag = false;
                         }
                     }
                 }
             }
-            if (tmp) {
-                removeTile(4, 0);
-            }
-        }
-        //check bottom right corner
-        if (validStatus[4][6] == Status.USED) {
-            boolean tmp = false;
-            a = Dash_Matrix[4][6].controlCorners(0);
-            b = Dash_Matrix[3][6].controlCorners(2);
-            if (a * b != 0) {
-                if ((a + b) / 2 != a) {
-                    if (a != 3 && b != 3) {
-                        tmp = true;
+            else if (flag) {
+                a = Dash_Matrix[4][0].controlCorners(0);
+                b = Dash_Matrix[3][0].controlCorners(2);
+                if (a * b != 0) {
+                    if ((a - b) != 0) {
+                        if (a != 3 && b != 3) {
+                            flag = false;
+                        }
                     }
                 }
-            } else if (!tmp) {
+            }
+        }
+        if (!flag) {
+            result = true;
+            removeTile(4,0);
+        }
+        return result;
+    }
+
+    public boolean checkDx(){
+        boolean result = false;
+        int a, b;
+        boolean flag = true;
+        if(validStatus[4][6] == Status.USED){
+            if(validStatus[4][5] == Status.FREE && validStatus[3][6] == Status.FREE) flag = false;
+            if(flag){
                 a = Dash_Matrix[4][6].controlCorners(3);
                 b = Dash_Matrix[4][5].controlCorners(1);
                 if (a * b != 0) {
-                    if ((a + b) / 2 != a) {
+                    if ((a - b) != 0) {
                         if (a != 3 && b != 3) {
-                            tmp = true;
+                            flag = false;
+                        }
+                    }
+                }
+            }else if (flag) {
+                a = Dash_Matrix[4][6].controlCorners(0);
+                b = Dash_Matrix[3][6].controlCorners(2);
+                if (a * b != 0) {
+                    if ((a - b) != 0) {
+                        if (a != 3 && b != 3) {
+                            flag = false;
                         }
                     }
                 }
             }
-            if (tmp) {
-                removeTile(4, 0);
-            }
         }
+        if (!flag) {
+            result = true;
+            removeTile(4,6);
+        }
+        return result;
     }
 
+    public void controlAssembly() {
+        boolean flag = true;
+        controlCannon();
+        controlEngine();
+        while (flag) {
+            if(checkFirstRow() && checkLastRow() && checkSx() && checkDx() && checkFirstColumn() && checkLastColumn() && checkInnerMatrix()){
+                flag = false;
+            }
+
+        }
+    }
     /**
      * this method checks every exposed connectors on the ship
      * first it checks the exposed connectors in the inner matrix,
