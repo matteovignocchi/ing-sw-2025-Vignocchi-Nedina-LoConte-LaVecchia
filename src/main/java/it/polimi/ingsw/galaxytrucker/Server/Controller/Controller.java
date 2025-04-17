@@ -298,7 +298,34 @@ public class Controller {
 
     public void addGoods(Player player, List<Colour> list) {
         boolean flag = true;
+        PlayerView x = getPlayerView(player.getId());
+        if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         while (list.size() != 0 && flag == true) {
+            x.inform("seleziona una HOusing unit");
+            int[] vari = x.askCoordinate();
+            Tile t = player.getTile(vari[0], vari[1]);
+            switch (t){
+                case StorageUnit c -> {
+                    if(c.isFull()){
+                        x.printListOfGoods(c.getListOfGoods());
+                        x.ask("seleziona indice da rimuovere");
+                        int tmpint = x.askIndex();
+                        Colour tmp = c.getListOfGoods().get(tmpint-1);
+                        c.removeGood(tmpint-1);
+                        list.add(tmp);
+                    }
+                    x.inform("seleziona la merce da inserire");
+                    int tmpint = x.askIndex();
+                    c.addGood(list.get(tmpint-1));
+                }
+                default -> {
+                    x.inform("cella non valida");
+                }
+
+
+            }
+            if(!x.ask("Vuoi continurare")) flag = false;
+
             //select storage Unit
             //selecton indice lista che sto passando dentro
             //t.addGood

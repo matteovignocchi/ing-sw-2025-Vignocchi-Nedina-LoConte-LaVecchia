@@ -16,7 +16,6 @@ public class StorageUnit extends Tile {
     private List<Colour> listOfGoods = new ArrayList<>();
     private int max;
     private boolean advanced;
-
     /**
      * the values are standard, and they are given when the game starts from the application
      * @param a
@@ -72,5 +71,13 @@ public class StorageUnit extends Tile {
      */
     public int getListSize() {
         return listOfGoods.size();
+    }
+
+    public boolean isFull() {
+        if(listOfGoods.size() >= max) {
+            return true;
+        }else{
+            return false;
+        }
     }
 }

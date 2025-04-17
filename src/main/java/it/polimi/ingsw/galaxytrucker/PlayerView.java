@@ -1,9 +1,11 @@
 package it.polimi.ingsw.galaxytrucker;
 
+import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -57,6 +59,12 @@ public class PlayerView {
         cordinate[1] = scanner.nextInt();
         return cordinate;
     }
+
+    public int askIndex(){
+        return 3;
+    }
+
+    public void printListOfGoods(List<Colour> listOfGoods){}
 
 
 
