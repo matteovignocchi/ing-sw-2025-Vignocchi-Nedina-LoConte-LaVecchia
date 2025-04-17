@@ -1,0 +1,36 @@
+{
+  "cards" : [
+    {
+      "type": "AbandonedShipCard",
+      "days" : 2,
+      "credits": 8,
+      "num_crewmates" : 5
+    },
+    {
+      "type": "AbandonedShipCard",
+      "days" : 1,
+      "credits": 6,
+      "num_crewmates" : 4
+    },
+    {
+      "type": "AbandonedStationCard",
+      "days" : 1,
+      "num_crewmates" : 7,
+      "station_goods" : ["RED" , "YELLOW"]
+    },
+    {
+      "type": "AbandonedStationCard",
+      "days" : 2,
+      "num_crewmates" : 8,
+      "station_goods" : ["RED" , "RED"]
+    },
+    {
+      "type": "PiratesCard",
+      "fire_power": 4,
+      "days": 2,
+      "credits": 6,
+      "shots_directions": [0, 0],
+      "shots_size": [true, false]
+    }
+  ]
+}

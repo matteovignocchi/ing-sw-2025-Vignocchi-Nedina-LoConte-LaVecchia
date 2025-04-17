@@ -6,16 +6,6 @@ import java.util.*;
  * Deck class description
  * @author Gabriele La Vecchia && Francesco Lo Conte
  */
-//public class Deck {
-//  protected List<Card> cards;
-//      public Deck(List<Card> cards) {
-//      this.cards = new LinkedList<>(cards);
-//      }
-//
-//      public Card draw(){return cards.removeFirst();}
-//
-//      public List<Card> getDeck(){ return new LinkedList<>(cards);
-//      }
 
 //Logica FIFO, ricorda la complessità
 public class Deck {
@@ -27,7 +17,7 @@ public class Deck {
 
     public void add(Card card) {
         if(card != null) {
-            cards.offer(card); //offer è un metodo per le queue che aggiunge alla fine
+            cards.offer(card);
         }
     }
 
@@ -48,6 +38,8 @@ public class Deck {
         if(cards.isEmpty()) throw new InvalidSizeException("The deck is empty");
         return cards.poll(); //metodo che rimuove la carta in cima
     }
+    //qui si può aggiungere anche qualche metodo come peek(), cioè vedere la carta senza eliminarla
+    //oppure discard(), ma capire se effettivamente serve
 
     //Non necessario, ma se faremo dei controlli si fa molto velocemente invece di chiamare size
     //e vedere se effettivamente il mazzo è vuoto. Evita eccezioni che sono smell

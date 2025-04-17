@@ -1,5 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
 /**
  * "Slavers" adventure card description
  * @author Gabriele La Vecchia && Francesco Lo Conte
@@ -11,7 +16,13 @@ public class SlaversCard implements Card{
     private final int num_crewmates;
     private final int fire_power;
 
-    public SlaversCard(int days, int credits, int num_crewmates, int fire_power) {
+    @JsonCreator
+    public SlaversCard(
+            @JsonProperty("days") int days,
+            @JsonProperty("credits") int credits,
+            @JsonProperty("num_crewmates") int num_crewmates,
+            @JsonProperty("fire_power") int fire_power
+    ){
         if(days <= 0) throw new IllegalArgumentException("days must be greater than 0");
         if(credits <= 0) throw new IllegalArgumentException("credits must be greater than 0");
         if(fire_power <= 0) throw new IllegalArgumentException("fire_power must be greater than 0");

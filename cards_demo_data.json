@@ -1,0 +1,16 @@
+{
+  "cards" : [
+    {
+      "type": "AbandonedShipCard",
+      "days" : 1,
+      "credits": 4,
+      "num_crewmates" : 3
+    },
+    {
+      "type": "AbandonedStationCard",
+      "days" : 1,
+      "num_crewmates" : 5,
+      "station_goods" : ["YELLOW" , "GREEN"]
+    }
+  ]
+}

@@ -1,4 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +17,13 @@ public class FirstWarzoneCard implements Card {
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
 
-    public FirstWarzoneCard(int days, int num_crewmates, List<Integer> shots_directions, List<Boolean> shots_size){
+    @JsonCreator
+    public FirstWarzoneCard(
+            @JsonProperty("days") int days,
+            @JsonProperty("num_crewmates") int num_crewmates,
+            @JsonProperty("shots_directions") List<Integer> shots_directions,
+            @JsonProperty("shots_size") List<Boolean> shots_size
+    ){
         if(shots_directions == null || shots_directions.isEmpty()) throw new IllegalArgumentException("List shots_directions is null or empty");
         if(shots_size == null || shots_size.isEmpty()) throw new IllegalArgumentException("List shots_size is null or empty");
         if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
