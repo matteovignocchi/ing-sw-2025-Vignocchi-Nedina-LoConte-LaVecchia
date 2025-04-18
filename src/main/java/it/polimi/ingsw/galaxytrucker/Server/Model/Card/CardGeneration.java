@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-//Unico CardGenerator oppure due, uno per demo, uno per lvl 2?
-
 public class CardGeneration {
     private final List<Card> level1Cards;
     private final List<Card> level2Cards;

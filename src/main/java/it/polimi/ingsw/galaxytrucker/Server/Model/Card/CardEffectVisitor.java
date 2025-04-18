@@ -39,7 +39,6 @@ public class CardEffectVisitor implements CardVisitor {
 
         for (Player p : players) {
             int x = controller.getPowerEngine(p);
-            //f.moveRocket(x, p, players);
             f.moveRocket(x, p);
         }
     }
@@ -51,7 +50,6 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i = players.size() - 1; i >= 0; i--) {
             Player p = players.get(i);
             int x = p.countExposedConnectors();
-            //f.moveRocket(-x, p, players);
             f.moveRocket(-x, p);
         }
     }
@@ -69,7 +67,6 @@ public class CardEffectVisitor implements CardVisitor {
                 String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
                 if(controller.askPlayerDecision(string, p)){
-                    //f.moveRocket(-1 * card.getDays(), p, players);
                     f.moveRocket(-days, p);
                     p.addCredits(credits);
                 }
@@ -250,7 +247,6 @@ public class CardEffectVisitor implements CardVisitor {
             String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
             if(controller.askPlayerDecision(string, p)){
                 int days = card.getDays();
-                //f.moveRocket(-days, p, players);
                 f.moveRocket(-days, p);
                 controller.addGoods(p, card.getRewardGoods().get(z));
                 z++;

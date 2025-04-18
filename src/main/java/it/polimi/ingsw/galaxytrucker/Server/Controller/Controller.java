@@ -21,7 +21,7 @@ public class Controller {
     public Pile pileOfTile = new Pile();
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard f_board;
-    private Deck demoDeck;
+    private Deck deck;
     private List<Deck> decks;
 
     private List<PlayerView> players_views = new ArrayList<>();
@@ -31,7 +31,7 @@ public class Controller {
         if(isDemo) {
             f_board = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
-            demoDeck = deckCreator.CreateDemoDeck();
+            deck = deckCreator.CreateDemoDeck();
         }else{
             f_board = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
@@ -761,8 +761,14 @@ public class Controller {
 
     //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
 
-    //metodo per pescare una carta e attivarla (scorrere la lista dei deck, mergiarla??)
-    //metodo per checkare se carte finite, fase successiva ? (parte del metodo di sopra, step automatico)
+    //metodo per mergiare la lista di decks in un unico deck
+
+    /*metodo per pescare una carta e attivarla:
+    1. pesco con il metodo draw (che rimuove dal deck)
+    2. chiamo activate card
+    3. check se deck vuoto (attivata ultima carta) si passa alla fase di premizione
+     */
+
 
 
 

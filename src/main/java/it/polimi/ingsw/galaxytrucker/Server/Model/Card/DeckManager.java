@@ -6,15 +6,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class DeckManager {
-    //nome meglio generator?
-    private final CardGeneration generation;
+    private final CardGeneration generator;
 
     public DeckManager() throws IOException {
-        this.generation = new CardGeneration();
+        this.generator = new CardGeneration();
     }
 
     public Deck CreateDemoDeck() {
-        List<Card> special = new ArrayList<>(generation.getDemoCards());
+        List<Card> special = new ArrayList<>(generator.getDemoCards());
         Collections.shuffle(special);
         Deck deck = new Deck();
         deck.addAll(special);
@@ -23,8 +22,8 @@ public class DeckManager {
 
     public List<Deck> CreateSecondLevelDeck() throws CardEffectException {
         int numberOfDecks = 4;
-        List<Card> level1 = new ArrayList<>(generation.getLevel1Cards());
-        List<Card> level2 = new ArrayList<>(generation.getLevel2Cards());
+        List<Card> level1 = new ArrayList<>(generator.getLevel1Cards());
+        List<Card> level2 = new ArrayList<>(generator.getLevel2Cards());
         List<Deck> decks = new ArrayList<>();
 
         Collections.shuffle(level1);
@@ -40,7 +39,7 @@ public class DeckManager {
             deck.add(level2.removeFirst());
             deck.add(level2.removeFirst());
             deck.add(level1.removeFirst());
-            deck.shuffle(); //rimischio il singolo minideck, ma è omettibile
+            deck.shuffle();
             decks.add(deck);
         }
         return decks;
