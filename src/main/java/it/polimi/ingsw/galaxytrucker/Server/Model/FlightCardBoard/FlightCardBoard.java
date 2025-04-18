@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard;
 
+import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -137,59 +138,109 @@ public class FlightCardBoard {
      *
      * @param x number of free spaces the rocket must move
      * @param p player
-     * @param players list of players in game
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      * @throws InvalidPlayerException exception thrown if (see conditions below)
      */
 
+    //CAMBIARE NOME FLAG isEliminated E METODI ASSOCIATI
     public void moveRocket(int x, Player p) throws InvalidPlayerException {
-        if(p==null) throw new IllegalArgumentException("Player null");
-        if(orderedPlayersInFlight.isEmpty()) return;
-        if(!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
-        //Gestire eccezione x = 0
+        if (p == null) throw new IllegalArgumentException("Player null");
+        //Gestire eccezione x = 0: non puoi spostarti di 0 caselle (?)
+        if (orderedPlayersInFlight.isEmpty()) return;
+        if (!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
         //Gestire con un try catch al chiamante ?
 
         int temp = p.getPos() + x;
         boolean rocketsFound = true;
 
-        if (x > 0){
-            while(rocketsFound) {
-                rocketsFound = false;
-                int old_lap = p.getLap();
-                temp = this.checkOverLap(p, temp);
+        while (rocketsFound) {
+            rocketsFound = false;
+            int old_lap = p.getLap();
+            temp = this.checkOverLap(p, temp);
 
-                int count = 0;
-                for(Player other : orderedPlayersInFlight) {
-                    if(other.equals(p)) continue;
-                    int other_abs_pos = other.getPos() + other.getLap() * position_number;
-                    if(p.getPos() + old_lap * position_number  < other_abs_pos && other_abs_pos <= temp + p.getLap() * position_number) {
+            int count = 0;
+            for (Player other : orderedPlayersInFlight) {
+                if (other.equals(p)) continue;
+                int p_pos = p.getPos();
+                int p_lap = p.getLap();
+                int other_pos = other.getPos();
+                int other_lap = other.getLap();
+                int other_abs_pos = other_pos + other_lap * position_number;
+                if (x > 0){
+                    int start = p_pos + old_lap * position_number;
+                    int end = temp + p_lap * position_number;
+                    if (start < other_abs_pos && other_abs_pos <= end) {
+                        count++;
+                        rocketsFound = true;
+                    } else if (p_lap > other_lap && temp >= other_pos && !other.isEliminated()) {
+                        count++;
+                        rocketsFound = true;
+                        other.setEliminated();
+                    }
+                } else if (x < 0){
+                    int start = temp + p_lap * position_number;
+                    int end = p_pos + old_lap * position_number;
+                    if(start <= other_abs_pos && other_abs_pos < end) {
+                        count--;
+                        rocketsFound = true;
+                    } else if (p_lap < other_lap && temp <= other_pos && !other.isEliminated()) {
+                        count--;
+                        rocketsFound = true;
+                        other.setEliminated();
+                    }
+                }
+            }
+            p.setPos(temp);
+            temp = temp + count;
+        }
+    }
+
+    /*
+    public void moveRocket(int x, Player p) throws InvalidPlayerException {
+        if (p == null) throw new IllegalArgumentException("Player null");
+        //Gestire eccezione x = 0: non puoi spostarti di 0 caselle (?)
+        if (orderedPlayersInFlight.isEmpty()) return;
+        if (!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
+        //Gestire con un try catch al chiamante ?
+
+        int temp = p.getPos() + x;
+        boolean rocketsFound = true;
+
+
+        while (rocketsFound) {
+            rocketsFound = false;
+            int old_lap = p.getLap();
+            temp = this.checkOverLap(p, temp);
+
+            int count = 0;
+            for (Player other : orderedPlayersInFlight) {
+                if (other.equals(p)) continue;
+                int other_start = other.getPos() + (other.getLap() - old_lap) * position_number;
+                int other_end = other_start;
+                if(other_start > position_number) other_end = other_start - position_number;
+                else if (other_start < 1) other_end = other_start + position_number;
+                if (x > 0){
+                    int start = p.getPos();
+                    int end = temp;
+                    if (start < other_start && other_end <= end) {
                         count++;
                         rocketsFound = true;
                     }
-                }
-                p.setPos(temp);
-                temp = temp + count;
-            }
-        } else if (x < 0){
-            while(rocketsFound) {
-                rocketsFound = false;
-                int old_lap = p.getLap();
-                temp = this.checkOverLap(p, temp);
-
-                int count = 0;
-                for(Player other : orderedPlayersInFlight) {
-                    if(other.equals(p)) continue;
-                    int other_abs_pos = other.getPos() + other.getLap() * position_number;
-                    if(temp + p.getLap() * position_number <= other_abs_pos && other_abs_pos < p.getPos() + old_lap * position_number) {
+                } else if (x < 0){
+                    int start = temp;
+                    int end = p.getPos();
+                    if(start <= other_start && other_end < end) {
                         count--;
                         rocketsFound = true;
                     }
                 }
-                p.setPos(temp);
-                temp = temp + count;
             }
+            p.setPos(temp);
+            temp = temp + count;
         }
     }
+     */
+
 
 
     //MODIFICARE DESCRIZIONE
@@ -198,7 +249,6 @@ public class FlightCardBoard {
      * another one with a higher number of laps and a higher position on the board, and setting
      * their "eliminated" attribute to "true".
      *
-     * @param players list of players in game
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
 
