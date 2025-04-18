@@ -21,20 +21,10 @@ class FlightCardBoardTest {
         board = new FlightCardBoard();
         // TODO: inizializza i tuoi Player con id, pos, lap, ecc.
         p1 = new Player(1, true);
-        p1.setLap(0);
-        p1.setPos(0);
         p2 = new Player(2, true);
-        p2.setLap(0);
-        p2.setPos(0);
         p3 = new Player(3, true);
-        p3.setLap(0);
-        p3.setPos(0);
         p4 = new Player(4, true);
-        p4.setLap(0);
-        p4.setPos(0);
         p5 = new Player(5, true);
-        p5.setLap(0);
-        p5.setPos(0);
     }
 
     @Test
@@ -128,7 +118,7 @@ class FlightCardBoardTest {
     }
 
     @Test
-    @DisplayName("checkOverLap incrementa lap se temp supera position_number")
+    @DisplayName("checkOverLap: nessun incremento del lap")
     void testCheckOverLap1() {
         p1.setLap(0);
         p1.setPos(10);
@@ -140,11 +130,10 @@ class FlightCardBoardTest {
     }
 
     @Test
-    @DisplayName("checkOverLap incrementa lap se temp supera position_number")
+    @DisplayName("checkOverLap: incrementa lap, nuova pos")
     void testCheckOverLap2() {
         p1.setLap(0);
         p1.setPos(12);
-
 
         int temp = board.checkOverLap(p1, 19); //conferma che le posizioni le contiamo da 1 a 18 e non da 0 a 17
 
@@ -152,10 +141,39 @@ class FlightCardBoardTest {
         assertEquals(1, temp);
     }
 
+    @Test
+    @DisplayName("checkOverLap: decrementa lap, nuova pos")
+    void testCheckOverLap3() {
+        p1.setLap(0);
+        p1.setPos(2);
+
+
+        int temp = board.checkOverLap(p1, -5); //conferma che le posizioni le contiamo da 1 a 18 e non da 0 a 17
+
+        assertEquals(-1, p1.getLap());
+        assertEquals(13, temp);
+    }
+
     //testare flightcardboard di liv 2
 
     @Test
-    @DisplayName("moveRocket muove correttamente senza overlap")
+    @DisplayName("moveRocket: su lista vuota non fa nulla")
+    void testMoveRocketEmpty() throws InvalidPlayerException {
+        // non aggiungo nessun player
+        // non deve sollevare eccezioni
+        board.moveRocket(5, p1);
+    }
+
+    @Test
+    @DisplayName("moveRocket: con player non in flight lancia InvalidPlayerException")
+    void testMoveRocketNotInFlight() {
+        board.addPlayer(p2);
+        assertThrows(InvalidPlayerException.class,
+                () -> board.moveRocket(3, p1));
+    }
+
+    @Test
+    @DisplayName("moveRocket: muove in avanti senza overlap")
     void testMoveRocketSimple() throws InvalidPlayerException {
         p1.setPos(2);
         board.addPlayer(p1);
@@ -165,7 +183,7 @@ class FlightCardBoardTest {
     }
 
     @Test
-    @DisplayName("moveRocket muove correttamente con overlap")
+    @DisplayName("moveRocket: muove in avanti con overlap")
     void testMoveRocket2() throws InvalidPlayerException {
         p1.setPos(16);
         board.addPlayer(p1);
@@ -175,24 +193,10 @@ class FlightCardBoardTest {
         assertEquals(1, p1.getLap());
     }
 
-    @Test
-    @DisplayName("moveRocket su lista vuota non fa nulla")
-    void testMoveRocketEmpty() throws InvalidPlayerException {
-        // non aggiungo nessun player
-        // non deve sollevare eccezioni
-        board.moveRocket(5, p1);
-    }
+
 
     @Test
-    @DisplayName("moveRocket con player non in flight lancia InvalidPlayerException")
-    void testMoveRocketNotInFlight() {
-        board.addPlayer(p2);
-        assertThrows(InvalidPlayerException.class,
-                () -> board.moveRocket(3, p1));
-    }
-
-    @Test
-    @DisplayName("moveRocket muove caso difficile")
+    @DisplayName("moveRocket con players in mezzo")
     void testMoveRocket3() throws InvalidPlayerException {
         p1.setPos(8);
         p2.setPos(13);
@@ -214,17 +218,19 @@ class FlightCardBoardTest {
         assertEquals(0, p4.getLap());
     }
 
+    //Testare questo caso + casi spostamenti negativi (craere test diversi, idealmente 4)
+    // aggiungere un checkoverlap negativo (che palle diosanto)
     @Test
-    @DisplayName("moveRocket muove caso difficile con overlap")
+    @DisplayName("moveRocket con players in mezzo e overlap")
     void testMoveRocket4() throws InvalidPlayerException {
-        p1.setPos(8);
-        p2.setPos(13);
-        p3.setPos(10);
-        p4.setPos(6);
-        p1.setLap(0);
-        p2.setLap(0);
-        p3.setLap(0);
-        p4.setLap(0);
+        p1.setPos(14);
+        p2.setPos(1);
+        p3.setPos(16);
+        p4.setPos(12);
+        p1.setLap(1);
+        p2.setLap(2);
+        p3.setLap(1);
+        p4.setLap(1);
 
         board.addPlayer(p1);
         board.addPlayer(p2);
@@ -233,8 +239,8 @@ class FlightCardBoardTest {
 
         board.moveRocket(5, p4);
 
-        assertEquals(14, p4.getPos());
-        assertEquals(0, p4.getLap());
+        assertEquals(2, p4.getPos());
+        assertEquals(2, p4.getLap());
     }
 
 
@@ -244,10 +250,50 @@ class FlightCardBoardTest {
         // TODO: imposta pos/ lap su p1, p2 in modo che p2 overlappi p1
         board.addPlayer(p1);
         board.addPlayer(p2);
-        // ad es. p1.lap=0,pos=3; p2.lap=1,pos=2
+        board.addPlayer(p3);
+        board.addPlayer(p4);
+        p1.setLap(-1);
+        p2.setLap(0);
+        p3.setLap(0);
+        p4.setLap(0);
+        p1.setPos(4);
+        p2.setPos(6);
+        p3.setPos(9);
+        p4.setPos(10);
         board.eliminateOverlappedPlayers();
         List<Player> remaining = board.getOrderedPlayers();
         assertFalse(remaining.contains(p1));
         assertTrue(remaining.contains(p2));
+        assertTrue(remaining.contains(p3));
+        assertTrue(remaining.contains(p4));
+        assertEquals(3, remaining.size());
+    }
+
+    @Test
+    @DisplayName("eliminateOverlappedPlayers rimuove i player overlappati")
+    void testEliminateOverlappedPlayers2() {
+        // TODO: imposta pos/ lap su p1, p2 in modo che p2 overlappi p1
+        board.addPlayer(p1);
+        board.addPlayer(p2);
+        board.addPlayer(p3);
+        board.addPlayer(p4);
+        p1.setLap(1);
+        p2.setLap(1);
+        p3.setLap(2);
+        p4.setLap(1);
+        p1.setPos(4);
+        p2.setPos(2);
+        p3.setPos(10);
+        p4.setPos(9);
+        board.eliminateOverlappedPlayers();
+        List<Player> remaining = board.getOrderedPlayers();
+        assertFalse(remaining.contains(p1));
+        assertFalse(remaining.contains(p2));
+        assertTrue(remaining.contains(p3));
+        assertFalse(remaining.contains(p4));
+        assertEquals(1, remaining.size());
     }
 }
+
+
+

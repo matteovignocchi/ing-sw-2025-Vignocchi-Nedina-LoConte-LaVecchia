@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -102,6 +103,7 @@ public class FlightCardBoard {
         });
     }
 
+    //MODIFICARE IL COMMENTO (CASO NEGATIVO)
     /**
      * The method sees if the player has a  position on the board beyond the last space.
      * If so, it calculates the correct position (the board has a cyclic structure) and
@@ -115,10 +117,14 @@ public class FlightCardBoard {
         if (temp > position_number) {
             temp = temp - position_number;
             p.setLap(p.getLap()+1);
+        } else if (temp < 1){
+            temp = temp + position_number;
+            p.setLap(p.getLap()-1);
         }
         return temp;
     }
 
+    // COMMENTI DA RISCRIVERE
     /**
      * The method moves the specified player's rocket on the board by x spaces (x can be positive
      * or negative).
@@ -135,60 +141,58 @@ public class FlightCardBoard {
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      * @throws InvalidPlayerException exception thrown if (see conditions below)
      */
-    //aggiornare la lista dei giocatori in ordine in base agli spostamenti fatti (?)
-    /* VECCHIA VERSIONE
-    public void moveRocket(int x, Player p, List<Player> players) throws InvalidPlayerException {
-        if(p==null) throw new IllegalArgumentException("Player null");
-        else if(players==null) throw new IllegalArgumentException("Players list null");
-        else if(players.isEmpty()) throw new IllegalArgumentException("Players list empty");
-        else if(!players.contains(p)) throw new InvalidPlayerException("Player is not in game");
 
-        int temp = p.getPos() + x;
-        int pIndex = players.indexOf(p);
-        boolean rocketsFound = true;
-
-        while(rocketsFound) {
-            rocketsFound = false;
-            temp = this.checkOverLap(p, temp);
-
-            int count = 0;
-            for(Player other : players) {
-                if(other.getId() != pIndex && !other.isEliminated() && p.getPos() < other.getPos() && other.getPos() <= temp){
-                    count++;
-                    rocketsFound = true;
-                }
-            }
-            p.setPos(temp);
-            temp = temp + count;
-        }
-    }
-     */
     public void moveRocket(int x, Player p) throws InvalidPlayerException {
         if(p==null) throw new IllegalArgumentException("Player null");
         if(orderedPlayersInFlight.isEmpty()) return;
         if(!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
+        //Gestire eccezione x = 0
         //Gestire con un try catch al chiamante ?
 
         int temp = p.getPos() + x;
         boolean rocketsFound = true;
 
-        while(rocketsFound) {
-            rocketsFound = false;
-            temp = this.checkOverLap(p, temp);
+        if (x > 0){
+            while(rocketsFound) {
+                rocketsFound = false;
+                int old_lap = p.getLap();
+                temp = this.checkOverLap(p, temp);
 
-            int count = 0;
-            for(Player other : orderedPlayersInFlight) {
-                if(!other.equals(p) && p.getPos() < other.getPos() && other.getPos() <= temp){
-                    count++;
-                    rocketsFound = true;
+                int count = 0;
+                for(Player other : orderedPlayersInFlight) {
+                    if(other.equals(p)) continue;
+                    int other_abs_pos = other.getPos() + other.getLap() * position_number;
+                    if(p.getPos() + old_lap * position_number  < other_abs_pos && other_abs_pos <= temp + p.getLap() * position_number) {
+                        count++;
+                        rocketsFound = true;
+                    }
                 }
+                p.setPos(temp);
+                temp = temp + count;
             }
-            p.setPos(temp);
-            temp = temp + count;
+        } else if (x < 0){
+            while(rocketsFound) {
+                rocketsFound = false;
+                int old_lap = p.getLap();
+                temp = this.checkOverLap(p, temp);
+
+                int count = 0;
+                for(Player other : orderedPlayersInFlight) {
+                    if(other.equals(p)) continue;
+                    int other_abs_pos = other.getPos() + other.getLap() * position_number;
+                    if(temp + p.getLap() * position_number <= other_abs_pos && other_abs_pos < p.getPos() + old_lap * position_number) {
+                        count--;
+                        rocketsFound = true;
+                    }
+                }
+                p.setPos(temp);
+                temp = temp + count;
+            }
         }
     }
 
 
+    //MODIFICARE DESCRIZIONE
     /**
      * The method eliminates the overlapped players, by checking for each of them if there's
      * another one with a higher number of laps and a higher position on the board, and setting
@@ -198,29 +202,10 @@ public class FlightCardBoard {
      * @throws IllegalArgumentException exception thrown if (see conditions below)
      */
 
-    /* VECCHIA VERSIONE
-    public void eliminateOverlappedPlayers(List<Player> players) throws IllegalArgumentException{
-        if(players==null) throw new IllegalArgumentException("Players list null");
-        else if (players.isEmpty()) throw new IllegalArgumentException("Players list empty");
-
-        for(Player p : players) {
-            if(p.isEliminated()) continue;
-            boolean overlapped = false;
-            for(Player other : players){
-                if(other.isEliminated() || other.getId() == p.getId()) continue;
-                if(other.getLap() > p.getLap() && other.getPos() > p.getPos()){
-                    overlapped = true;
-                    break;
-                }
-            }
-            if(overlapped) p.setEliminated();
-        }
-    }
-     */
-
-    //Se da problemi in testing, modificare con metodo con iteratore
     public void eliminateOverlappedPlayers() {
-        for(Player p : orderedPlayersInFlight) {
+        Iterator<Player> iterator = orderedPlayersInFlight.iterator();
+        while(iterator.hasNext()) {
+            Player p = iterator.next(); // qui o dopo ? caso primo elemento
             boolean overlapped = false;
             for(Player other : orderedPlayersInFlight) {
                 if(other.getId() == p.getId()) continue;
@@ -229,7 +214,7 @@ public class FlightCardBoard {
                     break;
                 }
             }
-            if(overlapped) orderedPlayersInFlight.remove(p);
+            if(overlapped) iterator.remove();
         }
     }
 
