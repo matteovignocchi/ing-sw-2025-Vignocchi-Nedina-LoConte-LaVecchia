@@ -23,6 +23,7 @@ public class Player {
     //discard Pile
     private List<Tile> discardPile;
     //In game values
+    //Si inizia a contare da 1 per le posizioni, così come per i laps
     protected int lap;
     protected int position;
     private boolean isEliminated; //eliminabile

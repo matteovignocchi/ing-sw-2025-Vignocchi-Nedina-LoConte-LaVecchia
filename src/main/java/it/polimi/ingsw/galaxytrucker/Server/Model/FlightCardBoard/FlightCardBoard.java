@@ -24,6 +24,7 @@ public class FlightCardBoard {
      * a test flight
      */
     public FlightCardBoard() {
+        //si inizia a contare da 1 le posizioni
         this.position_number = 18;
         this.bonus_first_position = 4;
         this.bonus_second_position = 3;
