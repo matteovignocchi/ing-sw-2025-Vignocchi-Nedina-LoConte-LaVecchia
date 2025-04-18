@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 public class FlightCardBoard {
-    protected int position_number;
+    public int position_number;
     protected int bonus_MostBeautifulShip;
     protected int bonus_first_position;
     protected int bonus_second_position;
@@ -94,6 +94,7 @@ public class FlightCardBoard {
                 int p2_lap = p2.getLap();
                 int p1_pos = p1.getPos();
                 int p2_pos = p2.getPos();
+                if(p1_lap == p2_lap && p1_pos == p2_pos) throw new RuntimeException("Two players cannot have the same lap and the same position");
                 if(p1_lap > p2_lap || (p1_lap == p2_lap && p1_pos > p2_pos)) return -1;
                 return 1;
             }
@@ -168,7 +169,6 @@ public class FlightCardBoard {
         //Gestire con un try catch al chiamante ?
 
         int temp = p.getPos() + x;
-        int pIndex = orderedPlayersInFlight.indexOf(p);
         boolean rocketsFound = true;
 
         while(rocketsFound) {
@@ -177,7 +177,7 @@ public class FlightCardBoard {
 
             int count = 0;
             for(Player other : orderedPlayersInFlight) {
-                if(other.getId() != pIndex &&  p.getPos() < other.getPos() && other.getPos() <= temp){
+                if(!other.equals(p) && p.getPos() < other.getPos() && other.getPos() <= temp){
                     count++;
                     rocketsFound = true;
                 }
@@ -186,8 +186,6 @@ public class FlightCardBoard {
             temp = temp + count;
         }
     }
-
-
 
 
     /**
