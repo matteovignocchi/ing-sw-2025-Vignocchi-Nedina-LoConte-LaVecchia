@@ -7,6 +7,8 @@ import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.*;
 
 import it.polimi.ingsw.galaxytrucker.PlayerView;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;//support for changes method in player
 
@@ -19,14 +21,21 @@ public class Controller {
     public Pile pileOfTile = new Pile();
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard f_board;
+    private Deck demoDeck;
+    private List<Deck> decks;
+
     private List<PlayerView> players_views = new ArrayList<>();
 
      // da finire: creazione tutti altri elementi del model()
-    public Controller(boolean isDemo) {
+    public Controller(boolean isDemo) throws IOException, CardEffectException {
         if(isDemo) {
             f_board = new FlightCardBoard();
+            DeckManager deckCreator = new DeckManager();
+            demoDeck = deckCreator.CreateDemoDeck();
         }else{
             f_board = new FlightCardBoard2();
+            DeckManager deckCreator = new DeckManager();
+            decks = deckCreator.CreateSecondLevelDeck();
         }
     }
 
@@ -750,9 +759,13 @@ public class Controller {
         }
     }
 
-    public void createFlightCardBoard (){
+    //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
 
-    }
+    //metodo per pescare una carta e attivarla (scorrere la lista dei deck, mergiarla??)
+    //metodo per checkare se carte finite, fase successiva ? (parte del metodo di sopra, step automatico)
+
+
+
 
 
 

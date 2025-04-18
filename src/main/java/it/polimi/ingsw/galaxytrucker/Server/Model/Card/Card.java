@@ -8,11 +8,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @author Gabriele La vecchia && Francesco Lo Conte
  */
 
-//Questo dice a Jackson:
-//Leggi il campo "type" nel JSON
-//Se è "plague", crea un oggetto di tipo PlagueCard
-//Se è "pirates", crea un PiratesCard, ecc.
-
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,

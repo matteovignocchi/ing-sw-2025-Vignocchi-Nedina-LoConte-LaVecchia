@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 

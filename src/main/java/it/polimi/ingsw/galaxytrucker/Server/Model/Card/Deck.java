@@ -4,10 +4,11 @@ import java.util.*;
 
 /**
  * Deck class description
- * @author Gabriele La Vecchia && Francesco Lo Conte
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 //Logica FIFO, ricorda la complessità
+//Mettere le eccezioni nei metodi
 public class Deck {
     private final Queue<Card> cards;
 

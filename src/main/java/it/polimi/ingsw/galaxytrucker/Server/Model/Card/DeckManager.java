@@ -1,17 +1,19 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class DeckManager {
+    //nome meglio generator?
     private final CardGeneration generation;
 
-    public DeckManager(CardGeneration generation) {
-        this.generation = generation;
+    public DeckManager() throws IOException {
+        this.generation = new CardGeneration();
     }
 
-    public Deck FirstLevelDeck() {
+    public Deck CreateDemoDeck() {
         List<Card> special = new ArrayList<>(generation.getDemoCards());
         Collections.shuffle(special);
         Deck deck = new Deck();
@@ -19,7 +21,7 @@ public class DeckManager {
         return deck;
     }
 
-    public List<Deck> SecondLevelDeck() throws CardEffectException {
+    public List<Deck> CreateSecondLevelDeck() throws CardEffectException {
         int numberOfDecks = 4;
         List<Card> level1 = new ArrayList<>(generation.getLevel1Cards());
         List<Card> level2 = new ArrayList<>(generation.getLevel2Cards());

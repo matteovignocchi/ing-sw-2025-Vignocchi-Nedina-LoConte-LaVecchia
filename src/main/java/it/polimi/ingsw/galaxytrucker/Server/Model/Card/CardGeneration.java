@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+//Unico CardGenerator oppure due, uno per demo, uno per lvl 2?
+
 public class CardGeneration {
     private final List<Card> level1Cards;
     private final List<Card> level2Cards;
@@ -26,7 +28,7 @@ public class CardGeneration {
         }
     }
 
-    //dobbiamo ritornare nuove liste?
+    //dobbiamo ritornare nuove liste? secondo me in sto caso non ce n'è bsiogno
     public List<Card> getLevel1Cards() {return level1Cards;}
 
     public List<Card> getLevel2Cards() {return level2Cards;}
