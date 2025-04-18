@@ -41,7 +41,7 @@
   {
     "type": "SmugglersCard",
     "days": 1,
-    "fire_power": 6,
+    "fire_power": 4,
     "num_removed_goods": 2,
     "reward_goods": ["YELLOW", "GREEN", "BLUE"]
   },
@@ -118,5 +118,4 @@
     "shots_directions": [2, 2],
     "shots_size": [false, true]
   }
-
 ]

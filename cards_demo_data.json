@@ -1,16 +1,48 @@
-{
-  "cards" : [
-    {
-      "type": "AbandonedShipCard",
-      "days" : 1,
-      "credits": 4,
-      "num_crewmates" : 3
-    },
-    {
-      "type": "AbandonedStationCard",
-      "days" : 1,
-      "num_crewmates" : 5,
-      "station_goods" : ["YELLOW" , "GREEN"]
-    }
+[
+  {
+    "type": "SmugglersCard",
+    "days": 1,
+    "fire_power": 4,
+    "num_removed_goods": 2,
+    "reward_goods": ["YELLOW", "GREEN", "BLUE"]
+  },
+  {
+    "type": "StardustCard"
+  },
+  {
+    "type": "OpenSpaceCard"
+  },
+  {
+    "type": "MeteoritesRainCard",
+    "directions": [0, 3, 1],
+    "size": [true, false, false]
+  },
+  {
+  "type": "PlanetsCard",
+  "days": 2,
+  "reward_goods": [
+    ["RED", "RED"],
+    ["RED", "BLUE", "BLUE"],
+    ["YELLOW"]
   ]
-}
+  },
+  {
+    "type": "FirstWarzoneCard",
+    "days": 3,
+    "num_crewmates": 2,
+    "shots_directions": [2, 2],
+    "shots_size": [false, true]
+  },
+  {
+  "type": "AbandonedShipCard",
+  "days" : 1,
+  "credits": 4,
+  "num_crewmates" : 3
+  },
+  {
+  "type": "AbandonedStationCard",
+  "days" : 1,
+  "num_crewmates" : 5,
+  "station_goods" : ["YELLOW" , "GREEN"]
+  }
+]
