@@ -18,7 +18,7 @@ class TileParserLoaderTest {
     Controller controller;
     @BeforeEach
     void setUp() throws CardEffectException, IOException {
-        tileParserLoader = new TileParserLoader();  // assegna al campo della classe
+        tileParserLoader = new TileParserLoader();
         controller = new Controller(false, 0);
     }
     private boolean sameElementsWithSameCount(List<Tile> list1, List<Tile> list2) {
