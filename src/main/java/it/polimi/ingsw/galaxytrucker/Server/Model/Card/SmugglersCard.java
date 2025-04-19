@@ -31,7 +31,7 @@ public class SmugglersCard implements Card{
         this.days = days;
         this.fire_power = fire_power;
         this.num_removed_goods = num_removed_goods;
-        this.reward_goods = new ArrayList<>(num_removed_goods); //capire come inizializzare
+        this.reward_goods = new ArrayList<>(reward_goods); //capire come inizializzare
     }
 
     @Override

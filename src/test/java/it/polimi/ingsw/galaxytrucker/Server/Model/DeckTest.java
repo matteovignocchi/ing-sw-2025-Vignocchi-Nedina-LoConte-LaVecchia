@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Server.Model.Card.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +17,7 @@ class DeckTest {
     @BeforeEach
     void setUp() {
         deck = new Deck();
-        dummyCard = new OpenSpaceCard(); // Usa una carta semplice, poi prova con quella più difficile
+        dummyCard = new OpenSpaceCard();
     }
 
     @Test
@@ -41,7 +42,7 @@ class DeckTest {
 
     @Test
     void testShuffleChangesOrder() {
-        deck.addAll(List.of(new OpenSpaceCard(), new AbandonedShipCard(5,3, 2), new OpenSpaceCard()));
+        deck.addAll(List.of(new OpenSpaceCard(), new AbandonedShipCard(5,3, 2), new StardustCard(), new AbandonedShipCard(3,1, 6) ));
         List<Card> original = deck.getCards();
 
         for(Card card: original){
@@ -57,9 +58,8 @@ class DeckTest {
             System.out.println(card);
         }
 
-        assertEquals(3, shuffled.size());
+        assertEquals(4, shuffled.size());
     }
-    //aggiungi metodo tostring a card per vedere se i valori sono giusti
 
     @Test
     void testDrawThrowsWhenEmpty() {
@@ -78,7 +78,9 @@ class DeckTest {
     @Test
     void testAddAllWithNullsDoesNotThrow() {
         Deck deck = new Deck();
-        List<Card> cards = List.of(null, null);
+        List<Card> cards = new ArrayList<>();
+        cards.add(null);
+        cards.add(null);
         assertDoesNotThrow(() -> deck.addAll(cards));
         assertTrue(deck.isEmpty());
     }

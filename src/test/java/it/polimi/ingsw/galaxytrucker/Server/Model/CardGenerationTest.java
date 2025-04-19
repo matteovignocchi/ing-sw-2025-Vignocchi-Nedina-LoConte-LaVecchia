@@ -21,37 +21,39 @@ class CardGenerationTest {
         cardGeneration = new CardGeneration();
     }
 
+    private void printCards(String title, List<Card> cards) {
+        System.out.println("=== " + title + " ===");
+        for (Card card : cards) {
+            System.out.println(card); // grazie al toString() nelle carte
+        }
+        System.out.println();
+    }
+
     @Test
+    @DisplayName("Level 1 cards loaded and printed")
     void testLevel1CardsLoaded() {
         List<Card> cards = cardGeneration.getLevel1Cards();
         assertNotNull(cards);
         assertFalse(cards.isEmpty(), "Level 1 cards should not be empty");
-
-        for(Card card: cards){
-            System.out.println(card);
-        }
+        printCards("Level 1 Cards", cards);
     }
 
     @Test
+    @DisplayName("Level 2 cards loaded and printed")
     void testLevel2CardsLoaded() {
         List<Card> cards = cardGeneration.getLevel2Cards();
         assertNotNull(cards);
         assertFalse(cards.isEmpty(), "Level 2 cards should not be empty");
-
-        for(Card card: cards){
-            System.out.println(card);
-        }
+        printCards("Level 2 Cards", cards);
     }
 
     @Test
+    @DisplayName("Demo cards loaded and printed")
     void testDemoCardsLoaded() {
         List<Card> cards = cardGeneration.getDemoCards();
         assertNotNull(cards);
         assertFalse(cards.isEmpty(), "Demo cards should not be empty");
-
-        for(Card card: cards){
-            System.out.println(card);
-        }
+        printCards("Demo Cards", cards);
     }
 
     @Test
