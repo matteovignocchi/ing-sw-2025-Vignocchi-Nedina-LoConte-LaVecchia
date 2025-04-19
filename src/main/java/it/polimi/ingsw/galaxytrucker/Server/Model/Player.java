@@ -24,9 +24,11 @@ public class Player {
     //discard Pile
     private List<Tile> discardPile;
     //In game values
+    //Si inizia a contare da 1 per le posizioni, così come per i laps
     protected int lap;
     protected int position;
-    private boolean isEliminated; //eliminabile
+    private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
+    private boolean overlappedOnce;
 
     /**
      * constructor that initialize all the variables
@@ -39,6 +41,7 @@ public class Player {
         this.lap = 0;
         this.position = 0;
         this.isEliminated = false;
+        this.overlappedOnce = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
         purpleAlien = false;
@@ -290,6 +293,14 @@ public class Player {
             }
         }
         return tmp;
+    }
+
+    public boolean getOverlappedOnce(){
+        return overlappedOnce;
+    }
+
+    public void setOverlappedOnce(boolean value){
+        overlappedOnce = value;
     }
 
     /**

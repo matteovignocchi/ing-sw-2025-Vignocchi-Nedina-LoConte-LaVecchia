@@ -6,8 +6,12 @@ package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
  */
 
 public class StardustCard implements Card {
+
     @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }
+
+    @Override
+    public String toString() {return "StardustCard";}
 }
