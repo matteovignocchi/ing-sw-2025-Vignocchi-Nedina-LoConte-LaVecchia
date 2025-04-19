@@ -142,10 +142,8 @@ public class FlightCardBoard {
      * @throws InvalidPlayerException exception thrown if (see conditions below)
      */
 
-    //CAMBIARE NOME FLAG isEliminated E METODI ASSOCIATI
     public void moveRocket(int x, Player p) throws InvalidPlayerException {
         if (p == null) throw new IllegalArgumentException("Player null");
-        //Gestire eccezione x = 0: non puoi spostarti di 0 caselle (?)
         if (orderedPlayersInFlight.isEmpty()) return;
         if (!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
         //Gestire con un try catch al chiamante ?
@@ -166,32 +164,36 @@ public class FlightCardBoard {
                 int other_pos = other.getPos();
                 int other_lap = other.getLap();
                 int other_abs_pos = other_pos + other_lap * position_number;
-                if (x > 0){
+                if (x >= 0){
                     int start = p_pos + old_lap * position_number;
                     int end = temp + p_lap * position_number;
                     if (start < other_abs_pos && other_abs_pos <= end) {
                         count++;
                         rocketsFound = true;
-                    } else if (p_lap > other_lap && temp >= other_pos && !other.isEliminated()) {
+                    } else if (p_lap > other_lap && temp >= other_pos && !other.getOverlappedOnce()) {
                         count++;
                         rocketsFound = true;
-                        other.setEliminated();
+                        other.setOverlappedOnce(true);
                     }
-                } else if (x < 0){
+                } else {
                     int start = temp + p_lap * position_number;
                     int end = p_pos + old_lap * position_number;
                     if(start <= other_abs_pos && other_abs_pos < end) {
                         count--;
                         rocketsFound = true;
-                    } else if (p_lap < other_lap && temp <= other_pos && !other.isEliminated()) {
+                    } else if (p_lap < other_lap && temp <= other_pos && !other.getOverlappedOnce()) {
                         count--;
                         rocketsFound = true;
-                        other.setEliminated();
+                        other.setOverlappedOnce(true);
                     }
                 }
             }
             p.setPos(temp);
             temp = temp + count;
+        }
+
+        for (Player player : orderedPlayersInFlight){
+            p.setOverlappedOnce(false);
         }
     }
 
