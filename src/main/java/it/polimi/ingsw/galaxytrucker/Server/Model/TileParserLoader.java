@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 
 public class TileParserLoader {
-    public static List<Tile> loadTiles(String filename) {
+    public  List<Tile> loadTiles(String filename) {
         List<Tile> pileOfTile = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
