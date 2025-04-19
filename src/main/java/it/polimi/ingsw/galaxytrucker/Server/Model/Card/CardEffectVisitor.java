@@ -93,7 +93,6 @@ public class CardEffectVisitor implements CardVisitor {
                 i_less_powerengine = i;
         }
 
-        //f.moveRocket(-card.getDays(), players.get(i_less_crewmates), players);
         f.moveRocket(-card.getDays(), players.get(i_less_crewmates));
         controller.removeCrewmate(players.get(i_less_firepower), card.getNumCrewmates());
         Player p = players.get(i_less_powerengine);

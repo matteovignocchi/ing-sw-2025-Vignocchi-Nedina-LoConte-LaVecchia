@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,10 +128,92 @@ class CardEffectVisitorMockTest {
     @Test
     @DisplayName("visit(PlanetsCard)")
     void visitPlanetsCard() throws CardEffectException {
-        //PlanetsCard card = new PlanetsCard();
+        List<List<Colour>> reward = new ArrayList<>(List.of(List.of(Colour.RED, Colour.RED, Colour.GREEN, Colour.BLUE),
+                List.of(Colour.BLUE, Colour.YELLOW, Colour.YELLOW)));
+        PlanetsCard card = new PlanetsCard(reward, 3);
+
+        when(mockCtrl.askPlayerDecision(anyString(), eq(p1))).thenReturn(true);
+        when(mockCtrl.askPlayerDecision(anyString(), eq(p2))).thenReturn(false);
+        when(mockCtrl.askPlayerDecision(anyString(), eq(p3))).thenReturn(true);
+
+        CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
+        visitor.visit(card);
+
+        verify(mockBoard).moveRocket(eq(-3), eq(p1));
+        verify(mockCtrl).addGoods(eq(p1), eq(reward.getFirst()));
+        verify(mockBoard, never()).moveRocket(eq(-3), eq(p2));
+        verify(mockCtrl, never()).addGoods(eq(p2), anyList());
+        verify(mockBoard).moveRocket(eq(-3), eq(p3));
+        verify(mockCtrl).addGoods(eq(p3), eq(reward.get(1)));
+        verify(mockBoard, never()).moveRocket(eq(-3), eq(p4));
+        verify(mockCtrl, never()).addGoods(eq(p4), anyList());
     }
 
+    @Test
+    @DisplayName("visit(FirstWarzoneCard): sposta, rimuove crew e spara in ordine")
+    void visitFirstWarzoneCard() throws CardEffectException {
+        FirstWarzoneCard card = new FirstWarzoneCard(3, 2, List.of(0,2), List.of(false, true));
 
+        when(mockCtrl.getNumCrew(p1)).thenReturn(5);
+        when(mockCtrl.getNumCrew(p2)).thenReturn(3);  // minimo
+        when(mockCtrl.getNumCrew(p3)).thenReturn(6);
+        when(mockCtrl.getNumCrew(p4)).thenReturn(7);
 
+        when(mockCtrl.getFirePower(p1)).thenReturn(8.0);
+        when(mockCtrl.getFirePower(p2)).thenReturn(4.0); // minimo
+        when(mockCtrl.getFirePower(p3)).thenReturn(9.0);
+        when(mockCtrl.getFirePower(p4)).thenReturn(7.0);
+
+        when(mockCtrl.getPowerEngine(p1)).thenReturn(5);
+        when(mockCtrl.getPowerEngine(p2)).thenReturn(6);
+        when(mockCtrl.getPowerEngine(p3)).thenReturn(2); // minimo
+        when(mockCtrl.getPowerEngine(p4)).thenReturn(4);
+
+        when(p3.throwDice()).thenReturn(2, 3, 6, 5);
+
+        CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
+        visitor.visit(card);
+
+        InOrder inOrder = inOrder(mockBoard, mockCtrl);
+        inOrder.verify(mockBoard).moveRocket(-3, p2);
+        inOrder.verify(mockCtrl).removeCrewmate(p2, 2);
+        inOrder.verify(mockCtrl).defenceFromCannon(0, false, 5, p3);
+        inOrder.verify(mockCtrl).defenceFromCannon(2, true,  11, p3);
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("visit(SecondWarzoneCard): sposta, rimuove goods e spara in ordine")
+    void visitSecondWarzoneCard() throws CardEffectException {
+        SecondWarzoneCard card = new SecondWarzoneCard(4, 3, List.of(1,3,0), List.of(true,false,true));
+
+        when(mockCtrl.getNumCrew(p1)).thenReturn(8);
+        when(mockCtrl.getNumCrew(p2)).thenReturn(2);  // minimo
+        when(mockCtrl.getNumCrew(p3)).thenReturn(6);
+        when(mockCtrl.getNumCrew(p4)).thenReturn(3);
+
+        when(mockCtrl.getFirePower(p1)).thenReturn(7.0);
+        when(mockCtrl.getFirePower(p2)).thenReturn(5.0);
+        when(mockCtrl.getFirePower(p3)).thenReturn(9.0);
+        when(mockCtrl.getFirePower(p4)).thenReturn(1.0); //minimo
+
+        when(mockCtrl.getPowerEngine(p1)).thenReturn(1); //minimo
+        when(mockCtrl.getPowerEngine(p2)).thenReturn(3);
+        when(mockCtrl.getPowerEngine(p3)).thenReturn(8);
+        when(mockCtrl.getPowerEngine(p4)).thenReturn(5);
+
+        when(p2.throwDice()).thenReturn(2, 3, 2, 6, 4, 3);
+
+        CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
+        visitor.visit(card);
+
+        InOrder inOrder = inOrder(mockBoard, mockCtrl);
+        inOrder.verify(mockBoard).moveRocket(-4, p4);
+        inOrder.verify(mockCtrl).removeGoods(p1, 3);
+        inOrder.verify(mockCtrl).defenceFromCannon(1, true,  5, p2);
+        inOrder.verify(mockCtrl).defenceFromCannon(3, false, 8, p2);
+        inOrder.verify(mockCtrl).defenceFromCannon(0, true,  7, p2);
+        inOrder.verifyNoMoreInteractions();
+    }
 }
 
