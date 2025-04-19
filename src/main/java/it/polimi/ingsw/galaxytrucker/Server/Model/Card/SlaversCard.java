@@ -35,6 +35,12 @@ public class SlaversCard implements Card{
     }
 
     @Override
+    public String toString(){
+        return "SlaversCard{" + "days:" + days + ", credits:" + credits +
+                ", num_crewmates:" + num_crewmates + ", fire_power:" + fire_power + "}";
+    }
+
+    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }

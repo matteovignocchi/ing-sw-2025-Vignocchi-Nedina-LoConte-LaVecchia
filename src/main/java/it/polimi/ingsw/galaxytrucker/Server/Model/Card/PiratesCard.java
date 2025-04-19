@@ -41,6 +41,12 @@ public class PiratesCard implements Card {
     }
 
     @Override
+    public String toString(){
+        return "PiratesCard{" + "fire_power:" + fire_power + ", days:" + days + ", credits:" + credits + ", shots_directions:" + shots_directions
+                + ", shots_size:" + shots_size + "}";
+    }
+
+    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
             visitor.visit(this);
     }

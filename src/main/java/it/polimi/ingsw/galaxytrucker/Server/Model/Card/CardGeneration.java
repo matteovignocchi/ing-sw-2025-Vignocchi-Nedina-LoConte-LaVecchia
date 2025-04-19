@@ -14,19 +14,18 @@ public class CardGeneration {
     public CardGeneration() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
 
-        level1Cards = loadCards("cards_level1_data.json", mapper); //verificare che il path sia corretto
+        level1Cards = loadCards("cards_level1_data.json", mapper);
         level2Cards = loadCards("cards_level2_data.json", mapper);
         demoCards = loadCards("cards_demo_data.json", mapper);
     }
 
-    private List<Card> loadCards(String fileName, ObjectMapper mapper) throws IOException {
+    public List<Card> loadCards(String fileName, ObjectMapper mapper) throws IOException {
         try (InputStream file = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if(file ==null) throw new IOException("File not found" + fileName);
             return mapper.readValue(file, new TypeReference<List<Card>>() {});
         }
     }
 
-    //dobbiamo ritornare nuove liste? secondo me in sto caso non ce n'è bsiogno
     public List<Card> getLevel1Cards() {return level1Cards;}
 
     public List<Card> getLevel2Cards() {return level2Cards;}

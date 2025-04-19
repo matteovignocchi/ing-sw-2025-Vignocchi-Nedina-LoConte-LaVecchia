@@ -32,6 +32,11 @@ public class PlanetsCard implements Card {
     }
 
     @Override
+    public String toString(){
+        return "PlanetsCard{" + "reward_goods:" + reward_goods + ", days:" + days + "}";
+    }
+
+    @Override
     public void accept(CardVisitor visitor) throws CardEffectException {
             visitor.visit(this);
     }

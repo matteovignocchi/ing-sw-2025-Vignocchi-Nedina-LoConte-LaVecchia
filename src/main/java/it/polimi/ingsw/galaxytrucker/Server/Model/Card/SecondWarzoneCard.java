@@ -36,6 +36,12 @@ public class SecondWarzoneCard implements Card {
     }
 
     @Override
+    public String toString(){
+        return "SecondWarzoneCard{" + "days:" + days + ", num_goods:" + num_goods + ", shots_directions:" + shots_directions
+                + ", shots_size:" + shots_size + "}";
+    }
+
+    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }

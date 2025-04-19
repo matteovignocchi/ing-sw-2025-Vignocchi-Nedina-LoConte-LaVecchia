@@ -39,6 +39,12 @@ public class SmugglersCard implements Card{
         visitor.visit(this);
     }
 
+    @Override
+    public String toString(){
+        return "SmugglersCard{" + "days:" + days + ", fire_power:" + fire_power + ", num_removed_goods:" + num_removed_goods
+                + ", reward_goods:" + reward_goods + "}";
+    }
+
     public int getDays(){ return days; }
 
     public int getFirePower(){ return fire_power; }

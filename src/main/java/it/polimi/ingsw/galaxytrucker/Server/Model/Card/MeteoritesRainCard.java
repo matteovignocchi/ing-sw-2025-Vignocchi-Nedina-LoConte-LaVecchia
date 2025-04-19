@@ -26,6 +26,11 @@ public class MeteoritesRainCard implements Card{
     }
 
     @Override
+    public String toString(){
+        return "MeteoritesRainCard{" + "directions:" + directions + ", size:" + size + "}";
+    }
+
+    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
             visitor.visit(this);
     }

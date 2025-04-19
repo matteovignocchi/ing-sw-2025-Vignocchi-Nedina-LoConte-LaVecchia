@@ -41,6 +41,12 @@ public class FirstWarzoneCard implements Card {
         visitor.visit(this);
     }
 
+    @Override
+    public String toString(){
+        return "FirstWarzoneCard{" + "days:" + days + ", num_crewmates:" + num_crewmates + ", shots_directions:" + shots_directions
+        + ", shots_size:" + shots_size + "}";
+    }
+
     public int getDays() {return days;}
 
     public int getNumCrewmates() {return num_crewmates;}

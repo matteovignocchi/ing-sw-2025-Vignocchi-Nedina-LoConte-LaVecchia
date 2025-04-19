@@ -23,8 +23,10 @@ public class Deck {
     }
 
     public void addAll(Collection<Card> cards) {
-        for(Card card : cards){
-            add(card);
+        if (cards != null) {
+            for (Card card : cards) {
+                add(card);
+            }
         }
     }
 
