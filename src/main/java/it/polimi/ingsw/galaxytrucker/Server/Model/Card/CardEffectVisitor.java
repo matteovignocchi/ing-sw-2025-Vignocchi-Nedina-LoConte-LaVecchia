@@ -4,7 +4,6 @@ import it.polimi.ingsw.galaxytrucker.Server.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
