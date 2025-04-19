@@ -10,23 +10,25 @@ import it.polimi.ingsw.galaxytrucker.PlayerView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public class Controller {
 
     private List<Player> players_in_Game = new ArrayList<>();
-    public Pile pileOfTile = new Pile();
+    public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard f_board;
     private Deck deck;
     private List<Deck> decks;
+    private TileParserLoader pileMaker = new TileParserLoader();
 
     private List<PlayerView> players_views = new ArrayList<>();
     private final int idGame;
 
      // da finire: creazione tutti altri elementi del model()
-    public Controller(boolean isDemo) throws IOException, CardEffectException {
+    public Controller(boolean isDemo, int id) throws IOException, CardEffectException {
         if(isDemo) {
             f_board = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -36,6 +38,10 @@ public class Controller {
             DeckManager deckCreator = new DeckManager();
             decks = deckCreator.CreateSecondLevelDeck();
         }
+        this.idGame = id;
+
+        pileOfTile = pileMaker.loadTiles("tile_data.json");
+        Collections.shuffle(pileOfTile);
     }
 
     public void addPlayer(int id, boolean isDemo) {
@@ -76,9 +82,11 @@ public class Controller {
 
     }
 
-//    public Tile getTile(int index){
-//    }
-
+    public Tile getTile(int index) {
+        Tile tmp = pileOfTile.get(index);
+        pileOfTile.remove(index);
+        return tmp;
+    }
     // metodo che restituisce il numero di crewMate nella nave
     public int getNumCrew(Player p) {
         int tmp = 0;
