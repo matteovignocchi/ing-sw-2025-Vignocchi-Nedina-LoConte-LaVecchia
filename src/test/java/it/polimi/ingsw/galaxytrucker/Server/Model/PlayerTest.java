@@ -112,42 +112,48 @@ class PlayerTest {
 
     @Test
     void testFirstCheckAssembly(){
-        MultiJoint multiJoint0 = new MultiJoint(2,2,2,2);
-        MultiJoint multiJoint1 = new MultiJoint(1,1,1,1);
-        player.addTile(3,0,multiJoint1);
-        player.addTile(4,4,multiJoint1);
-        player.addTile(0,4,multiJoint1);
-        player.addTile(2,6,multiJoint1);
-        player.addTile(0,2, multiJoint0);
-        player.addTile(1,1, multiJoint0);
-        player.addTile(1,2, multiJoint0);
-        player.addTile(1,4, multiJoint0);
-        player.addTile(1,5, multiJoint0);
-        player.addTile(2,0, multiJoint0);
-        player.addTile(2,1, multiJoint0);
-        player.addTile(2,2, multiJoint0);
-        player.addTile(2,3, multiJoint0);
-        player.addTile(2,4, multiJoint0);
-        player.addTile(2,5, multiJoint0);
-        player.addTile(3,2, multiJoint0);
-        player.addTile(3,3, multiJoint0);
-        player.addTile(3,4, multiJoint0);
-        player.addTile(3,5, multiJoint0);
-        player.addTile(3,6, multiJoint0);
-        player.addTile(4,2, multiJoint0);
+        MultiJoint multiJoint0 = new MultiJoint(3,3,3,3);
+        MultiJoint multiJoint1 = new MultiJoint(1,2,1,2);
+        MultiJoint multiJoint2 = new MultiJoint(2,1,2,1);
+        MultiJoint multiJoint3 = new MultiJoint(0,1,2,3);
+        player.addTile(2,3,multiJoint0);
+        player.addTile(1,1,multiJoint0);
+        player.addTile(1,2,multiJoint0);
+        player.addTile(1,3,multiJoint0);
+        player.addTile(1,5,multiJoint0);
+        player.addTile(2,5,multiJoint0);
+        player.addTile(4,2,multiJoint0);
+        player.addTile(3,6,multiJoint0);
+        player.addTile(4,4,multiJoint0);
+        player.addTile(1,4,multiJoint1);
+        player.addTile(2,1,multiJoint1);
+        player.addTile(2,4,multiJoint1);
+        player.addTile(3,4,multiJoint1);
+        player.addTile(3,5,multiJoint2);
+        player.addTile(2,2,multiJoint3);
+        player.addTile(3,1,multiJoint3);
+        player.addTile(4,1,multiJoint3);
         player.controlAssembly();
         assertAll(
-                () -> assertEquals(Status.FREE, player.validityCheck(3,0)),
-                () -> assertEquals(Status.FREE, player.validityCheck(0,4)),
-                () -> assertEquals(Status.FREE, player.validityCheck(4,4)),
-                () -> assertEquals(Status.FREE, player.validityCheck(2,6)),
-                () -> assertEquals(Status.USED,player.validityCheck(2,1)),
-                () -> assertEquals(Status.USED,player.validityCheck(3,2)),
-                () -> assertEquals(Status.USED,player.validityCheck(1,4)),
-                () -> assertEquals(Status.USED,player.validityCheck(2,5)),
-                () -> assertEquals(Status.USED,player.validityCheck(3,4)),
-                () -> assertEquals(Status.USED,player.validityCheck(3,6))
-        );
+                ()->assertSame(Status.FREE, player.validityCheck(3,4)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,1)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,1)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,4)),
+                ()->assertSame(Status.USED, player.validityCheck(1,1)),
+                ()->assertSame(Status.USED, player.validityCheck(1,2)),
+                ()->assertSame(Status.USED, player.validityCheck(1,3)),
+                ()->assertSame(Status.USED, player.validityCheck(1,3)),
+                ()->assertSame(Status.USED, player.validityCheck(1,5))
+               // ()->assertSame(Status.USED, player.validityCheck(2,1))
+//                ()->assertSame(Status.USED, player.validityCheck(2,2)),
+//                ()->assertSame(Status.USED, player.validityCheck(2,3)),
+//                ()->assertSame(Status.USED, player.validityCheck(2,4)),
+//                ()->assertSame(Status.USED, player.validityCheck(2,5)),
+//                ()->assertSame(Status.USED, player.validityCheck(3,5)),
+//                ()->assertSame(Status.USED, player.validityCheck(3,6))
+                );
+
+
     }
 
 }

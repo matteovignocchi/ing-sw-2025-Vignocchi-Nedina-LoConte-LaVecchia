@@ -8,11 +8,9 @@ import it.polimi.ingsw.galaxytrucker.Server.Model.*;
 
 import it.polimi.ingsw.galaxytrucker.PlayerView;
 import java.util.ArrayList;
-import java.util.List;//support for changes method in player
+import java.util.List;
 
 
-
-//method for select the energy cell
 public class Controller {
 
     private List<Player> players_in_Game = new ArrayList<>();
@@ -20,14 +18,16 @@ public class Controller {
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard f_board;
     private List<PlayerView> players_views = new ArrayList<>();
+    private final int idGame;
 
      // da finire: creazione tutti altri elementi del model()
-    public Controller(boolean isDemo) {
+    public Controller(boolean isDemo , int idGame) {
         if(isDemo) {
             f_board = new FlightCardBoard();
         }else{
             f_board = new FlightCardBoard2();
         }
+        this.idGame = idGame;
     }
 
     public void addPlayer(int id, boolean isDemo) {
@@ -44,15 +44,33 @@ public class Controller {
         return players_in_Game.size();
     }
 
+    public int checkIdGame(){
+        return idGame;
+    }
 
-    //switch (t) {
-    //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
-    //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
-    // default        -> ;
+    public boolean controlPresenceOfPlayer(int id) {
+        for (Player p : players_in_Game) {
+            if (p.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    // }
+    public void addToShownTile(Tile tile) {
+        shownTile.add(tile);
+    }
 
-    //matrici da i=4 j=6
+    public Tile getShownTile(int index) {
+        Tile tmp = shownTile.get(index);
+        shownTile.remove(index);
+        return tmp;
+
+    }
+
+//    public Tile getTile(int index){
+//    }
+
     // metodo che restituisce il numero di crewMate nella nave
     public int getNumCrew(Player p) {
         int tmp = 0;
@@ -61,7 +79,7 @@ public class Controller {
                 Tile y = p.getTile(i, j);
                 switch (y) {
                     case HousingUnit c -> tmp = tmp + c.returnLenght();
-                    default -> tmp = tmp;
+                    default -> {}
                 }
             }
         }
@@ -337,7 +355,41 @@ public class Controller {
 
     public void addHuman() {
         for (Player p : players_in_Game) {
-            //in tutte le abitazioni normali metto 2 human
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 7; j++) {
+                    Tile t = p.getTile(i, j);
+                    switch (t){
+                        case HousingUnit h -> {
+                            Human tmp = h.getType();
+                            switch (tmp){
+                                case HUMAN -> {
+                                    Human tmp2 = Human.HUMAN;
+                                    for(int z = 0; z<2 ; z++) h.addHuman(tmp2);}
+                                case PURPLE_ALIEN -> {
+                                    if(askPlayerDecision("alien",p)){
+                                        Human tmp2 = Human.PURPLE_ALIEN;
+                                        h.addHuman(tmp2);
+                                    }else{
+                                        Human tmp2 = Human.HUMAN;
+                                        for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                    }
+
+                                }
+                                case BROWN_ALIEN -> {
+                                    if(askPlayerDecision("alien",p)){
+                                        Human tmp2 = Human.BROWN_ALIEN;
+                                        h.addHuman(tmp2);
+                                    }else{
+                                        Human tmp2 = Human.HUMAN;
+                                        for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                    }
+                                }
+                            }
+                        }
+                        default -> {}
+                    }
+                }
+            }            //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
         }
@@ -345,10 +397,30 @@ public class Controller {
 
     public void removeCrewmate(Player player, int num) {
         int totalCrew = getNumCrew(player);
-        if (num > totalCrew) {
+        PlayerView x = getPlayerView(player.getId());
+        if (num >= totalCrew) {
             player.isEliminated();
         } else {
-            while (num != 0) {
+            while (num > 0) {
+                x.inform("seleziona un HOusing unit");
+                int[] vari = x.askCoordinate();
+                Tile y = player.getTile(vari[0], vari[1]);
+                switch (y){
+                    case HousingUnit h -> {
+                        if(h.returnLenght()>0){
+                            int tmp = h.removeHumans(1);
+                            if(tmp == 2) player.setBrownAlien();
+                            if(tmp == 3) player.setPurpleAlien();
+                            num--;
+                        }else{
+                            x.inform("seleziona una housing unit valida");
+                        }
+                    }
+                    default -> {
+                        x.inform("seleziona una abitazione valida");
+                    }
+                }
+
                 //select HousinUnit t = p.selectHousingUnit
                 //se contiene almeno 1 persona
                 //dentro un if
@@ -570,13 +642,6 @@ public class Controller {
         }
     }
 
-    private boolean manageHousingUnit(Player player) {
-        PlayerView x = getPlayerView(player.getId());
-        x.inform("selezionare una HOusingUnit");
-        int[] var = x.askCoordinate();
-  return true;
-    }
-
     private PlayerView getPlayerView(int id) {
         PlayerView x = null;
         for (PlayerView p : players_views) {
@@ -586,13 +651,6 @@ public class Controller {
         }
         return x;
     }
-
-    //switch (t) {
-    //   case Cannone t  -> this.potenza+= t.potenzaDiFuoco();
-    //  case CannoneDoppio  t -> this.potenza+= 2*t.potenzaDiFuoco();
-    // default        -> ;
-
-    // }
 
     public boolean checkProtection(int dir, int dir2, Player player) {
         boolean result = false;

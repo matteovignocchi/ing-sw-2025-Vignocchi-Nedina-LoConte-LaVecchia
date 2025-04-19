@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
 import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -321,13 +322,12 @@ public class Player {
      * @param b column of the matrix
      */
     public void removeTile(int a, int b) {
-        Tile tmp = Dash_Matrix[a][b];
+        addToDiscardPile(Dash_Matrix[a][b]);
         Dash_Matrix[a][b] = new EmptySpace();
         validStatus[a][b] = Status.FREE;
-        if (a == 2 && b == 3) {
-            this.setEliminated();
-        }
-        addToDiscardPile(tmp);
+//        if (a == 2 && b == 3) {
+//            this.setEliminated();
+//        }
     }
 
     /**
@@ -445,361 +445,99 @@ public class Player {
         }
     }
 
+    public boolean isIsolated(int x, int y) {
+        Tile tmp = Dash_Matrix[x][y];
+        if(tmp == null) return true;
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
+        int[] opt = {2,3,0,1};
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if(nx<0 || ny < 0 || nx>=5 || ny>=7) continue;
+            Tile nearTmp = Dash_Matrix[nx][ny];
+            if (nearTmp == null || isEmptySpace(nearTmp)) continue;
+            int sideCurr = tmp.controlCorners(i);
+            int sideNear = nearTmp.controlCorners(opt[i]);
+
+            if (sideCurr * sideNear != 0) return false;
+        }
+        return true;
+    }
+
     /**
      * this method controls if the ship that the player built is legal, checking every tile
      */
-    public boolean checkFirstColumn() {
-        boolean result = false;
-        int a, b;
-        for (int i = 1; i < 4; i++) {
-            boolean flag = true;
-            if (validStatus[i][0] == Status.USED) {
 
-                if (validStatus[i + 1][0] == Status.FREE && validStatus[i - 1][0] == Status.FREE && validStatus[i][1] == Status.FREE)
-                    flag = false;
+    public boolean connected(int i, int j) {
+        if(i == 0 || j == 0) return false;
+        if(i == 3 || j == 3 ) return true;
+        return i == j;
 
-                if (flag) {
-                    a = Dash_Matrix[i][0].controlCorners(0);
-                    b = Dash_Matrix[i - 1][0].controlCorners(2);
-                    if (a * b != 0) {
-                        if ((a-b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[i][0].controlCorners(2);
-                    b = Dash_Matrix[i + 1][0].controlCorners(0);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[i][0].controlCorners(1);
-                    b = Dash_Matrix[i][1].controlCorners(3);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                }
-
-            }
-            if (!flag) {
-                result = true;
-                removeTile(i, 0);
-            }
-        }
-        return result;
     }
-
-    public boolean checkLastColumn() {
-        boolean result = false;
-        int a, b;
-        for (int i = 1; i < 4; i++) {
-            boolean flag = true;
-            if (validStatus[i][6] == Status.USED) {
-
-                if (validStatus[i + 1][6] == Status.FREE && validStatus[i - 1][6] == Status.FREE && validStatus[i][5] == Status.FREE)
-                    flag = false;
-
-                if (flag) {
-                    a = Dash_Matrix[i][6].controlCorners(0);
-                    b = Dash_Matrix[i - 1][6].controlCorners(2);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[i][6].controlCorners(2);
-                    b = Dash_Matrix[i + 1][6].controlCorners(0);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[i][6].controlCorners(3);
-                    b = Dash_Matrix[i][5].controlCorners(1);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                }
-
-            }
-            if (!flag) {
-                result = true;
-                removeTile(i, 6);
-            }
-        }
-        return result;
-    }
-
-    public boolean checkInnerMatrix() {
-        boolean result = false;
-        int a, b;
-        for (int i = 1; i < 4; i++) {
-            for (int j = 1; j < 6; j++) {
-
-                boolean flag = true;
-
-                if (validStatus[i][j] == Status.USED) {
-                    if (validStatus[i - 1][j] == Status.FREE && validStatus[i+1][j] == Status.FREE && validStatus[i][j+1] == Status.FREE && validStatus[i][j-1] == Status.FREE) flag = false;
-
-                    if(flag){
-                        a = Dash_Matrix[i][j].controlCorners(0);
-                        b = Dash_Matrix[i - 1][j].controlCorners(2);
-                        if (a * b != 0) {
-                            if ((a - b) != 0) {
-                                if (a != 3 && b != 3) {
-                                    flag = false;
-                                }
-                            }
-                        }
-                    }
-                    else if (flag) {
-                        a = Dash_Matrix[i][j].controlCorners(2);
-                        b = Dash_Matrix[i + 1][j].controlCorners(0);
-                        if (a * b != 0) {
-                            if ((a - b) != 0) {
-                                if(a != 3 && b != 3){
-                                    flag = false;
-                                }
-                            }
-                        }
-
-                    }
-                    else if (flag) {
-                        a = Dash_Matrix[i][j].controlCorners(3);
-                        b = Dash_Matrix[i][j-1].controlCorners(1);
-                        if (a * b != 0) {
-                            if ((a - b) != 0) {
-                                if (a != 3 && b != 3) {
-                                    flag = false;
-                                }
-                            }
-                        }
-
-                    }
-                    else if (flag) {
-                        a = Dash_Matrix[i][j].controlCorners(1);
-                        b = Dash_Matrix[i][j+1].controlCorners(3);
-                        if (a * b != 0) {
-                            if ((a - b) != 0) {
-                                if (a != 3 && b != 3) {
-                                    flag = false;
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-                if (!flag) {
-                    result = true;
-                    removeTile(i, j);
-                }
-            }
-        }
-        return result;
-    }
-
-    public boolean checkFirstRow(){
-        boolean result = false;
-        int a, b;
-        for (int i = 1; i < 6; i++) {
-            boolean flag = true;
-            if(validStatus[0][i] == Status.USED){
-                if(validStatus[0][i-1] == Status.FREE && validStatus[0][i+1] == Status.FREE && validStatus[1][i] == Status.FREE) flag = false;
-
-                if(flag){
-                    a = Dash_Matrix[0][i].controlCorners(3);
-                    b = Dash_Matrix[0][i-1].controlCorners(1);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[0][i].controlCorners(1);
-                    b = Dash_Matrix[0][i+1].controlCorners(3);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-
-                } else if (flag) {
-                    a = Dash_Matrix[0][i].controlCorners(2);
-                    b = Dash_Matrix[1][i].controlCorners(0);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-
-                }
-            }
-            if (!flag) {
-                result = true;
-                removeTile(0, i);
-            }
-
-        }
-        return result;
-    }
-
-    public boolean checkLastRow(){
-        boolean result = false;
-        int a, b;
-        for (int i = 1; i < 6; i++) {
-            boolean flag = true;
-            if(validStatus[4][i] == Status.USED){
-                if(validStatus[4][i-1] == Status.FREE && validStatus[4][i+1] == Status.FREE && validStatus[3][i] == Status.FREE) flag = false;
-                if(flag){
-                    a = Dash_Matrix[4][i].controlCorners(1);
-                    b = Dash_Matrix[4][i+1].controlCorners(3);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                } else if (flag) {
-                    a = Dash_Matrix[4][i].controlCorners(3);
-                    b = Dash_Matrix[4][i-1].controlCorners(1);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-
-                }else if (flag) {
-                    a = Dash_Matrix[4][i].controlCorners(2);
-                    b = Dash_Matrix[3][i].controlCorners(0);
-                    if (a * b != 0) {
-                        if ((a - b) != 0) {
-                            if (a != 3 && b != 3) {
-                                flag = false;
-                            }
-                        }
-                    }
-                }
-            }
-            if (!flag) {
-                result = true;
-                removeTile(4, i);
-            }
-        }
-        return result;
-    }
-
-    public boolean checkSx(){
-        boolean result = false;
-        int a, b;
-        boolean flag = true;
-        if(validStatus[4][0] == Status.USED){
-            if(validStatus[4][1] == Status.FREE && validStatus[3][0] == Status.FREE) flag = false;
-            if(flag){
-                a = Dash_Matrix[4][0].controlCorners(1);
-                b = Dash_Matrix[4][1].controlCorners(3);
-                if (a * b != 0) {
-                    if ((a - b) != 0) {
-                        if (a != 3 && b != 3) {
-                            flag = false;
-                        }
-                    }
-                }
-            }
-            else if (flag) {
-                a = Dash_Matrix[4][0].controlCorners(0);
-                b = Dash_Matrix[3][0].controlCorners(2);
-                if (a * b != 0) {
-                    if ((a - b) != 0) {
-                        if (a != 3 && b != 3) {
-                            flag = false;
-                        }
-                    }
-                }
-            }
-        }
-        if (!flag) {
-            result = true;
-            removeTile(4,0);
-        }
-        return result;
-    }
-
-    public boolean checkDx(){
-        boolean result = false;
-        int a, b;
-        boolean flag = true;
-        if(validStatus[4][6] == Status.USED){
-            if(validStatus[4][5] == Status.FREE && validStatus[3][6] == Status.FREE) flag = false;
-            if(flag){
-                a = Dash_Matrix[4][6].controlCorners(3);
-                b = Dash_Matrix[4][5].controlCorners(1);
-                if (a * b != 0) {
-                    if ((a - b) != 0) {
-                        if (a != 3 && b != 3) {
-                            flag = false;
-                        }
-                    }
-                }
-            }else if (flag) {
-                a = Dash_Matrix[4][6].controlCorners(0);
-                b = Dash_Matrix[3][6].controlCorners(2);
-                if (a * b != 0) {
-                    if ((a - b) != 0) {
-                        if (a != 3 && b != 3) {
-                            flag = false;
-                        }
-                    }
-                }
-            }
-        }
-        if (!flag) {
-            result = true;
-            removeTile(4,6);
-        }
-        return result;
+    private boolean isEmptySpace(@NotNull Tile t) {
+        return t.controlCorners(0) == 0 && t.controlCorners(1) == 0 && t.controlCorners(2) == 0 && t.controlCorners(3) == 0;
     }
 
     public void controlAssembly() {
-        boolean flag = true;
         controlCannon();
         controlEngine();
-        while (flag) {
-            if(checkFirstRow() && checkLastRow() && checkSx() && checkDx() && checkFirstColumn() && checkLastColumn() && checkInnerMatrix()){
-                flag = false;
-            }
+        Queue<int[]> coda = new LinkedList<>();
+        boolean[][] visited = new boolean[5][7];
+        visited[2][3] = true;
+        coda.add(new int[]{2,3});
+        int[] dx = {-1,0,1,0};
+        int[] dy = {0,1,0,-1};
+        int[] opt = {2,3,0,1};
+        while (!coda.isEmpty()) {
+            int[] curr = coda.poll();
+            int x = curr[0];
+            int y = curr[1];
+            Tile tmp = Dash_Matrix[x][y];
+            for (int i = 0; i < 4; i++) {
+                int nx = x+ dx[i];
+                int ny = y+ dy[i];
+                if(nx<0 || ny<0 || nx>=5 || ny>=7) continue;
+//                if(visited[nx][ny]) continue;
+//                Tile near = Dash_Matrix[nx][ny];
+//                if(near == null || isEmptySpace(near)) continue;
+                 int tmpSide = Dash_Matrix[x][y].controlCorners(i);
+                 int nearSide =Dash_Matrix[nx][ny].controlCorners(opt[i]);
+//                if(connected(tmpSide, nearSide)) {
+//                    visited[nx][ny] = true;
+//                    coda.add(new int[]{nx, ny});
+//                }
+                if(!visited[nx][ny]){
+                    if(connected(tmpSide,nearSide)){
+                        coda.add(new int[]{nx,ny});
+                        visited[nx][ny] = true;
+                    }
+                }
 
+            }
         }
+        for(int i = 0 ; i<5 ; i++){
+            for(int j = 0 ; j<7 ; j++) {
+                if (!visited[i][j] || isIsolated(i,j)) removeTile(i, j);
+            }
+        }
+
+        for(int i = 0 ; i<5 ; i++){
+            for(int j = 0 ; j<7 ; j++){
+                if(validityCheck(i, j) == Status.USED) {
+                    System.out.print("U");
+                }else{
+                    System.out.print("L");
+                }
+            }
+            System.out.println();
+        }
+
     }
+
+
+
+
     /**
      * this method checks every exposed connectors on the ship
      * first it checks the exposed connectors in the inner matrix,
