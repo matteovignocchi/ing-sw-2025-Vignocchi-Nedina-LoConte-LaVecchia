@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -196,54 +195,6 @@ public class FlightCardBoard {
             p.setOverlappedOnce(false);
         }
     }
-
-    /*
-    public void moveRocket(int x, Player p) throws InvalidPlayerException {
-        if (p == null) throw new IllegalArgumentException("Player null");
-        //Gestire eccezione x = 0: non puoi spostarti di 0 caselle (?)
-        if (orderedPlayersInFlight.isEmpty()) return;
-        if (!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
-        //Gestire con un try catch al chiamante ?
-
-        int temp = p.getPos() + x;
-        boolean rocketsFound = true;
-
-
-        while (rocketsFound) {
-            rocketsFound = false;
-            int old_lap = p.getLap();
-            temp = this.checkOverLap(p, temp);
-
-            int count = 0;
-            for (Player other : orderedPlayersInFlight) {
-                if (other.equals(p)) continue;
-                int other_start = other.getPos() + (other.getLap() - old_lap) * position_number;
-                int other_end = other_start;
-                if(other_start > position_number) other_end = other_start - position_number;
-                else if (other_start < 1) other_end = other_start + position_number;
-                if (x > 0){
-                    int start = p.getPos();
-                    int end = temp;
-                    if (start < other_start && other_end <= end) {
-                        count++;
-                        rocketsFound = true;
-                    }
-                } else if (x < 0){
-                    int start = temp;
-                    int end = p.getPos();
-                    if(start <= other_start && other_end < end) {
-                        count--;
-                        rocketsFound = true;
-                    }
-                }
-            }
-            p.setPos(temp);
-            temp = temp + count;
-        }
-    }
-     */
-
-
 
     //MODIFICARE DESCRIZIONE
     /**

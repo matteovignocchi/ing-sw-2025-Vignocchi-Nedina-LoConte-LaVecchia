@@ -80,4 +80,11 @@ public class StorageUnit extends Tile {
             return false;
         }
     }
+
+    public boolean isAdvanced() {
+        return advanced;
+    }
+    public int getMax() {
+        return max;
+    }
 }

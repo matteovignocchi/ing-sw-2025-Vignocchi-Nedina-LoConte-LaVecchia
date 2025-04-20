@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Server.Controller;
 
 import it.polimi.ingsw.galaxytrucker.Server.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Pile.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.*;
 
@@ -40,7 +39,7 @@ public class Controller {
         }
         this.idGame = id;
 
-        pileOfTile = pileMaker.loadTiles("tile_data.json");
+        pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
 
@@ -80,6 +79,10 @@ public class Controller {
         shownTile.remove(index);
         return tmp;
 
+    }
+
+    public List<Tile> getPileOfTile() {
+        return pileOfTile;
     }
 
     public Tile getTile(int index) {

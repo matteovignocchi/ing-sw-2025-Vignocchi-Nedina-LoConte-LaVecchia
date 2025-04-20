@@ -4,7 +4,6 @@ import it.polimi.ingsw.galaxytrucker.Server.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,17 +13,12 @@ public class CardEffectVisitor implements CardVisitor {
     private final FlightCardBoard f;
     private final List<Player> players;
 
-    //GESTIRE ECCEZIONI SU PLAYERS, PLAYER SINGOLO E F != NULL (NO EMPTY) A MONTE, AL MOMENTO DELLA CREAZIONE
-    //O QUI NEL COSTRUTTORE ?????
-    //VEDERE SE ECCEZIONI CHECKED O UNCHECKED IN STO CASO
-    public CardEffectVisitor(Controller controller) throws CardEffectException {
+    public CardEffectVisitor(Controller controller) {
 
-        //NullPointerException (?) o eccezione custom (?)
         if (controller == null) throw new NullPointerException("controller is null");
         FlightCardBoard f = controller.getFlightCardBoard();
         List<Player> players = f.getOrderedPlayers();
-        //Questi controlli necessari qui (?)
-        if (f == null) throw new NullPointerException("flightCardBoard is null");
+
         if (players == null || players.isEmpty()) throw new NullPointerException("players is null");
         for (Player p : players) if (p == null) throw new NullPointerException("player is null");
 
@@ -94,7 +88,6 @@ public class CardEffectVisitor implements CardVisitor {
                 i_less_powerengine = i;
         }
 
-        //f.moveRocket(-card.getDays(), players.get(i_less_crewmates), players);
         f.moveRocket(-card.getDays(), players.get(i_less_crewmates));
         controller.removeCrewmate(players.get(i_less_firepower), card.getNumCrewmates());
         Player p = players.get(i_less_powerengine);
@@ -122,7 +115,6 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(i_less_powerengine)))
                 i_less_powerengine = i;
         }
-        //f.moveRocket(-card.getDays(), players.get(i_less_firepower), players);
         f.moveRocket(-card.getDays(), players.get(i_less_firepower));
         controller.removeGoods(players.get(i_less_powerengine), card.getNumGoods());
         Player p = players.get(i_less_crewmates);
@@ -142,14 +134,12 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players) {
             double player_fire_power = controller.getFirePower(p);
             if(player_fire_power > smugglers_fire_power){
-                //Prima variante di askPlayerDecision (gli passo le info della carta)
                 int days = card.getDays();
                 List<Colour> reward_goods = card.getRewardGoods();
                 String reward_goods_string = reward_goods.stream().map(Colour::name).collect(Collectors.joining(", "));
                 String string = String.format("Do you want to redeem %s goods and lose %d flight days?",
                         reward_goods_string, days);
                 if(controller.askPlayerDecision(string, p)){
-                    //f.moveRocket(-days, p, players);
                     f.moveRocket(-days, p);
                     controller.addGoods(p, card.getRewardGoods());
                 }
@@ -165,7 +155,6 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for(Player p : players) {
-            //Seconda versione di askPlayerDecision (non gli passo le info della carta, le ha già)
             String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
             if (controller.askPlayerDecision(string, p)) {
                 int days = card.getDays();
@@ -189,7 +178,6 @@ public class CardEffectVisitor implements CardVisitor {
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
                 if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
-                    //f.moveRocket(-days, p, players);
                     f.moveRocket(-days, p);
                     controller.addGoods(p, card.getStationGoods());
                 }

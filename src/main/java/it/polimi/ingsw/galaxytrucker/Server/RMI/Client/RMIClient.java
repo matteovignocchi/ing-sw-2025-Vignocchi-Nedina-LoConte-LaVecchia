@@ -2,17 +2,25 @@ package it.polimi.ingsw.galaxytrucker.Server.RMI.Client;
 
 import it.polimi.ingsw.galaxytrucker.PlayerView;
 import it.polimi.ingsw.galaxytrucker.Server.RMI.Server.VirtualViewRmi;
+import it.polimi.ingsw.galaxytrucker.Server.TUIView;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 public class RMIClient extends UnicastRemoteObject implements VirtualViewRmi {
     final VirtualServerRmi server;
+    VirtualViewRmi view;
     //view
     public RMIClient(VirtualServerRmi server) throws RemoteException {
         super();
         this.server = server;
     }
+
+
 
     private void run() throws RemoteException {
         //this.server.connect(this);

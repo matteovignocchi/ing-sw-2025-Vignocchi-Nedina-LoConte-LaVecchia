@@ -11,7 +11,4 @@ public class StardustCard implements Card {
     public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
     }
-
-    @Override
-    public String toString() {return "StardustCard";}
 }

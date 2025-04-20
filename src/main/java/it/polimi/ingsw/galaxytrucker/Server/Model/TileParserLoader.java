@@ -2,17 +2,22 @@ package it.polimi.ingsw.galaxytrucker.Server.Model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 
 public class TileParserLoader {
-    public  List<Tile> loadTiles(String filename) {
+
+    public List<Tile> loadTiles() {
         List<Tile> pileOfTile = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode root = mapper.readTree(new File(filename));
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("tile_data.json")){
+            if (is == null) {
+                throw new RuntimeException("File 'tiles_data.json' non trovato nel classpath!");
+            }
+            JsonNode root = mapper.readTree(is);
             JsonNode tilesArray = root.get("tiles");
             for (JsonNode obj : tilesArray) {
                 String type = obj.get("type").asText();

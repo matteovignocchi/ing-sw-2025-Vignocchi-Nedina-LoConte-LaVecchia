@@ -29,7 +29,6 @@ public class DeckManager {
         Collections.shuffle(level1);
         Collections.shuffle(level2);
 
-        //per sicurezza, ma penso abbastanza inutile
         if (level2.size() < numberOfDecks * 2 || level1.size() < numberOfDecks) {
             throw new InvalidSizeException("Not enough cards to create 4 decks");
         }
