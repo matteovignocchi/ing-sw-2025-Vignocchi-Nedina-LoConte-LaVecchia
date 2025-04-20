@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class describes the behavior of the "Warzone" adventure card at level 1.
+ * This class handles the FirstWarzoneCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
@@ -15,6 +16,14 @@ public class FirstWarzoneCard implements Card {
     private final int num_crewmates;
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
+
+    /**
+     * Constructs an {@code FirstWarzoneCard} with the specified values.
+     * @param days: flight days lost by the player with the least crewmates.
+     * @param num_crewmates: number of crewmates the player with the least engine power loses.
+     * @param shots_directions: list of attack directions for the player with the least firepower.
+     * @param shots_size: Attack size list for the player with the least firepower.
+     */
 
     @JsonCreator
     public FirstWarzoneCard(

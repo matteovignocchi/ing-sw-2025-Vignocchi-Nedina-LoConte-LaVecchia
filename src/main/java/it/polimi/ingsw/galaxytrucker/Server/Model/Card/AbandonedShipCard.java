@@ -3,10 +3,10 @@ package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
 
 /**
- * This class describes the behavior of the "Abandoned Ship" adventure card.
+ * This class handles the AbandonedShipCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
@@ -15,6 +15,13 @@ public class AbandonedShipCard implements Card{
     private final int days;
     private final int credits;
     private final int num_crewmates;
+
+    /**
+     * Constructs an {@code AbandonedShipCard} with the specified values.
+     * @param days: flight days that the player who accepts loses.
+     * @param credits: credits earned by the player who accepts.
+     * @param num_crewmates: crewmates that loses the player who accepts.
+     */
 
     @JsonCreator
     public AbandonedShipCard(

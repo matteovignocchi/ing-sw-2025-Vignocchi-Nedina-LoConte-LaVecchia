@@ -1,10 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 
 /**
- * This class describes the behavior of the "open space" adventure card.
- * @author Gabriele La Vecchia & Francesco Lo Conte
+ * This class handles the OpenSpaceCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
-
 public class OpenSpaceCard implements Card {
 
     @Override

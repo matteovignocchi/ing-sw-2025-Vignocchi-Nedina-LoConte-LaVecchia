@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lv. 2 "Warzone" adventure card description
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * This class handles the SecondWarzoneCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 public class SecondWarzoneCard implements Card {
@@ -15,6 +16,14 @@ public class SecondWarzoneCard implements Card {
     private final int num_goods;
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
+
+    /**
+     * Constructs an {@code SecondWarzoneCard} with the specified values.
+     * @param days: days of flight that the player with the least firepower loses.
+     * @param num_goods: number of goods lost by the player with the least engine power.
+     * @param shots_directions: list of attack directions for the player with the least number of crewmates.
+     * @param shots_size: Attack size list for the player with the least number of crewmates.
+     */
 
     @JsonCreator
     public SecondWarzoneCard(
