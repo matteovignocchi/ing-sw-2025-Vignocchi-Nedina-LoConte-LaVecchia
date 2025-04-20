@@ -31,7 +31,7 @@ public class SmugglersCard implements Card{
         this.days = days;
         this.fire_power = fire_power;
         this.num_removed_goods = num_removed_goods;
-        this.reward_goods = new ArrayList<>(reward_goods); //capire come inizializzare
+        this.reward_goods = new ArrayList<>(reward_goods);
     }
 
     @Override
@@ -39,11 +39,6 @@ public class SmugglersCard implements Card{
         visitor.visit(this);
     }
 
-    @Override
-    public String toString(){
-        return "SmugglersCard{" + "days:" + days + ", fire_power:" + fire_power + ", num_removed_goods:" + num_removed_goods
-                + ", reward_goods:" + reward_goods + "}";
-    }
 
     public int getDays(){ return days; }
 

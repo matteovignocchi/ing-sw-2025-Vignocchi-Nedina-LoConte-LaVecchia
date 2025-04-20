@@ -41,12 +41,6 @@ public class PiratesCard implements Card {
     }
 
     @Override
-    public String toString(){
-        return "PiratesCard{" + "fire_power:" + fire_power + ", days:" + days + ", credits:" + credits + ", shots_directions:" + shots_directions
-                + ", shots_size:" + shots_size + "}";
-    }
-
-    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
             visitor.visit(this);
     }
@@ -72,30 +66,3 @@ public class PiratesCard implements Card {
  * the first defeated player rolls the dice and determines the row and/or column that will be attacked by the cannons.
  * This column and/or row is valid for each defeated player.
  */
-
-// @Override
-// public void activate (List<Player> players, FlightCardBoard f){
-// if(players == null) throw new NullPointerException("Null players list");
-// else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-// else if(f == null) throw new NullPointerException("Null flight card board");
-//
-// List<Player> losers = new ArrayList<>();
-// for(Player p : players) {
-// if(p.getFirePower() > fire_power){
-// if(p.askPlayerDecision()){
-// f.moveRocket(-days, p, players);
-// p.addCredits(credits);
-// }
-// break;
-// } else if (p.getFirePower() < fire_power)
-// losers.add(p);
-// }
-// if(losers.getFirst() != null){
-// int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
-// for(Player p : losers){
-// for(int i = 0; i < shots_directions.size(); i++){
-// p.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res);
-// }
-// }
-// }
-// }

@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
 import java.util.ArrayList;
 import java.util.Comparator;

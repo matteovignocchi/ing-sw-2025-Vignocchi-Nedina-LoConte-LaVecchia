@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Colour;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +38,6 @@ public class FirstWarzoneCard implements Card {
     @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
         visitor.visit(this);
-    }
-
-    @Override
-    public String toString(){
-        return "FirstWarzoneCard{" + "days:" + days + ", num_crewmates:" + num_crewmates + ", shots_directions:" + shots_directions
-        + ", shots_size:" + shots_size + "}";
     }
 
     public int getDays() {return days;}

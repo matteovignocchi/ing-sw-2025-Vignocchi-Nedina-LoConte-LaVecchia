@@ -25,7 +25,7 @@ class CardEffectVisitorMockTest {
 
     @BeforeEach
     void setUp() {
-        mockCtrl  = mock(Controller.class);
+        mockCtrl = mock(Controller.class);
         mockBoard = mock(FlightCardBoard.class);
         p1 = mock(Player.class);
         p2 = mock(Player.class);
@@ -152,21 +152,21 @@ class CardEffectVisitorMockTest {
     @Test
     @DisplayName("visit(FirstWarzoneCard): sposta, rimuove crew e spara in ordine")
     void visitFirstWarzoneCard() throws CardEffectException {
-        FirstWarzoneCard card = new FirstWarzoneCard(3, 2, List.of(0,2), List.of(false, true));
+        FirstWarzoneCard card = new FirstWarzoneCard(3, 2, List.of(0, 2), List.of(false, true));
 
         when(mockCtrl.getNumCrew(p1)).thenReturn(5);
-        when(mockCtrl.getNumCrew(p2)).thenReturn(3);  // minimo
+        when(mockCtrl.getNumCrew(p2)).thenReturn(3);
         when(mockCtrl.getNumCrew(p3)).thenReturn(6);
         when(mockCtrl.getNumCrew(p4)).thenReturn(7);
 
         when(mockCtrl.getFirePower(p1)).thenReturn(8.0);
-        when(mockCtrl.getFirePower(p2)).thenReturn(4.0); // minimo
+        when(mockCtrl.getFirePower(p2)).thenReturn(4.0);
         when(mockCtrl.getFirePower(p3)).thenReturn(9.0);
         when(mockCtrl.getFirePower(p4)).thenReturn(7.0);
 
         when(mockCtrl.getPowerEngine(p1)).thenReturn(5);
         when(mockCtrl.getPowerEngine(p2)).thenReturn(6);
-        when(mockCtrl.getPowerEngine(p3)).thenReturn(2); // minimo
+        when(mockCtrl.getPowerEngine(p3)).thenReturn(2);
         when(mockCtrl.getPowerEngine(p4)).thenReturn(4);
 
         when(p3.throwDice()).thenReturn(2, 3, 6, 5);
@@ -178,26 +178,26 @@ class CardEffectVisitorMockTest {
         inOrder.verify(mockBoard).moveRocket(-3, p2);
         inOrder.verify(mockCtrl).removeCrewmate(p2, 2);
         inOrder.verify(mockCtrl).defenceFromCannon(0, false, 5, p3);
-        inOrder.verify(mockCtrl).defenceFromCannon(2, true,  11, p3);
+        inOrder.verify(mockCtrl).defenceFromCannon(2, true, 11, p3);
         inOrder.verifyNoMoreInteractions();
     }
 
     @Test
     @DisplayName("visit(SecondWarzoneCard): sposta, rimuove goods e spara in ordine")
     void visitSecondWarzoneCard() throws CardEffectException {
-        SecondWarzoneCard card = new SecondWarzoneCard(4, 3, List.of(1,3,0), List.of(true,false,true));
+        SecondWarzoneCard card = new SecondWarzoneCard(4, 3, List.of(1, 3, 0), List.of(true, false, true));
 
         when(mockCtrl.getNumCrew(p1)).thenReturn(8);
-        when(mockCtrl.getNumCrew(p2)).thenReturn(2);  // minimo
+        when(mockCtrl.getNumCrew(p2)).thenReturn(2);
         when(mockCtrl.getNumCrew(p3)).thenReturn(6);
         when(mockCtrl.getNumCrew(p4)).thenReturn(3);
 
         when(mockCtrl.getFirePower(p1)).thenReturn(7.0);
         when(mockCtrl.getFirePower(p2)).thenReturn(5.0);
         when(mockCtrl.getFirePower(p3)).thenReturn(9.0);
-        when(mockCtrl.getFirePower(p4)).thenReturn(1.0); //minimo
+        when(mockCtrl.getFirePower(p4)).thenReturn(1.0);
 
-        when(mockCtrl.getPowerEngine(p1)).thenReturn(1); //minimo
+        when(mockCtrl.getPowerEngine(p1)).thenReturn(1);
         when(mockCtrl.getPowerEngine(p2)).thenReturn(3);
         when(mockCtrl.getPowerEngine(p3)).thenReturn(8);
         when(mockCtrl.getPowerEngine(p4)).thenReturn(5);
@@ -210,9 +210,9 @@ class CardEffectVisitorMockTest {
         InOrder inOrder = inOrder(mockBoard, mockCtrl);
         inOrder.verify(mockBoard).moveRocket(-4, p4);
         inOrder.verify(mockCtrl).removeGoods(p1, 3);
-        inOrder.verify(mockCtrl).defenceFromCannon(1, true,  5, p2);
+        inOrder.verify(mockCtrl).defenceFromCannon(1, true, 5, p2);
         inOrder.verify(mockCtrl).defenceFromCannon(3, false, 8, p2);
-        inOrder.verify(mockCtrl).defenceFromCannon(0, true,  7, p2);
+        inOrder.verify(mockCtrl).defenceFromCannon(0, true, 7, p2);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -250,12 +250,6 @@ class CardEffectVisitorMockTest {
 
         verify(mockCtrl, never()).askPlayerDecision(anyString(), eq(p2));
     }
-    //noi con un if gestiamo la richiesta, cioè chiediamo solo ai giocatori che hanno num_crewmates > 5 se
-    //vogliono accettare oppure no. Questo è giusto oppure bisogna gestirlo con un'eccezione?  (secondo me va bene cosi com'è)
-
-    //nell'if abbiamo >=, ma non dovremmo lasciare solo >???
-    //altrimenti il player che ha 5 crewmates potrebbe accettare, e di conseguenza morire
-    //quindi, o si fa un'eccezione anche per questo caso o lasciamo solo >
 
     @Test
     @DisplayName("visit(SmugglersCard): primo player ha firepower maggiore e accetta")
@@ -307,12 +301,10 @@ class CardEffectVisitorMockTest {
     void visitMeteoritesRainCard() throws CardEffectException {
         MeteoritesRainCard card = new MeteoritesRainCard(List.of(0, 1), List.of(true, false));
 
-        when(p1.throwDice()).thenReturn(3, 3); // res = 6
-
+        when(p1.throwDice()).thenReturn(3, 3);
         CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
         visitor.visit(card);
 
-        // Due meteoriti × 4 player = 8 chiamate a defenceFromMeteorite
         verify(mockCtrl, times(4)).defenceFromMeteorite(0, true, 6);
         verify(mockCtrl, times(4)).defenceFromMeteorite(1, false, 6);
     }
@@ -339,48 +331,50 @@ class CardEffectVisitorMockTest {
         when(mockCtrl.getFirePower(p3)).thenReturn(5.0);
         when(mockCtrl.getFirePower(p4)).thenReturn(6.0);
 
-        when(p1.throwDice()).thenReturn(2, 4); //due lanci di dado che restituiscono 2 e 4
+        when(p1.throwDice()).thenReturn(2, 4);
 
         CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
         visitor.visit(card);
 
-        // Verifica che defenceFromCannon sia chiamato con i valori corretti per ogni giocatore
         for (Player p : players) {
             verify(mockCtrl, times(1)).defenceFromCannon(0, false, 6, p);
             verify(mockCtrl, times(1)).defenceFromCannon(1, true, 6, p);
         }
     }
 
-    //da sistemare e capire
     @Test
-    @DisplayName("visit(PiratesCard): un giocatore si salva, gli altri subiscono danni")
-    void visitPiratesCardOneSurvive() throws CardEffectException {
+    @DisplayName("visit(PiratesCard): p3 sconfigge i pirati, p1 e p2 subiscono danni")
+    void visitPiratesCard_Cornercase() throws CardEffectException {
         PiratesCard card = new PiratesCard(10, 2, 3, List.of(0, 1), List.of(false, true));
 
-        when(mockCtrl.getFirePower(p1)).thenReturn(11.0); // p1 si salva
-        when(mockCtrl.askPlayerDecision(anyString(), eq(p1))).thenReturn(true);
+        when(mockCtrl.getFirePower(p1)).thenReturn(5.0);
+        when(mockCtrl.getFirePower(p2)).thenReturn(8.0);
+        when(mockCtrl.getFirePower(p3)).thenReturn(11.0);
+        when(mockCtrl.getFirePower(p4)).thenReturn(12.0);
 
-        when(mockCtrl.getFirePower(p2)).thenReturn(4.0); // losers
-        when(mockCtrl.getFirePower(p3)).thenReturn(5.0); // losers
-        when(mockCtrl.getFirePower(p4)).thenReturn(6.0); // losers
+        when(mockCtrl.askPlayerDecision(anyString(), eq(p3))).thenReturn(false);
 
-        when(p2.throwDice()).thenReturn(2, 4);  //totale = 6
+        when(p1.throwDice()).thenReturn(2, 4);
 
-        List<Player> players = List.of(p1, p2, p3, p4);
+        when(mockBoard.getOrderedPlayers()).thenReturn(List.of(p1, p2, p3, p4));
+
         CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
         visitor.visit(card);
 
-        // p1 non subisce danni
-        verify(mockCtrl, never()).defenceFromCannon(anyInt(), anyBoolean(), anyInt(), eq(p1));
+        verify(p1, times(2)).throwDice();
 
-        // p2, p3, p4 subiscono danni con risultato 6
-        for (Player p : List.of(p2, p3, p4)) {
+        for (Player p : List.of(p1, p2)) {
             verify(mockCtrl).defenceFromCannon(0, false, 6, p);
             verify(mockCtrl).defenceFromCannon(1, true, 6, p);
         }
+
+        verify(mockCtrl).askPlayerDecision(anyString(), eq(p3));
+        verify(mockBoard, never()).moveRocket(anyInt(), eq(p3));
+        verify(p3, never()).addCredits(anyInt());
+
+        verify(mockCtrl, never()).defenceFromCannon(anyInt(), anyBoolean(), anyInt(), eq(p4));
+        verify(p4, never()).throwDice();
     }
-
 }
-
 
 

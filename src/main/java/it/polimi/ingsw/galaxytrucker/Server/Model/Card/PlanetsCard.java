@@ -10,6 +10,7 @@ import java.util.List;
  * "Planets" adventure card description
  * @author Gabriele La vecchia && Francesco Lo Conte
  */
+
 public class PlanetsCard implements Card {
     private final List<List<Colour>> reward_goods;
     private final int days;
@@ -29,11 +30,6 @@ public class PlanetsCard implements Card {
         }
         this.reward_goods = temp;
         this.days = days;
-    }
-
-    @Override
-    public String toString(){
-        return "PlanetsCard{" + "reward_goods:" + reward_goods + ", days:" + days + "}";
     }
 
     @Override
@@ -61,19 +57,3 @@ public class PlanetsCard implements Card {
  * Once he has made his decision, you move on to the next player who in turn must choose.
  * If all the planets on the card are occupied by players, the method ends.
  */
-//@Override
-// public void activate(List<Player> players, FlightCardBoard f) {
-// if(players == null) throw new NullPointerException("Null players list");
-// else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-// else if(f == null) throw new NullPointerException("Null flight card board");
-
-//    int j = 0;
-//    for(Player p : players){
-//        if(p.askPlayerDecision()){
-//          f.moveRocket(-days, p, players);
-//          p.addGoods(reward_goods.get(j));
-//          j++;
-//          if(j > reward_goods.size()) break;
-//          }
-//       }
-//   }
