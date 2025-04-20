@@ -116,7 +116,8 @@ class PlayerTest {
         MultiJoint multiJoint1 = new MultiJoint(1,2,1,2);
         MultiJoint multiJoint2 = new MultiJoint(2,1,2,1);
         MultiJoint multiJoint3 = new MultiJoint(0,1,2,3);
-        player.addTile(2,3,multiJoint0);
+        HousingUnit h = new HousingUnit(3,3,3,3 ,Human.HUMAN);
+        player.addTile(2,3,h);
         player.addTile(1,1,multiJoint0);
         player.addTile(1,2,multiJoint0);
         player.addTile(1,3,multiJoint0);
@@ -129,28 +130,49 @@ class PlayerTest {
         player.addTile(2,1,multiJoint1);
         player.addTile(2,4,multiJoint1);
         player.addTile(3,4,multiJoint1);
-        player.addTile(3,5,multiJoint2);
+        player.addTile(3,5,multiJoint3);
         player.addTile(2,2,multiJoint3);
         player.addTile(3,1,multiJoint3);
         player.addTile(4,1,multiJoint3);
         player.controlAssembly();
+        player.controlAssemblyWithCordinate(2,3);
         assertAll(
-                ()->assertSame(Status.FREE, player.validityCheck(3,4)),
-                ()->assertSame(Status.FREE, player.validityCheck(4,1)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,0)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,1)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,2)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,3)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,4)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,5)),
+                ()->assertSame(Status.FREE, player.validityCheck(0,6)),
+                ()->assertSame(Status.FREE, player.validityCheck(1,0)),
+                ()->assertSame(Status.FREE, player.validityCheck(1,6)),
+                ()->assertSame(Status.FREE, player.validityCheck(2,0)),
+                ()->assertSame(Status.FREE, player.validityCheck(2,6)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,0)),
                 ()->assertSame(Status.FREE, player.validityCheck(3,1)),
-                ()->assertSame(Status.FREE, player.validityCheck(4,4)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,2)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,3)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,5)),
+                ()->assertSame(Status.FREE, player.validityCheck(3,6)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,0)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,1)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,2)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,3)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,5)),
+                ()->assertSame(Status.FREE, player.validityCheck(4,6)),
+
                 ()->assertSame(Status.USED, player.validityCheck(1,1)),
                 ()->assertSame(Status.USED, player.validityCheck(1,2)),
                 ()->assertSame(Status.USED, player.validityCheck(1,3)),
-                ()->assertSame(Status.USED, player.validityCheck(1,3)),
-                ()->assertSame(Status.USED, player.validityCheck(1,5))
-               // ()->assertSame(Status.USED, player.validityCheck(2,1))
-//                ()->assertSame(Status.USED, player.validityCheck(2,2)),
-//                ()->assertSame(Status.USED, player.validityCheck(2,3)),
-//                ()->assertSame(Status.USED, player.validityCheck(2,4)),
-//                ()->assertSame(Status.USED, player.validityCheck(2,5)),
-//                ()->assertSame(Status.USED, player.validityCheck(3,5)),
-//                ()->assertSame(Status.USED, player.validityCheck(3,6))
+                ()->assertSame(Status.USED, player.validityCheck(1,4)),
+                ()->assertSame(Status.USED, player.validityCheck(1,5)),
+                ()->assertSame(Status.USED, player.validityCheck(2,1)),
+                ()->assertSame(Status.USED, player.validityCheck(2,2)),
+                ()->assertSame(Status.USED, player.validityCheck(2,3)),
+                ()->assertSame(Status.USED, player.validityCheck(2,4)),
+                ()->assertSame(Status.USED, player.validityCheck(2,5)),
+                ()->assertSame(Status.USED, player.validityCheck(3,4)),
+                ()->assertSame(Status.USED, player.validityCheck(4,4))
                 );
 
 
