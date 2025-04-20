@@ -5,12 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 import java.io.IOException;
-import java.util.List;
+
 
 class ControllerTest {
     Controller controller, spyController;
@@ -31,14 +29,15 @@ class ControllerTest {
         p3.setLap(1);
         p4.setPos(22);
         p4.setLap(1);
-        controller.getFlightCardBoard().addPlayer(p1);
-        controller.getFlightCardBoard().addPlayer(p2);
-        controller.getFlightCardBoard().addPlayer(p3);
-        controller.getFlightCardBoard().addPlayer(p4);
+        //controller.getFlightCardBoard().addPlayer(p1);
+        //controller.getFlightCardBoard().addPlayer(p2);
+        //controller.getFlightCardBoard().addPlayer(p3);
+        //controller.getFlightCardBoard().addPlayer(p4);
     }
+
     @Test
     @DisplayName("activate openSpaceCard")
-    void activateCardTest() throws CardEffectException, IOException {
+    void activateCardTest1() throws CardEffectException, IOException {
         OpenSpaceCard card = new OpenSpaceCard();
         doReturn(2).when(spyController).getPowerEngine(p1);
         doReturn(4).when(spyController).getPowerEngine(p2);
@@ -58,8 +57,39 @@ class ControllerTest {
         assertEquals(15, p1.getPos());
         assertEquals(2, p4.getLap());
         assertEquals(1, p4.getPos());
-        assertEquals(2, p3.getLap()); // test: actual 1   DOVE ERRORE?
-        assertEquals(2, p3.getPos()); // test: actual 24
+        assertEquals(2, p3.getLap());
+        assertEquals(2, p3.getPos());
+    }
+
+    @Test
+    @DisplayName("activate StardustCard")
+    void activateCardTest2() throws CardEffectException, IOException {
+        StardustCard card = new StardustCard();
+        Player spyP1, spyP2, spyP3, spyP4;
+        spyP1 = Mockito.spy(p1);
+        spyP2 = Mockito.spy(p2);
+        spyP3 = Mockito.spy(p3);
+        spyP4 = Mockito.spy(p4);
+        doReturn(11).when(spyP1).countExposedConnectors();
+        doReturn(14).when(spyP2).countExposedConnectors();
+        doReturn(6).when(spyP3).countExposedConnectors();
+        doReturn(18).when(spyP4).countExposedConnectors();
+        controller.getFlightCardBoard().addPlayer(spyP1);
+        controller.getFlightCardBoard().addPlayer(spyP2);
+        controller.getFlightCardBoard().addPlayer(spyP3);
+        controller.getFlightCardBoard().addPlayer(spyP4);
+
+        controller.getFlightCardBoard().orderPlayersInFlightList();
+        controller.activateCard(card);
+
+        assertEquals(1, spyP3.getLap());
+        assertEquals(10, spyP3.getPos());
+        assertEquals(1, spyP4.getLap());
+        assertEquals(1, spyP4.getPos());
+        assertEquals(1, spyP1.getLap());
+        assertEquals(24, spyP1.getPos());
+        assertEquals(1, spyP2.getLap());
+        assertEquals(22, spyP2.getPos());
     }
 
 }

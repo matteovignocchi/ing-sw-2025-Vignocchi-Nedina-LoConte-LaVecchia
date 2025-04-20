@@ -1,14 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.FlightCardBoard;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.*;
 import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.InvalidPlayerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class FlightCardBoardTest {
@@ -367,6 +364,29 @@ class FlightCardBoardTest {
 
         assertEquals(14, p4.getPos());
         assertEquals(0, p4.getLap());
+    }
+
+    @Test
+    @DisplayName("moveRocket: caso problema integrity test")
+    void testMoveRocket11() throws InvalidPlayerException {
+        p1.setPos(15);
+        p2.setPos(20);
+        p3.setPos(18);
+        p4.setPos(1);
+        p1.setLap(2);
+        p2.setLap(2);
+        p3.setLap(1);
+        p4.setLap(2);
+
+        board.addPlayer(p2);
+        board.addPlayer(p1);
+        board.addPlayer(p4);
+        board.addPlayer(p3);
+
+        board.moveRocket(6, p3);
+
+        assertEquals(2, p3.getPos());
+        assertEquals(2, p3.getLap());
     }
 
     @Test

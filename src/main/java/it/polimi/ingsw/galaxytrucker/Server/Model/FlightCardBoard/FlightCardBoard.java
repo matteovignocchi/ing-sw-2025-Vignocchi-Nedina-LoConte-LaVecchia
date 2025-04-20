@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Server.Model.Player;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -147,53 +146,48 @@ public class FlightCardBoard {
         if (orderedPlayersInFlight.isEmpty()) return;
         if (!orderedPlayersInFlight.contains(p)) throw new InvalidPlayerException("Player is not in flight");
         //Gestire con un try catch al chiamante ?
-
-        int temp = p.getPos() + x;
+        // getsione =0 casi negli if
+        int p_final = p.getPos() + x;
+        int p_start;
         boolean rocketsFound = true;
 
         while (rocketsFound) {
             rocketsFound = false;
-            int old_lap = p.getLap();
-            temp = this.checkOverLap(p, temp);
+            p_start= p.getPos();
+            p_final = this.checkOverLap(p, p_final);
 
             int count = 0;
             for (Player other : orderedPlayersInFlight) {
                 if (other.equals(p)) continue;
-                int p_pos = p.getPos();
-                int p_lap = p.getLap();
                 int other_pos = other.getPos();
-                int other_lap = other.getLap();
-                int other_abs_pos = other_pos + other_lap * position_number;
                 if (x >= 0){
-                    int start = p_pos + old_lap * position_number;
-                    int end = temp + p_lap * position_number;
-                    if (start < other_abs_pos && other_abs_pos <= end) {
-                        count++;
-                        rocketsFound = true;
-                    } else if (p_lap > other_lap && temp >= other_pos && !other.getOverlappedOnce()) {
-                        count++;
-                        rocketsFound = true;
-                        other.setOverlappedOnce(true);
+                    if (p_final > p_start) {
+                        if(p_start < other_pos && other_pos <= p_final){
+                            count++;
+                            rocketsFound = true;
+                        }
+                    } else {
+                        if((p_start < other_pos && other_pos <= position_number) || (0 < other_pos && other_pos <= p_final)){
+                            count++;
+                            rocketsFound = true;
+                        }
                     }
                 } else {
-                    int start = temp + p_lap * position_number;
-                    int end = p_pos + old_lap * position_number;
-                    if(start <= other_abs_pos && other_abs_pos < end) {
-                        count--;
-                        rocketsFound = true;
-                    } else if (p_lap < other_lap && temp <= other_pos && !other.getOverlappedOnce()) {
-                        count--;
-                        rocketsFound = true;
-                        other.setOverlappedOnce(true);
+                    if(p_final < p_start) {
+                        if(p_final <= other_pos && other_pos < p_start){
+                            count--;
+                            rocketsFound = true;
+                        }
+                    } else {
+                        if((0 < other_pos && other_pos < p_start) || (p_final <= other_pos && other_pos <= position_number)){
+                            count--;
+                            rocketsFound = true;
+                        }
                     }
                 }
             }
-            p.setPos(temp);
-            temp = temp + count;
-        }
-
-        for (Player player : orderedPlayersInFlight){
-            p.setOverlappedOnce(false);
+            p.setPos(p_final);
+            p_final = p_final + count;
         }
     }
 
