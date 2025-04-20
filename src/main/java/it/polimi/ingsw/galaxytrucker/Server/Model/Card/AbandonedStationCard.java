@@ -37,12 +37,6 @@ public class AbandonedStationCard implements Card {
             visitor.visit(this);
     }
 
-    @Override
-    public String toString(){
-        return "AbandonedStationCard{" + "num_crewmates:" + num_crewmates + ", days:" + days +
-                ", station_goods:" + station_goods + "}";
-    }
-
     public int getDays(){ return days; }
 
     public int getNumCrewmates(){ return num_crewmates; }

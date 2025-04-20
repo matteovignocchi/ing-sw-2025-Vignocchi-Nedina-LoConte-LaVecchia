@@ -56,7 +56,7 @@ public class Player {
             }
         }
         //place the central unit
-        Dash_Matrix[3][2] = new HousingUnit(3,3,3,3,Human.HUMAN);
+        Dash_Matrix[2][3] = new HousingUnit(3,3,3,3,Human.HUMAN);
 
         //initialized a matrix with the valid position of the ship
         validStatus = new Status[5][7];
@@ -455,7 +455,21 @@ public class Player {
             }
         }
     }
+    /**
+     * this method controls if the ship that the player built is legal, checking every tile
+     */
 
+    //funzioni di supporto ai metodi
+    private boolean connected(int i, int j) {
+
+        if(i == 0 || j == 0) return false;
+        if(i == 3 || j == 3 ) return true;
+        return  i == j;
+
+    }
+    private boolean isOutOfBounds(int x, int y) {
+        return x < 0 || y < 0 || x >= 5 || y >= 7;
+    }
     public boolean isIsolated(int x, int y) {
         Tile tmp = Dash_Matrix[x][y];
         if(tmp == null) return true;
@@ -465,76 +479,33 @@ public class Player {
         for (int i = 0; i < 4; i++) {
             int nx = x + dx[i];
             int ny = y + dy[i];
-            if(nx<0 || ny < 0 || nx>=5 || ny>=7) continue;
+            if(isOutOfBounds(nx,ny)) continue;
             Tile nearTmp = Dash_Matrix[nx][ny];
-            if (nearTmp == null || isEmptySpace(nearTmp)) continue;
             int sideCurr = tmp.controlCorners(i);
             int sideNear = nearTmp.controlCorners(opt[i]);
-
-            if (sideCurr * sideNear != 0) return false;
+            if ((sideCurr*sideNear) != 0) return false;
         }
         return true;
     }
 
-    /**
-     * this method controls if the ship that the player built is legal, checking every tile
-     */
 
-    public boolean connected(int i, int j) {
-        if(i == 0 || j == 0) return false;
-        if(i == 3 || j == 3 ) return true;
-        return i == j;
 
-    }
-    private boolean isEmptySpace(@NotNull Tile t) {
-        return t.controlCorners(0) == 0 && t.controlCorners(1) == 0 && t.controlCorners(2) == 0 && t.controlCorners(3) == 0;
-    }
 
-    public void controlAssembly() {
-        controlCannon();
+    //funzione numero 1 da chiamare , è quella che si fa dopo la fine dellassemblaggio nave.
+    public void controlAssembly(){
         controlEngine();
-        Queue<int[]> coda = new LinkedList<>();
-        boolean[][] visited = new boolean[5][7];
-        visited[2][3] = true;
-        coda.add(new int[]{2,3});
-        int[] dx = {-1,0,1,0};
-        int[] dy = {0,1,0,-1};
-        int[] opt = {2,3,0,1};
-        while (!coda.isEmpty()) {
-            int[] curr = coda.poll();
-            int x = curr[0];
-            int y = curr[1];
-            Tile tmp = Dash_Matrix[x][y];
-            for (int i = 0; i < 4; i++) {
-                int nx = x+ dx[i];
-                int ny = y+ dy[i];
-                if(nx<0 || ny<0 || nx>=5 || ny>=7) continue;
-//                if(visited[nx][ny]) continue;
-//                Tile near = Dash_Matrix[nx][ny];
-//                if(near == null || isEmptySpace(near)) continue;
-                 int tmpSide = Dash_Matrix[x][y].controlCorners(i);
-                 int nearSide =Dash_Matrix[nx][ny].controlCorners(opt[i]);
-//                if(connected(tmpSide, nearSide)) {
-//                    visited[nx][ny] = true;
-//                    coda.add(new int[]{nx, ny});
-//                }
-                if(!visited[nx][ny]){
-                    if(connected(tmpSide,nearSide)){
-                        coda.add(new int[]{nx,ny});
-                        visited[nx][ny] = true;
-                    }
-                }
+        controlCannon();
 
-            }
+        boolean flag = true;
+        while(flag){
+            flag = false;
+            boolean tmp = controlAssembly2();
+            if(tmp) flag = true;
         }
-        for(int i = 0 ; i<5 ; i++){
-            for(int j = 0 ; j<7 ; j++) {
-                if (!visited[i][j] || isIsolated(i,j)) removeTile(i, j);
-            }
-        }
+//        controlAssembly2();
 
-        for(int i = 0 ; i<5 ; i++){
-            for(int j = 0 ; j<7 ; j++){
+        for (int i = 0 ; i < 5; i++) {
+            for (int j = 0 ; j < 7; j++) {
                 if(validityCheck(i, j) == Status.USED) {
                     System.out.print("U");
                 }else{
@@ -546,6 +517,159 @@ public class Player {
 
     }
 
+    public boolean controlAssembly2() {
+        //istanzio le mie variabili
+        int count = 0;
+        boolean[][] visited = new boolean[5][7];
+        boolean[][] wrongConnection = new boolean[5][7];
+        Queue<int[]> queue = new LinkedList<>();
+        //array di dir per suo nel codice:
+        int [] dx = {-1, 0, 1, 0};
+        int [] dy = {0, 1, 0, -1};
+        int [] opp = {2,3,0,1};
+        //addo
+        queue.add(new int[] {2,3});
+        visited[2][3] = true;
+
+        //inizio algoritmo di ricerca per nodale:
+        while (!queue.isEmpty()) {
+            int[] curr = queue.poll();
+            int x = curr[0];
+            int y = curr[1];
+
+            for(int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                if(isOutOfBounds(nx,ny) || visited[nx][ny]) continue;
+                if(validStatus[nx][ny] == Status.FREE) continue;
+                int currentSide = Dash_Matrix[x][y].controlCorners(i);
+                int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+                if(connected(currentSide,nearSide)){
+                    queue.add(new int[] {nx,ny});
+                    visited[nx][ny] = true;
+                }else{
+                     wrongConnection[nx][ny] = true;
+                }
+
+            }
+
+        }
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 7; j++) {
+                if(!visited[i][j] || wrongConnection[i][j]) {
+                    if(!(validStatus[i][j] == Status.FREE)){
+                        count++;
+                    }
+                    this.removeTile(i, j);
+
+
+                }
+            }
+        }
+            for(int i = 0; i < 5; i++) {
+                for(int j = 0; j < 7; j++) {
+                    if(isIsolated(i,j) && validStatus[i][j] == Status.USED){
+                        this.removeTile(i,j);
+                        count ++;
+                    }
+                }
+            }
+// funzioni che servono per il debug , le lascio che non si sa mai dovessi avere altri problemi
+//            for(int i = 0; i < 5; i++) {
+//                for(int j = 0; j < 7; j++) {
+//                    System.out.print(visited[i][j] ? "V" : "N");
+//                }
+//                System.out.println();
+//            }
+//            for(int i = 0; i < 5; i++) {
+//                for(int j = 0; j < 7; j++) {
+//                    System.out.print(wrongConnection[i][j] ? "R" : "W");
+//                }
+//                System.out.println();
+//            }
+//        System.out.println("////////////");
+        return count != 0;
+    }
+
+
+    //funzione da chiamare dopo che la nava è stata colpita e qualocosa è stato rotto
+    public void controlAssemblyWithCordinate(int x, int y) throws IllegalArgumentException {
+        Tile tmp =  Dash_Matrix[x][y];
+        switch (tmp){
+            case HousingUnit h -> {
+                boolean flag = true;
+                while(flag){
+                    flag = false;
+                    boolean tmp2 = controlWithCordinate(x,y);
+                    if(tmp2) flag = true;
+                }
+
+            }
+            default -> throw new IllegalArgumentException("bisogna inserire una housing unit da cui partire");
+        }
+
+    }
+
+    public boolean controlWithCordinate(int xx, int yy){
+        int count = 0;
+        boolean[][] visited = new boolean[5][7];
+        boolean[][] wrongConnection = new boolean[5][7];
+        Queue<int[]> queue = new LinkedList<>();
+        //array di dir per suo nel codice:
+        int [] dx = {-1, 0, 1, 0};
+        int [] dy = {0, 1, 0, -1};
+        int [] opp = {2,3,0,1};
+        //addo
+        queue.add(new int[] {xx,yy});
+        visited[xx][yy] = true;
+
+        //inizio algoritmo di ricerca per nodale:
+        while (!queue.isEmpty()) {
+            int[] curr = queue.poll();
+            int x = curr[0];
+            int y = curr[1];
+
+            for(int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                if(isOutOfBounds(nx,ny) || visited[nx][ny]) continue;
+                if(validStatus[nx][ny] == Status.FREE) continue;
+                int currentSide = Dash_Matrix[x][y].controlCorners(i);
+                int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+                if(connected(currentSide,nearSide)){
+                    queue.add(new int[] {nx,ny});
+                    visited[nx][ny] = true;
+                }else{
+                    wrongConnection[nx][ny] = true;
+                }
+
+            }
+
+        }
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 7; j++) {
+                if(!visited[i][j] || wrongConnection[i][j]) {
+                    if(!(validStatus[i][j] == Status.FREE)){
+                        count++;
+                    }
+                    this.removeTile(i, j);
+
+
+                }
+            }
+        }
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 7; j++) {
+                if(isIsolated(i,j) && validStatus[i][j] == Status.USED){
+                    this.removeTile(i,j);
+                    count ++;
+                }
+            }
+        }
+        return count != 0;
+    }
 
 
 

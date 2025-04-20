@@ -9,6 +9,7 @@ import java.util.List;
  * "MeteoritesRain" adventure card description
  * @author Gabriele La Vecchia && Francesco Lo Conte
  */
+
 public class MeteoritesRainCard implements Card{
     private final List<Integer> directions;
     private final List<Boolean> size;
@@ -26,11 +27,6 @@ public class MeteoritesRainCard implements Card{
     }
 
     @Override
-    public String toString(){
-        return "MeteoritesRainCard{" + "directions:" + directions + ", size:" + size + "}";
-    }
-
-    @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
             visitor.visit(this);
     }
@@ -39,19 +35,3 @@ public class MeteoritesRainCard implements Card{
 
     public List<Boolean> getMeteorites_size(){ return new ArrayList<>(size); }
 }
-
-
-
-//@Override
-//public void activate(List<Player> players, FlightCardBoard f) {
-//    if(players == null) throw new NullPointerException("Null players list");
-//    else if(players.isEmpty()) throw new IllegalArgumentException("Empty players list");
-//    else if(f == null) throw new NullPointerException("Null flight card board");
-
-//    for (int i = 0; i < directions.size(); i++) {
-//        int res = players.getFirst().throwDice() + players.getFirst().throwDice();
-//        for(Player p : players){
-//            p.defenceFromMeteorite(directions.get(i), size.get(i), res);
-//        }
-//    }
-//}

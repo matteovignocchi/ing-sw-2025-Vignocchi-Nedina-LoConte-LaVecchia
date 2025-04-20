@@ -5,6 +5,3 @@ public abstract class CardEffectException extends Exception{
        super(message);
    }
 }
-
-//E' una classe astratta perchè rappresenta una generica categoria di eccezioni legate agli effetti delle
-//carte e non viene mai istanziata direttamente
