@@ -815,6 +815,16 @@ public class Controller {
         return f_board;
     }
 
+    // TODO: capire se gestire le eccezioni col try catch qui o nel virtual client (al confine con la
+    //  view)
+
+    /**
+     * The following method activates the effect of a card. Then, it eliminates any possible overlapped players
+     * after the application of the effect, and reorders the list of players in order of lap and position
+     * on the flight board.
+     *
+     * @param card card
+     */
     public void activateCard(Card card){
         try{
             CardEffectVisitor visitor = new CardEffectVisitor(this);
@@ -823,13 +833,30 @@ public class Controller {
             f_board.orderPlayersInFlightList();
         } catch (CardEffectException e) {
             System.err.println("Error: " + e.getMessage());
-            //poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
+            // TODO: poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
+        } catch (InvalidPlayerException e){
+            System.err.println("Error: " + e.getMessage());
+            // TODO: notificare la view con view.showerror?
         }
     }
 
-    //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
+    /**
+     * The following method merges all four small decks for lvl 2 flight into a single one.
+     */
+    public void mergeDecks (){
+        try{
+            for(Deck d : decks){
+                deck.addAll(d.getCards());
+            }
+            deck.shuffle();
+        } catch (RuntimeException e){
+            System.err.println("Error during decks' merging: " + e.getMessage());
+            //TODO: notificare la view
+        }
+    }
 
-    //metodo per mergiare la lista di decks in un unico deck
+
+    //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
 
     /*metodo per pescare una carta e attivarla:
     1. pesco con il metodo draw (che rimuove dal deck)

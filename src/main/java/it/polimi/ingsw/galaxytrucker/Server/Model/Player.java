@@ -28,7 +28,6 @@ public class Player {
     protected int lap;
     protected int position;
     private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
-    private boolean overlappedOnce;
 
     /**
      * constructor that initialize all the variables
@@ -41,7 +40,6 @@ public class Player {
         this.lap = 0;
         this.position = 0;
         this.isEliminated = false;
-        this.overlappedOnce = false;
         this.discardPile = new ArrayList<Tile>();
         credit = 0;
         purpleAlien = false;
@@ -293,14 +291,6 @@ public class Player {
             }
         }
         return tmp;
-    }
-
-    public boolean getOverlappedOnce(){
-        return overlappedOnce;
-    }
-
-    public void setOverlappedOnce(boolean value){
-        overlappedOnce = value;
     }
 
     /**
