@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * "Pirates" card description
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * This class handles the PiratesCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 public class PiratesCard implements Card {
@@ -17,6 +18,15 @@ public class PiratesCard implements Card {
     private final int credits;
     private final List<Integer> shots_directions;
     private final List<Boolean> shots_size;
+
+    /**
+     * Constructs an {@code PiratesCard} with the specified values.
+     * @param fire_power: firepower needed to beat the pirate card.
+     * @param days: flight days that the player who accepts loses.
+     * @param credits: credits earned by the player who accepts.
+     * @param shots_directions: list of attack directions for players beaten by pirates.
+     * @param shots_size: Attack size list for players beaten by pirates.
+     */
 
     @JsonCreator
     public PiratesCard(

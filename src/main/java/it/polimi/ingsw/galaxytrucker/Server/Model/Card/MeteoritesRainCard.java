@@ -6,13 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * "MeteoritesRain" adventure card description
- * @author Gabriele La Vecchia && Francesco Lo Conte
+ * This class handles the MeteoritesRainCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 public class MeteoritesRainCard implements Card{
     private final List<Integer> directions;
     private final List<Boolean> size;
+
+    /**
+     * Constructs an {@code MeteoritesRainCard} with the specified values.
+     * @param directions: list of attack directions for all players.
+     * @param size:Attack size list for all players.
+     */
 
     @JsonCreator
     public MeteoritesRainCard(

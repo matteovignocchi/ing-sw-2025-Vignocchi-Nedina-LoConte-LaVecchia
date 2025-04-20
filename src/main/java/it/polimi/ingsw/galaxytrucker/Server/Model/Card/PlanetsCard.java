@@ -7,13 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * "Planets" adventure card description
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * This class handles the PlanetsCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 public class PlanetsCard implements Card {
     private final List<List<Colour>> reward_goods;
     private final int days;
+
+    /**
+     * Constructs an {@code PlanetsCard} with the specified values.
+     * @param reward_goods: List of lists of goods, in order from first to last planet.
+     * @param days: flight days lost by players who decide to land on a planet.
+     */
 
     @JsonCreator
     public PlanetsCard(
@@ -38,6 +45,10 @@ public class PlanetsCard implements Card {
     }
 
     public int getDays() {return days;}
+
+    /**
+     * @return A copy of the list of goods lists
+     */
 
     public List<List<Colour>> getRewardGoods() {
         List<List<Colour>> copy = new ArrayList<>(reward_goods.size());

@@ -6,15 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * "Smugglers" adventure card's description
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * This class handles the SmugglersCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
+
 
 public class SmugglersCard implements Card{
     private final int days;
     private final int fire_power;
     private final int num_removed_goods;
     private final List<Colour> reward_goods;
+
+    /**
+     * Constructs an {@code SmugglersCard} with the specified values.
+     * @param days: flight days lost by the player who defeats the smugglers and accepts the reward.
+     * @param fire_power: firepower needed to beat the smugglers card.
+     * @param num_removed_goods: number of goods lost by the player who defeats the smugglers and accepts the reward.
+     * @param reward_goods: list of goods that represent the reward for those who defeat the smugglers.
+     */
 
     @JsonCreator
     public SmugglersCard(

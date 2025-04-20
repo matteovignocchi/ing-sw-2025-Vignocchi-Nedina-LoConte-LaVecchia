@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class describes the behavior of the "Abandoned Station" adventure card.
+ * This class handles the AbandonedStationCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
@@ -15,6 +16,13 @@ public class AbandonedStationCard implements Card {
     private final int num_crewmates;
     private final int days;
     private final List<Colour> station_goods;
+
+    /**
+     * Constructs an {@code AbandonedStationCard} with the specified values.
+     * @param num_crewmates: crewmates needed to be able to decide to redeem the rewards.
+     * @param days: flight days that the player who accepts loses.
+     * @param station_goods: List of goods, the reward for those who accept.
+     */
 
     @JsonCreator
     public AbandonedStationCard(

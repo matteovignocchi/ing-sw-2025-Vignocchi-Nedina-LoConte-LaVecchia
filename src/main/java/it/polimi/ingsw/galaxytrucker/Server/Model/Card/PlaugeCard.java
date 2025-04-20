@@ -1,7 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model.Card;
 
 /**
- * This class describes the behavior of the "Plauge Card" adventure card.
+ * This class handles the PlaugeCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 

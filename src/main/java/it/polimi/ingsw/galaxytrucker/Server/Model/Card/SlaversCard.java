@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 /**
- * "Slavers" adventure card description
- * @author Gabriele La Vecchia && Francesco Lo Conte
+ * This class handles the SlaversCard, which is deserialized via Jackson.
+ * It is parsed through a visitor pattern.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
 public class SlaversCard implements Card{
@@ -14,6 +15,14 @@ public class SlaversCard implements Card{
     private final int credits;
     private final int num_crewmates;
     private final int fire_power;
+
+    /**
+     * Constructs an {@code SlaversCard} with the specified values.
+     * @param days: flight days lost by the player who defeats the slavers and accepts the reward.
+     * @param credits: credits earned by the player who defeats the slavers and accepts the reward.
+     * @param num_crewmates: crewmates lost by the player who defeats the slavers and accepts the reward.
+     * @param fire_power: firepower needed to beat the slavers card.
+     */
 
     @JsonCreator
     public SlaversCard(
