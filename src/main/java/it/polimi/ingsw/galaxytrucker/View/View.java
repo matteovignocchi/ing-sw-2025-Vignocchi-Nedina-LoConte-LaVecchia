@@ -7,7 +7,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.util.List;
 
 
-public interface InterfaceView {
+public interface View {
 
     public void inform(String message);
     public boolean ask(String message);
@@ -21,7 +21,7 @@ public interface InterfaceView {
     public void printListOfGoods(List<Colour> Goods);
     public void printDashShip(Tile[][] ship);
     public void printBonusBrown(boolean bonusBrown);
-    public void printBonuspurple(boolean bonuspurple);
+    public void printBonusPurple(boolean bonusPurple);
     public void printList(String key,List<Object> list);
     public void printNewFase(GameFase gameFase);
     public void printLap(int i);

@@ -1,14 +1,14 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.Server.VirtualClient;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 
+import java.rmi.RemoteException;
 import java.util.Scanner;
 
 public class ClientMain {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RemoteException {
         Scanner input = new Scanner(System.in);
         System.out.println("Choose the type of protocol : 1 : RMI ; 2 : SOCKET");
         int choice = input.nextInt();

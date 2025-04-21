@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.View;
+package it.polimi.ingsw.galaxytrucker.Server;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
