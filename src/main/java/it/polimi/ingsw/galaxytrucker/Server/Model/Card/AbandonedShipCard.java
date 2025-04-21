@@ -17,7 +17,7 @@ public class AbandonedShipCard implements Card{
     private final int num_crewmates;
 
     /**
-     * Constructs an {@code AbandonedShipCard} with the specified values.
+     * AbandonedShipCard constructor with specific values.
      * @param days: flight days that the player who accepts loses.
      * @param credits: credits earned by the player who accepts.
      * @param num_crewmates: crewmates that loses the player who accepts.
@@ -43,9 +43,21 @@ public class AbandonedShipCard implements Card{
         visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
+
     public int getDays(){ return days; }
 
+    /**
+     * @return credits shown on the card.
+     */
+
     public int getCredits(){ return credits; }
+
+    /**
+     * @return number of crewmates shown on the card.
+     */
 
     public int getNumCrewmates(){ return num_crewmates; }
 }

@@ -18,7 +18,7 @@ public class SecondWarzoneCard implements Card {
     private final List<Boolean> shots_size;
 
     /**
-     * Constructs an {@code SecondWarzoneCard} with the specified values.
+     * SecondWarzoneCard constructor with specific values.
      * @param days: days of flight that the player with the least firepower loses.
      * @param num_goods: number of goods lost by the player with the least engine power.
      * @param shots_directions: list of attack directions for the player with the least number of crewmates.
@@ -49,11 +49,27 @@ public class SecondWarzoneCard implements Card {
         visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
+
     public int getDays() {return days;}
+
+    /**
+     * @return number of goods shown on the card.
+     */
 
     public int getNumGoods() {return num_goods;}
 
+    /**
+     * @return list of attack directions shown on the card.
+     */
+
     public List<Integer> getShotsDirections() {return new ArrayList<>(shots_directions);}
+
+    /**
+     * @return attack size list shown on the card.
+     */
 
     public List<Boolean> getShotsSize() {return new ArrayList<>(shots_size);}
 }

@@ -13,6 +13,14 @@ public class CardEffectVisitor implements CardVisitor {
     private final FlightCardBoard f;
     private final List<Player> players;
 
+    /**
+     * CardEffectVisitor constructs that apply adventure card effects using the specified Controller.
+     * This constructor retrieves the current FlightCardBoard and the list of players in flight order from the controller.
+     *
+     * @param controller: the controller through which the visitor interacts with the game state;
+     * @throws NullPointerException: if the controller, flight board, player list, or an individual player is null.
+     */
+
     public CardEffectVisitor(Controller controller) {
 
         if (controller == null) throw new NullPointerException("controller is null");
@@ -35,6 +43,7 @@ public class CardEffectVisitor implements CardVisitor {
      * @throws InvalidCardException if card is null
      * @throws CardEffectException  in case of any error during effect execution
      */
+
     @Override
     public void visit(OpenSpaceCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -53,6 +62,7 @@ public class CardEffectVisitor implements CardVisitor {
      * @throws InvalidCardException if card is null
      * @throws CardEffectException  in case of any error during effect execution
      */
+
     @Override
     public void visit (StardustCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -113,6 +123,7 @@ public class CardEffectVisitor implements CardVisitor {
      * @param card card
      * @throws CardEffectException if card is null
      */
+
     @Override
     public void visit(FirstWarzoneCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -153,6 +164,7 @@ public class CardEffectVisitor implements CardVisitor {
      * @param card card
      * @throws CardEffectException if card is null
      */
+
     @Override
     public void visit(SecondWarzoneCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -218,6 +230,17 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the "Abandoned Ship" card effect:
+     * In order, from the leader onwards, each player is asked if he is willing to lose "num_crewmates"
+     * crewmates and "days" flight days. The first player to accept "destroys" the card, exiting the cycle
+     * and no other player can take advantage of this.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
+
     @Override
     public void visit(AbandonedShipCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -235,6 +258,18 @@ public class CardEffectVisitor implements CardVisitor {
             }
         }
     }
+
+    /**
+     * Applies the "Abandoned Station" card effect:
+     * In order, from the leader onwards, check that the player in question has a number of crewmates
+     * greater than or equal to the number of crewmates indicated on the card. If this is true,
+     * then ask the player if he is willing to lose "days" flight days in exchange for some goods.
+     * The first player to accept "destroys" the card, preventing all other players from using it.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
 
     @Override
     public void visit(AbandonedStationCard card) throws CardEffectException {
@@ -254,6 +289,17 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the "Meteorites Rain" card effect:
+     * For each meteorite, the leader rolls the dice twice, determining for each player the column
+     * or row on which the meteorite will be thrown. Meteorites are managed with two lists,
+     * one indicating the size and one indicating the direction.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
+
     @Override
     public void visit(MeteoritesRainCard card) throws CardEffectException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -265,6 +311,21 @@ public class CardEffectVisitor implements CardVisitor {
             }
         }
     }
+
+    /**
+     * Applies the "Pirates" card effect:
+     * For each player, in order of route, verify that the firepower of each of them is greater than
+     * that indicated on the card. If this is not true, the player in question is added to a list of losers,
+     * otherwise he is asked if he is willing to lose "days" days of flight in exchange for "credits" credits.
+     * Regardless of whether he accepts or not, the card is "destroyed" and no other player can become a loser
+     * or can exploit it.
+     * All losers will receive cannon shots that are managed with two lists, one indicating the direction
+     * and one indicating the size.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
 
     @Override
     public void visit(PiratesCard card) throws CardEffectException {
@@ -294,6 +355,20 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the "Planets" card effect:
+     * For each player, in order of route, it is asked if he wants to land on a planet receiving goods and
+     * losing "days" days of flight. The first player can only land on the first planet, the second can land
+     * on the first planet (if the leader has not landed there previously) or on the second planet
+     * (if the leader has landed on the first planet) and so on.
+     * If there are more players than available planets, there is a risk that the last player
+     * will not even have the possibility to decide to land.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
+
     @Override
     public void visit(PlanetsCard card) throws CardEffectException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -310,6 +385,15 @@ public class CardEffectVisitor implements CardVisitor {
             }
         }
     }
+
+    /**
+     * Applies the "Plauge" card effect:
+     * For each player, a method is called that checks the amount of exposed connectors.
+     *
+     * @param card: card object on which the method is activated.
+     * @throws InvalidCardException if card is null.
+     * @throws CardEffectException  in case of any error during effect execution.
+     */
 
     @Override
     public void visit(PlaugeCard card) throws CardEffectException {

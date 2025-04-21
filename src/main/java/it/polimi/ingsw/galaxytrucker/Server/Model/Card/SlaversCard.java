@@ -17,7 +17,7 @@ public class SlaversCard implements Card{
     private final int fire_power;
 
     /**
-     * Constructs an {@code SlaversCard} with the specified values.
+     * SlaversCard constructor with specific values.
      * @param days: flight days lost by the player who defeats the slavers and accepts the reward.
      * @param credits: credits earned by the player who defeats the slavers and accepts the reward.
      * @param num_crewmates: crewmates lost by the player who defeats the slavers and accepts the reward.
@@ -47,11 +47,27 @@ public class SlaversCard implements Card{
         visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
+
     public int getDays(){ return days; }
+
+    /**
+     * @return credits shown on the card.
+     */
 
     public int getCredits(){ return credits; }
 
+    /**
+     * @return number of crewmates shown on the card.
+     */
+
     public int getNumCrewmates(){ return num_crewmates; }
+
+    /**
+     * @return firepower shown on the card.
+     */
 
     public int getFirePower(){ return fire_power; }
 }
