@@ -1,5 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
+import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.Tile;
+
+import java.util.List;
 import java.util.Scanner;
 
 public class TUIView {
@@ -15,6 +18,9 @@ public class TUIView {
     }
     public void inform(String message) {
         System.out.println("> " + message + "\n");
+    }
+    public void reportError(String message) {
+        System.err.print("\n[ERROR] " + message + "\n> ");
     }
 
     public void ask(String x){
@@ -36,12 +42,23 @@ public class TUIView {
     }
     public void askCoordinate(){
         int[] cordinate = new int[2];
-        System.out.print("selezionare la cella di riferimento ");
-        System.out.print("inserire la riga");
+        System.out.print("> Insert the row:\n");
         cordinate[0] = scanner.nextInt();
-        System.out.print("inserire la colonna");
+        System.out.print("> Insert the column:\n");
         cordinate[1] = scanner.nextInt();
         //server.sendCoordinate(playerId, coordinate);
+    }
+
+    public void askIndex(){
+        int index;
+        System.out.print("> Selezionare l'indice della cella\n ");
+        index = scanner.nextInt();
+        //server.sendIndex(playerId, index);
+
+    }
+
+    public void printTiles(List<Tile> tiles){
+
     }
 
     public void printFirePower(float power){
