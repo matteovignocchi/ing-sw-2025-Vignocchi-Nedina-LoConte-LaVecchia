@@ -27,6 +27,14 @@ public class CardEffectVisitor implements CardVisitor {
         this.players = players;
     }
 
+    /**
+     * Applies the “Open Space” card effect: for each player in turn order,
+     * moves their rocket forward by an amount equal to their engine power.
+     *
+     * @param card the OpenSpaceCard to apply
+     * @throws InvalidCardException if card is null
+     * @throws CardEffectException  in case of any error during effect execution
+     */
     @Override
     public void visit(OpenSpaceCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -37,6 +45,14 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the “Stardust” card effect: in reverse turn order,
+     * each player moves backward by the number of exposed connectors on their ship.
+     *
+     * @param card the StardustCard to apply
+     * @throws InvalidCardException if card is null
+     * @throws CardEffectException  in case of any error during effect execution
+     */
     @Override
     public void visit (StardustCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
@@ -47,6 +63,20 @@ public class CardEffectVisitor implements CardVisitor {
             f.moveRocket(-x, p);
         }
     }
+
+    /**
+     * Applies the “Slavers” card effect:
+     * In order from the leader, for each player:
+     * - If a player has less firepower than the Slavers' value, they lose the specified number of crewmates.
+     * - If a player has the same firepower as the Slavers' value, nothing happens
+     * - If a player has higher firepower than the Slavers' value, they can decide whether to get the specified number
+     *   of credits and lose the specified number of days flight or not. In any case, Slavers are defeated and don't
+     *   attack the following players in the list.
+     *
+     * @param card the SlaversCard to apply
+     * @throws InvalidCardException if card is null
+     * @throws CardEffectException  in case of any error during effect execution
+     */
 
     @Override
     public void visit(SlaversCard card) throws CardEffectException {
@@ -71,26 +101,38 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the "First Warzone" card effect:
+     * - It finds the player with the fewest crewmates and moves his rocket backward by the card's days
+     * - It finds the player with the lowest firepower and removes the specified crewmates from him
+     * - It finds the player with the lowest engine power, and he will be hit by the specified shots. The player
+     *   rolls two dices per shot, to determinate the raw/column which will be hit.
+     * If two or more player tie for the lowest interested attribute, the first one in order on the board will be
+     * chosen.
+     *
+     * @param card card
+     * @throws CardEffectException if card is null
+     */
     @Override
     public void visit(FirstWarzoneCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
-        int i_less_firepower = 0;
-        int i_less_crewmates = 0;
-        int i_less_powerengine = 0;
+        int idx_firepower = 0;
+        int idx_crew = 0;
+        int idx_engine = 0;
 
         for (int i=1; i < players.size(); i++) {
-            if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(i_less_crewmates)))
-                i_less_crewmates = i;
-            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(i_less_firepower)))
-                i_less_firepower = i;
-            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(i_less_powerengine)))
-                i_less_powerengine = i;
+            if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
+                idx_crew = i;
+            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(idx_firepower)))
+                idx_firepower = i;
+            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(idx_engine)))
+                idx_engine = i;
         }
 
-        f.moveRocket(-card.getDays(), players.get(i_less_crewmates));
-        controller.removeCrewmate(players.get(i_less_firepower), card.getNumCrewmates());
-        Player p = players.get(i_less_powerengine);
+        f.moveRocket(-card.getDays(), players.get(idx_crew));
+        controller.removeCrewmate(players.get(idx_firepower), card.getNumCrewmates());
+        Player p = players.get(idx_engine);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
@@ -99,25 +141,37 @@ public class CardEffectVisitor implements CardVisitor {
         }
     }
 
+    /**
+     * Applies the "Second Warzone" card effect:
+     * - It finds the player with the lowest firepower and moves his rocket backward by the card's days
+     * - It finds the player with the lowest engine power, and removes from him the specified number of goods
+     * - It finds the player with the fewest number of crewmates, and e will be hit by the specified shots. The player
+     *   rolls two dices per shot, to determinate the raw/column which will be hit.
+     * If two or more player tie for the lowest interested attribute, the first one in order on the board will be
+     * chosen.
+     *
+     * @param card card
+     * @throws CardEffectException if card is null
+     */
     @Override
     public void visit(SecondWarzoneCard card) throws CardEffectException{
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
-        int i_less_firepower = 0;
-        int i_less_powerengine = 0;
-        int i_less_crewmates = 0;
+        int idx_firepower = 0;
+        int idx_engine = 0;
+        int idx_crew = 0;
 
         for (int i=1; i < players.size(); i++) {
-            if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(i_less_crewmates)))
-                i_less_crewmates = i;
-            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(i_less_firepower)))
-                i_less_firepower = i;
-            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(i_less_powerengine)))
-                i_less_powerengine = i;
+            if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
+                idx_crew = i;
+            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(idx_firepower)))
+                idx_firepower = i;
+            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(idx_engine)))
+                idx_engine = i;
         }
-        f.moveRocket(-card.getDays(), players.get(i_less_firepower));
-        controller.removeGoods(players.get(i_less_powerengine), card.getNumGoods());
-        Player p = players.get(i_less_crewmates);
+        f.moveRocket(-card.getDays(), players.get(idx_firepower));
+        controller.removeGoods(players.get(idx_engine), card.getNumGoods());
+        Player p = players.get(idx_crew);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
@@ -125,6 +179,20 @@ public class CardEffectVisitor implements CardVisitor {
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
         }
     }
+
+    /**
+     * Applies the “Smugglers” card effect:
+     * In order from the leader, for each player:
+     * - If a player has less firepower than the Smuggler's value, he loses the specified number of goods
+     * - If a player has the sam firepower as Smuggler's value, nothing happens
+     * - If a player has higher firepower than the Smuggler's value, he can decide whether to get the specified goods as
+     *   reward and lose the specified flight days or not.
+     *   In any case, Smugglers are defeated and don't attack any other player
+     *
+     * @param card the SmugglersCard to apply
+     * @throws InvalidCardException if card is null
+     * @throws CardEffectException  in case of any error during effect execution
+     */
 
     @Override
     public void visit(SmugglersCard card) throws CardEffectException{
