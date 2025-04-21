@@ -1,7 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.InvalidPlayerException;
+import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
+import it.polimi.ingsw.galaxytrucker.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

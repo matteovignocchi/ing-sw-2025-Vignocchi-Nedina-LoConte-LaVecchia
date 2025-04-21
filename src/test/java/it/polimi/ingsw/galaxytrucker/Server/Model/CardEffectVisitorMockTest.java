@@ -1,10 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectVisitor;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.FlightCardBoard.FlightCardBoard;
+import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.Model.Card.*;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

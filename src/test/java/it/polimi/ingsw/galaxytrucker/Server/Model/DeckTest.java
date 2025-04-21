@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.*;
+import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

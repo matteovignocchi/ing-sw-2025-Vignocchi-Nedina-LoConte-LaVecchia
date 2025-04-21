@@ -1,14 +1,14 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Card.CardEffectException;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

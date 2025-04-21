@@ -1,10 +1,9 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
 
-import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayerTest {
@@ -116,7 +115,7 @@ class PlayerTest {
         MultiJoint multiJoint1 = new MultiJoint(1,2,1,2);
         MultiJoint multiJoint2 = new MultiJoint(2,1,2,1);
         MultiJoint multiJoint3 = new MultiJoint(0,1,2,3);
-        HousingUnit h = new HousingUnit(3,3,3,3 ,Human.HUMAN);
+        HousingUnit h = new HousingUnit(3,3,3,3 , Human.HUMAN);
         player.addTile(2,3,h);
         player.addTile(1,1,multiJoint0);
         player.addTile(1,2,multiJoint0);

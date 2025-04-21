@@ -1,0 +1,7 @@
+package it.polimi.ingsw.galaxytrucker.Model.Tile;
+
+public class EmptyHousingList extends RuntimeException {
+    public EmptyHousingList(String message) {
+        super(message);
+    }
+}
