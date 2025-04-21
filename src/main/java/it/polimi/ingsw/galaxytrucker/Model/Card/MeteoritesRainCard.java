@@ -16,7 +16,7 @@ public class MeteoritesRainCard implements Card{
     private final List<Boolean> size;
 
     /**
-     * Constructs an {@code MeteoritesRainCard} with the specified values.
+     * MeteoritesRainCard constructor with specific values.
      * @param directions: list of attack directions for all players.
      * @param size:Attack size list for all players.
      */
@@ -38,7 +38,15 @@ public class MeteoritesRainCard implements Card{
             visitor.visit(this);
     }
 
+    /**
+     * @return list of attack directions shown on the card.
+     */
+
     public List<Integer> getMeteorites_directions(){ return new ArrayList<>(directions); }
+
+    /**
+     * @return attack size list shown on the card.
+     */
 
     public List<Boolean> getMeteorites_size(){ return new ArrayList<>(size); }
 }

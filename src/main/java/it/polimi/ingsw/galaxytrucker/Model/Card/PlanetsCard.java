@@ -17,7 +17,7 @@ public class PlanetsCard implements Card {
     private final int days;
 
     /**
-     * Constructs an {@code PlanetsCard} with the specified values.
+     * PlanetsCard constructor with specific values.
      * @param reward_goods: List of lists of goods, in order from first to last planet.
      * @param days: flight days lost by players who decide to land on a planet.
      */
@@ -44,10 +44,14 @@ public class PlanetsCard implements Card {
             visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
+
     public int getDays() {return days;}
 
     /**
-     * @return A copy of the list of goods lists
+     * @return A copy of the list of goods lists shown on the card.
      */
 
     public List<List<Colour>> getRewardGoods() {

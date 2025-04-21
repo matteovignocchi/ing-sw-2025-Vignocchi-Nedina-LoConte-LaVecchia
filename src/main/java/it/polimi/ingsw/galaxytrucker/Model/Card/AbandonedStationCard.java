@@ -18,7 +18,7 @@ public class AbandonedStationCard implements Card {
     private final List<Colour> station_goods;
 
     /**
-     * Constructs an {@code AbandonedStationCard} with the specified values.
+     * AbandonedStationCard constructor with specific values.
      * @param num_crewmates: crewmates needed to be able to decide to redeem the rewards.
      * @param days: flight days that the player who accepts loses.
      * @param station_goods: List of goods, the reward for those who accept.
@@ -45,9 +45,21 @@ public class AbandonedStationCard implements Card {
             visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
+
     public int getDays(){ return days; }
 
+    /**
+     * @return number of crewmates shown on the card.
+     */
+
     public int getNumCrewmates(){ return num_crewmates; }
+
+    /**
+     * @return list of goods shown on the card.
+     */
 
     public List<Colour> getStationGoods(){ return new ArrayList<>(station_goods); }
 }

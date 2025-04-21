@@ -5,12 +5,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The DeckManager class is responsible for creating playable decks of adventure cards using cards loaded
+ * via the CardGeneration class. This class can be used by the game controller to generate shuffled decks.
+ * @author Francesco Lo Conte && Gabriele La Vecchia
+ */
+
 public class DeckManager {
     private final CardGeneration generator;
+
+    /**
+     * Constructs a new DeckManager by initializing a CardGeneration instance to load cards from JSON resources.
+     * @throws IOException: if loading card data files fails.
+     */
 
     public DeckManager() throws IOException {
         this.generator = new CardGeneration();
     }
+
+    /**
+     * Creates a demo deck to use for simplified or demo games.
+     * The deck is made up of all the cards in the demo JSON, shuffled randomly.
+     *
+     * @return a "Deck" object containing the shuffled demo cards.
+     */
 
     public Deck CreateDemoDeck() {
         List<Card> special = new ArrayList<>(generator.getDemoCards());
@@ -19,6 +37,13 @@ public class DeckManager {
         deck.addAll(special);
         return deck;
     }
+
+    /**
+     * Creates 4 "Second level" decks, each consisting of 2 level 2 cards and 1 level 1 card.
+     * The method ensures that the cards are shuffled before generating the deck.
+     * @return a "List<Deck>" containing 4 individual decks
+     * @throws CardEffectException if there are not enough cards to generate the decks
+     */
 
     public List<Deck> CreateSecondLevelDeck() throws CardEffectException {
         int numberOfDecks = 4;

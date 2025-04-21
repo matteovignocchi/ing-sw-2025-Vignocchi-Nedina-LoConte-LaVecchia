@@ -20,7 +20,7 @@ public class PiratesCard implements Card {
     private final List<Boolean> shots_size;
 
     /**
-     * Constructs an {@code PiratesCard} with the specified values.
+     * PiratesCard constructor with specific values.
      * @param fire_power: firepower needed to beat the pirate card.
      * @param days: flight days that the player who accepts loses.
      * @param credits: credits earned by the player who accepts.
@@ -55,13 +55,33 @@ public class PiratesCard implements Card {
             visitor.visit(this);
     }
 
+    /**
+     * @return firepower shown on the card.
+     */
+
     public int getFirePower(){return fire_power;}
+
+    /**
+     * @return flight days shown on the card.
+     */
 
     public int getDays(){return days;}
 
+    /**
+     * @return credits shown on the card.
+     */
+
     public int getCredits(){return credits;}
 
+    /**
+     * @return list of attack directions shown on the card.
+     */
+
     public List<Integer> getShots_directions(){return new ArrayList<>(shots_directions);}
+
+    /**
+     * @return attack size list shown on the card.
+     */
 
     public List<Boolean> getShots_size(){return new ArrayList<>(shots_size);}
 }

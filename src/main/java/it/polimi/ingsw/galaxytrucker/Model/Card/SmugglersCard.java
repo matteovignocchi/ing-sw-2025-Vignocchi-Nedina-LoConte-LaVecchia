@@ -19,7 +19,7 @@ public class SmugglersCard implements Card{
     private final List<Colour> reward_goods;
 
     /**
-     * Constructs an {@code SmugglersCard} with the specified values.
+     * AbandonedShipCard constructor with specific values.
      * @param days: flight days lost by the player who defeats the smugglers and accepts the reward.
      * @param fire_power: firepower needed to beat the smugglers card.
      * @param num_removed_goods: number of goods lost by the player who defeats the smugglers and accepts the reward.
@@ -49,12 +49,27 @@ public class SmugglersCard implements Card{
         visitor.visit(this);
     }
 
+    /**
+     * @return flight days shown on the card.
+     */
 
     public int getDays(){ return days; }
 
+    /**
+     * @return firepower shown on the card.
+     */
+
     public int getFirePower(){ return fire_power; }
 
+    /**
+     * @return number of goods to delete in case of penalty shwon on the card.
+     */
+
     public int getNumRemovedGoods() { return num_removed_goods; }
+
+    /**
+     * @return list of goods shown on the card.
+     */
 
     public List<Colour> getRewardGoods() { return new ArrayList<>(reward_goods); }
 }

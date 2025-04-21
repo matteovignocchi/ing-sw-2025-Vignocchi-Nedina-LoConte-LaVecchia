@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
- * Card interface
+ * Card interface that represents a generic adventure card in the game.
+ * It also supports polymorphic deserialization from JSON using Jackson.
+ * The "JsonTypeInfo" and "JsonSubTypes" annotations enable the ObjectMapper
+ * to correctly instantiate the specific card subclass based on the "type" property in the JSON file.
  * @author Gabriele La vecchia && Francesco Lo Conte
  */
 
@@ -28,5 +31,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = AbandonedStationCard.class, name = "AbandonedStationCard")
 })
 public interface Card {
+
+    /**
+     *This method allows the Visitor pattern to be used by allowing an external "CardVisitor" to perform operations
+     * based on the specific card type. Each card implementation will override this method
+     * by passing itself as an argument.
+     * @param visitor:  the visitor that will handle the card effect.
+     * @throws CardEffectException: custom exception that handles an error while executing the card effect.
+     */
+
     void accept (CardVisitor visitor) throws CardEffectException;
 }
