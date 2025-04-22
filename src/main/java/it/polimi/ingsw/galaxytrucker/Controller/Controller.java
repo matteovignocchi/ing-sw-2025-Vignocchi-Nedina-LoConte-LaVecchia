@@ -8,7 +8,7 @@ import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerExceptio
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
-import it.polimi.ingsw.galaxytrucker.Server.Model.*;
+import it.polimi.ingsw.galaxytrucker.Model.*;
 
 import it.polimi.ingsw.galaxytrucker.View.PlayerView;
 
