@@ -59,6 +59,7 @@ public class VirtualServerRMI extends UnicastRemoteObject implements VirtualServ
 
     @Override
     public void logout(String username) throws RemoteException {
+
     }
 
     @Override
