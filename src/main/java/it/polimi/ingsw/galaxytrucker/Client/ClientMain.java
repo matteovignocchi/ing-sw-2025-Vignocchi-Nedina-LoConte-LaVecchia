@@ -3,6 +3,9 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
+import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,36 +18,50 @@ import java.util.Scanner;
 public class ClientMain {
 
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
-        final String serverName = "GameServer";
         Scanner input = new Scanner(System.in);
-        System.out.println("Choose the type of protocol : 1 : RMI ; 2 : SOCKET");
-        int choice = input.nextInt();
-        if(choice == 1) {
-            Registry registry = LocateRegistry.getRegistry(args[0], 1234);
-            VirtualServerRmi server = (VirtualServerRmi) registry.lookup(serverName);
-            //new VirtualClientRmi(server).run();
-        }else{
-            String host = args[0];
-            int port = Integer.parseInt(args[1]);
+        System.out.println("Choose the type of protocol: 1 - RMI ; 2 - SOCKET");
+        int protocolChoice = input.nextInt();
+        System.out.println("Choose the type of view: 1 - TUI ; 2 - GUI");
+        int viewChoice = input.nextInt();
 
-            Socket serverSocket = new Socket(host, port);
+        try{
+            View view;
 
-            InputStreamReader socketRx = new InputStreamReader(serverSocket.getInputStream());
-            OutputStreamWriter socketTx = new OutputStreamWriter(serverSocket.getOutputStream());
+            if (viewChoice == 1) {
+                view = new TUIView();
+            } else {
+                view = new GUIView();
+            }
+            if (protocolChoice == 1) {
 
-            new VirtualClientSocket(new BufferedReader(socketRx), new BufferedWriter(socketTx)).run();
+                String host = args.length > 0 ? args[0] : "localhost";
+                Registry registry = LocateRegistry.getRegistry(host, 1234);
+                VirtualServerRmi server = (VirtualServerRmi) registry.lookup("GameServer");
+
+                VirtualClientRmi client = new VirtualClientRmi(server, view);
+                //server.registerClient(client);
+                view.start();
+
+            }else {
+                // SOCKET
+                String host = args.length > 0 ? args[0] : "localhost";
+                int port = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
+
+                Socket socket = new Socket(host, port);
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+                VirtualClientSocket client = new VirtualClientSocket(in, out, view);
+                new Thread(client).start();
+                view.start(); // oppure client.start() se centralizzi
+
+            }
+
+        } catch (Exception e) {
+            System.err.println("Client error: " + e.getMessage());
+            e.printStackTrace();
         }
-        System.out.println("Choose the type of view ");
-        int choice2 = input.nextInt();
-
     }
-
-
-
-
-
-
-
 }
 
 //public class RMIClient extends UnicastRemoteObject implements VirtualViewRmi {

@@ -14,7 +14,7 @@ public interface View {
     public void askCordinate();
     public void askindex();
     public void setint();
-
+    public void start();
     public void printFirePower(float power);
     public void printEnginePower(int power);
     public void printNumOfCredits(int credits);
