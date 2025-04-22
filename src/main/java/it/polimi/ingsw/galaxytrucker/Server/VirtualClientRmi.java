@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.MultiJoint;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
@@ -23,51 +24,48 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         this.view = view;
     }
 
+    //PARTE VIEW
     public void setView(View view) {
         this.view = view;
     }
 
     @Override
-    public void inform(String message) throws RemoteException {
+    public void showUpdate() throws RemoteException {
+
 
     }
 
     @Override
-    public void showUpdate() throws RemoteException {
-
+    public void inform(String message) throws RemoteException {
+        this.view.inform(message);
     }
+
 
     @Override
     public void reportError(String error) throws RemoteException {
-
+        this.view.reportError(error);
     }
 
     @Override
     public boolean askDecision() throws RemoteException {
-        return true;
-
+        return this.view.ask();
     }
 
     @Override
     public int askIndex() throws RemoteException {
-        return 2;
+        return this.view.askindex();
 
     }
 
     @Override
     public int[] askCoordinates() throws RemoteException {
-        return new int[] {1,2};
+        return this.view.askCordinate();
 
     }
 
     @Override
-    public void printList(List<Objects> pile) throws RemoteException {
-
-    }
-
-    @Override
-    public void setFase(GameFase fase) throws RemoteException {
-
+    public String askString() throws Exception {
+        return this.view.askString();
     }
 
     @Override
@@ -76,62 +74,84 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
+    public void printList(List<Objects> pile) throws RemoteException {
+
+    }
+
+
+    @Override
+    public void printPlayerDashboard(Tile[][] dashboard) throws RemoteException {
+
+    }
+
+    //FASI DI GIOCO
+    @Override
+    public void updateGameState(GameFase fase) throws RemoteException{
+        this.gameFase = fase;
+        view.updateState(fase);
+    }
+
+
+    //PARTI DI GIOCO
+
+    @Override
+    public void startMach() throws RemoteException {
 
     }
 
     @Override
-    public String askString() throws Exception {
-        return "";
-    }
-
-    @Override
-    public void startMach() throws Exception {
-
-    }
-
-    @Override
-    public boolean sendLogin(String username, String password) throws Exception {
-        return server.authenticate(username, password);
-    }
-
-    @Override
-    public void sendGameRequest(String message) throws Exception {
-        server.handleGameRequest(message);
-    }
-
-    @Override
-    public String waitForResponce() throws Exception {
-        return server.waitForResponnse();
-    }
-
-    @Override
-    public String waitForGameUpadate() throws Exception {
-        return "";
-    }
-
-    @Override
-    public List<String> requestGameList() throws Exception {
+    public List<String> requestGameList() throws RemoteException {
         return server.getAvaibleGames();
     }
 
     @Override
-    public List<String> getAvailableAction() throws Exception {
+    public List<String> getAvailableAction() throws RemoteException {
         return List.of();
     }
 
     @Override
-    public String sendAction(String message) throws Exception {
-        return server.handlePlayerAction(message);
+    public List<Tile> getPileOfTile() throws RemoteException {
+        return List.of();
     }
 
     @Override
-    public GameFase getCurrentGameState() throws Exception {
+    public GameFase getCurrentGameState() throws RemoteException {
         return gameFase;
     }
 
-    public void updateGamesState(GameFase gameFase){
-        this.gameFase = gameFase;
-        view.updateState(gameFase);
+    @Override
+    public Tile getTile(int i) throws RemoteException {
+        return Tile tile = new MultiJoint(0,3,1,5);
     }
+
+
+
+    //PARTE COMUNICAZIONE CON IL SERVER
+
+    @Override
+    public boolean sendLogin(String username, String password) throws RemoteException {
+        return server.authenticate(username, password);
+    }
+
+    @Override
+    public void sendGameRequest(String message) throws RemoteException {
+        server.handleGameRequest(message);
+    }
+
+    @Override
+    public String waitForResponce() throws RemoteException {
+        return server.waitForResponse();
+    }
+
+    @Override
+    public String waitForGameUpadate() throws RemoteException {
+        return "";
+    }
+
+    @Override
+    public String sendAction(String message) throws RemoteException {
+        return server.handlePlayerAction(message);
+    }
+
+
 }

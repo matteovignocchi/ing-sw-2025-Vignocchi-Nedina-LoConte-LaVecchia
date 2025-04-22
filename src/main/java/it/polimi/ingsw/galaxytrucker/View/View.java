@@ -10,10 +10,10 @@ import java.util.List;
 public interface View {
 
     void inform(String message);
-    void ask(String message);
-    void askCordinate();
-    void askindex();
-    void setint();
+    boolean ask();
+    int[] askCordinate();
+    int askindex();
+    void setInt();
     void start();
     void printFirePower(float power);
     void printEnginePower(int power);

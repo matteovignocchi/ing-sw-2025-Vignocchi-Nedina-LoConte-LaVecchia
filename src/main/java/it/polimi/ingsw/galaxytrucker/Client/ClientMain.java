@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
@@ -16,6 +17,9 @@ import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Scanner;
 
+import static it.polimi.ingsw.galaxytrucker.GameFase.*;
+import static java.lang.String.valueOf;
+
 public class ClientMain {
 
     private static GameFase gameFase;
@@ -26,16 +30,13 @@ public class ClientMain {
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
 
         Scanner input = new Scanner(System.in);
-        System.out.println("Choose the type of protocol: 1 - RMI ; 2 - SOCKET");
+        System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
         int protocolChoice = input.nextInt();
-
-        System.out.println("Choose the type of view: 1 - TUI ; 2 - GUI");
+        System.out.println("> Choose the type of view:\n 1 - TUI \n2 - GUI");
         int viewChoice = input.nextInt();
 
         try{
-
             view = (viewChoice == 1) ? new TUIView() : new GUIView();
-
             String host = args.length > 0 ? args[0] : "localhost";
 
             if (protocolChoice == 1) {
@@ -45,39 +46,41 @@ public class ClientMain {
                 server.registerClient(virtualClient);
                 view.start();
 
-            }else {
+            }else{
                 int port = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
                 virtualClient = new VirtualClientSocket(host , port , view);
                 view.start();
+
             }
 
             isConnected = true;
             view.inform("Connected with success");
-            view.inform("\n-----LOGIN-----");
+            view.inform("-----LOGIN-----");
 
             while(isConnected){
+                view.inform("Insert your username and password:");
                 String username = virtualClient.askString();
                 String password = virtualClient.askString();
-
                 boolean LoginSuccess = virtualClient.sendLogin(username, password);
                 if(LoginSuccess){
                     view.inform("Login successful");
                     break;
+
                 }else{
-                    view.reportError("credenziali non valide");
+                    view.reportError("Credential not valid");
+
                 }
             }
 
             while(isConnected){
-                view.inform("menu del server");
-                view.inform("1. Crea nuova partita");
-                view.inform("2 . unisci a una partita");
-                view.inform("3 . logOut");
-
+                view.inform("-----MENU-----");
+                view.inform("1. Create new game");
+                view.inform("2. Enter in a game");
+                view.inform("3. Logout");
                 int choice = virtualClient.askIndex();
                 switch (choice) {
                     case 1:
-                        createnewgame();
+                        createNewGame();
                         break;
                     case 2:
                         joinExistingGame();
@@ -85,21 +88,21 @@ public class ClientMain {
                     case 3:
                         System.exit(0);
                     default:
-                        view.inform("scelta non valida");
+                        view.inform("Choice not valid");
                 }
             }
-
         } catch (Exception e) {
-            System.err.println("Client error: " + e.getMessage());
+            System.err.println("> Client error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void setGameFase(GameFase gameFase) {
-        this.gameFase = gameFase;
+        ClientMain.gameFase = gameFase;
     }
 
-    private static void createnewgame() throws Exception{
+    private static void createNewGame() throws Exception{
+
         view.inform("Creating New Game");
         virtualClient.sendGameRequest("CREATE");
 
@@ -107,7 +110,7 @@ public class ClientMain {
         view.inform(response);
 
         if(response.contains("create")){
-            wairForPlayers();
+            waitForPlayers();
         }
     }
 
@@ -116,19 +119,19 @@ public class ClientMain {
         while(true){
             String status = virtualClient.waitForGameUpadate();
             if(status.contains("start")){
-                startgame();
+                startGame();
                 break;
             }
             view.inform(status);
         }
     }
 
-    private static void wairForPlayers() throws Exception{
+    private static void waitForPlayers() throws Exception{
         view.inform("waiting for min 2 player in lobby");
         while(true){
             String status = virtualClient.waitForGameUpadate();
             if(status.contains("Start")){
-                startgame();
+                startGame();
                 break;
             }
             view.inform(status);
@@ -136,19 +139,18 @@ public class ClientMain {
     }
 
     private static void joinExistingGame() throws Exception{
-        view.inform("\n partite disponibili");
-        List<String> avaibleGames = virtualClient.requestGameList();
-        for(int i = 0 ; i < avaibleGames.size(); i++){
-            view.inform((i+1) + "." + avaibleGames.get(i));
+        view.inform("Available Games");
+        List<String> availableGames = virtualClient.requestGameList();
+        for(int i = 0 ; i < availableGames.size(); i++){
+            view.inform((i+1) + "." + availableGames.get(i));
         }
         int choice = virtualClient.askIndex();
-        virtualClient.sendGameRequest("JOIN_" + avaibleGames.get(choice-1));
+        virtualClient.sendGameRequest("JOIN_" + availableGames.get(choice-1));
         String response = virtualClient.waitForResponce();
         view.inform(response);
         if(response.contains("join")){
             waitGameStart();
         }
-
 
     }
 
@@ -156,11 +158,12 @@ public class ClientMain {
 
 
     //metodo gestione partita
-    private static void startgame() throws Exception{
+    private static void startGame() throws Exception{
         GameFase gameState =  virtualClient.getCurrentGameState();
         switch (gameState){
             case FASE0 -> handleMainActionPhase();
-
+            case FASE1 -> handleChoosingCoveredTile();
+            case FASE2 -> handleBuildingPhase();
         }
     }
 
@@ -168,6 +171,9 @@ public class ClientMain {
 
     //metodo gestione di che posso fare
     private static void handleMainActionPhase() throws Exception{
+        //chiedo ad oleg domani, prima non devo fare l'update della view perchè prima vedo
+        //la mainActionPhase poi scelgo cosa fare
+        view.updateState(FASE0);
         view.inform("Possible actions:");
         List<String> possibleActions = virtualClient.getAvailableAction();
 
@@ -175,86 +181,42 @@ public class ClientMain {
             view.inform((i+1)+"."+possibleActions.get(i));
         }
         int choice = virtualClient.askIndex();
+        //chiedere perchè send action non è un void ma è un string
         String result = virtualClient.sendAction(possibleActions.get(choice-1));
     }
 
+    private static void handleChoosingCoveredTile() throws Exception{
+        view.updateState(FASE1);
+        //per fare più easy possiamo che ci da soltanto il numero di tessere coperte, che tanto passo da 151 circa,
+        //quindi mandare ogni volta la lista che risulta pesante
+        List<Tile> pile = virtualClient.getPileOfTile();
+        view.printList("pile", pile);
+        //VERSIONE 2
+        //int totalTile = virtualClient.getNumOfTile();
+        //view.printCovered(totalTile);
+        view.inform("Choose one of covered tile and give the index");
+        int index = virtualClient.askIndex();
+        //l'ho pensato così forse è sbagliato
+        Tile tile = virtualClient.getTile(index -1);
+        view.printTile(tile);
+        view.inform("Possible actions:");
+        List<String> possibleActions = virtualClient.getAvailableAction();
+        for(int i = 0 ; i < possibleActions.size(); i++){
+            view.inform((i+1)+"."+possibleActions.get(i));
+        }
+        int choice = virtualClient.askIndex();
+        String result = virtualClient.sendAction(possibleActions.get(choice -1));
 
+    }
 
-
-
-
-
+    private static void handleBuildingPhase() throws Exception{
+        view.updateState(FASE2);
+        view.inform("Choose one of slots and give the indexes");
+        int[] coordinate = view.askCordinate();
+        //qua credo ci vada il send coordinates però dobbiamo creare il metodo
+    }
 
 
 }
 
 
-//public class RMIClient extends UnicastRemoteObject implements VirtualViewRmi {
-//    final VirtualServerRmi server;
-//    //View view;
-//    //view
-//    public RMIClient(VirtualServerRmi server) throws RemoteException {
-//        super();
-//        this.server = server;
-//    }
-//
-//
-//
-//    private void run() throws RemoteException {
-//        //this.server.connect(this);
-//        //this.graphicInterface(type);
-//
-//    }
-//
-//    private void startInterface(String type) throws RemoteException {
-//        PlayerView view;
-//        boolean flag = true;
-//        while(flag) {
-//            if (type.equalsIgnoreCase("TUI")) {
-//                //view = new TUIView(service, playerId);
-//                flag = false;
-//            } else if(type.equalsIgnoreCase("GUI")) {
-//                //view = new GUIView(service, playerId);
-//                flag = false;
-//            } else {
-//                reportError("The response entered is invalid. Try again:");
-//            }
-//        }
-//
-//        //view.start();
-//    }
-//
-//
-//    //metodo send move, che chiama la view il suo metodo send move, che chiama il metodo send move del virtual server che lo manda al controller
-//    public void sendMove() throws RemoteException {//qui generico
-//        //virtualServerRmi.sendMove(playerId, move);
-//
-//    }
-//
-//    @Override
-//    public void showUpdate() throws RemoteException {
-//        //penso di mettere un tipo, cpsì fa print dashboard eccc
-//    }
-//
-//    @Override
-//    public void reportError(String error) throws RemoteException {
-//        //gestire datarace per il report error, forse così va bene ma non sono sicuro
-//        synchronized (System.err){
-//            //view.reportError(error);
-//        }
-//    }
-//
-//    @Override
-//    public void ask(String question) throws RemoteException {
-//        synchronized (System.out){
-//            //view.inform(question);
-//        }
-//
-//    }
-//
-//    @Override
-//    public void printPileOfTile(List<Tile> pile) throws RemoteException {
-//        //view.printTiles(tiles); la TUI o GUI gestisce la stampa
-//    }
-//
-//}

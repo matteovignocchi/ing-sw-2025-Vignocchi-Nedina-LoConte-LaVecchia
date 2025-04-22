@@ -13,22 +13,23 @@ public class GUIView implements View {
     }
 
     @Override
-    public void ask(String message) {
+    public boolean ask() {
+        return false;
+    }
+
+
+    @Override
+    public int[] askCordinate() {
 
     }
 
     @Override
-    public void askCordinate() {
+    public int askindex() {
 
     }
 
     @Override
-    public void askindex() {
-
-    }
-
-    @Override
-    public void setint() {
+    public void setInt() {
 
     }
 
@@ -84,6 +85,21 @@ public class GUIView implements View {
 
     @Override
     public void printLap(int i) {
+
+    }
+
+    @Override
+    public String askString() {
+        return "";
+    }
+
+    @Override
+    public void reportError(String message) {
+
+    }
+
+    @Override
+    public void updateState(GameFase gameFase) {
 
     }
 }

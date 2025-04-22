@@ -15,7 +15,7 @@ public interface VirtualView {
     int askIndex() throws Exception;
     int[] askCoordinates() throws Exception;
     void printList(List<Objects> pile) throws Exception;
-    void setFase(GameFase fase) throws Exception;
+    void updateGameState(GameFase fase) throws Exception;
     void printCard(Card card) throws Exception;
     void printPlayerDashboard(Tile[][] dashboard) throws Exception;
     String askString() throws Exception;
@@ -26,7 +26,8 @@ public interface VirtualView {
     String waitForGameUpadate() throws Exception;
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
+    List<Tile> getPileOfTile() throws Exception;
     String sendAction(String message) throws Exception;
     GameFase getCurrentGameState() throws Exception;
-
+    Tile getTile(int i) throws Exception;
 }
