@@ -11,53 +11,55 @@ import java.util.List;
 import java.util.Objects;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
-    VirtualServerRmi virtualServerRmiClient;
+    final VirtualServerRmi virtualServerRmiClient;
+
     public VirtualClientRmi(VirtualServerRmi virtualServerRmi) throws RemoteException {
         super();
+        this.virtualServerRmiClient = virtualServerRmi;
     }
 
     @Override
-    public void inform(String message) throws Exception {
-
-    }
-
-    @Override
-    public void showUpdate() throws Exception {
+    public void inform(String message) throws RemoteException {
 
     }
 
     @Override
-    public void reportError(String error) throws Exception {
+    public void showUpdate() throws RemoteException {
 
     }
 
     @Override
-    public void askDecision() throws Exception {
+    public void reportError(String error) throws RemoteException {
 
     }
 
     @Override
-    public void askIndex() throws Exception {
+    public void askDecision() throws RemoteException {
 
     }
 
     @Override
-    public void askCoordinates() throws Exception {
+    public void askIndex() throws RemoteException {
 
     }
 
     @Override
-    public void printList(List<Objects> pile) throws Exception {
+    public void askCoordinates() throws RemoteException {
 
     }
 
     @Override
-    public void setFase(GameFase fase) throws Exception {
+    public void printList(List<Objects> pile) throws RemoteException {
 
     }
 
     @Override
-    public void printCard(Card card) throws Exception {
+    public void setFase(GameFase fase) throws RemoteException {
+
+    }
+
+    @Override
+    public void printCard(Card card) throws RemoteException {
 
     }
 }
