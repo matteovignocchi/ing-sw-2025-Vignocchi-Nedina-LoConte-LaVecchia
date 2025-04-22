@@ -13,6 +13,7 @@ public interface VirtualServer {
     void createNewGame() throws Exception;
     void enterGame(int id) throws Exception;
     void logout() throws Exception;
+    void drawCard() throws Exception;
 
     //ci saranmno i vari metodi di send delle informazioni
 
