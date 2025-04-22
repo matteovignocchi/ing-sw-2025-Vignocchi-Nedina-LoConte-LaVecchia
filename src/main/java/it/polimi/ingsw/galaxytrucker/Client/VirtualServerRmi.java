@@ -25,14 +25,14 @@ import java.util.Map;
 
 //TODO: ho inserito alcuni metodi, ma penso che dobbiamo ragionare insieme su quelli che mancano
 
-public class VirtualServerRMI extends UnicastRemoteObject implements VirtualServer {
+public class VirtualServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     private final Controller controller;
     private final Map<String, Integer> userToId;
     private int id_player;
     //la uso per fare la traduzione che ho pensato (vedi commento in VirtualServer)
 
-    public VirtualServerRMI(Controller controller) throws RemoteException {
+    public VirtualServerRmi(Controller controller) throws RemoteException {
         this.controller = controller;
         this.userToId = new HashMap<>();
         this.id_player = 0;
@@ -89,5 +89,6 @@ public class VirtualServerRMI extends UnicastRemoteObject implements VirtualServ
     @Override
     public void sendPlayerDash(String username, int dash) throws RemoteException {
     }
+
 }
 
