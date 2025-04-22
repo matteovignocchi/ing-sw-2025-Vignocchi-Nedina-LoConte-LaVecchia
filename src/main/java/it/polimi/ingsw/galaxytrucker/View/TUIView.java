@@ -74,7 +74,7 @@ public class TUIView implements View {
 
 
     //per ora lascio il server come int
-    public TUIView() {
+    public TUIView()  {
 
     }
 

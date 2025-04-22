@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
@@ -8,53 +9,84 @@ import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.*;
-import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.List;
 import java.util.Scanner;
 
 public class ClientMain {
 
+    private static GameFase gameFase;
+    private static View view;
+    private static VirtualView virtualClient;
+    private static boolean isConnected;
+
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
+
         Scanner input = new Scanner(System.in);
         System.out.println("Choose the type of protocol: 1 - RMI ; 2 - SOCKET");
         int protocolChoice = input.nextInt();
+
         System.out.println("Choose the type of view: 1 - TUI ; 2 - GUI");
         int viewChoice = input.nextInt();
 
         try{
-            View view;
 
-            if (viewChoice == 1) {
-                view = new TUIView();
-            } else {
-                view = new GUIView();
-            }
+            view = (viewChoice == 1) ? new TUIView() : new GUIView();
+
+            String host = args.length > 0 ? args[0] : "localhost";
+
             if (protocolChoice == 1) {
-
-                String host = args.length > 0 ? args[0] : "localhost";
                 Registry registry = LocateRegistry.getRegistry(host, 1234);
                 VirtualServerRmi server = (VirtualServerRmi) registry.lookup("GameServer");
-
-                VirtualClientRmi client = new VirtualClientRmi(server, view);
-                //server.registerClient(client);
+                virtualClient = new VirtualClientRmi(server, view);
+                server.registerClient(virtualClient);
                 view.start();
 
             }else {
-                // SOCKET
-                String host = args.length > 0 ? args[0] : "localhost";
                 int port = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
+                virtualClient = new VirtualClientSocket(host , port , view);
+                view.start();
+            }
 
-                Socket socket = new Socket(host, port);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            isConnected = true;
+            view.inform("Connected with success");
+            view.inform("\n-----LOGIN-----");
 
-                VirtualClientSocket client = new VirtualClientSocket(in, out, view);
-                new Thread(client).start();
-                view.start(); // oppure client.start() se centralizzi
+            while(isConnected){
+                String username = virtualClient.askString();
+                String password = virtualClient.askString();
 
+                boolean LoginSuccess = virtualClient.sendLogin(username, password);
+                if(LoginSuccess){
+                    view.inform("Login successful");
+                    break;
+                }else{
+                    view.reportError("credenziali non valide");
+                }
+            }
+
+            while(isConnected){
+                view.inform("menu del server");
+                view.inform("1. Crea nuova partita");
+                view.inform("2 . unisci a una partita");
+                view.inform("3 . logOut");
+
+                int choice = virtualClient.askIndex();
+                switch (choice) {
+                    case 1:
+                        createnewgame();
+                        break;
+                    case 2:
+                        joinExistingGame();
+                        break;
+                    case 3:
+                        System.exit(0);
+                    default:
+                        view.inform("scelta non valida");
+                }
             }
 
         } catch (Exception e) {
@@ -62,7 +94,100 @@ public class ClientMain {
             e.printStackTrace();
         }
     }
+
+    public void setGameFase(GameFase gameFase) {
+        this.gameFase = gameFase;
+    }
+
+    private static void createnewgame() throws Exception{
+        view.inform("Creating New Game");
+        virtualClient.sendGameRequest("CREATE");
+
+        String response = virtualClient.waitForResponce();
+        view.inform(response);
+
+        if(response.contains("create")){
+            wairForPlayers();
+        }
+    }
+
+    private static void waitGameStart() throws Exception{
+        view.inform("Waiting for game started");
+        while(true){
+            String status = virtualClient.waitForGameUpadate();
+            if(status.contains("start")){
+                startgame();
+                break;
+            }
+            view.inform(status);
+        }
+    }
+
+    private static void wairForPlayers() throws Exception{
+        view.inform("waiting for min 2 player in lobby");
+        while(true){
+            String status = virtualClient.waitForGameUpadate();
+            if(status.contains("Start")){
+                startgame();
+                break;
+            }
+            view.inform(status);
+        }
+    }
+
+    private static void joinExistingGame() throws Exception{
+        view.inform("\n partite disponibili");
+        List<String> avaibleGames = virtualClient.requestGameList();
+        for(int i = 0 ; i < avaibleGames.size(); i++){
+            view.inform((i+1) + "." + avaibleGames.get(i));
+        }
+        int choice = virtualClient.askIndex();
+        virtualClient.sendGameRequest("JOIN_" + avaibleGames.get(choice-1));
+        String response = virtualClient.waitForResponce();
+        view.inform(response);
+        if(response.contains("join")){
+            waitGameStart();
+        }
+
+
+    }
+
+
+
+
+    //metodo gestione partita
+    private static void startgame() throws Exception{
+        GameFase gameState =  virtualClient.getCurrentGameState();
+        switch (gameState){
+            case FASE0 -> handleMainActionPhase();
+
+        }
+    }
+
+
+
+    //metodo gestione di che posso fare
+    private static void handleMainActionPhase() throws Exception{
+        view.inform("Possible actions:");
+        List<String> possibleActions = virtualClient.getAvailableAction();
+
+        for(int i = 0 ; i < possibleActions.size(); i++){
+            view.inform((i+1)+"."+possibleActions.get(i));
+        }
+        int choice = virtualClient.askIndex();
+        String result = virtualClient.sendAction(possibleActions.get(choice-1));
+    }
+
+
+
+
+
+
+
+
+
 }
+
 
 //public class RMIClient extends UnicastRemoteObject implements VirtualViewRmi {
 //    final VirtualServerRmi server;
