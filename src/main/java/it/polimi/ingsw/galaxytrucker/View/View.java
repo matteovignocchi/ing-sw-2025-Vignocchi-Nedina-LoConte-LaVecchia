@@ -10,10 +10,10 @@ import java.util.List;
 public interface View {
 
     public void inform(String message);
-    public boolean ask(String message);
-    public int[] askCordinate();
-    public int askindex();
-    public int setint();
+    public void ask(String message);
+    public void askCordinate();
+    public void askindex();
+    public void setint();
 
     public void printFirePower(float power);
     public void printEnginePower(int power);
@@ -25,7 +25,7 @@ public interface View {
     public void printList(String key,List<Object> list);
     public void printNewFase(GameFase gameFase);
     public void printLap(int i);
-
+    //meetodo per richiedere
 
 }
 
@@ -38,4 +38,4 @@ public interface View {
 //    void ask(String question) throws RemoteException;
 //    @Override
 //    void printPileOfTile(List<Tile> pile) throws RemoteException;
-//}
+//

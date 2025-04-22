@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.rmi.RemoteException;
 import java.util.Scanner;
@@ -12,7 +13,7 @@ public class ClientMain {
         Scanner input = new Scanner(System.in);
         System.out.println("Choose the type of protocol : 1 : RMI ; 2 : SOCKET");
         int choice = input.nextInt();
-        VirtualClient client = choice == 1 ? new VirtualClientRmi() : new VirtualClientSocket();
+        VirtualView client = choice == 1 ? new VirtualClientRmi() : new VirtualClientSocket();
         System.out.println("Choose the type of view ");
         int choice2 = input.nextInt();
 
