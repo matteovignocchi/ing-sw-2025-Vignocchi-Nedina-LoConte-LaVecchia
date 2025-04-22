@@ -9,22 +9,25 @@ import java.util.List;
 
 public interface View {
 
-    public void inform(String message);
-    public void ask(String message);
-    public void askCordinate();
-    public void askindex();
-    public void setint();
-    public void start();
-    public void printFirePower(float power);
-    public void printEnginePower(int power);
-    public void printNumOfCredits(int credits);
-    public void printListOfGoods(List<Colour> Goods);
-    public void printDashShip(Tile[][] ship);
-    public void printBonusBrown(boolean bonusBrown);
-    public void printBonusPurple(boolean bonusPurple);
-    public void printList(String key,List<Object> list);
-    public void printNewFase(GameFase gameFase);
-    public void printLap(int i);
+    void inform(String message);
+    void ask(String message);
+    void askCordinate();
+    void askindex();
+    void setint();
+    void start();
+    void printFirePower(float power);
+    void printEnginePower(int power);
+    void printNumOfCredits(int credits);
+    void printListOfGoods(List<Colour> Goods);
+    void printDashShip(Tile[][] ship);
+    void printBonusBrown(boolean bonusBrown);
+    void printBonusPurple(boolean bonusPurple);
+    void printList(String key,List<Object> list);
+    void printNewFase(GameFase gameFase);
+    void printLap(int i);
+    String askString();
+    void reportError(String message);
+    void updateState(GameFase gameFase);
     //meetodo per richiedere
 
 }

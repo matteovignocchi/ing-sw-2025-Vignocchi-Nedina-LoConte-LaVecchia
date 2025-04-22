@@ -2,10 +2,8 @@ package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-import it.polimi.ingsw.galaxytrucker.View.View;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import java.util.List;
 
 public interface VirtualServer {
     void sendIndex(int index) throws Exception;
@@ -31,6 +29,15 @@ public interface VirtualServer {
 
     //IN CONTROLLER VA FATTO IN MODO CHE INVECE CHE CHIAMARE I METODI SU PLAYERVIEW LI CHIAMI DIRETTAMENTI SUL PLAYER TRAMITE SERVER , NON AVRò PIù
     //LA LISTA DI VIEW MA DIRETTAMENTE CHIAMATE A METODI PUBBLICI DEI CLIENT
+
+
+    /// ///////////////////
+    //metodi aggiunti in post
+    boolean authenticate(String username, String password) throws Exception;
+    List<String> getAvaibleGames() throws Exception;
+    String handleGameRequest(String request) throws Exception;
+    String handlePlayerAction(String action) throws Exception;
+    String waitForResponnse() throws Exception;
 
 
 

@@ -18,4 +18,15 @@ public interface VirtualView {
     void setFase(GameFase fase) throws Exception;
     void printCard(Card card) throws Exception;
     void printPlayerDashboard(Tile[][] dashboard) throws Exception;
+    String askString() throws Exception;
+    void startMach() throws Exception;
+    public boolean sendLogin(String username, String password) throws Exception;
+    void sendGameRequest(String message) throws Exception;
+    String waitForResponce() throws Exception;
+    String waitForGameUpadate() throws Exception;
+    List<String> requestGameList() throws Exception;
+    List<String> getAvailableAction() throws Exception;
+    String sendAction(String message) throws Exception;
+    GameFase getCurrentGameState() throws Exception;
+
 }

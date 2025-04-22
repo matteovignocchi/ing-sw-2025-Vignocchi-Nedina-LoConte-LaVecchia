@@ -17,6 +17,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
     private final View view;
+    private GameFase gameFase;
+    private String lastResponse;
 
     public VirtualClientSocket(String host, int port , View view) throws IOException {
         this.socket = new Socket(host, port);
@@ -28,6 +30,24 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void run() {
+        try{
+            while(true){
+                Object received = in.readObject();
+                switch(received){
+                    case GameFase g ->
+                        gameFase = (GameFase) received;
+                    case String s ->{
+                        this.lastResponse = (String) received;
+                        this.notifyAll();
+                    }
+                    default -> throw new IllegalStateException("Unexpected value: " + received);
+                }
+            }
+        } catch (IOException e) {
+            view.reportError("CONNECTION ERROR: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            view.reportError("COMMUNICATION ERROR: " + e.getMessage());
+        }
 
     }
 
@@ -79,6 +99,62 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
 
+    }
+
+    @Override
+    public String askString() throws Exception {
+        return "";
+    }
+
+    @Override
+    public void startMach() throws Exception {
+
+    }
+
+    @Override
+    public boolean sendLogin(String username, String password) throws Exception {
+        out.writeObject(new LoginRequest(username , password));
+        return Boolean.parseBoolean(waitForResponce());
+
+    }
+
+    @Override
+    public void sendGameRequest(String message) throws Exception {
+
+    }
+
+    @Override
+    public  synchronized String waitForResponce() throws Exception {
+        while (lastResponse == null) wait();
+        String response = lastResponse;
+        lastResponse = null;
+        return response;
+    }
+
+    @Override
+    public String waitForGameUpadate() throws Exception {
+        return "";
+    }
+
+    @Override
+    public List<String> requestGameList() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public List<String> getAvailableAction() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public String sendAction(String message) throws Exception {
+//        out.writeObject(new ActionRequest(message) );
+        return waitForResponce();
+    }
+
+    @Override
+    public GameFase getCurrentGameState() throws Exception {
+        return null;
     }
 
 }
