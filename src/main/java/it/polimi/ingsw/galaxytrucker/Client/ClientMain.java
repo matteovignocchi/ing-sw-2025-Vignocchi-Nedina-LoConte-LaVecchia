@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
@@ -16,6 +17,8 @@ import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 public class ClientMain {
+
+    public GameFase gameFase;
 
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
         Scanner input = new Scanner(System.in);
@@ -49,6 +52,10 @@ public class ClientMain {
                 new VirtualClientSocket(host , port , view);
                 view.start();
             }
+
+
+
+
         } catch (Exception e) {
             System.err.println("Client error: " + e.getMessage());
             e.printStackTrace();

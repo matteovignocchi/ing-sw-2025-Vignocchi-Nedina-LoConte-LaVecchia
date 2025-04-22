@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.Client.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
@@ -43,17 +42,17 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void askDecision() throws RemoteException {
+    public boolean askDecision() throws RemoteException {
 
     }
 
     @Override
-    public void askIndex() throws RemoteException {
+    public int askIndex() throws RemoteException {
 
     }
 
     @Override
-    public void askCoordinates() throws RemoteException {
+    public int[] askCoordinates() throws RemoteException {
 
     }
 

@@ -6,7 +6,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -48,17 +47,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void askDecision() throws Exception {
+    public boolean askDecision() throws Exception {
 
     }
 
     @Override
-    public void askIndex() throws Exception {
+    public int askIndex() throws Exception {
 
     }
 
     @Override
-    public void askCoordinates() throws Exception {
+    public int[] askCoordinates() throws Exception {
 
     }
 

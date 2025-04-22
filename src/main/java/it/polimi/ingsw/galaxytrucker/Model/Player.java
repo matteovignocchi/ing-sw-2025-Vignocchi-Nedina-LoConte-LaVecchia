@@ -1,7 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
+//import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
 import java.util.*;
 
@@ -106,8 +106,8 @@ public class Player {
             validStatus[0][2]  = Status.FREE;
             validStatus[0][3]  = Status.BLOCK;
             validStatus[0][4]  = Status.FREE;
-            validStatus[0][5]  = Status.BLOCK;
-            validStatus[0][6]  = Status.BLOCK;
+            validStatus[0][5]  = Status.FREE;
+            validStatus[0][6]  = Status.FREE;
             //second row
             validStatus[1][0]  = Status.BLOCK;
             validStatus[1][1]  = Status.FREE;
@@ -372,6 +372,10 @@ public class Player {
         if (validStatus[x][y] == Status.FREE ) {
             Dash_Matrix[x][y] = t;
             validStatus[x][y] = Status.USED;
+
+            if(x == 0 && (y == 5 || y ==6)){
+                addToDiscardPile(t);
+            }
 
         } else {
             throw new IllegalArgumentException("Position not valid");

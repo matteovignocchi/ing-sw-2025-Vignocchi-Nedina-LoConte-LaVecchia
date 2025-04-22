@@ -18,7 +18,8 @@ public interface VirtualServer {
     void enterGame(int id) throws Exception;
     void logout() throws Exception;
     void drawCard() throws Exception;
-    void sendPlayerDash(int i) throws Exception;
+    void placeTile(Tile tile) throws Exception;
+    Tile[][] sendPlayerDash(int i) throws Exception;
     //metodo per il login  , lo chiama il client quando si connette e chiama gli altri metodi per fare cosine
     void registerClient(VirtualView client) throws Exception;
 
