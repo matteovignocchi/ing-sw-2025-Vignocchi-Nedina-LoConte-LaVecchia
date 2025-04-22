@@ -48,17 +48,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public boolean askDecision() throws Exception {
-
+       return true;
     }
 
     @Override
     public int askIndex() throws Exception {
-
+     return 2;
     }
 
     @Override
     public int[] askCoordinates() throws Exception {
-
+      return new int[] {1, 2};
     }
 
     @Override
