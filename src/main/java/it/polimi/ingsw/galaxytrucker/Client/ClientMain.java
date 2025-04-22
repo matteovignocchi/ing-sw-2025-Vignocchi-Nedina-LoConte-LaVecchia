@@ -39,24 +39,16 @@ public class ClientMain {
                 VirtualServerRmi server = (VirtualServerRmi) registry.lookup("GameServer");
 
                 VirtualClientRmi client = new VirtualClientRmi(server, view);
-                //server.registerClient(client);
+                server.registerClient(client);
                 view.start();
 
             }else {
                 // SOCKET
                 String host = args.length > 0 ? args[0] : "localhost";
                 int port = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
-
-                Socket socket = new Socket(host, port);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-                VirtualClientSocket client = new VirtualClientSocket(in, out, view);
-                new Thread(client).start();
-                view.start(); // oppure client.start() se centralizzi
-
+                new VirtualClientSocket(host , port , view);
+                view.start();
             }
-
         } catch (Exception e) {
             System.err.println("Client error: " + e.getMessage());
             e.printStackTrace();

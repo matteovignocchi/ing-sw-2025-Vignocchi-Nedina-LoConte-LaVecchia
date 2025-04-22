@@ -1,6 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -17,10 +19,17 @@ public interface VirtualServer {
     void logout() throws Exception;
     void drawCard() throws Exception;
     void sendPlayerDash(int i) throws Exception;
+    //metodo per il login  , lo chiama il client quando si connette e chiama gli altri metodi per fare cosine
+    void registerClient(VirtualView client) throws Exception;
+
     //ci saranmno i vari metodi di send delle informazioni
     //chiamo metodo virtual server -> il metodo in virtual server chiama il metodo in view per restituire le robe
 
     //che poi verrranno implementati in modo diverso in base al tipo di comunicazione
+
+
+    //IN CONTROLLER VA FATTO IN MODO CHE INVECE CHE CHIAMARE I METODI SU PLAYERVIEW LI CHIAMI DIRETTAMENTI SUL PLAYER TRAMITE SERVER , NON AVRò PIù
+    //LA LISTA DI VIEW MA DIRETTAMENTE CHIAMATE A METODI PUBBLICI DEI CLIENT
 
 
 
