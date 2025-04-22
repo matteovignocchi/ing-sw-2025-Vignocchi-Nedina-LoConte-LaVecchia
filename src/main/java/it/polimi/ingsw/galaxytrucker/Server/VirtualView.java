@@ -18,5 +18,5 @@ public interface VirtualView {
     void printList(List<Objects> pile) throws Exception;
     void setFase(GameFase fase) throws Exception;
     void printCard(Card card) throws Exception;
-
+    void printPlayerDashboard(Tile[][] dashboard) throws Exception;
 }

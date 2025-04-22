@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Client.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 
@@ -68,6 +69,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void printCard(Card card) throws RemoteException {
+
+    }
+
+    @Override
+    public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
 
     }
 }
