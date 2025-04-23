@@ -53,57 +53,53 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void inform(String message) throws Exception {
-
+        this.view.inform(message);
     }
 
     @Override
     public void showUpdate() throws Exception {
-
+        this.view.updateState(gameFase);
     }
 
     @Override
     public void reportError(String error) throws Exception {
-
+        this.view.reportError(error);
     }
 
     @Override
     public boolean askDecision() throws Exception {
-       return true;
+       return this.view.ask();
     }
 
     @Override
     public int askIndex() throws Exception {
-     return 2;
+        return this.view.askindex();
     }
 
     @Override
     public int[] askCoordinates() throws Exception {
-      return new int[] {1, 2};
-    }
-
-    @Override
-    public void printList(List<Objects> pile) throws Exception {
-
-    }
-
-    @Override
-    public void setFase(GameFase fase) throws Exception {
-
-    }
-
-    @Override
-    public void printCard(Card card) throws Exception {
-
-    }
-
-    @Override
-    public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
-
+        return this.view.askCordinate();
     }
 
     @Override
     public String askString() throws Exception {
-        return "";
+        return this.view.askString();
+    }
+
+    @Override
+    public void printList(List<Objects> pile) throws Exception {
+        this.view.printList("",pile);
+    }
+
+
+    @Override
+    public void printCard(Card card) throws Exception {
+        this.view.printCard(card);
+    }
+
+    @Override
+    public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
+        this.view.printDashShip(dashboard);
     }
 
     @Override
@@ -112,8 +108,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
+    public void updateGameState(GameFase fase) throws Exception {
+        this.gameFase = fase;
+        showUpdate();
+    }
+
+    @Override
     public boolean sendLogin(String username, String password) throws Exception {
-        out.writeObject(new LoginRequest(username , password));
+        ActionRequest loginRequest = new ActionRequest("LOGIN", new LoginRequest(username, password));
+        sendRequest(loginRequest);
         return Boolean.parseBoolean(waitForResponce());
 
     }
@@ -147,12 +150,23 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void sendAction(int key) throws Exception {
+    public List<Tile> getPileOfTile() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public String sendAction(String message) throws Exception {
 //        out.writeObject(new ActionRequest(message) );
+        return waitForResponce();
     }
 
     @Override
     public GameFase getCurrentGameState() throws Exception {
+        return null;
+    }
+
+    @Override
+    public Tile getTile(int i) throws Exception {
         return null;
     }
 
