@@ -351,7 +351,7 @@ public class Controller {
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
-                        x.printListOFGoods(c.getListOfGoods());
+                        x.printListOfGoods(c.getListOfGoods());
                         x.ask("seleziona indice da rimuovere");
                         int tmpint = x.askIndex();
                         Colour tmp = c.getListOfGoods().get(tmpint - 1);
@@ -619,7 +619,7 @@ public class Controller {
         }
     }
 
-    public boolean askPlayerDecision(String condition, Player id) {
+    public boolean askPlayerDecision(String condition, Player id) throws Exception {
         VirtualView x = map.get(id);
         return x.ask(condition);
     }
@@ -628,7 +628,7 @@ public class Controller {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(Player player) {
+    private boolean manageEnergyCell(Player player) throws Exception {
 
         VirtualView x = map.get(player);
         int[] coordinate = new int[2];
@@ -667,7 +667,7 @@ public class Controller {
         }
     }
 
-    public boolean checkProtection(int dir, int dir2, Player player) {
+    public boolean checkProtection(int dir, int dir2, Player player) throws Exception {
         boolean result = false;
         if (dir == 0) {
             boolean flag = true;
