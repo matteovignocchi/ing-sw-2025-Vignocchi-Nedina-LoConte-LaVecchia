@@ -30,7 +30,7 @@ public class classeDisupportoPerServer {
     }
     //questo è il metodo che vi chiamo ogni volta nelle fasi del gioco per sapere cosa posso e cosa non posso fare durante le fasi del gioco
     //va gestita la parte del sono il giocatore uno->si seguira una fase x in cui entra orima il giocatore 1 , poi il giocatore 2 etc...
-    public List<String> sendAvaibleGames(int id) throws RemoteException {
+    public List<String> sendAvailableChoices(int id) throws RemoteException {
         GameFase tmp = controller.getGameFase(id);
         List<String> listOfOptions = new ArrayList<>();
         switch (tmp) {

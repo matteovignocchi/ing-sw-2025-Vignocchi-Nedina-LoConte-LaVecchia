@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
@@ -10,7 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
-import java.util.Objects;
 
 public class VirtualClientSocket implements Runnable, VirtualView {
     private final Socket socket;
@@ -30,99 +30,137 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void run() {
-        try{
-            while(true){
-                Object received = in.readObject();
-                switch(received){
-                    case GameFase g ->
-                        gameFase = (GameFase) received;
-                    case String s ->{
-                        this.lastResponse = (String) received;
-                        this.notifyAll();
+        try {
+            while (true) {
+                Message msg = (Message) in.readObject();
+
+                switch (msg.getMessageType()) {
+                    case Message.TYPE_UPDATE -> {
+                        switch (msg.getOperation()) {
+                            case Message.OP_GET_BOARD -> {
+                                gameFase = (GameFase) msg.getPayload();
+                                showUpdate();
+                            }
+                        }
                     }
-                    default -> throw new IllegalStateException("Unexpected value: " + received);
+                    case Message.TYPE_RESPONSE -> {
+                        synchronized (this) {
+                            lastResponse = msg.getPayload() != null ? msg.getPayload().toString() : null;
+                            notifyAll();
+                        }
+                    }
+                    case Message.TYPE_ERROR -> {
+                        view.reportError("ERROR: " + msg.getPayload());
+                    }
+                    case Message.TYPE_NOTIFICATION -> {
+                        view.inform("NOTIFY: " + msg.getPayload());
+                    }
+                    default -> {
+                        view.reportError("Unknown message type: " + msg.getMessageType());
+                    }
                 }
             }
-        } catch (IOException e) {
-            view.reportError("CONNECTION ERROR: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            view.reportError("COMMUNICATION ERROR: " + e.getMessage());
+        } catch (IOException | ClassNotFoundException e) {
+            try {
+                view.reportError("Connection error: " + e.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
     }
 
     @Override
-    public void inform(String message) throws Exception {
+    public void inform(String message){
         this.view.inform(message);
     }
 
     @Override
-    public void showUpdate() throws Exception {
+    public void showUpdate(){
         this.view.updateState(gameFase);
     }
 
     @Override
-    public void reportError(String error) throws Exception {
+    public void reportError(String error){
         this.view.reportError(error);
     }
 
     @Override
-    public boolean askDecision() throws Exception {
-       return this.view.ask();
+    public boolean ask(String message){
+        return view.ask(message);
     }
 
     @Override
-    public int askIndex() throws Exception {
-        return this.view.askindex();
+    public void printListOfGoods(List<Colour> listOfGoods){
+        view.printListOfGoods(listOfGoods);
     }
 
     @Override
-    public int[] askCoordinates() throws Exception {
+    public int askIndex(){
+        return this.view.askIndex();
+    }
+
+    @Override
+    public int[] askCoordinates() {
         return this.view.askCordinate();
     }
 
     @Override
-    public String askString() throws Exception {
+    public String askString(){
         return this.view.askString();
     }
 
-    @Override
-    public void printList(List<Objects> pile) throws Exception {
-        this.view.printList("",pile);
-    }
 
 
     @Override
-    public void printCard(Card card) throws Exception {
+    public void printCard(Card card){
         this.view.printCard(card);
     }
 
     @Override
-    public void printPlayerDashboard(Tile[][] dashboard) throws Exception {
+    public void printListOfTileCovered(List<Tile> tiles) {
+
+    }
+
+    @Override
+    public void printListOfTileShown(List<Tile> tiles)  {
+
+    }
+
+    @Override
+    public void printPlayerDashboard(Tile[][] dashboard)  {
         this.view.printDashShip(dashboard);
     }
 
     @Override
-    public void startMach() throws Exception {
+    public void startMach() {
 
     }
 
     @Override
-    public void updateGameState(GameFase fase) throws Exception {
+    public void updateGameState(GameFase fase){
         this.gameFase = fase;
         showUpdate();
     }
 
     @Override
+    public boolean sendRegistration(String username, String password) throws Exception {
+        Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
+        sendRequest(registrationRequest);
+        return Boolean.parseBoolean(waitForResponce());
+    }
+
+    @Override
     public boolean sendLogin(String username, String password) throws Exception {
-        ActionRequest loginRequest = new ActionRequest("LOGIN", new LoginRequest(username, password));
+        Message loginRequest = Message.request(Message.OP_LOGIN, new LoginRequest(username, password));
         sendRequest(loginRequest);
         return Boolean.parseBoolean(waitForResponce());
 
     }
 
     @Override
-    public void sendGameRequest(String message) throws Exception {
+    public void sendGameRequest(String message){
 
     }
 
@@ -135,39 +173,50 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public String waitForGameUpadate() throws Exception {
+    public String waitForGameUpadate() {
         return "";
     }
 
     @Override
-    public List<String> requestGameList() throws Exception {
+    public List<String> requestGameList()  {
         return List.of();
     }
 
     @Override
-    public List<String> getAvailableAction() throws Exception {
+    public List<String> getAvailableAction()  {
         return List.of();
     }
 
     @Override
-    public List<Tile> getPileOfTile() throws Exception {
+    public List<Tile> getPileOfTile()  {
         return List.of();
     }
 
     @Override
-    public String sendAction(String message) throws Exception {
-//        out.writeObject(new ActionRequest(message) );
-        return waitForResponce();
+    public void sendAction(int key)  {
+
     }
 
+
     @Override
-    public GameFase getCurrentGameState() throws Exception {
+    public GameFase getCurrentGameState() {
         return null;
     }
 
     @Override
-    public Tile getTile(int i) throws Exception {
+    public Tile getTile()  {
         return null;
     }
+
+    @Override
+    public int[] askCoordinate() {
+        return new int[0];
+    }
+
+    public void sendRequest(Message message) throws IOException {
+        out.writeObject(message);
+        out.flush();
+    }
+
 
 }

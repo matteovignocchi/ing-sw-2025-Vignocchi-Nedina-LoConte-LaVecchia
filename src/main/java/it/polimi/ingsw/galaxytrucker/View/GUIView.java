@@ -13,7 +13,7 @@ public class GUIView implements View {
     }
 
     @Override
-    public boolean ask() {
+    public boolean ask(String message) {
         return false;
     }
 
@@ -24,7 +24,7 @@ public class GUIView implements View {
     }
 
     @Override
-    public int askindex() {
+    public int askIndex() {
 
     }
 

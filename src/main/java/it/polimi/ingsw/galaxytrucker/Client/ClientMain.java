@@ -53,9 +53,27 @@ public class ClientMain {
 
             isConnected = true;
             view.inform("Connected with success");
-            view.inform("-----LOGIN-----");
-
             while(isConnected){
+                view.inform("Choose to sign up or log in:");
+                view.inform("1. Register");
+                view.inform("2. Login");
+                int choice = view.askIndex();
+
+                if (choice != 1 && choice != 2) {
+                    view.reportError("Invalid choice. Please select 1 or 2.");
+                    continue;
+                }
+                if(choice == 1){
+                    view.inform("Choose your username and password:");
+                    String username = virtualClient.askString();
+                    String password = virtualClient.askString();
+                    boolean registrationSuccess = virtualClient.sendRegistration(username, password);
+                    if (!registrationSuccess) {
+                        view.reportError("Registration failed. Try again.");
+                        continue;
+                    }
+                    view.inform("Registration successful. Now log in:");
+                }
                 view.inform("Insert your username and password:");
                 String username = virtualClient.askString();
                 String password = virtualClient.askString();
@@ -63,10 +81,8 @@ public class ClientMain {
                 if(LoginSuccess){
                     view.inform("Login successful");
                     break;
-
                 }else{
                     view.reportError("Credential not valid");
-
                 }
             }
 
