@@ -27,7 +27,11 @@ public interface VirtualView {
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
     List<Tile> getPileOfTile() throws Exception;
-    String sendAction(String message) throws Exception;
+    void sendAction(String message) throws Exception;
     GameFase getCurrentGameState() throws Exception;
     Tile getTile(int i) throws Exception;
+
+
+
+
 }

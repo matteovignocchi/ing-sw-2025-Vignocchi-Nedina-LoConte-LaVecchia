@@ -149,8 +149,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public String sendAction(String message) throws RemoteException {
-        return server.handlePlayerAction(message);
+    public void sendAction(String message) throws RemoteException {
+         server.handlePlayerAction(message);
     }
 
 

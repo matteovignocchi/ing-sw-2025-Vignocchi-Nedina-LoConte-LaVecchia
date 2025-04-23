@@ -40,7 +40,7 @@ public class ClientMain {
             String host = args.length > 0 ? args[0] : "localhost";
 
             if (protocolChoice == 1) {
-                Registry registry = LocateRegistry.getRegistry(host, 1234);
+                Registry registry = LocateRegistry.getRegistry(host, 1099);
                 VirtualServerRmi server = (VirtualServerRmi) registry.lookup("GameServer");
                 virtualClient = new VirtualClientRmi(server, view);
                 server.registerClient(virtualClient);

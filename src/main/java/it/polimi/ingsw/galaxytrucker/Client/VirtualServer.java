@@ -49,7 +49,7 @@ public interface VirtualServer extends Remote {
     boolean authenticate(String username, String password) throws RemoteException;
     Void handleGameRequest(String message) throws RemoteException;
     String waitForResponse() throws RemoteException;
-    String handlePlayerAction(String message) throws RemoteException;
+    void handlePlayerAction(String message) throws RemoteException;
 
 
 
