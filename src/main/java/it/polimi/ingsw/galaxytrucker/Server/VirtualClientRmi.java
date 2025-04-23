@@ -3,7 +3,6 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.MultiJoint;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
@@ -120,8 +119,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public Tile getTile(int i) throws RemoteException {
-        return server.getTile(i);
+    public Tile getTile() throws RemoteException {
+        return server.getTileServer();
     }
 
 
@@ -149,8 +148,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void sendAction(String message) throws RemoteException {
-         server.handlePlayerAction(message);
+    public void sendAction(int key) throws RemoteException {
+         server.handlePlayerAction(key);
     }
 
 

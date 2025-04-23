@@ -106,7 +106,11 @@ public class CardEffectVisitor implements CardVisitor {
                 }
                 break;
             } else if (player_fire_power < slavers_fire_power) {
-                controller.removeCrewmate(p, card.getNumCrewmates());
+                try {
+                    controller.removeCrewmate(p, card.getNumCrewmates());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -142,13 +146,21 @@ public class CardEffectVisitor implements CardVisitor {
         }
 
         f.moveRocket(-card.getDays(), players.get(idx_crew));
-        controller.removeCrewmate(players.get(idx_firepower), card.getNumCrewmates());
+        try {
+            controller.removeCrewmate(players.get(idx_firepower), card.getNumCrewmates());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         Player p = players.get(idx_engine);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
             int res = p.throwDice() + p.throwDice();
-            controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+            try {
+                controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -182,13 +194,21 @@ public class CardEffectVisitor implements CardVisitor {
                 idx_engine = i;
         }
         f.moveRocket(-card.getDays(), players.get(idx_firepower));
-        controller.removeGoods(players.get(idx_engine), card.getNumGoods());
+        try {
+            controller.removeGoods(players.get(idx_engine), card.getNumGoods());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         Player p = players.get(idx_crew);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
             int res = p.throwDice() + p.throwDice();
-            controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+            try {
+                controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -221,11 +241,19 @@ public class CardEffectVisitor implements CardVisitor {
                         reward_goods_string, days);
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
-                    controller.addGoods(p, card.getRewardGoods());
+                    try {
+                        controller.addGoods(p, card.getRewardGoods());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 break;
             } else if (player_fire_power < smugglers_fire_power) {
-                controller.removeGoods(p, card.getNumRemovedGoods());
+                try {
+                    controller.removeGoods(p, card.getNumRemovedGoods());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -253,7 +281,11 @@ public class CardEffectVisitor implements CardVisitor {
                 int credits = card.getCredits();
                 p.addCredits(credits);
                 int num_crewmates = card.getNumCrewmates();
-                controller.removeCrewmate(p, num_crewmates);
+                try {
+                    controller.removeCrewmate(p, num_crewmates);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             }
         }
@@ -282,7 +314,11 @@ public class CardEffectVisitor implements CardVisitor {
                 if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
-                    controller.addGoods(p, card.getStationGoods());
+                    try {
+                        controller.addGoods(p, card.getStationGoods());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 break;
             }
@@ -307,7 +343,11 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = players.getFirst().throwDice() + players.getFirst().throwDice();
             for(Player p : players){
-                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+                try {
+                    controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -349,7 +389,11 @@ public class CardEffectVisitor implements CardVisitor {
             int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
             for(Player p : losers){
                 for(int i = 0; i < card.getShots_directions().size(); i++){
-                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
+                    try {
+                        controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
@@ -379,7 +423,11 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.askPlayerDecision(string, p)){
                 int days = card.getDays();
                 f.moveRocket(-days, p);
-                controller.addGoods(p, card.getRewardGoods().get(z));
+                try {
+                    controller.addGoods(p, card.getRewardGoods().get(z));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 z++;
                 if(z >= card.getRewardGoods().size()) break;
             }
@@ -399,7 +447,11 @@ public class CardEffectVisitor implements CardVisitor {
     public void visit(PlaugeCard card) throws CardEffectException {
 
         for(Player p : players){
-            controller.startPlauge(p);
+            try {
+                controller.startPlauge(p);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

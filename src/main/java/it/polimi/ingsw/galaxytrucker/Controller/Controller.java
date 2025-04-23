@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
 
+import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
@@ -10,12 +11,12 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Model.*;
 
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.PlayerView;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.rmi.RemoteException;
+import java.util.*;
 
 
 public class Controller {
@@ -30,9 +31,11 @@ public class Controller {
     private Deck deck;
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
-
-    private List<PlayerView> players_views = new ArrayList<>();
+    private Map<Player , VirtualView> map = new HashMap<>();
     private final int idGame;
+    private GameFase principalGameFase;
+    private GameFase preGameFase;
+
 
      // da finire: creazione tutti altri elementi del model()
     public Controller(boolean isDemo, int id) throws IOException, CardEffectException {
@@ -50,17 +53,14 @@ public class Controller {
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
-
-    public void addPlayer(int id, boolean isDemo) {
-        //capire se gestirla con una cheked che evita di inserire troppi players
+    //
+    public void addPlayer(int id, boolean isDemo, VirtualView v) throws RemoteException {
         if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");
-
         Player p = new Player(id, isDemo);
         players_in_Game.add(p);
-        PlayerView p2 = new PlayerView(id);
-        players_views.add(p2);
+        map.put(p,v);
     }
-
+    //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
         return players_in_Game.size();
     }
@@ -190,10 +190,9 @@ public class Controller {
         return p.getTotalGood();
     }
 
-    public void removeGoods(Player p, int num) {
+    public void removeGoods(Player p, int num) throws Exception {
         int totalEnergy = getTotalEnergy(p);
         int totalGood = getTotalGood(p);
-        PlayerView pview = getPlayerView(p.getId());
         List<Colour> TotalGood = p.getTotalListOfGood();
         int r = 0;
         int g = 0;
@@ -223,8 +222,8 @@ public class Controller {
         if(num < totalGood){
             while(num != 0){
                 if(r != 0){
-                    pview.inform("selezionare cella ed eliminare rosso");
-                    int[] vari = pview.askCoordinate();
+                    map.get(p).inform("selezionare cella ed eliminare rosso");
+                    int[] vari = map.get(p).askCoordinate();
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
@@ -241,8 +240,8 @@ public class Controller {
 
                 }
                 if(r == 0 && num!=0 && g != 0){
-                    pview.inform("selezionare cella ed eliminare giallo");
-                    int[] vari = pview.askCoordinate();
+                    map.get(p).inform("selezionare cella ed eliminare giallo");
+                    int[] vari = map.get(p).askCoordinate();
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
@@ -259,8 +258,8 @@ public class Controller {
 
                 }
                 if(r == 0 && g == 0 && v != 0 && num!=0){
-                    pview.inform("selezionare cella ed eliminare verde");
-                    int[] vari = pview.askCoordinate();
+                    map.get(p).inform("selezionare cella ed eliminare verde");
+                    int[] vari = map.get(p).askCoordinate();
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
@@ -277,8 +276,8 @@ public class Controller {
 
                 }
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
-                    pview.inform("selezionare cella ed eliminare blu");
-                    int[] vari = pview.askCoordinate();
+                    map.get(p).inform("selezionare cella ed eliminare blu");
+                    int[] vari = map.get(p).askCoordinate();
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
@@ -311,8 +310,8 @@ public class Controller {
             int finish = num-totalGood;
             if(finish < totalEnergy){
                 while(finish > 0){
-                    pview.inform("selezionare cella ed eliminare una batteria");
-                    int[] vari = pview.askCoordinate();
+                    map.get(p).inform("selezionare cella ed eliminare una batteria");
+                    int[] vari = map.get(p).askCoordinate();
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case EnergyCell c -> {
@@ -341,9 +340,9 @@ public class Controller {
             }
         }
 
-    public void addGoods(Player player, List<Colour> list) {
+    public void addGoods(Player player, List<Colour> list) throws Exception {
         boolean flag = true;
-        PlayerView x = getPlayerView(player.getId());
+        VirtualView x = map.get(player);
         if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         while (list.size() != 0 && flag == true) {
             x.inform("seleziona una HOusing unit");
@@ -352,10 +351,10 @@ public class Controller {
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
-                        x.printListOfGoods(c.getListOfGoods());
+                        x.printListOFGoods(c.getListOfGoods());
                         x.ask("seleziona indice da rimuovere");
                         int tmpint = x.askIndex();
-                        Colour tmp = c.getListOfGoods().get(tmpint-1);
+                        Colour tmp = c.getListOfGoods().get(tmpint - 1);
                         c.removeGood(tmpint-1);
                         list.add(tmp);
                     }
@@ -422,9 +421,9 @@ public class Controller {
         }
     }
 
-    public void removeCrewmate(Player player, int num) {
+    public void removeCrewmate(Player player, int num) throws Exception {
         int totalCrew = getNumCrew(player);
-        PlayerView x = getPlayerView(player.getId());
+        VirtualView x = map.get(player);
         if (num >= totalCrew) {
             player.isEliminated();
         } else {
@@ -459,17 +458,16 @@ public class Controller {
         }
     }
 
-    public void startPlauge(Player player) {
+    public void startPlauge(Player player) throws Exception {
         int firstNumber = getNumCrew(player);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = player.getTile(i, j);
-                boolean var = false;
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            //il player seleziona l'indice
+                            map.get(player).askIndex();
                             int x = c.removeHumans(1);
                             tmp++;
                             if (x == 2) player.setBrownAlien();
@@ -494,9 +492,9 @@ public class Controller {
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
-    public boolean isProtected(Player p1, int d) {
+    public boolean isProtected(Player p1, int d) throws Exception {
         boolean flag = false;
-        PlayerView x = getPlayerView(p1.getId());
+        VirtualView x = map.get(p1);
         while (!flag) {
             if (x.ask("vuoi usare uno scudo?")) {
                 int[] coordinate = x.askCoordinate();
@@ -534,7 +532,7 @@ public class Controller {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) {
+    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws Exception {
         if (dir == 0) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
@@ -569,7 +567,7 @@ public class Controller {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite(int dir, boolean type, int dir2) {
+    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
         for (Player p : players_in_Game) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
@@ -622,7 +620,7 @@ public class Controller {
     }
 
     public boolean askPlayerDecision(String condition, Player id) {
-        PlayerView x = getPlayerView(id.getId());
+        VirtualView x = map.get(id);
         return x.ask(condition);
     }
 
@@ -632,7 +630,7 @@ public class Controller {
 
     private boolean manageEnergyCell(Player player) {
 
-        PlayerView x = getPlayerView(player.getId());
+        VirtualView x = map.get(player);
         int[] coordinate = new int[2];
         boolean exits = false;
 
@@ -667,16 +665,6 @@ public class Controller {
 
             return false;
         }
-    }
-
-    private PlayerView getPlayerView(int id) {
-        PlayerView x = null;
-        for (PlayerView p : players_views) {
-            if (id == p.getId()) {
-                x = p;
-            }
-        }
-        return x;
     }
 
     public boolean checkProtection(int dir, int dir2, Player player) {
@@ -815,6 +803,55 @@ public class Controller {
         return false;
     }
 
+    //MEDOTI PER PRENDERE LE GAMEFASE
+    public List<GameFase> getGameFasesForEachPlayer() {
+        List<GameFase> gameFases = new ArrayList<>();
+        for(Player x : players_in_Game ) {
+            gameFases.add(x.getGameFase());
+        }
+        return gameFases;
+    }
+
+    public GameFase getGameFase(int id) {
+        for(Player p : players_in_Game ) {
+            if(id == p.getId()) {
+                return p.getGameFase();
+            }
+        }
+        return null;
+    }
+
+    public void setGameFaseForEachPlayer(GameFase gameFase) {
+        for(Player p : players_in_Game ) {
+            p.setGameFase(gameFase);
+        }
+    }
+    public void setGameFase(GameFase gameFase, int id) {
+        for(Player p : players_in_Game ) {
+            if(id == p.getId()) {
+                p.setGameFase(gameFase);
+            }
+        }
+    }
+
+    public GameFase getPrincipalGameFase() {
+        return principalGameFase;
+    }
+
+    public void setNextPrincipalGameFase() {
+
+        switch (principalGameFase) {
+            case FASE0 -> {
+                preGameFase = principalGameFase;
+                principalGameFase = GameFase.FASE5;
+            }
+            case FASE5 -> {
+                preGameFase = principalGameFase;
+                principalGameFase = GameFase.FASE13;
+            }
+            default -> principalGameFase = preGameFase;
+        }
+    }
 
     //////////////////////////////////////////////////////////////////
     //METTIAMO METODI OLEG-TEO SOPRA, MIEI-FRA SOTTO, MIA MAGGIORE CHIAREZZA, SCUSATE SONO AUTISTICO

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.awt.*;
 import java.rmi.Remote;
@@ -45,11 +46,27 @@ public interface VirtualServer extends Remote {
     //COME AVEVAMO FATTO IN CONTROLLER
 
     List<String> getAvaibleGames() throws RemoteException;
-    Tile getTile(int index) throws RemoteException;
+    Tile getTileServer() throws RemoteException;
     boolean authenticate(String username, String password) throws RemoteException;
     Void handleGameRequest(String message) throws RemoteException;
     String waitForResponse() throws RemoteException;
     void handlePlayerAction(String message) throws RemoteException;
+    void registerClient(VirtualView client) throws RemoteException;
+    void getUncoveredTile() throws RemoteException;
+    void rotateGlass() throws RemoteException;
+    void setReady()  throws RemoteException;
+    void lookDeck() throws RemoteException;
+    void lookDashBoard() throws RemoteException;
+    void logOut() throws RemoteException;
+    void activateCard() throws RemoteException;
+    void getBackTile() throws RemoteException;
+    void positionTile() throws RemoteException;
+    void drawCard() throws RemoteException;
+    void rightRotatedTile() throws RemoteException;
+    void leftRotatedTile() throws RemoteException;
+//    List<String> sendAvaibleGames(int id) throws RemoteException;
+
+
 
 
 

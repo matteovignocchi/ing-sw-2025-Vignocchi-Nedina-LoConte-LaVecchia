@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
 import java.util.List;
@@ -27,11 +28,14 @@ public interface VirtualView {
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
     List<Tile> getPileOfTile() throws Exception;
-    void sendAction(String message) throws Exception;
+    void sendAction(int key) throws Exception;
     GameFase getCurrentGameState() throws Exception;
-    Tile getTile(int i) throws Exception;
+    Tile getTile() throws Exception;
 
 
+    int[] askCoordinate();
 
+    boolean ask(String s);
 
+    void printListOFGoods(List<Colour> listOfGoods);
 }

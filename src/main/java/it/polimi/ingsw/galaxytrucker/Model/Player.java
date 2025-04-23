@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
+import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
@@ -28,6 +29,7 @@ public class Player {
     protected int lap;
     protected int position;
     private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
+    private GameFase gameFase;
 
     /**
      * constructor that initialize all the variables
@@ -240,6 +242,14 @@ public class Player {
      */
     public boolean presenceBrownAlien() { return this.brownAlien; }
 
+    public void setGameFase(GameFase gameFase) {
+        this.gameFase = gameFase;
+    }
+
+    public GameFase getGameFase() {
+        return gameFase;
+    }
+
     /**
      * @return number of tile in the discard pile
      */
@@ -251,8 +261,12 @@ public class Player {
      * the method add the tile in the discard pile
      * @param tile
      */
-    public void addToDiscardPile(Tile tile){
-        discardPile.add(tile);
+    public void addToDiscardPile(Tile tile) throws IndexOutOfBoundsException{
+        if(gameFase!=GameFase.FASE0) discardPile.add(tile);
+        else {
+            if(discardPile.size()>=2) throw new IndexOutOfBoundsException();
+            discardPile.add(tile);
+        }
     }
 
     /**
@@ -372,7 +386,6 @@ public class Player {
         if (validStatus[x][y] == Status.FREE ) {
             Dash_Matrix[x][y] = t;
             validStatus[x][y] = Status.USED;
-
             if(x == 0 && (y == 5 || y ==6)){
                 addToDiscardPile(t);
             }
@@ -449,11 +462,35 @@ public class Player {
             }
         }
     }
-    /**
-     * this method controls if the ship that the player built is legal, checking every tile
-     */
 
     //funzioni di supporto ai metodi
+
+    public void controlOfConnection(){
+        int [] dx = {-1, 0, 1, 0};
+        int [] dy = {0, 1, 0, -1};
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 7; y++) {
+                Tile housing = Dash_Matrix[x][y];
+                switch (housing){
+                    case HousingUnit e->{
+                        for (int i = 0; i < 4; i++) {
+                            int nx = x + dx[i];
+                            int ny = y + dy[i];
+                            if(isOutOfBounds(nx,ny)) continue;
+                            Tile nearTmp = Dash_Matrix[nx][ny];
+                            switch (nearTmp){
+                                case HousingUnit e1->e.setConnected(true);
+                                default -> {}
+                            }
+
+
+                        }
+                    }
+                    default -> {}
+                }
+            }
+        }
+    }
     private boolean connected(int i, int j) {
 
         if(i == 0 || j == 0) return false;
@@ -482,9 +519,6 @@ public class Player {
         return true;
     }
 
-
-
-
     //funzione numero 1 da chiamare , è quella che si fa dopo la fine dellassemblaggio nave.
     public void controlAssembly(){
         controlEngine();
@@ -508,6 +542,7 @@ public class Player {
             }
             System.out.println();
         }
+        controlOfConnection();
 
     }
 
