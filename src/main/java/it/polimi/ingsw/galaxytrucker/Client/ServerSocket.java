@@ -3,17 +3,12 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class VirtualServerSocket extends UnicastRemoteObject implements VirtualServer {
-    protected VirtualServerSocket() throws RemoteException {
+public class ServerSocket extends UnicastRemoteObject implements VirtualServer {
+    protected ServerSocket() throws RemoteException {
     }
 
     @Override
     public void login(String username, String password) throws RemoteException {
-
-    }
-
-    @Override
-    public void register(String username, String password) throws RemoteException {
 
     }
 
