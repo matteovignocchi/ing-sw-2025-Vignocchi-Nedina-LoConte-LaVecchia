@@ -160,7 +160,7 @@ public class ClientMain {
         }
         int choice = virtualClient.askIndex();
         //chiedere perchè send action non è un void ma è un strin
-        virtualClient.sendAction(choice);
+        virtualClient.sendAction(choice-1);
     }
 
     //metodo gestione partita
