@@ -3,9 +3,9 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
-import java.awt.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 
 // Interfaccia comune per i metodi chiamabili dal client verso il server (sia RMI che Socket).

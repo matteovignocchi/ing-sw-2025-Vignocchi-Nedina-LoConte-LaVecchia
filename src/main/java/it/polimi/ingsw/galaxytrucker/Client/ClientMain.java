@@ -8,7 +8,6 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
-
 import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -41,7 +40,7 @@ public class ClientMain {
 
             if (protocolChoice == 1) {
                 Registry registry = LocateRegistry.getRegistry(host, 1099);
-                VirtualServerRmi server = (VirtualServerRmi) registry.lookup("GameServer");
+                ServerRmi server = (ServerRmi) registry.lookup("GameServer");
                 virtualClient = new VirtualClientRmi(server, view);
                 server.registerClient(virtualClient);
                 view.start();

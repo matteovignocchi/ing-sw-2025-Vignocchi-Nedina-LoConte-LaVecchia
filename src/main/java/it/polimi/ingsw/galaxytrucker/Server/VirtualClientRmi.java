@@ -1,8 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.Client.VirtualServerRmi;
+import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
+import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
@@ -13,11 +15,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
-    private final VirtualServerRmi server;
+    private final ServerRmi server;
     private View view;
     private GameFase gameFase;
 
-    public VirtualClientRmi(VirtualServerRmi server, View view) throws RemoteException {
+    public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
         super();
         this.server = server;
         this.view = view;
@@ -100,7 +102,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public List<String> requestGameList() throws RemoteException {
-        return server.getAvaibleGames();
+         return server.getAvaibleGames();
     }
 
     @Override
@@ -123,6 +125,20 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return server.getTileServer();
     }
 
+    @Override
+    public int[] askCoordinate() {
+        return new int[0];
+    }
+
+    @Override
+    public boolean ask(String s) {
+        return false;
+    }
+
+    @Override
+    public void printListOFGoods(List<Colour> listOfGoods) {
+
+    }
 
 
     //PARTE COMUNICAZIONE CON IL SERVER
@@ -149,7 +165,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void sendAction(int key) throws RemoteException {
-         server.handlePlayerAction(key);
+         server.handlePlayerAction("key");
     }
 
 
