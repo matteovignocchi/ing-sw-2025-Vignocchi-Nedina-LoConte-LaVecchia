@@ -82,5 +82,10 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     public void sendPlayerDash(String username, int dash) throws RemoteException {
     }
 
+    @Override
+    public void activateCard() throws RemoteException {
+
+    }
+
 }
 

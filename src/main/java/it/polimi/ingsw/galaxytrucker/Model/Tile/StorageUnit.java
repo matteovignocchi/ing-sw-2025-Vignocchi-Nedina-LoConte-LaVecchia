@@ -5,6 +5,7 @@ import it.polimi.ingsw.galaxytrucker.Model.InvalidIndex;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * class for the storage unit with

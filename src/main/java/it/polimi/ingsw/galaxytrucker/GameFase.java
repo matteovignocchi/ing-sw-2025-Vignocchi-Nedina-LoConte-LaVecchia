@@ -4,7 +4,7 @@ public enum GameFase {
     FASE0, //fase iniziale quando costruisci(ho la scelte di prendere la tile dalle coperte, scoperte, posso girare la clessidra, posso dichiararmi pronto, guarda nave altri giocatori, guarda mazzo, e uscire(comune a tutte))
     FASE1, //prima chiedo indice, ho preso la tile dalle coperte o dalle scoperte, decido dove metterla
     FASE2, //decido di metterla sulla dashboard, decido prima posizione poi l'orientazione
-    FASE3, //ho deciso di mettere la tile nelle prenotate
+//    FASE3, //ho deciso di mettere la tile nelle prenotate
     FASE4, //clicco pronto e aspetto gli altri, nelle scelte ho sempre guardare le altre navi e uscire del gioco
     FASE5, //adesso stiamo giocando,(sei primo) hai le scelte del tipo pesca carta, guarda la nave avversiaria, esci
     FASE6, //chiedo indice, fase visualizzazione nave avversaria

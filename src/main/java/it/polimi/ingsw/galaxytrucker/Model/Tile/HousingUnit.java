@@ -14,7 +14,7 @@ public class HousingUnit extends Tile{
     private List<Human> listOfToken = new ArrayList<>();
     private int max;
     private Human isAlien;
-    private boolean isConnected;
+    private boolean isConnected = false;
     /**
      * the values are standard, and they are given when the game starts from the application
      * @param a

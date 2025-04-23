@@ -102,7 +102,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(SlaversCard)")
-    void visitSlaversCard() throws CardEffectException {
+    void visitSlaversCard() throws Exception {
         SlaversCard card = new SlaversCard(6, 10, 4, 5);
         when(mockCtrl.getFirePower(p1)).thenReturn(4.0);
         when(mockCtrl.getFirePower(p2)).thenReturn(5.0);
@@ -127,7 +127,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(PlanetsCard)")
-    void visitPlanetsCard() throws CardEffectException {
+    void visitPlanetsCard() throws Exception {
         List<List<Colour>> reward = new ArrayList<>(List.of(List.of(Colour.RED, Colour.RED, Colour.GREEN, Colour.BLUE),
                 List.of(Colour.BLUE, Colour.YELLOW, Colour.YELLOW)));
         PlanetsCard card = new PlanetsCard(reward, 3);
@@ -151,7 +151,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(FirstWarzoneCard): sposta, rimuove crew e spara in ordine")
-    void visitFirstWarzoneCard() throws CardEffectException {
+    void visitFirstWarzoneCard() throws Exception {
         FirstWarzoneCard card = new FirstWarzoneCard(3, 2, List.of(0, 2), List.of(false, true));
 
         when(mockCtrl.getNumCrew(p1)).thenReturn(5);
@@ -184,7 +184,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(SecondWarzoneCard): sposta, rimuove goods e spara in ordine")
-    void visitSecondWarzoneCard() throws CardEffectException {
+    void visitSecondWarzoneCard() throws Exception {
         SecondWarzoneCard card = new SecondWarzoneCard(4, 3, List.of(1, 3, 0), List.of(true, false, true));
 
         when(mockCtrl.getNumCrew(p1)).thenReturn(8);
@@ -218,7 +218,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(AbandonedShipCard): solo primo player risponde true")
-    void visitAbandonedShipCard() throws CardEffectException {
+    void visitAbandonedShipCard() throws Exception {
         AbandonedShipCard card = new AbandonedShipCard(1, 6, 2);
 
         when(mockCtrl.askPlayerDecision(anyString(), eq(p1))).thenReturn(true);
@@ -236,7 +236,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(AbandonedStationCard): primo player ha abbastanza crew e accetta")
-    void visitAbandonedStationCard() throws CardEffectException {
+    void visitAbandonedStationCard() throws Exception {
         AbandonedStationCard card = new AbandonedStationCard(3, 1, List.of(Colour.BLUE, Colour.RED));
 
         when(mockCtrl.getNumCrew(p1)).thenReturn(5);
@@ -253,7 +253,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(SmugglersCard): primo player ha firepower maggiore e accetta")
-    void visitSmugglersCard() throws CardEffectException {
+    void visitSmugglersCard() throws Exception {
         SmugglersCard card = new SmugglersCard(4, 2, 1, List.of(Colour.RED, Colour.GREEN));
 
         when(mockCtrl.getFirePower(p1)).thenReturn(6.0);
@@ -269,7 +269,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(SmugglersCard): p1 e p2 sconfitti, p3 accetta ricompensa")
-    void visitSmugglersCard_MultiplePlayers() throws CardEffectException {
+    void visitSmugglersCard_MultiplePlayers() throws Exception {
         SmugglersCard card = new SmugglersCard(5, 5, 2, List.of(Colour.RED, Colour.YELLOW));
 
         when(mockCtrl.getFirePower(p1)).thenReturn(2.0); // sconfitto
@@ -298,7 +298,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(MeteoritesRainCard): spara su tutti i player")
-    void visitMeteoritesRainCard() throws CardEffectException {
+    void visitMeteoritesRainCard() throws Exception {
         MeteoritesRainCard card = new MeteoritesRainCard(List.of(0, 1), List.of(true, false));
 
         when(p1.throwDice()).thenReturn(3, 3);
@@ -311,7 +311,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(PlaugeCard): chiama startPlague su ogni player")
-    void visitPlagueCard() throws CardEffectException {
+    void visitPlagueCard() throws Exception {
         PlaugeCard card = new PlaugeCard();
         CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
         visitor.visit(card);
@@ -323,7 +323,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(PiratesCard): tutti vengono colpiti")
-    void visitPiratesCardAllLose() throws CardEffectException {
+    void visitPiratesCardAllLose() throws Exception {
         PiratesCard card = new PiratesCard(10, 2, 3, List.of(0, 1), List.of(false, true));
 
         when(mockCtrl.getFirePower(p1)).thenReturn(3.0);
@@ -344,7 +344,7 @@ class CardEffectVisitorMockTest {
 
     @Test
     @DisplayName("visit(PiratesCard): p3 sconfigge i pirati, p1 e p2 subiscono danni")
-    void visitPiratesCard_Cornercase() throws CardEffectException {
+    void visitPiratesCard_Cornercase() throws Exception {
         PiratesCard card = new PiratesCard(10, 2, 3, List.of(0, 1), List.of(false, true));
 
         when(mockCtrl.getFirePower(p1)).thenReturn(5.0);

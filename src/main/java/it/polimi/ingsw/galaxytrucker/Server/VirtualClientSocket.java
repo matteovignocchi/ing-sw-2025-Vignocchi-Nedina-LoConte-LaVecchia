@@ -147,9 +147,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public String sendAction(String message) throws Exception {
+    public void sendAction(int key) throws Exception {
 //        out.writeObject(new ActionRequest(message) );
-        return waitForResponce();
     }
 
     @Override
