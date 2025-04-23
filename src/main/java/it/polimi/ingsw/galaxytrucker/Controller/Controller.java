@@ -37,6 +37,7 @@ public class Controller {
     private GameFase preGameFase;
 
 
+
      // da finire: creazione tutti altri elementi del model()
     public Controller(boolean isDemo, int id) throws IOException, CardEffectException {
         if(isDemo) {
