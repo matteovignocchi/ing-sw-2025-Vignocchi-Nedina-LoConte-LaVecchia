@@ -13,6 +13,7 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -28,7 +29,12 @@ public class Controller {
     private Deck deck;
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
-    private Map<Player , VirtualView> map = new HashMap<>();
+
+    //cambiare nomi mappe e dire a oleg e teo
+    private final Map<String, VirtualView> ViewByName = new ConcurrentHashMap<>();
+    private final Map<String, Player> PlayerByName = new HashMap<>();
+    private final int Max_Players;
+
     private GameFase principalGameFase;
     private GameFase preGameFase;
     private final AtomicInteger player_id;
@@ -36,7 +42,7 @@ public class Controller {
 
 
     // da finire: creazione tutti altri elementi del model()
-    public Controller(boolean isDemo) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int Max_Players) throws CardEffectException, IOException {
         if(isDemo) {
             f_board = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -47,26 +53,24 @@ public class Controller {
             decks = deckCreator.CreateSecondLevelDeck();
         }
         this.isDemo = isDemo;
+        this.Max_Players = Max_Players;
         this.player_id = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
 
+    //modificare con nickname
     public void addPlayer(VirtualView v) throws RemoteException {
         if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");//gestire eccezione!!!!!!!!
         Player p = new Player(player_id.getAndIncrement(), isDemo);
         players_in_Game.add(p);
-        map.put(p,v);
+        .put(p,v);
         //bisogna anche aggiungerlo nella plancia di volo(ma dopo la costruzione)
     }
 
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
         return players_in_Game.size();
-    }
-
-    public int checkIdGame(){
-        return idGame;
     }
 
     public boolean controlPresenceOfPlayer(int id) {

@@ -10,15 +10,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+//TODO:
+// 1)metodo per far startare la partita appena raggiungiamo il num di players Max_Players
+// 2)eccezioni, capire bene quando e dove + remoteException per disconnessione
+// 3)Modifica metodi con le nuove mappe
+// 4)Implementare metodi che mancano nel controller
+// 5)Riorganizzare controller
+// 6)
+
+
+
 public class GameManager {
     private final Map<Integer, Controller> games;
     private final AtomicInteger idCounter;
-
-    //Map<nickname, virtualview>;
-
-    //nickname.getplayer
-    //player.reconnect(){isconnected=true}
-    //nickname x -->modifico vitrualview
 
     public GameManager() {
         this.games = new ConcurrentHashMap<>();
@@ -26,9 +30,9 @@ public class GameManager {
         loadSavedGames(); // Caricamento automatico all'avvio
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v) throws CardEffectException, IOException {
+    public synchronized int createGame(boolean isDemo, VirtualView v, int MaxPLayers) throws CardEffectException, IOException {
         int gameId = idCounter.getAndIncrement();
-        Controller controller = new Controller(isDemo);
+        Controller controller = new Controller(isDemo, MaxPLayers);
         games.put(gameId, controller);
         controller.addPlayer(v);
         saveGameState(gameId, controller);
@@ -72,10 +76,10 @@ public class GameManager {
         saveGameState(gameId, controller);
     }
 
-    public synchronized void reconnectGame(String username, VirtualView newView) throws IOException {
+    public synchronized void reconnectGame(String nickname, VirtualView newView) throws IOException {
         for (Map.Entry<Integer, Controller> entry : games.entrySet()) {
             Controller controller = entry.getValue();
-            Player player = controller.getPlayerByUsername(username);
+            Player player = controller.getPlayerByUsername(nickname); //da cambiare in base alle nostre mappe
             if (player != null) {
                 controller.remapView(player, newView);
                 player.setConnected(true);
@@ -88,7 +92,7 @@ public class GameManager {
                 return;
             }
         }
-        throw new IOException("No active game found for user: " + username);
+        throw new IOException("No active game found for user: " + nickname);
     }
 
     public Controller getController(int gameId) {
@@ -122,9 +126,9 @@ public class GameManager {
     private void deleteSavedGame(int gameId) {
         File file = new File("saves/game_" + gameId + ".sav");
         if (file.exists() && file.delete()) {
-            System.out.println("🗑️ Salvataggio game_" + gameId + ".sav rimosso.");
+            System.out.println("Salvataggio game_" + gameId + ".sav rimosso.");
         } else {
-            System.err.println("⚠ Nessun file da eliminare per game " + gameId);
+            System.err.println("Nessun file da eliminare per game " + gameId);
         }
     }
 
@@ -140,9 +144,9 @@ public class GameManager {
                 Controller controller = (Controller) in.readObject();
                 int gameId = Integer.parseInt(file.getName().replace("game_", "").replace(".sav", ""));
                 games.put(gameId, controller);
-                System.out.println("🔁 Partita " + gameId + " ripristinata.");
+                System.out.println("Partita " + gameId + " ripristinata.");
             } catch (Exception e) {
-                System.err.println("❌ Errore caricamento " + file.getName() + ": " + e.getMessage());
+                System.err.println("Errore caricamento " + file.getName() + ": " + e.getMessage());
             }
         }
     }
