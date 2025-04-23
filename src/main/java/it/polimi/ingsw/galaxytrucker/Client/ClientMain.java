@@ -1,5 +1,4 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
@@ -161,7 +160,7 @@ public class ClientMain {
         }
         int choice = virtualClient.askIndex();
         //chiedere perchè send action non è un void ma è un strin
-        virtualClient.sendAction(choice-1);
+        virtualClient.sendAction(choice);
     }
 
     //metodo gestione partita

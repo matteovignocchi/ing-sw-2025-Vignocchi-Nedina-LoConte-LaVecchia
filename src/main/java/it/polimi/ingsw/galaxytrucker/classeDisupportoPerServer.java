@@ -1,20 +1,15 @@
 package it.polimi.ingsw.galaxytrucker;
-
-
-
-
 //cuccioli dato che tanto devo far sta cosa mentalmente abbozzo un idea dei metodi di gestione e dei corpi dei metodi
-
 import it.polimi.ingsw.galaxytrucker.Client.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class classeDisupportoPerServer {
 
@@ -43,55 +38,55 @@ public class classeDisupportoPerServer {
             //per guardare la nave degli altri non creo una fase in piu, sfrutto il fatto che il metodo viewDashboard nella tui e gui sia
             //completamente distaccato e chiamabile solo dal server
             case FASE0 -> {
-                listOfOptions.add("1 : prendiTileCoperta");
-                listOfOptions.add("2 : prendiTileScoperta");
-                listOfOptions.add("11 : GiraLaClessidra");
-                listOfOptions.add("22 : DichiaratiPronto");
-                listOfOptions.add("33 : GuardaUnMazzo");
-                listOfOptions.add("50 : GuardaUnaNave");
-                listOfOptions.add("100 : LogOut");
+                listOfOptions.add(" prendi Tile Coperta");
+                listOfOptions.add(" prendi Tile Scoperta");
+                listOfOptions.add(" Gira La Clessidra");
+                listOfOptions.add(" Dichiarati Pronto");
+                listOfOptions.add(" Guarda Un Mazzo");
+                listOfOptions.add(" Guarda Una Nave");
+                listOfOptions.add(" LogOut");
             }
             case FASE1 -> {
-                listOfOptions.add("3 : restituisciTile");
-                listOfOptions.add("4 : posizionaTile");
-                listOfOptions.add("100 : LogOut");
-                listOfOptions.add("50 : guardaUnaNave");
-                listOfOptions.add("69: RightRotateTile");
-                listOfOptions.add("96 : LeftRotateTile");
+                listOfOptions.add(" restituisci Tile");
+                listOfOptions.add(" posiziona Tile");
+                listOfOptions.add(" LogOut");
+                listOfOptions.add(" guarda Una Nave");
+                listOfOptions.add(" RightRotate Tile");
+                listOfOptions.add(" LeftRotate Tile");
             }
             case FASE2 -> {
 
             }
 //            case FASE3 -> {}
             case FASE4 -> {
-                listOfOptions.add("50 : GuardaUnaNave");
-                listOfOptions.add("100 : LogOut");
+                listOfOptions.add(" Guarda Una Nave");
+                listOfOptions.add(" LogOut");
             }
             //da qui in poi le fasi corrispondo al fatto che stiamo giocando , fase 6 è solo il primo giocatore , il pescare la carta
             //fa si che partendo dal primo un player alla volta in base alla carta pescata venga posizionato nella fase giusta e poi di nuovo
             //in fase 5 , comunque se avete dubbi chiamatemi
             case FASE5 -> {
-                listOfOptions.add("50 : GuardaUnaNave");
-                listOfOptions.add("100 : LogOut");
+                listOfOptions.add(" Guarda Una Nave");
+                listOfOptions.add(" LogOut");
             }
             case FASE6 -> {
-                listOfOptions.add("5 : DrawCard");
-                listOfOptions.add("100 : LogOut");
-                listOfOptions.add("50 : GuardaUnaNave");
+                listOfOptions.add(" Draw Card");
+                listOfOptions.add(" LogOut");
+                listOfOptions.add(" Guarda Una Nave");
             }
             //da qui in poi ci sara sempre la chiamata al metodo print card ogni volta che un giocatore entra nella fase corrispettiva , e in
             //base alla fase delle opzioni diverse a schermo
             //ogni volta che il player entra in una fase chiama activate card e se la gestisce la carta , non il server
 
             case FASE7 -> {
-                listOfOptions.add("50 : GuardaUnaNave");
-                listOfOptions.add("100 : LogOut");
+                listOfOptions.add(" Guarda Una Nave");
+                listOfOptions.add(" LogOut");
                 server.activateCard();
                 //da qui si stampano in automatico le cose per la gestione carta senza dover creare fasi in più
             }
 
             case FASE13 -> {
-                listOfOptions.add("100 : logOut");
+                listOfOptions.add("logOut");
             }
             case FASE14 -> {
             }
@@ -110,46 +105,48 @@ public class classeDisupportoPerServer {
     //valore scelto dalla lista , e id perchè non so come gestite la comunicazione
     //così la maggior parte delle cose rimangono private e siamo felici tutti
     //i metodi poi vanno ampliati , se avete bisogno chiamatemi
-    public void actionManagment(int index , int id) throws RemoteException {
-        switch (index){
-            case 1 -> {
+    public void actionManagment(String s , int id) throws RemoteException {
+
+        String command = s.trim().toLowerCase();
+        switch (command) {
+            case "prenditilecoperta"-> {
                 //getTile prende  la tile di indice index dalla pila delle tile tramite controller , una volta presa la manda alluntente
                 //che entrerà in fase 1, da li vedo cosa vuole fare
                 //io chiamo i metodi come void ma dentro devono avere un qualcosa che mi manda la info al client
                 //non so come volete associare gli id ai virtual server , io lascio solo lo scheletro
                 server.getTileServer();
             }
-            case 2 -> {
+            case " prenditilescoperta"-> {
                 server.getUncoveredTile();
             }
-            case 3 -> {
+            case "restituiscitile" -> {
                 server.getBackTile();
             }
-            case 4 -> {
+            case "posizionatile" -> {
                 server.positionTile();
             }
-            case 5 -> {
+            case "drawcard" -> {
                 server.drawCard();
             }
-            case 11-> {
+            case "giralaclessidra"-> {
                 server.rotateGlass();
             }
-            case 22 -> {
+            case "dichiaratipronto" -> {
                 server.setReady();
             }
-            case 33 -> {
+            case "guardaunmazzo" -> {
                 server.lookDeck();
             }
-            case 50 -> {
+            case "guardaunanave" -> {
                 server.lookDashBoard();
             }
-            case 69 ->{
+            case "rightrotatetile" ->{
                 server.rightRotatedTile();
             }
-            case 96 -> {
+            case "leftrotatetile" -> {
                 server.leftRotatedTile();
             }
-            case 100 ->{
+            case " logout" ->{
                 server.logOut();
             }
         }
