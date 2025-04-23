@@ -9,11 +9,14 @@ import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerExceptio
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
+import it.polimi.ingsw.galaxytrucker.Model.*;
+
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.PlayerView;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class Controller {
@@ -29,14 +32,13 @@ public class Controller {
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
     private Map<Player , VirtualView> map = new HashMap<>();
+    private final int idGame;
     private GameFase principalGameFase;
     private GameFase preGameFase;
-    private final AtomicInteger player_id;
-    private boolean isDemo;
 
 
      // da finire: creazione tutti altri elementi del model()
-    public Controller(boolean isDemo) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int id) throws IOException, CardEffectException {
         if(isDemo) {
             f_board = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -46,24 +48,25 @@ public class Controller {
             DeckManager deckCreator = new DeckManager();
             decks = deckCreator.CreateSecondLevelDeck();
         }
+        this.idGame = id;
 
-        this.isDemo = isDemo;
-        this.player_id = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
-
-    public void addPlayer(VirtualView v) throws RemoteException {
-        if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");//gestire eccezione!!!!!!!!
-        Player p = new Player(player_id.getAndIncrement(), isDemo);
+    //
+    public void addPlayer(int id, boolean isDemo, VirtualView v) throws RemoteException {
+        if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");
+        Player p = new Player(id, isDemo);
         players_in_Game.add(p);
         map.put(p,v);
-        //bisogna anche aggiungerlo nella plancia di volo(ma dopo la costruzione)
     }
-
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
         return players_in_Game.size();
+    }
+
+    public int checkIdGame(){
+        return idGame;
     }
 
     public boolean controlPresenceOfPlayer(int id) {

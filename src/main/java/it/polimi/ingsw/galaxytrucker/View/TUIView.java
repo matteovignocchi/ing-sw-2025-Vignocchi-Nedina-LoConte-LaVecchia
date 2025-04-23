@@ -32,10 +32,10 @@ public class TUIView implements View {
     }
 
     @Override
-    public boolean ask(){
+    public boolean ask(String message) {
         boolean flag = true;
         boolean decision = false;
-        inform("(Yes/No)");
+        inform(message+ "(Yes/No)");
         String response = scanner.nextLine().trim().toLowerCase();
         while(flag) {
             if (response.equals("yes")) {
@@ -63,7 +63,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public int askindex() {
+    public int askIndex() {
         int index;
         inform("Insert index:");
         index = scanner.nextInt();

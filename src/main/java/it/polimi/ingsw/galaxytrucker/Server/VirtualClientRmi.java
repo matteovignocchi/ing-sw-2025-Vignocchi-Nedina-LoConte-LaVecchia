@@ -1,18 +1,14 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
 import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
-import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
-
-
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Objects;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
     private final ServerRmi server;
@@ -32,64 +28,77 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void showUpdate() throws RemoteException {
-
-
+        view.updateState(gameFase);
     }
 
     @Override
     public void inform(String message) throws RemoteException {
-        this.view.inform(message);
+        view.inform(message);
     }
 
 
     @Override
     public void reportError(String error) throws RemoteException {
-        this.view.reportError(error);
+        view.reportError(error);
     }
 
     @Override
-    public boolean askDecision() throws RemoteException {
-        return this.view.ask();
+    public boolean ask(String message) throws RemoteException {
+        return view.ask(message);
     }
 
     @Override
     public int askIndex() throws RemoteException {
-        return this.view.askindex();
-
+        return view.askIndex();
     }
 
     @Override
     public int[] askCoordinates() throws RemoteException {
-        return this.view.askCordinate();
+        return view.askCordinate();
 
     }
 
     @Override
-    public String askString() throws Exception {
-        return this.view.askString();
+    public String askString() throws RemoteException {
+        return view.askString();
+    }
+
+    @Override
+    public int[] askCoordinate() throws RemoteException {
+        return view.askCordinate();
     }
 
     @Override
     public void printCard(Card card) throws RemoteException {
-
+        view.printCard(card);
     }
 
     @Override
-    public void printList(List<Objects> pile) throws RemoteException {
-
+    public void printListOfTileCovered(List<Tile> tiles) throws RemoteException {
+        view.printPileCovered(tiles);
     }
 
+    @Override
+    public void printListOfTileShown(List<Tile> tiles) throws RemoteException {
+        view.printPileShown(tiles);
+    }
+
+    @Override
+    public void printListOfGoods(List<Colour> listOfGoods) {
+        view.printListOfGoods(listOfGoods);
+    }
 
     @Override
     public void printPlayerDashboard(Tile[][] dashboard) throws RemoteException {
-
+        this.view.printDashShip(dashboard);
     }
 
     //FASI DI GIOCO
+
     @Override
     public void updateGameState(GameFase fase) throws RemoteException{
         this.gameFase = fase;
-        view.updateState(fase);
+        showUpdate();
     }
 
 
@@ -107,12 +116,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public List<String> getAvailableAction() throws RemoteException {
-        return List.of();
+        return server.getAvailableChoices();
     }
 
     @Override
     public List<Tile> getPileOfTile() throws RemoteException {
-        return List.of();
+        return server.getPileOfTile();
     }
 
     @Override
@@ -125,23 +134,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return server.getTileServer();
     }
 
-    @Override
-    public int[] askCoordinate() {
-        return new int[0];
-    }
-
-    @Override
-    public boolean ask(String s) {
-        return false;
-    }
-
-    @Override
-    public void printListOFGoods(List<Colour> listOfGoods) {
-
-    }
 
 
     //PARTE COMUNICAZIONE CON IL SERVER
+    @Override
+    public boolean sendRegistration(String username, String password) throws RemoteException {
+        return server.registerCredential(username, password);
+    }
 
     @Override
     public boolean sendLogin(String username, String password) throws RemoteException {
@@ -160,7 +159,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public String waitForGameUpadate() throws RemoteException {
-        return "";
+        return server.waitForGameStart();
     }
 
     @Override
