@@ -21,7 +21,6 @@ public interface VirtualServer extends Remote {
 
     // Autenticazione e Account
     void login(String username, String password) throws RemoteException;
-    void register(String username, String password) throws RemoteException;
     void logout(String username) throws RemoteException;
 
     // Gestione Partite

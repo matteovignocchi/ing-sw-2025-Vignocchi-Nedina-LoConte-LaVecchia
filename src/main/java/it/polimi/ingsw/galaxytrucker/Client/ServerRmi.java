@@ -25,19 +25,18 @@ import java.util.Map;
 
 //TODO: ho inserito alcuni metodi, ma penso che dobbiamo ragionare insieme su quelli che mancano
 
-public class VirtualServerRmi extends UnicastRemoteObject implements VirtualServer {
+public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     private final Controller controller;
     private final Map<String, Integer> userToId;
     private int id_player;
     //la uso per fare la traduzione che ho pensato (vedi commento in VirtualServer)
 
-    public VirtualServerRmi(Controller controller) throws RemoteException {
+    public ServerRmi(Controller controller) throws RemoteException {
         this.controller = controller;
         this.userToId = new HashMap<>();
         this.id_player = 0;
     }
-
 
     @Override
     public void login(String username, String password) throws RemoteException {
@@ -48,13 +47,6 @@ public class VirtualServerRmi extends UnicastRemoteObject implements VirtualServ
         id_player++;
         userToId.put(username, id);
         System.out.println("Login effettuato: " + username + " -> id " + id);
-    }
-
-    //TODO: secondo te un player può registrarsi e NON GIOCARE?
-    // cioè, register e login sono logiche separate o no? Secondo me sono separate
-    @Override
-    public void register(String username, String password) throws RemoteException {
-
     }
 
     @Override
