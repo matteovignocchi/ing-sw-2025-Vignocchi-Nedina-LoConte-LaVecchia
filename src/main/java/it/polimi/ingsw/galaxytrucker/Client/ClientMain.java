@@ -160,20 +160,41 @@ public class ClientMain {
     //metodo gestione partita
     private static void startGame() throws Exception{
         GameFase gameState =  virtualClient.getCurrentGameState();
-        switch (gameState){
-            case FASE0 -> {
-                view.updateState(FASE0);
-            view.inform("Possible actions:");
-            List<String> possibleActions = virtualClient.getAvailableAction();
 
-            for(int i = 0 ; i < possibleActions.size(); i++){
-                view.inform((i+1)+"."+possibleActions.get(i));
-            }
-            int choice = virtualClient.askIndex();
-            //chiedere perchè send action non è un void ma è un strin
-            virtualClient.sendAction(possibleActions.get(choice-1));
+        while(true){
+            gameState = virtualClient.getCurrentGameState();
+            switch (gameState){
+                case FASE0 -> {
+                    view.updateState(FASE0);
+                    view.inform("Possible actions:");
+                    List<String> possibleActions = virtualClient.getAvailableAction();
+
+                    for(int i = 0 ; i < possibleActions.size(); i++){
+                        view.inform((i+1)+"."+possibleActions.get(i));
+                    }
+                    int choice = virtualClient.askIndex();
+                    //chiedere perchè send action non è un void ma è un strin
+                    virtualClient.sendAction(possibleActions.get(choice-1));
+                }
+                case FASE1 -> {
+                    view.updateState(FASE0);
+                    view.inform("Possible actions:");
+                    List<String> possibleActions = virtualClient.getAvailableAction();
+
+                    for(int i = 0 ; i < possibleActions.size(); i++){
+                        view.inform((i+1)+"."+possibleActions.get(i));
+                    }
+                    int choice = virtualClient.askIndex();
+                    //chiedere perchè send action non è un void ma è un strin
+                    virtualClient.sendAction(possibleActions.get(choice-1));
+                }
+                //cosi per tutte la fasi.
             }
         }
+
+
+
+
     }
 
 
