@@ -28,6 +28,7 @@ public interface View {
     String askString();
     void reportError(String message);
     void updateState(GameFase gameFase);
+    void printTile(Tile tile);
     //meetodo per richiedere
 
 }

@@ -1,5 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+
+import java.awt.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -33,5 +36,24 @@ public interface VirtualServer extends Remote {
     void sendPlayerDash(String username, int dash) throws RemoteException;
 
     // Aggiungerai altri metodi specifici man mano che le fasi evolvono.
+
+
+
+
+
+    //METODI AGGIUNTI PER ME E MATTEO , CI SERVONO PER FAR FUNZIONARE LE COSE , SE VI RENDETE CONTO CHE MANCA QUALCOSA A VOI AGGIUNGETECELO
+    //COME AVEVAMO FATTO IN CONTROLLER
+
+    List<String> getAvaibleGames() throws RemoteException;
+    Tile getTile(int index) throws RemoteException;
+    boolean authenticate(String username, String password) throws RemoteException;
+    Void handleGameRequest(String message) throws RemoteException;
+    String waitForResponse() throws RemoteException;
+    String handlePlayerAction(String message) throws RemoteException;
+
+
+
+
+
 }
 

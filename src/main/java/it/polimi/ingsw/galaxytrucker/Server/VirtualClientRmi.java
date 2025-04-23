@@ -121,7 +121,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public Tile getTile(int i) throws RemoteException {
-        return Tile tile = new MultiJoint(0,3,1,5);
+        return server.getTile(i);
     }
 
 
