@@ -37,7 +37,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_UPDATE -> {
                         switch (msg.getOperation()) {
-                            case Message.OP_GAME_FASE -> {
+                            case Message.OP_GAME_PHASE -> {
                                 gameFase = (GameFase) msg.getPayload();
                                 showUpdate();
                             }
@@ -248,7 +248,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public GameFase getCurrentGameState() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_GAME_FASE,null);
+        Message request = Message.request(Message.OP_GAME_PHASE,null);
         sendRequest(request);
         Object response = waitForResponce();
         return (GameFase) response;

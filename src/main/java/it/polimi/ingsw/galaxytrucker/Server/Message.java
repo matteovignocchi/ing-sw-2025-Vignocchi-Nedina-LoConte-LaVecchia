@@ -20,7 +20,7 @@ public class Message implements Serializable {
     public static final String OP_PRINT_SHOWN = "PRINT_SHOWN";
     public static final String OP_PRINT_GOODS = "PRINT_GOODS";
     public static final String OP_PRINT_DASHBOARD = "PRINT_DASHBOARD";
-    public static final String OP_GAME_FASE = "GAME_FASE";
+    public static final String OP_GAME_PHASE = "GAME_PHASE";
 
     public static final String OP_GET_TILE = "GET_TILE";
     public static final String OP_GET_CARD = "GET_CARD";
