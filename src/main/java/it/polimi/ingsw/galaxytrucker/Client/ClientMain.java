@@ -187,66 +187,11 @@ public class ClientMain {
             switch (gameState) {
                 case FASE0 -> {
                     view.updateState(FASE0);
-                    choosePossibleActions();
-                }
-                case FASE1 -> {
-                    view.updateState(FASE1);
-                    choosePossibleActions();
-                }
-                case FASE2 -> {
-                    view.updateState(FASE2);
-                    choosePossibleActions();
-                }
-//                case FASE3 -> {
-//                    view.updateState(FASE3);
-//                    choosePossibleActions();
-//                }
-                case FASE4 -> {
-                    view.updateState(FASE4);
-                    choosePossibleActions();
-                }
-                case FASE5 -> {
-                    view.updateState(FASE5);
-                    choosePossibleActions();
-                }
-                case FASE6 -> {
-                    view.updateState(FASE6);
-                    choosePossibleActions();
-                }
-                case FASE7 -> {
-                    view.updateState(FASE7);
-                    choosePossibleActions();
-                }
-                case FASE8 -> {
-                    view.updateState(FASE8);
-                    choosePossibleActions();
-                }
-                case FASE9 -> {
-                    view.updateState(FASE9);
-                    choosePossibleActions();
-                }
-                case FASE10 -> {
-                    view.updateState(FASE10);
-                    choosePossibleActions();
-                }
-                case FASE11 -> {
-                    view.updateState(FASE11);
-                    choosePossibleActions();
-                }
-                case FASE12 -> {
-                    view.updateState(FASE12);
-                    choosePossibleActions();
-                }
-                case FASE13 -> {
-                    view.updateState(FASE13);
-                    choosePossibleActions();
-                }
-                case FASE14 -> {
-                    view.updateState(FASE14);
-                    choosePossibleActions();
                 }
                 default -> view.reportError("Problem with communication server");
             }
+            choosePossibleActions();
+
 
         } while (!gameState.equals(GameFase.FASE14));
 

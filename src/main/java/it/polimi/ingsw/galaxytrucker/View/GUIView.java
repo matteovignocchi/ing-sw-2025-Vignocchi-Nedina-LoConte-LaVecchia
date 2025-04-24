@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
@@ -20,12 +21,12 @@ public class GUIView implements View {
 
     @Override
     public int[] askCordinate() {
-
+     return null;
     }
 
     @Override
     public int askIndex() {
-
+return 0;
     }
 
     @Override
@@ -55,6 +56,11 @@ public class GUIView implements View {
 
     @Override
     public void printListOfGoods(List<Colour> Goods) {
+
+    }
+
+    @Override
+    public void printListOfTiles(List<Tile> Tiles) {
 
     }
 
@@ -89,6 +95,16 @@ public class GUIView implements View {
     }
 
     @Override
+    public void printPileCovered(List<Tile> tiles) {
+
+    }
+
+    @Override
+    public void printPileShown(List<Tile> tiles) {
+
+    }
+
+    @Override
     public String askString() {
         return "";
     }
@@ -100,6 +116,16 @@ public class GUIView implements View {
 
     @Override
     public void updateState(GameFase gameFase) {
+
+    }
+
+    @Override
+    public void printTile(Tile tile) {
+
+    }
+
+    @Override
+    public void printCard(Card card) {
 
     }
 }
