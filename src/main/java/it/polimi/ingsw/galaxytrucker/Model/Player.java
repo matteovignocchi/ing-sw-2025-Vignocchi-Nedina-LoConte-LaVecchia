@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -11,9 +12,10 @@ import java.util.*;
  * it has all the information for the game
  * @author Matteo Vignocchi & Oleg Nedina
  */
-public class Player {
+public class Player implements Serializable {
     //Beginning
-    protected int id;
+    private final int id;
+    private boolean connected = true;
     private int credit;
     //Ship building
     private boolean isReady;
@@ -43,6 +45,7 @@ public class Player {
         this.position = 0;
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
+        this.gameFase = GameFase.BOARD_SETUP;
         credit = 0;
         purpleAlien = false;
         brownAlien = false;
@@ -180,6 +183,11 @@ public class Player {
     public int getId() {
         return id;
     }
+
+    public boolean isConnected() { return connected; }
+
+    public void setConnected(boolean connected) { this.connected = connected; }
+
 
     /**
      * @return how many laps the player did

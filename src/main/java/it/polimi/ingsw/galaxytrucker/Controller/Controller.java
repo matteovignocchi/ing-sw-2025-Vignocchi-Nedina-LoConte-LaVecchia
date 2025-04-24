@@ -11,22 +11,22 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-public class Controller {
+public class Controller implements Serializable {
 
     private List<Player> players_in_Game = new ArrayList<>();
-    private final Map<String, VirtualView> ViewByName = new ConcurrentHashMap<>();
-    private final Map<String, Player> PlayerByName = new HashMap<>();
+    private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
+    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>();
+    private final AtomicInteger player_id_counter;
     private final int Max_Players;
-    private GameFase principalGameFase;
+    private GameFase principalGameFase = GameFase.BOARD_SETUP; //iniazilizzato a fase 0
     private GameFase preGameFase;
-    private final AtomicInteger player_id;
-    private boolean isDemo;
+    private final boolean isDemo;
 
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
@@ -47,7 +47,7 @@ public class Controller {
         }
         this.isDemo = isDemo;
         this.Max_Players = Max_Players;
-        this.player_id = new AtomicInteger(1); //verificare che matcha con la logica
+        this.player_id_counter = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
@@ -56,15 +56,55 @@ public class Controller {
                                                     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public synchronized void addPlayer(String nickname, VirtualView view) throws RemoteException {
+        if (PlayerByNickname.containsKey(nickname)) throw new IllegalArgumentException("Nickname already used");
+        if (PlayerByNickname.size() >= Max_Players) throw new IllegalStateException("Game is full");
 
-    public void addPlayer(String nickname, VirtualView v) throws RemoteException {
-        if (players_in_Game.size() >= Max_Players) throw new RuntimeException("Too many players in flight");
-        Player p = new Player(player_id.getAndIncrement(), isDemo);
-        players_in_Game.add(p);
-        PlayerByName.put(nickname, p);
-        ViewByName.put(nickname, v);
-        startGameIfReady();
+        Player player = new Player(player_id_counter.getAndIncrement(), true);
+        PlayerByNickname.put(nickname, player);
+        ViewByNickname.put(nickname, view);
+        if (PlayerByNickname.size() == Max_Players) startingGame();
     }
+
+    private void startingGame() {
+        principalGameFase = GameFase.TILE_MANAGEMENT; //da capire qual è la fase giusta
+        PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.TILE_MANAGEMENT));
+    }
+
+    public Player getPlayerByNickname(String nickname) {
+        return PlayerByNickname.get(nickname);
+    }
+
+    public void removePlayer(String nickname){
+        PlayerByNickname.remove(nickname);
+        ViewByNickname.remove(nickname);
+    } //va rimosso anche dalla lista players_in_game??
+
+    public void remapView(String nickname, VirtualView view){
+        ViewByNickname.put(nickname, view);
+    }
+
+    public int countConnectedPlayers() {
+        return (int) PlayerByNickname.values().stream().filter(Player::isConnected).count();
+    }
+
+    public GameFase getPrincipalGameFase() {
+        return principalGameFase;
+    }
+
+    public void markDisconnected(String nickname) {
+        Player player = PlayerByNickname.get(nickname);
+        if (player != null) player.setConnected(false);
+    }
+
+    public void pauseGame() {
+        principalGameFase = GameFase.WAITING_FOR_PLAYERS;
+    }//non so se la fase è corretta, cioè il gioco deve continuare se crasha, a meno che non resta un solo player e attivo un timeout
+    //Metodo da rivedere
+
+    public void resumeGame() {
+        principalGameFase = GameFase.DRAW_PHASE;
+    }//metodo da rivedere
 
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
@@ -82,10 +122,11 @@ public class Controller {
 
     public int getMax_Players(){ return Max_Players; }
 
+    //da verificare se la fase è giusta
     public void startGameIfReady() {
         if (players_in_Game.size() == Max_Players) {
-            principalGameFase = GameFase.FASE5;
-            setGameFaseForEachPlayer(GameFase.FASE5);
+            principalGameFase = GameFase.TILE_MANAGEMENT;
+            setGameFaseForEachPlayer(GameFase.TILE_MANAGEMENT);
             // TODO: notifica view se serve
             // TODO: capire bene come gestire le fasi
         }
@@ -120,10 +161,6 @@ public class Controller {
                 p.setGameFase(gameFase);
             }
         }
-    }
-
-    public GameFase getPrincipalGameFase() {
-        return principalGameFase;
     }
 
     public void setNextPrincipalGameFase() {
