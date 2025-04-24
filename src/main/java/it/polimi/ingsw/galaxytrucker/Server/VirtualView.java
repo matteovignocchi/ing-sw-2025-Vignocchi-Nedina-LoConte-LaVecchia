@@ -24,13 +24,11 @@ public interface VirtualView {
     public boolean sendRegistration(String username, String password) throws Exception;
     public boolean sendLogin(String username, String password) throws Exception;
     void sendGameRequest(String message) throws Exception;
-    String waitForResponce() throws Exception;
+    Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
-    List<Tile> getPileOfTile() throws Exception;
-    List<Tile> getPileOfTileShown() throws Exception;
-    List<Tile> getTileBooked() throws Exception;
+
     void sendAction(int key) throws Exception;
     GameFase getCurrentGameState() throws Exception;
 

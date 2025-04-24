@@ -119,7 +119,7 @@ public class ClientMain {
         view.inform("Creating New Game");
         virtualClient.sendGameRequest("CREATE");
 
-        String response = virtualClient.waitForResponce();
+        String response = (String) virtualClient.waitForResponce();
         view.inform(response);
 
         if(response.contains("create")){
@@ -159,7 +159,7 @@ public class ClientMain {
         }
         int choice = virtualClient.askIndex();
         virtualClient.sendGameRequest("JOIN_" + availableGames.get(choice-1));
-        String response = virtualClient.waitForResponce();
+        String response = (String) virtualClient.waitForResponce();
         view.inform(response);
         if(response.contains("join")){
             waitGameStart();

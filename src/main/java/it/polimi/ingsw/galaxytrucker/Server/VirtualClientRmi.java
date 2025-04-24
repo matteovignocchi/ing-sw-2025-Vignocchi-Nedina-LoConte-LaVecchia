@@ -118,21 +118,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public List<String> getAvailableAction() throws RemoteException {
         return server.getAvailableChoices();
     }
-
-    @Override
-    public List<Tile> getPileOfTile() throws RemoteException {
-        return server.getPileOfTile();
-    }
-
-    @Override
-    public List<Tile> getPileOfTileShown() throws RemoteException {
-        return server.getPileOfTileShown();
-    }
-
-    @Override
-    public List<Tile> getTileBooked() throws RemoteException {
-        return server.getDiscardPile();
-    }
+    //tutti questi metodi get non sono inutili dato che è sempre una
+    //lista di comandi, tanto io mando il comando e il server me la printa
 
     @Override
     public GameFase getCurrentGameState() throws RemoteException {
@@ -163,7 +150,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public String waitForResponce() throws RemoteException {
+    public Object waitForResponce() throws RemoteException {
         return server.waitForResponse();
     }
 

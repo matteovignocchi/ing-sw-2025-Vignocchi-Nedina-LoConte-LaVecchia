@@ -18,7 +18,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectOutputStream out;
     private final View view;
     private GameFase gameFase;
-    private String lastResponse;
+    private Object lastResponse;
 
     public VirtualClientSocket(String host, int port , View view) throws IOException {
         this.socket = new Socket(host, port);
@@ -37,7 +37,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_UPDATE -> {
                         switch (msg.getOperation()) {
-                            case Message.OP_GAME_FASE -> {
+                            case Message.OP_GAME_PHASE -> {
                                 gameFase = (GameFase) msg.getPayload();
                                 showUpdate();
                             }
@@ -84,6 +84,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                                 view.inform((String) msg.getPayload());
                                 view.askString();
                             }
+
                         }
                     }
 
@@ -104,7 +105,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void inform(String message){
+    public void inform(String message) throws IOException {
         view.inform(message);
     }
 
@@ -123,10 +124,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         return view.ask(message);
     }
 
-    @Override
-    public void printListOfGoods(List<Colour> listOfGoods){
-        view.printListOfGoods(listOfGoods);
-    }
+
 
     @Override
     public void printListOfTileCovered(List<Tile> tiles) {
@@ -161,6 +159,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
+    public void printListOfGoods(List<Colour> listOfGoods) throws Exception {
+        view.printListOfGoods(listOfGoods);
+    }
+
+
+    @Override
     public void printCard(Card card){
         view.printCard(card);
     }
@@ -185,59 +189,56 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public boolean sendRegistration(String username, String password) throws Exception {
         Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
         sendRequest(registrationRequest);
-        return Boolean.parseBoolean(waitForResponce());
+        return Boolean.parseBoolean((String) waitForResponce());
     }
 
     @Override
     public boolean sendLogin(String username, String password) throws Exception {
         Message loginRequest = Message.request(Message.OP_LOGIN, new LoginRequest(username, password));
         sendRequest(loginRequest);
-        return Boolean.parseBoolean(waitForResponce());
+        return Boolean.parseBoolean((String) waitForResponce());
 
     }
 
     @Override
-    public void sendGameRequest(String message){
-
+    public void sendGameRequest(String message) throws IOException {
+        Message gameRequest = Message.request(Message.OP_LOGIN, message);
+        sendRequest(gameRequest);
     }
 
     @Override
-    public  synchronized String waitForResponce() throws Exception {
+    public  synchronized Object waitForResponce() throws InterruptedException {
         while (lastResponse == null) wait();
-        String response = lastResponse;
+        Object response = lastResponse;
         lastResponse = null;
         return response;
     }
 
     @Override
-    public String waitForGameUpadate() {
-        return "";
+    public String waitForGameUpadate() throws InterruptedException {
+        while (lastResponse == null) wait();
+        String response = (String) lastResponse;
+        lastResponse = null;
+        return response;
     }
 
     @Override
-    public List<String> requestGameList()  {
-        return List.of();
+    public List<String> requestGameList() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_LIST_GAMES, null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (List<String>) response;
     }
 
     @Override
-    public List<String> getAvailableAction()  {
-        return List.of();
+    public List<String> getAvailableAction() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_ACTIONS, null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (List<String>) response;
     }
 
-    @Override
-    public List<Tile> getPileOfTile()  {
-        return List.of();
-    }
 
-    @Override
-    public List<Tile> getPileOfTileShown() throws Exception {
-        return List.of();
-    }
-
-    @Override
-    public List<Tile> getTileBooked() throws Exception {
-        return List.of();
-    }
 
     @Override
     public void sendAction(int key)  {
@@ -246,19 +247,28 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public GameFase getCurrentGameState() {
-        return null;
+    public GameFase getCurrentGameState() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_GAME_PHASE,null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (GameFase) response;
     }
 
     @Override
-    public Tile getTile()  {
-        return null;
+    public Tile getTile() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_GET_TILE, null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (Tile) response;
     }
 
     public void sendRequest(Message message) throws IOException {
         out.writeObject(message);
         out.flush();
     }
+
+
+
 
 
 }
