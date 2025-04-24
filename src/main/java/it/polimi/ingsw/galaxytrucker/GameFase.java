@@ -8,4 +8,5 @@ public enum GameFase {
     DRAW_PHASE,
     CARD_EFFECT,
     SCORING ,
+    EXIT,
 }

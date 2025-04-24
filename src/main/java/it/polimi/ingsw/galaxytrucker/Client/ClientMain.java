@@ -185,15 +185,26 @@ public class ClientMain {
 
         do {
             switch (gameState) {
-                case FASE0 -> {
-                    view.updateState(FASE0);
-                }
+                case BOARD_SETUP -> view.updateState(BOARD_SETUP);
+
+                case TILE_MANAGEMENT -> view.updateState(TILE_MANAGEMENT);
+
+                case WAITING_FOR_PLAYERS -> view.updateState(WAITING_FOR_PLAYERS);
+
+                case WAITING_FOR_TURN -> view.updateState(WAITING_FOR_TURN);
+
+                case SCORING ->  view.updateState(SCORING);
+
+                case DRAW_PHASE ->  view.updateState(DRAW_PHASE);
+
+                case CARD_EFFECT ->  view.updateState(CARD_EFFECT);
+
                 default -> view.reportError("Problem with communication server");
             }
             choosePossibleActions();
 
 
-        } while (!gameState.equals(GameFase.FASE14));
+        } while (!gameState.equals(EXIT));
 
 
 
