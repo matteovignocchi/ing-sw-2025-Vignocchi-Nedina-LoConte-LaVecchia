@@ -37,7 +37,6 @@ public class classeDisupportoPerServer {
         List<String> listOfOptions = new ArrayList<>();
         switch (tmp) {
 
-
             case BOARD_SETUP -> {
                 listOfOptions.add("get Blanket Tile");
                 listOfOptions.add("take Discovery Tile");
