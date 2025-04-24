@@ -29,7 +29,7 @@ public interface VirtualView {
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
 
-    void sendAction(int key) throws Exception;
+    void sendAction(String key) throws Exception;
     GameFase getCurrentGameState() throws Exception;
 
     Tile getTile() throws Exception;
@@ -38,4 +38,6 @@ public interface VirtualView {
     int[] askCoordinate() throws Exception;
 
     void printListOfGoods(List<Colour> listOfGoods) throws Exception;
+
+    GameFase getGameFase() throws Exception;
 }

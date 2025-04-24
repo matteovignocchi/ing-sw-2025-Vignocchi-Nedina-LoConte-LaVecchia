@@ -160,8 +160,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void sendAction(int key) throws RemoteException {
+    public void sendAction(String key) throws RemoteException {
          server.handlePlayerAction("key");
+    }
+
+    @Override
+    public GameFase getGameFase() {
+        return gameFase;
     }
 
 

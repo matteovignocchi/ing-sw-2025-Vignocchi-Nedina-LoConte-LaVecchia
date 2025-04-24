@@ -241,7 +241,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public void sendAction(int key)  {
+    public void sendAction(String key)  {
 
     }
 
@@ -265,6 +265,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void sendRequest(Message message) throws IOException {
         out.writeObject(message);
         out.flush();
+    }
+
+    public GameFase getGameFase(){
+        return gameFase;
     }
 
 

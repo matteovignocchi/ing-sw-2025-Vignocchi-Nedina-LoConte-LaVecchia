@@ -172,41 +172,37 @@ public class ClientMain {
         List<String> possibleActions = virtualClient.getAvailableAction();
 
         for(int i = 0 ; i < possibleActions.size(); i++){
-            view.inform(possibleActions.get(i));
+            view.inform((i+1)+":"+possibleActions.get(i));
         }
         int choice = virtualClient.askIndex();
         //chiedere perchè send action non è un void ma è un strin
-        virtualClient.sendAction(choice-1);
+        virtualClient.sendAction(possibleActions.get(choice-1));
     }
 
     //metodo gestione partita
     private static void startGame() throws Exception{
-        GameFase gameState =  virtualClient.getCurrentGameState();
+        GameFase gameState = virtualClient.getCurrentGameState();
+        switch (gameState) {
+            case BOARD_SETUP -> view.updateState(BOARD_SETUP);
+
+            case TILE_MANAGEMENT -> view.updateState(TILE_MANAGEMENT);
+
+            case WAITING_FOR_PLAYERS -> view.updateState(WAITING_FOR_PLAYERS);
+
+            case WAITING_FOR_TURN -> view.updateState(WAITING_FOR_TURN);
+
+            case SCORING ->  view.updateState(SCORING);
+
+            case DRAW_PHASE ->  view.updateState(DRAW_PHASE);
+
+            case CARD_EFFECT ->  view.updateState(CARD_EFFECT);
+
+            default -> view.reportError("Problem with communication server");
+        }
         do {
-            switch (gameState) {
-                case BOARD_SETUP -> view.updateState(BOARD_SETUP);
-
-                case TILE_MANAGEMENT -> view.updateState(TILE_MANAGEMENT);
-
-                case WAITING_FOR_PLAYERS -> view.updateState(WAITING_FOR_PLAYERS);
-
-                case WAITING_FOR_TURN -> view.updateState(WAITING_FOR_TURN);
-
-                case SCORING ->  view.updateState(SCORING);
-
-                case DRAW_PHASE ->  view.updateState(DRAW_PHASE);
-
-                case CARD_EFFECT ->  view.updateState(CARD_EFFECT);
-
-                default -> view.reportError("Problem with communication server");
-            }
             choosePossibleActions();
-
-
+            gameState = virtualClient.getGameFase();
         } while (!gameState.equals(EXIT));
-
-
-
 
     }
 
