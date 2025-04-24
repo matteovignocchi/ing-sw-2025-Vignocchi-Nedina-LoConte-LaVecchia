@@ -50,11 +50,28 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                         }
                     }
                     case Message.TYPE_ERROR -> {
-                        view.reportError("ERROR: " + msg.getPayload());
+                        view.reportError((String) msg.getPayload());
                     }
                     case Message.TYPE_NOTIFICATION -> {
-                        view.inform("NOTIFY: " + msg.getPayload());
+                        view.inform((String) msg.getPayload());
                     }
+                    case Message.TYPE_REQUEST -> {
+                        switch (msg.getOperation()) {
+                            case Message.OP_INDEX -> {
+                                view.inform((String) msg.getPayload());
+                                view.askIndex();
+                            }
+                            case Message.OP_COORDINATE -> {
+                                view.inform((String) msg.getPayload());
+                                view.askCordinate();
+                            }
+                            case Message.OP_STRING-> {
+                                view.inform((String) msg.getPayload());
+                                view.askString();
+                            }
+                        }
+                    }
+
                     default -> {
                         view.reportError("Unknown message type: " + msg.getMessageType());
                     }
@@ -73,17 +90,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void inform(String message){
-        this.view.inform(message);
+        view.inform(message);
     }
 
     @Override
     public void showUpdate(){
-        this.view.updateState(gameFase);
+        view.updateState(gameFase);
     }
 
     @Override
     public void reportError(String error){
-        this.view.reportError(error);
+        view.reportError(error);
     }
 
     @Override
@@ -97,40 +114,45 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public int askIndex(){
-        return this.view.askIndex();
-    }
-
-    @Override
-    public int[] askCoordinates() {
-        return this.view.askCordinate();
-    }
-
-    @Override
-    public String askString(){
-        return this.view.askString();
-    }
-
-
-
-    @Override
-    public void printCard(Card card){
-        this.view.printCard(card);
-    }
-
-    @Override
     public void printListOfTileCovered(List<Tile> tiles) {
-
+        view.printPileCovered(tiles);
     }
 
     @Override
     public void printListOfTileShown(List<Tile> tiles)  {
+        view.printListOfTiles(tiles);
+    }
 
+    @Override
+    public int askIndex(){
+        return view.askIndex();
+    }
+
+    @Override
+    public int[] askCoordinates() {
+        return view.askCordinate();
+    }
+
+    @Override
+    public String askString(){
+        return view.askString();
+    }
+
+
+    @Override
+    public int[] askCoordinate() {
+        return view.askCordinate();
+    }
+
+
+    @Override
+    public void printCard(Card card){
+        view.printCard(card);
     }
 
     @Override
     public void printPlayerDashboard(Tile[][] dashboard)  {
-        this.view.printDashShip(dashboard);
+        view.printDashShip(dashboard);
     }
 
     @Override
@@ -193,6 +215,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
+    public List<Tile> getPileOfTileShown() throws Exception {
+        return List.of();
+    }
+
+    @Override
+    public List<Tile> getTileBooked() throws Exception {
+        return List.of();
+    }
+
+    @Override
     public void sendAction(int key)  {
 
     }
@@ -206,11 +238,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public Tile getTile()  {
         return null;
-    }
-
-    @Override
-    public int[] askCoordinate() {
-        return new int[0];
     }
 
     public void sendRequest(Message message) throws IOException {

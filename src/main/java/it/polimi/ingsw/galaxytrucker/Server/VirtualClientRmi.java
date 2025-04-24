@@ -93,8 +93,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         this.view.printDashShip(dashboard);
     }
 
-    //FASI DI GIOCO
 
+    //FASI DI GIOCO
     @Override
     public void updateGameState(GameFase fase) throws RemoteException{
         this.gameFase = fase;
@@ -102,8 +102,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
 
-    //PARTI DI GIOCO
 
+    //PARTI DI GIOCO
     @Override
     public void startMach() throws RemoteException {
 
@@ -122,6 +122,16 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public List<Tile> getPileOfTile() throws RemoteException {
         return server.getPileOfTile();
+    }
+
+    @Override
+    public List<Tile> getPileOfTileShown() throws RemoteException {
+        return server.getPileOfTileShown();
+    }
+
+    @Override
+    public List<Tile> getTileBooked() throws RemoteException {
+        return server.getDiscardPile();
     }
 
     @Override

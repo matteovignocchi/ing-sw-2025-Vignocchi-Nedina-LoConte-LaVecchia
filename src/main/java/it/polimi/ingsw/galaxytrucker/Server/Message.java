@@ -20,6 +20,9 @@ public class Message implements Serializable {
     public static final String OP_GET_BOARD = "GET_BOARD";
     public static final String OP_GET_TILES = "GET_TILES";
     public static final String OP_GET_CARDS = "GET_CARDS";
+    public static final String OP_INDEX = "INDEX";
+    public static final String OP_COORDINATE = "COORDINATE";
+    public static final String OP_STRING = "STRING";
 
 
     private final String messageType;
