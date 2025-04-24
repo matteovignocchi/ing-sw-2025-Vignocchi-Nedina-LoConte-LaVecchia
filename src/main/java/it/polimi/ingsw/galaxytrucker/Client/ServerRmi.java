@@ -1,11 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.Server.GameManager;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.Map;
 
 //TODO: RemoteException è pensata per errori di trasporto, tipo:
 // 1) il client si è disconnesso
@@ -26,36 +25,29 @@ import java.util.Map;
 //TODO: ho inserito alcuni metodi, ma penso che dobbiamo ragionare insieme su quelli che mancano
 
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
+    private final GameManager gameManager;
 
-    private final Controller controller;
-    private final Map<String, Integer> userToId;
-    private int id_player;
-    //la uso per fare la traduzione che ho pensato (vedi commento in VirtualServer)
-
-    public ServerRmi(Controller controller) throws RemoteException {
-        this.controller = controller;
-        this.userToId = new HashMap<>();
-        this.id_player = 0;
+    public ServerRmi(GameManager gameManager) throws RemoteException {
+        super();
+        this.gameManager = gameManager;
     }
 
     @Override
-    public void login(String username, String password) throws RemoteException {
-        if (userToId.containsKey(username))
-            throw new RemoteException("Utente già connesso");
-
-        int id = id_player;
-        id_player++;
-        userToId.put(username, id);
-        System.out.println("Login effettuato: " + username + " -> id " + id);
+    public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException {
+        try{
+            return gameManager.createGame(isDemo, v, nickname, maxPlayers);
+        } catch(Exception e){
+            throw new RemoteException("Error in new game's creation:  " + e.getMessage());
+        }
+        //capire se gestione eccezione così va bene
     }
+
+
+
 
     @Override
     public void logout(String username) throws RemoteException {
 
-    }
-
-    @Override
-    public void createNewGame(String username) throws RemoteException {
     }
 
     @Override

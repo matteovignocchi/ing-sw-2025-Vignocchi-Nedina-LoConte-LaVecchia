@@ -21,10 +21,6 @@ public class ServerSocket extends UnicastRemoteObject implements VirtualServer {
 
     }
 
-    @Override
-    public void createNewGame(String username) throws RemoteException {
-
-    }
 
     @Override
     public void enterGame(String username, int gameId) throws RemoteException {

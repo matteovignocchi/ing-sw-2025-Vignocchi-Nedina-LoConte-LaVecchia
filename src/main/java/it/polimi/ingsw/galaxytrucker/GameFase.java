@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker;
 
+//sostituire fase con phase
+
 public enum GameFase {
     FASE0, //fase iniziale quando costruisci(ho la scelte di prendere la tile dalle coperte, scoperte, posso girare la clessidra, posso dichiararmi pronto, guarda nave altri giocatori, guarda mazzo, e uscire(comune a tutte))
     FASE1, //prima chiedo indice, ho preso la tile dalle coperte o dalle scoperte, decido dove metterla

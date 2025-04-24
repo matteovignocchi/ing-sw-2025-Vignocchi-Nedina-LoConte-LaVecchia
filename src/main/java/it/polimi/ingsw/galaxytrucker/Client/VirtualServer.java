@@ -20,12 +20,16 @@ import java.util.List;
 
 public interface VirtualServer extends Remote {
 
+    public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException;
+
+
+
+
     // Autenticazione e Account
     void login(String username, String password) throws RemoteException;
     void logout(String username) throws RemoteException;
 
     // Gestione Partite
-    void createNewGame(String username) throws RemoteException;
     void enterGame(String username, int gameId) throws RemoteException;
 
     // Azioni di gioco
@@ -36,11 +40,6 @@ public interface VirtualServer extends Remote {
     void sendPlayerDash(String username, int dash) throws RemoteException;
 
     // Aggiungerai altri metodi specifici man mano che le fasi evolvono.
-
-
-
-
-
     //METODI AGGIUNTI PER ME E MATTEO , CI SERVONO PER FAR FUNZIONARE LE COSE , SE VI RENDETE CONTO CHE MANCA QUALCOSA A VOI AGGIUNGETECELO
     //COME AVEVAMO FATTO IN CONTROLLER
 
