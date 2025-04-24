@@ -20,9 +20,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Controller {
 
     private List<Player> players_in_Game = new ArrayList<>();
+    private final Map<String, VirtualView> ViewByName = new ConcurrentHashMap<>();
+    private final Map<String, Player> PlayerByName = new HashMap<>();
+    private final int Max_Players;
+    private GameFase principalGameFase;
+    private GameFase preGameFase;
+    private final AtomicInteger player_id;
+    private boolean isDemo;
 
-    //sono le cose del model , invece che modificare tutto e creare un collegamento nodale in più si può lasciare così senza
-    //cambiare (idea che ci ha già approvato il floris)
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard f_board;
@@ -30,18 +35,6 @@ public class Controller {
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
 
-    //cambiare nomi mappe e dire a oleg e teo
-    private final Map<String, VirtualView> ViewByName = new ConcurrentHashMap<>();
-    private final Map<String, Player> PlayerByName = new HashMap<>();
-    private final int Max_Players;
-
-    private GameFase principalGameFase;
-    private GameFase preGameFase;
-    private final AtomicInteger player_id;
-    private boolean isDemo;
-
-
-    // da finire: creazione tutti altri elementi del model()
     public Controller(boolean isDemo, int Max_Players) throws CardEffectException, IOException {
         if(isDemo) {
             f_board = new FlightCardBoard();
@@ -59,13 +52,18 @@ public class Controller {
         Collections.shuffle(pileOfTile);
     }
 
-    //modificare con nickname
-    public void addPlayer(VirtualView v) throws RemoteException {
-        if(players_in_Game.size() >= 4) throw new RuntimeException("Too many players in flight");//gestire eccezione!!!!!!!!
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                    //GESTIONE PARTITA
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public void addPlayer(String nickname, VirtualView v) throws RemoteException {
+        if (players_in_Game.size() >= Max_Players) throw new RuntimeException("Too many players in flight");
         Player p = new Player(player_id.getAndIncrement(), isDemo);
         players_in_Game.add(p);
-        .put(p,v);
-        //bisogna anche aggiungerlo nella plancia di volo(ma dopo la costruzione)
+        PlayerByName.put(nickname, p);
+        ViewByName.put(nickname, v);
+        startGameIfReady();
     }
 
     //essendoci già condizione su if non penso servi
@@ -80,6 +78,78 @@ public class Controller {
             }
         }
         return false;
+    }
+
+    public int getMax_Players(){ return Max_Players; }
+
+    public void startGameIfReady() {
+        if (players_in_Game.size() == Max_Players) {
+            principalGameFase = GameFase.FASE5;
+            setGameFaseForEachPlayer(GameFase.FASE5);
+            // TODO: notifica view se serve
+            // TODO: capire bene come gestire le fasi
+        }
+    }
+
+    //MEDOTI PER PRENDERE LE GAMEFASE
+    public List<GameFase> getGameFasesForEachPlayer() {
+        List<GameFase> gameFases = new ArrayList<>();
+        for(Player x : players_in_Game ) {
+            gameFases.add(x.getGameFase());
+        }
+        return gameFases;
+    }
+
+    public GameFase getGameFase(int id) {
+        for(Player p : players_in_Game ) {
+            if(id == p.getId()) {
+                return p.getGameFase();
+            }
+        }
+        return null;
+    }
+
+    public void setGameFaseForEachPlayer(GameFase gameFase) {
+        for(Player p : players_in_Game ) {
+            p.setGameFase(gameFase);
+        }
+    }
+    public void setGameFase(GameFase gameFase, int id) {
+        for(Player p : players_in_Game ) {
+            if(id == p.getId()) {
+                p.setGameFase(gameFase);
+            }
+        }
+    }
+
+    public GameFase getPrincipalGameFase() {
+        return principalGameFase;
+    }
+
+    public void setNextPrincipalGameFase() {
+
+        switch (principalGameFase) {
+            case FASE0 -> {
+                preGameFase = principalGameFase;
+                principalGameFase = GameFase.FASE5;
+            }
+            case FASE5 -> {
+                preGameFase = principalGameFase;
+                principalGameFase = GameFase.FASE13;
+            }
+            default -> principalGameFase = preGameFase;
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                //GESTIONE MODEL
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public boolean askPlayerDecision(String condition, Player id) {
+        VirtualView x = map.get(id);
+        return x.ask(condition);
     }
 
     public void addToShownTile(Tile tile) {
@@ -102,6 +172,7 @@ public class Controller {
         pileOfTile.remove(index);
         return tmp;
     }
+
     // metodo che restituisce il numero di crewMate nella nave
     public int getNumCrew(Player p) {
         int tmp = 0;
@@ -623,11 +694,6 @@ public class Controller {
         }
     }
 
-    public boolean askPlayerDecision(String condition, Player id) {
-        VirtualView x = map.get(id);
-        return x.ask(condition);
-    }
-
     public void addCreditToPlayer(int credits, Player player) {
         player.addCredits(credits);
     }
@@ -807,58 +873,6 @@ public class Controller {
         return false;
     }
 
-    //MEDOTI PER PRENDERE LE GAMEFASE
-    public List<GameFase> getGameFasesForEachPlayer() {
-        List<GameFase> gameFases = new ArrayList<>();
-        for(Player x : players_in_Game ) {
-            gameFases.add(x.getGameFase());
-        }
-        return gameFases;
-    }
-
-    public GameFase getGameFase(int id) {
-        for(Player p : players_in_Game ) {
-            if(id == p.getId()) {
-                return p.getGameFase();
-            }
-        }
-        return null;
-    }
-
-    public void setGameFaseForEachPlayer(GameFase gameFase) {
-        for(Player p : players_in_Game ) {
-            p.setGameFase(gameFase);
-        }
-    }
-    public void setGameFase(GameFase gameFase, int id) {
-        for(Player p : players_in_Game ) {
-            if(id == p.getId()) {
-                p.setGameFase(gameFase);
-            }
-        }
-    }
-
-    public GameFase getPrincipalGameFase() {
-        return principalGameFase;
-    }
-
-    public void setNextPrincipalGameFase() {
-
-        switch (principalGameFase) {
-            case FASE0 -> {
-                preGameFase = principalGameFase;
-                principalGameFase = GameFase.FASE5;
-            }
-            case FASE5 -> {
-                preGameFase = principalGameFase;
-                principalGameFase = GameFase.FASE13;
-            }
-            default -> principalGameFase = preGameFase;
-        }
-    }
-
-    //////////////////////////////////////////////////////////////////
-    //METTIAMO METODI OLEG-TEO SOPRA, MIEI-FRA SOTTO, MIA MAGGIORE CHIAREZZA, SCUSATE SONO AUTISTICO
 
     public FlightCardBoard getFlightCardBoard() {
         return f_board;
@@ -912,15 +926,6 @@ public class Controller {
     2. chiamo activate card
     3. check se deck vuoto (attivata ultima carta) si passa alla fase di premizione
      */
-
-
-
-
-
-
-
-
-
 
 
 }

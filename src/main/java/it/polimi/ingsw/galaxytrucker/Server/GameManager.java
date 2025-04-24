@@ -30,21 +30,22 @@ public class GameManager {
         loadSavedGames(); // Caricamento automatico all'avvio
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v, int MaxPLayers) throws CardEffectException, IOException {
+    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int MaxPLayers) throws CardEffectException, IOException {
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, MaxPLayers);
         games.put(gameId, controller);
-        controller.addPlayer(v);
+        controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
         return gameId;
     }
 
-    public synchronized void joinGame(int gameId, VirtualView v) throws CardEffectException, IOException {
+    public synchronized void joinGame(int gameId, String nickname, VirtualView v) throws CardEffectException, IOException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new IOException("Game not found");
-        controller.addPlayer(v);
+        controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
     }
+
 
     public synchronized void quitGame(int gameId, VirtualView v) throws CardEffectException, IOException {
         Controller controller = games.get(gameId);
