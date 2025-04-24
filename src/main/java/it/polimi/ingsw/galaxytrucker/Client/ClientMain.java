@@ -54,26 +54,26 @@ public class ClientMain {
             isConnected = true;
             view.inform("Connected with success");
             while(isConnected){
-                view.inform("Choose to sign up or log in:");
-                view.inform("1. Register");
-                view.inform("2. Login");
-                int choice = view.askIndex();
-
-                if (choice != 1 && choice != 2) {
-                    view.reportError("Invalid choice. Please select 1 or 2.");
-                    continue;
-                }
-                if(choice == 1){
-                    view.inform("Choose your username and password:");
-                    String username = virtualClient.askString();
-                    String password = virtualClient.askString();
-                    boolean registrationSuccess = virtualClient.sendRegistration(username, password);
-                    if (!registrationSuccess) {
-                        view.reportError("Registration failed. Try again.");
-                        continue;
-                    }
-                    view.inform("Registration successful. Now log in:");
-                }
+//                view.inform("Choose to sign up or log in:");
+//                view.inform("1. Register");
+//                view.inform("2. Login");
+//                int choice = view.askIndex();
+//
+//                if (choice != 1 && choice != 2) {
+//                    view.reportError("Invalid choice. Please select 1 or 2.");
+//                    continue;
+//                }
+//                if(choice == 1){
+//                    view.inform("Choose your username and password:");
+//                    String username = virtualClient.askString();
+//                    String password = virtualClient.askString();
+//                    boolean registrationSuccess = virtualClient.sendRegistration(username, password);
+//                    if (!registrationSuccess) {
+//                        view.reportError("Registration failed. Try again.");
+//                        continue;
+//                    }
+//                    view.inform("Registration successful. Now log in:");
+//                }
                 view.inform("Insert your username and password:");
                 String username = virtualClient.askString();
                 String password = virtualClient.askString();
@@ -205,57 +205,6 @@ public class ClientMain {
         } while (!gameState.equals(EXIT));
 
     }
-
-
-
-//    //metodo gestione di che posso fare
-//    private static void handleMainActionPhase() throws Exception{
-//        //chiedo ad oleg domani, prima non devo fare l'update della view perchè prima vedo
-//        //la mainActionPhase poi scelgo cosa fare
-//        view.updateState(FASE0);
-//        view.inform("Possible actions:");
-//        List<String> possibleActions = virtualClient.getAvailableAction();
-//
-//        for(int i = 0 ; i < possibleActions.size(); i++){
-//            view.inform((i+1)+"."+possibleActions.get(i));
-//        }
-//        int choice = virtualClient.askIndex();
-//        //chiedere perchè send action non è un void ma è un string
-//        String result = virtualClient.sendAction(possibleActions.get(choice-1));
-//    }
-
-//    private static void handleChoosingCoveredTile() throws Exception{
-//        view.updateState(FASE1);
-//        //per fare più easy possiamo che ci da soltanto il numero di tessere coperte, che tanto passo da 151 circa,
-//        //quindi mandare ogni volta la lista che risulta pesante
-//        List<Tile> pile = virtualClient.getPileOfTile();
-//        view.printList("pile", pile);
-//        //VERSIONE 2
-//        //int totalTile = virtualClient.getNumOfTile();
-//        //view.printCovered(totalTile);
-//        view.inform("Choose one of covered tile and give the index");
-//        int index = virtualClient.askIndex();
-//        //l'ho pensato così forse è sbagliato
-//        Tile tile = virtualClient.getTile(index -1);
-//        view.printTile(tile);
-//        view.inform("Possible actions:");
-//        List<String> possibleActions = virtualClient.getAvailableAction();
-//        for(int i = 0 ; i < possibleActions.size(); i++){
-//            view.inform((i+1)+"."+possibleActions.get(i));
-//        }
-//        int choice = virtualClient.askIndex();
-//        String result = virtualClient.sendAction(possibleActions.get(choice -1));
-//
-//    }
-//
-//    private static void handleBuildingPhase() throws Exception{
-//        view.updateState(FASE2);
-//        view.inform("Choose one of slots and give the indexes");
-//        int[] coordinate = view.askCordinate();
-//        //qua credo ci vada il send coordinates però dobbiamo creare il metodo
-//    }
-//
-
 }
 
 

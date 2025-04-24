@@ -42,9 +42,11 @@ public class classeDisupportoPerServer {
                 listOfOptions.add("take Discovery Tile");
                 listOfOptions.add("Spin The Hourglass");
                 listOfOptions.add("Declare Ready");
-                listOfOptions.add("Watch A Deck");
-                listOfOptions.add("Watch A Ship");
                 listOfOptions.add("LogOut");
+                if(!controller.getIsDemo()){
+                    listOfOptions.add("Watch A Deck");
+                    listOfOptions.add("Watch A Ship");
+                }
             }
             //schermata dopo che ho preso una tile
             case TILE_MANAGEMENT -> {
@@ -57,7 +59,7 @@ public class classeDisupportoPerServer {
             }
             //schermata di attesa degli altri player
             case WAITING_FOR_PLAYERS -> {
-                listOfOptions.add("Spin The Hourglass");
+                if(!controller.getIsDemo()) listOfOptions.add("Spin The Hourglass");
                 listOfOptions.add("Watch A Ship");
                 listOfOptions.add("logOut");
 
