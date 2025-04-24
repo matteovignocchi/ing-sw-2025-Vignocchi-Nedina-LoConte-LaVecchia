@@ -18,7 +18,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectOutputStream out;
     private final View view;
     private GameFase gameFase;
-    private String lastResponse;
+    private Object lastResponse;
 
     public VirtualClientSocket(String host, int port , View view) throws IOException {
         this.socket = new Socket(host, port);
@@ -189,14 +189,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public boolean sendRegistration(String username, String password) throws Exception {
         Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
         sendRequest(registrationRequest);
-        return Boolean.parseBoolean(waitForResponce());
+        return Boolean.parseBoolean((String) waitForResponce());
     }
 
     @Override
     public boolean sendLogin(String username, String password) throws Exception {
         Message loginRequest = Message.request(Message.OP_LOGIN, new LoginRequest(username, password));
         sendRequest(loginRequest);
-        return Boolean.parseBoolean(waitForResponce());
+        return Boolean.parseBoolean((String) waitForResponce());
 
     }
 
@@ -207,9 +207,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public  synchronized String waitForResponce() throws InterruptedException {
+    public  synchronized Object waitForResponce() throws InterruptedException {
         while (lastResponse == null) wait();
-        String response = lastResponse;
+        Object response = lastResponse;
         lastResponse = null;
         return response;
     }
@@ -217,7 +217,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public String waitForGameUpadate() throws InterruptedException {
         while (lastResponse == null) wait();
-        String response = lastResponse;
+        String response = (String) lastResponse;
         lastResponse = null;
         return response;
     }
@@ -226,7 +226,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public List<String> requestGameList() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_LIST_GAMES, null);
         sendRequest(request);
-        Object response = waitForGenericResponse();
+        Object response = waitForResponce();
         return (List<String>) response;
     }
 
@@ -234,7 +234,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public List<String> getAvailableAction() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_ACTIONS, null);
         sendRequest(request);
-        Object response = waitForGenericResponse();
+        Object response = waitForResponce();
         return (List<String>) response;
     }
 
@@ -250,7 +250,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public GameFase getCurrentGameState() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GAME_FASE,null);
         sendRequest(request);
-        Object response = waitForGenericResponse();
+        Object response = waitForResponce();
         return (GameFase) response;
     }
 
@@ -258,7 +258,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public Tile getTile() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GET_TILE, null);
         sendRequest(request);
-        Object response = waitForGenericResponse();
+        Object response = waitForResponce();
         return (Tile) response;
     }
 
@@ -267,12 +267,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         out.flush();
     }
 
-    public synchronized Object waitForGenericResponse() throws InterruptedException {
-        while (lastResponse == null) wait();
-        Object response = lastResponse;
-        lastResponse = null;
-        return response;
-    }
+
+
 
 
 }

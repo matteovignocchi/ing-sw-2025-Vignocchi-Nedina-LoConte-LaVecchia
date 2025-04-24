@@ -150,7 +150,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public String waitForResponce() throws RemoteException {
+    public Object waitForResponce() throws RemoteException {
         return server.waitForResponse();
     }
 
