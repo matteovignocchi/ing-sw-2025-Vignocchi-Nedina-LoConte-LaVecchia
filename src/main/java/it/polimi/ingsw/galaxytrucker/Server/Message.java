@@ -15,8 +15,12 @@ public class Message implements Serializable {
     public static final String OP_LEAVE_GAME = "LEAVE_GAME";
     public static final String OP_START_GAME = "START_GAME";
     public static final String OP_LIST_GAMES = "LIST_GAMES";
-
-    public static final String OP_GAME_ACTION = "GAME_ACTION";
+    public static final String OP_PRINT_CARD = "PRINT_CARD";
+    public static final String OP_PRINT_COVERED = "PRINT_COVERED";
+    public static final String OP_PRINT_SHOWN = "PRINT_SHOWN";
+    public static final String OP_PRINT_GOODS = "PRINT_GOODS";
+    public static final String OP_PRINT_DASHBOARD = "PRINT_DASHBOARD";
+    public static final String OP_GAME_FASE = "GAME_FASE";
     public static final String OP_GET_BOARD = "GET_BOARD";
     public static final String OP_GET_TILES = "GET_TILES";
     public static final String OP_GET_CARDS = "GET_CARDS";

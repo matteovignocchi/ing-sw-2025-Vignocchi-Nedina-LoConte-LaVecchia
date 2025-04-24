@@ -37,9 +37,24 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_UPDATE -> {
                         switch (msg.getOperation()) {
-                            case Message.OP_GET_BOARD -> {
+                            case Message.OP_GAME_FASE -> {
                                 gameFase = (GameFase) msg.getPayload();
                                 showUpdate();
+                            }
+                            case Message.OP_PRINT_CARD -> {
+                                view.printCard((Card) msg.getPayload());
+                            }
+                            case Message.OP_PRINT_COVERED -> {
+                                view.printPileCovered((List<Tile>) msg.getPayload());
+                            }
+                            case Message.OP_PRINT_SHOWN -> {
+                                view.printPileShown((List<Tile>) msg.getPayload());
+                            }
+                            case Message.OP_PRINT_GOODS -> {
+                                view.printListOfGoods((List<Colour>) msg.getPayload());
+                            }
+                            case Message.OP_PRINT_DASHBOARD -> {
+                                view.printDashShip((Tile[][]) msg.getPayload());
                             }
                         }
                     }
