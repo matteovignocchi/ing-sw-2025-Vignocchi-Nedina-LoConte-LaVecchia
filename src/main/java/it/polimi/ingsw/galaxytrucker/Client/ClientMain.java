@@ -182,7 +182,6 @@ public class ClientMain {
     //metodo gestione partita
     private static void startGame() throws Exception{
         GameFase gameState =  virtualClient.getCurrentGameState();
-
         do {
             switch (gameState) {
                 case BOARD_SETUP -> view.updateState(BOARD_SETUP);
