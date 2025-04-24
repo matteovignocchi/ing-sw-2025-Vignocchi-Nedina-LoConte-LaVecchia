@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
@@ -25,10 +26,14 @@ public class TUIView implements View {
     public void reportError(String message) {
         System.err.print("\n[ERROR] " + message + "\n> ");
     }
-
     @Override
     public void updateState(GameFase gameFase) {
-
+    }
+    @Override
+    public void printTile(Tile tile) {
+    }
+    @Override
+    public void printCard(Card card) {
     }
 
     @Override
@@ -109,6 +114,11 @@ public class TUIView implements View {
     }
 
     @Override
+    public void printListOfTiles(List<Tile> Tiles) {
+
+    }
+
+    @Override
     public void printDashShip(Tile[][] ship) {
 
     }
@@ -138,7 +148,15 @@ public class TUIView implements View {
 
     }
 
+    @Override
+    public void printPileCovered(List<Tile> tiles) {
 
+    }
+
+    @Override
+    public void printPileShown(List<Tile> tiles) {
+
+    }
 
 
 }

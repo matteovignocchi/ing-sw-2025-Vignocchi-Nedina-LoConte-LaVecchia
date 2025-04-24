@@ -24,6 +24,9 @@ public interface View {
     void printDashShip(Tile[][] ship);
     void printBonusBrown(boolean bonusBrown);
     void printBonusPurple(boolean bonusPurple);
+
+    void printList(String key, List<Object> list);
+
     void printNewFase(GameFase gameFase);
     void printLap(int i);
     void printPileCovered(List<Tile> tiles);
