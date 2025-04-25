@@ -17,13 +17,12 @@ import java.rmi.server.UnicastRemoteObject;
 // Quindi, domanda per te Gabriele Antonio La Vecchia, creiamo una CommunicationException e la estendiamo (ad esempio) con:
 // InvalidGameIdException, UsernameAlreadyTakenException, ... (PER ME SI)
 // Ovviamente, se sei d'accordo, i metodi vanno fixati.
+// MIA RISPOSTA: SI, VA FATTO (GIA CREATA L'ECCEZIONE)
 
-//TODO: Il server riceve chiamate da un client remoto e delega al Controller la gestione della logica:
-// quindi dobbiamo creare dei nuovi metodi nel controller che gestiscano la nostra logica (o almeno io penso questo)
-// tutti gli errori che vedi, sono per questo motivo. Non saprei come fare diversamente
+//TODO: inserire gli altri metodi
 
-//TODO: ho inserito alcuni metodi, ma penso che dobbiamo ragionare insieme su quelli che mancano
-
+//TODO: capire come gestire bene le eccezioni (e.printstacktrace vs soluzione con log) (catch nel client chiamante)
+//      (no Exception nel catch, eccezioni più dettagliate)
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
@@ -32,26 +31,32 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
+    //TODO: GESTIRE ECCEZIONI BENE NEI METODI
     @Override
     public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException {
         try{
             return gameManager.createGame(isDemo, v, nickname, maxPlayers);
         } catch(Exception e){
+            e.printStackTrace();
             throw new RemoteException("Error in new game's creation:  " + e.getMessage());
         }
-        //capire se gestione eccezione così va bene
     }
 
+    @Override
+    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException {
+        try{
+            gameManager.joinGame(gameId, v, nickname);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RemoteException("Error in joining game:  " + e.getMessage());
+        }
+    }
 
 
 
     @Override
     public void logout(String username) throws RemoteException {
 
-    }
-
-    @Override
-    public void enterGame(String username, int gameId) throws RemoteException {
     }
 
     @Override

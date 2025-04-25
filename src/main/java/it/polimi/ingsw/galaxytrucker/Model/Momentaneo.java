@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -21,7 +21,7 @@ import java.util.List;
 public interface VirtualServer extends Remote {
 
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException;
-
+    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException;
 
 
 
