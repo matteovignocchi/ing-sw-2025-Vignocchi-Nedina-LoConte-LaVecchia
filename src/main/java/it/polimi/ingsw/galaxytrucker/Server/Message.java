@@ -10,8 +10,8 @@ public class Message implements Serializable {
     public static final String TYPE_NOTIFICATION = "NOTIFICATION";
     public static final String OP_LOGIN = "LOGIN";
     public static final String OP_REGISTER = "REGISTER";
-    public static final String OP_CREATE_GAME = "CREATE_GAME";
-    public static final String OP_JOIN_GAME = "JOIN_GAME";
+
+    public static final String OP_ACTIONS = "ACTIONS";
     public static final String OP_LEAVE_GAME = "LEAVE_GAME";
     public static final String OP_START_GAME = "START_GAME";
     public static final String OP_LIST_GAMES = "LIST_GAMES";
@@ -20,10 +20,10 @@ public class Message implements Serializable {
     public static final String OP_PRINT_SHOWN = "PRINT_SHOWN";
     public static final String OP_PRINT_GOODS = "PRINT_GOODS";
     public static final String OP_PRINT_DASHBOARD = "PRINT_DASHBOARD";
-    public static final String OP_GAME_FASE = "GAME_FASE";
-    public static final String OP_GET_BOARD = "GET_BOARD";
-    public static final String OP_GET_TILES = "GET_TILES";
-    public static final String OP_GET_CARDS = "GET_CARDS";
+    public static final String OP_GAME_PHASE = "GAME_PHASE";
+
+    public static final String OP_GET_TILE = "GET_TILE";
+    public static final String OP_GET_CARD = "GET_CARD";
     public static final String OP_INDEX = "INDEX";
     public static final String OP_COORDINATE = "COORDINATE";
     public static final String OP_STRING = "STRING";

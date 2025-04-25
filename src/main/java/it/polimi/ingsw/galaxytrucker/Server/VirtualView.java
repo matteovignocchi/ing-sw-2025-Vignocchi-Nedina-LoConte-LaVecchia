@@ -24,14 +24,12 @@ public interface VirtualView {
     public boolean sendRegistration(String username, String password) throws Exception;
     public boolean sendLogin(String username, String password) throws Exception;
     void sendGameRequest(String message) throws Exception;
-    String waitForResponce() throws Exception;
+    Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
     List<String> requestGameList() throws Exception;
     List<String> getAvailableAction() throws Exception;
-    List<Tile> getPileOfTile() throws Exception;
-    List<Tile> getPileOfTileShown() throws Exception;
-    List<Tile> getTileBooked() throws Exception;
-    void sendAction(int key) throws Exception;
+
+    void sendAction(String key) throws Exception;
     GameFase getCurrentGameState() throws Exception;
 
     Tile getTile() throws Exception;
@@ -40,4 +38,6 @@ public interface VirtualView {
     int[] askCoordinate() throws Exception;
 
     void printListOfGoods(List<Colour> listOfGoods) throws Exception;
+
+    GameFase getGameFase() throws Exception;
 }

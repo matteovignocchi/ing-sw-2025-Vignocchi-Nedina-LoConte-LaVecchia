@@ -165,15 +165,14 @@ public class Controller implements Serializable {
     }
 
     public void setNextPrincipalGameFase() {
-
         switch (principalGameFase) {
-            case FASE0 -> {
+            case BOARD_SETUP -> {
                 preGameFase = principalGameFase;
-                principalGameFase = GameFase.FASE5;
+                principalGameFase = GameFase.WAITING_FOR_TURN;
             }
-            case FASE5 -> {
+            case WAITING_FOR_TURN -> {
                 preGameFase = principalGameFase;
-                principalGameFase = GameFase.FASE13;
+                principalGameFase = GameFase.SCORING;
             }
             default -> principalGameFase = preGameFase;
         }
@@ -185,8 +184,8 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    public boolean askPlayerDecision(String condition, Player id) {
-        VirtualView x = map.get(id);
+    public boolean askPlayerDecision(String condition, Player id) throws Exception {
+        VirtualView x = ViewByNickname.get(id);
         return x.ask(condition);
     }
 
@@ -226,6 +225,10 @@ public class Controller implements Serializable {
         return tmp;
     }
 
+    public boolean getIsDemo(){
+        return isDemo;
+    }
+
     /**
      * this method return the engine power, checking every tile
      * this method checks even if there is a double engine and ask the player if they want to activate it
@@ -234,11 +237,11 @@ public class Controller implements Serializable {
      *
      * @return the total amount of engine power
      */
-    public int getPowerEngine(Player p) {
+    public int getPowerEngine(String p) throws Exception {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                Tile y = p.getTile(i, j);
+                Tile y = PlayerByNickname.get(p).getTile(i, j);
                 Boolean var = false;
                 switch (y) {
                     case Engine c -> {
@@ -256,18 +259,18 @@ public class Controller implements Serializable {
                 }
             }
         }
-        if (p.presenceBrownAlien() && tmp != 0) {
+        if (PlayerByNickname.get(p).presenceBrownAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
         }
     }
 
-    public double getFirePower(Player p) {
+    public double getFirePower(String p) throws Exception {
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = p.getTile(i, j);
+                Tile y = PlayerByNickname.get(p).getTile(i, j);
                 boolean var;
                 switch (y) {
                     case Engine c -> {
@@ -288,7 +291,7 @@ public class Controller implements Serializable {
 
             }
         }
-        if (p.presencePurpleAlien() && tmp != 0) {
+        if (PlayerByNickname.get(p).presencePurpleAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
@@ -303,10 +306,11 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
-    public void removeGoods(Player p, int num) throws Exception {
-        int totalEnergy = getTotalEnergy(p);
-        int totalGood = getTotalGood(p);
-        List<Colour> TotalGood = p.getTotalListOfGood();
+    public void removeGoods(String p, int num) throws Exception {
+        int totalEnergy = getTotalEnergy(PlayerByNickname.get(p));
+        int totalGood = getTotalGood(PlayerByNickname.get(p));
+
+        List<Colour> TotalGood = PlayerByNickname.get(p).getTotalListOfGood();
         int r = 0;
         int g = 0;
         int b = 0;
@@ -322,7 +326,7 @@ public class Controller implements Serializable {
         if(num == totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                  Tile y = p.getTile(i, j);
+                  Tile y = PlayerByNickname.get(p).getTile(i, j);
                   switch (y){
                       case StorageUnit c -> {
                           for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -335,9 +339,9 @@ public class Controller implements Serializable {
         if(num < totalGood){
             while(num != 0){
                 if(r != 0){
-                    map.get(p).inform("selezionare cella ed eliminare rosso");
-                    int[] vari = map.get(p).askCoordinate();
-                    Tile y = p.getTile(vari[0], vari[1]);
+                    ViewByNickname.get(p).inform("selezionare cella ed eliminare rosso");
+                    int[] vari = ViewByNickname.get(p).askCoordinate();
+                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -353,9 +357,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && num!=0 && g != 0){
-                    map.get(p).inform("selezionare cella ed eliminare giallo");
-                    int[] vari = map.get(p).askCoordinate();
-                    Tile y = p.getTile(vari[0], vari[1]);
+                    ViewByNickname.get(p).inform("selezionare cella ed eliminare giallo");
+                    int[] vari = ViewByNickname.get(p).askCoordinate();
+                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -371,9 +375,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && g == 0 && v != 0 && num!=0){
-                    map.get(p).inform("selezionare cella ed eliminare verde");
-                    int[] vari = map.get(p).askCoordinate();
-                    Tile y = p.getTile(vari[0], vari[1]);
+                    ViewByNickname.get(p).inform("selezionare cella ed eliminare verde");
+                    int[] vari = ViewByNickname.get(p).askCoordinate();
+                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -389,9 +393,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
-                    map.get(p).inform("selezionare cella ed eliminare blu");
-                    int[] vari = map.get(p).askCoordinate();
-                    Tile y = p.getTile(vari[0], vari[1]);
+                    ViewByNickname.get(p).inform("selezionare cella ed eliminare blu");
+                    int[] vari = ViewByNickname.get(p).askCoordinate();
+                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -411,7 +415,7 @@ public class Controller implements Serializable {
         if(num > totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                    Tile y = p.getTile(i, j);
+                    Tile y = PlayerByNickname.get(p).getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
                             for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -423,9 +427,9 @@ public class Controller implements Serializable {
             int finish = num-totalGood;
             if(finish < totalEnergy){
                 while(finish > 0){
-                    map.get(p).inform("selezionare cella ed eliminare una batteria");
-                    int[] vari = map.get(p).askCoordinate();
-                    Tile y = p.getTile(vari[0], vari[1]);
+                    ViewByNickname.get(p).inform("selezionare cella ed eliminare una batteria");
+                    int[] vari = ViewByNickname.get(p).askCoordinate();
+                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case EnergyCell c -> {
                             if(c.getCapacity() != 0) c.useBattery();
@@ -438,7 +442,7 @@ public class Controller implements Serializable {
                 }else{
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 7; j++){
-                        Tile y = p.getTile(i, j);
+                        Tile y = PlayerByNickname.get(p).getTile(i, j);
                         switch (y){
                             case EnergyCell c -> {
                                 for(int bb = 0 ; bb < c.getCapacity() ; i++) c.useBattery();
@@ -453,18 +457,18 @@ public class Controller implements Serializable {
             }
         }
 
-    public void addGoods(Player player, List<Colour> list) throws Exception {
+    public void addGoods(String player, List<Colour> list) throws Exception {
         boolean flag = true;
-        VirtualView x = map.get(player);
+        VirtualView x = ViewByNickname.get(player);
         if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         while (list.size() != 0 && flag == true) {
             x.inform("seleziona una HOusing unit");
             int[] vari = x.askCoordinate();
-            Tile t = player.getTile(vari[0], vari[1]);
+            Tile t = PlayerByNickname.get(player).getTile(vari[0], vari[1]);
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
-                        x.printListOFGoods(c.getListOfGoods());
+                        x.printListOfGoods(c.getListOfGoods());
                         x.ask("seleziona indice da rimuovere");
                         int tmpint = x.askIndex();
                         Colour tmp = c.getListOfGoods().get(tmpint - 1);
@@ -492,7 +496,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void addHuman() {
+    public void addHuman() throws Exception {
         for (Player p : players_in_Game) {
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -534,22 +538,22 @@ public class Controller implements Serializable {
         }
     }
 
-    public void removeCrewmate(Player player, int num) throws Exception {
-        int totalCrew = getNumCrew(player);
-        VirtualView x = map.get(player);
+    public void removeCrewmate(String player, int num) throws Exception {
+        int totalCrew = getNumCrew(PlayerByNickname.get(player));
+        VirtualView x = ViewByNickname.get(player);
         if (num >= totalCrew) {
-            player.isEliminated();
+            PlayerByNickname.get(player).isEliminated();
         } else {
             while (num > 0) {
                 x.inform("seleziona un HOusing unit");
                 int[] vari = x.askCoordinate();
-                Tile y = player.getTile(vari[0], vari[1]);
+                Tile y = PlayerByNickname.get(player).getTile(vari[0], vari[1]);
                 switch (y){
                     case HousingUnit h -> {
                         if(h.returnLenght()>0){
                             int tmp = h.removeHumans(1);
-                            if(tmp == 2) player.setBrownAlien();
-                            if(tmp == 3) player.setPurpleAlien();
+                            if(tmp == 2) PlayerByNickname.get(player).setBrownAlien();
+                            if(tmp == 3) PlayerByNickname.get(player).setPurpleAlien();
                             num--;
                         }else{
                             x.inform("seleziona una housing unit valida");
@@ -571,20 +575,20 @@ public class Controller implements Serializable {
         }
     }
 
-    public void startPlauge(Player player) throws Exception {
-        int firstNumber = getNumCrew(player);
+    public void startPlauge(String player) throws Exception {
+        int firstNumber = getNumCrew(PlayerByNickname.get(player));
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = player.getTile(i, j);
+                Tile y = PlayerByNickname.get(player).getTile(i, j);
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            map.get(player).askIndex();
+                            ViewByNickname.get(player).askIndex();
                             int x = c.removeHumans(1);
                             tmp++;
-                            if (x == 2) player.setBrownAlien();
-                            if (x == 3) player.setPurpleAlien();
+                            if (x == 2) PlayerByNickname.get(player).setBrownAlien();
+                            if (x == 3) PlayerByNickname.get(player).setPurpleAlien();
                         }
 
                     }
@@ -593,7 +597,7 @@ public class Controller implements Serializable {
                 }
             }
             if (tmp == firstNumber) {
-                player.setEliminated();
+                PlayerByNickname.get(player).setEliminated();
             }
         }
     }
@@ -605,13 +609,13 @@ public class Controller implements Serializable {
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
-    public boolean isProtected(Player p1, int d) throws Exception {
+    public boolean isProtected(String p1, int d) throws Exception {
         boolean flag = false;
-        VirtualView x = map.get(p1);
+        VirtualView x = ViewByNickname.get(p1);
         while (!flag) {
             if (x.ask("vuoi usare uno scudo?")) {
                 int[] coordinate = x.askCoordinate();
-                Tile y = p1.getTile(coordinate[0], coordinate[1]);
+                Tile y = PlayerByNickname.get(p1).getTile(coordinate[0], coordinate[1]);
                 switch (y) {
                     case Shield shield -> {
                         if (!(shield.getProtectedCorner(d) == 8)) {
@@ -645,29 +649,29 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws Exception {
+    public void defenceFromCannon(int dir, boolean type, int dir2, String p) throws Exception {
         if (dir == 0) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    p.removeFrom0(dir2);
+                    PlayerByNickname.get(p).removeFrom0(dir2);
                 }
             }
         } else if (dir == 2) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    p.removeFrom2(dir2);
+                    PlayerByNickname.get(p).removeFrom2(dir2);
                 }
             }
         } else if (dir == 1) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    p.removeFrom1(dir2);
+                    PlayerByNickname.get(p).removeFrom1(dir2);
                 }
             }
         } else if (dir == 3) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    p.removeFrom3(dir2);
+                    PlayerByNickname.get(p).removeFrom3(dir2);
                 }
             }
         }
@@ -681,26 +685,26 @@ public class Controller implements Serializable {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
-        for (Player p : players_in_Game) {
+        for (String p : PlayerByNickname.keySet()) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        p.removeFrom0(dir2);
+                        PlayerByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && p.checkNoConnector(dir, dir2)) {
+                    if (!type && PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            p.removeFrom2(dir2);
+                            PlayerByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && checkProtection(dir, dir2, p)) {
-                        p.removeFrom0(dir2);
+                        PlayerByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            p.removeFrom2(dir2);
+                            PlayerByNickname.get(p).removeFrom2(dir2);
                         }
                     }
 
@@ -708,11 +712,11 @@ public class Controller implements Serializable {
             } else if (dir == 1) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        p.removeFrom0(dir2);
+                        PlayerByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            p.removeFrom2(dir2);
+                            PlayerByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
@@ -720,11 +724,11 @@ public class Controller implements Serializable {
             } else if (dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        p.removeFrom0(dir2);
+                        PlayerByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !p.checkNoConnector(dir, dir2)) {
+                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            p.removeFrom2(dir2);
+                            PlayerByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
@@ -736,9 +740,9 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(Player player) {
+    private boolean manageEnergyCell(String player) throws Exception {
 
-        VirtualView x = map.get(player);
+        VirtualView x = ViewByNickname.get(player);
         int[] coordinate = new int[2];
         boolean exits = false;
 
@@ -749,7 +753,7 @@ public class Controller implements Serializable {
         } else {
             while (!exits) {
                 coordinate = x.askCoordinate();
-                Tile p = player.getTile(coordinate[0], coordinate[1]);
+                Tile p = PlayerByNickname.get(player).getTile(coordinate[0], coordinate[1]);
                 switch (p) {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
@@ -775,14 +779,14 @@ public class Controller implements Serializable {
         }
     }
 
-    public boolean checkProtection(int dir, int dir2, Player player) {
+    public boolean checkProtection(int dir, int dir2, String player) throws Exception {
         boolean result = false;
         if (dir == 0) {
             boolean flag = true;
             int i = 0;
             while (flag && i < 5) {
-                if (player.validityCheck(i, dir2 - 4) == Status.USED) {
-                    Tile y = player.getTile(i, dir2 - 4);
+                if (PlayerByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
+                    Tile y = PlayerByNickname.get(player).getTile(i, dir2 - 4);
                     switch (y) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
@@ -804,10 +808,10 @@ public class Controller implements Serializable {
             boolean flag = true;
             int i = 5;
             while (flag && i >= 1) {
-                if (player.validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = player.getTile(dir2 - 5, i);
-                    Tile y2 = player.getTile(dir2 - 5, i + 1);
-                    Tile y3 = player.getTile(dir2 - 5, i - 1);
+                if (PlayerByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = PlayerByNickname.get(player).getTile(dir2 - 5, i);
+                    Tile y2 = PlayerByNickname.get(player).getTile(dir2 - 5, i + 1);
+                    Tile y3 = PlayerByNickname.get(player).getTile(dir2 - 5, i - 1);
                     switch (y1) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
@@ -857,10 +861,10 @@ public class Controller implements Serializable {
             boolean flag = true;
             int i = 1;
             while (flag && i<6) {
-                if (player.validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = player.getTile(dir2 - 5, i);
-                    Tile y2 = player.getTile(dir2 - 5, i + 1);
-                    Tile y3 = player.getTile(dir2 - 5, i - 1);
+                if (PlayerByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = PlayerByNickname.get(player).getTile(dir2 - 5, i);
+                    Tile y2 = PlayerByNickname.get(player).getTile(dir2 - 5, i + 1);
+                    Tile y3 = PlayerByNickname.get(player).getTile(dir2 - 5, i - 1);
                     switch (y1) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
