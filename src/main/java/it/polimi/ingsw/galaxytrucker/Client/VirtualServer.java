@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
@@ -20,8 +21,8 @@ import java.util.List;
 
 public interface VirtualServer extends Remote {
 
-    public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException;
-    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException;
+    public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
+    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
 
 
 

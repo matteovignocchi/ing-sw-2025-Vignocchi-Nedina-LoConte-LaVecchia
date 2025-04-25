@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Server;
 
 import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.Client.ServerSocketMain;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.*;
 
@@ -24,7 +23,7 @@ public class ServerMain {
 
         } catch (Exception e) {
             System.out.println("Error in ServerMain initialization");
-            e.printStackTrace(); //va bene come stampa d'errore ? sostituirla con più stabile. quale?
+            e.printStackTrace();
         }
     }
 }

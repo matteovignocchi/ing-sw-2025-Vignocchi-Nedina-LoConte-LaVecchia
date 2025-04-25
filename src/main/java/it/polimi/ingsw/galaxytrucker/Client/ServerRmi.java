@@ -1,9 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-
-import javax.naming.CommunicationException;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -24,6 +23,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 //TODO: Le eccezioni di "Infrastruttura" -> wrapparle in RemoteException e lanciarle al client
 //      Le eccezioni di Game Logic -> wrapparle in BusinessLogicException e lanciarle al client
+// Dire agli altri di gestirle con try-catch al chiamante (?)
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
@@ -32,24 +32,26 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
-    //TODO: gestire bene le eccezioni
+    //TODO: gestire bene le eccezioni (i businesslogic error necessari in questi metodi inziali ?) vedere poi con l'implementazione
 
     @Override
-    public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException {
+    public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
         try{
             return gameManager.createGame(isDemo, v, nickname, maxPlayers);
-        } catch(CommunicationException e){
-            throw new RemoteException("Error in new game's creation:  " + e.getMessage());
+        } catch(BusinessLogicException e){
+            throw new BusinessLogicException("Business-logic error during game's creation: " + e.getMessage(), e);
         } catch (IOException e){
-            throw new RemoteException("Error in new game's creation:  " + e.getMessage());
+            throw new RemoteException("IO error during game's creation: ", e);
         }
     }
 
     @Override
-    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException {
+    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException {
         try{
             gameManager.joinGame(gameId, v, nickname);
-        } catch (Exception e){
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
+        } catch(IOException e){
             throw new RemoteException("Error in joining game:  " + e.getMessage());
         }
     }

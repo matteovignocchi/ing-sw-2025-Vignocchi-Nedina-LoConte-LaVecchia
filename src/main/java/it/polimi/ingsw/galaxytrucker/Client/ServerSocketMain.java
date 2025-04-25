@@ -18,11 +18,11 @@ public class ServerSocketMain implements Runnable {
     public void run() {
         try(ServerSocket server = new ServerSocket(port)) {
             while(true){
-                Socket client = server.accept();
-                new Thread (new ClientHandler(client, gameManager)).start();
+                Socket clientSocket = server.accept();
+                new Thread (new ClientHandler(clientSocket, gameManager)).start();
             }
         } catch(IOException e){
-            e.printStackTrace(); //Controllo più robusto da inserire
+            e.printStackTrace();
         }
     }
 }
