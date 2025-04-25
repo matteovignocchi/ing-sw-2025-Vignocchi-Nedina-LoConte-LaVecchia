@@ -109,7 +109,7 @@ public class Controller implements Serializable {
 
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
-        return players_in_Game.size();
+        return PlayerByNickname.size();
     }
 
     public boolean controlPresenceOfPlayer(int id) {

@@ -242,7 +242,7 @@ public class classeDisupportoPerServer {
                             // WAITING_FOR_TURN , farà fare i controlli su tutte la plance al controller e metterà al primo giocatore che ha finito
                             // in gameFase DRAW_FASE e il resto rimane in WAITING_FOR_TURN
 
-    /// drawCard() :
+    /// drawCard_server() :
                             //1) server riceve il comdando e stampa a tutti a schermo la carta pescata , poi andando in ordine
                             // di posizioni fa per ogni player
                             // -changegameFase()->CARD_EFFECT e changeView , in modo tale che un player alla volta può lavorare sulla

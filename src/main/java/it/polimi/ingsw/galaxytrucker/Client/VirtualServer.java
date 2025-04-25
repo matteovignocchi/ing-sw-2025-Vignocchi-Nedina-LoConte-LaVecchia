@@ -27,17 +27,12 @@ public interface VirtualServer extends Remote {
 
 
     // Autenticazione e Account
-    void login(String username, String password) throws RemoteException;
     void logout(String username) throws RemoteException;
-
-    // Gestione Partite
-    void enterGame(String username, int gameId) throws RemoteException;
 
     // Azioni di gioco
     void sendIndex(String username, int index) throws RemoteException;
     void sendChoice(String username, boolean choice) throws RemoteException;
     void sendCoordinates(String username, int x, int y) throws RemoteException;
-    void drawCard(String username) throws RemoteException;
     void sendPlayerDash(String username, int dash) throws RemoteException;
 
     // Aggiungerai altri metodi specifici man mano che le fasi evolvono.
