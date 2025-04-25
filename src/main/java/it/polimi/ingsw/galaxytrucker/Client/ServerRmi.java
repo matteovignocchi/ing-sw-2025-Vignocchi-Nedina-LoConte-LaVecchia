@@ -3,6 +3,8 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
+import javax.naming.CommunicationException;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
@@ -18,11 +20,10 @@ import java.rmi.server.UnicastRemoteObject;
 // InvalidGameIdException, UsernameAlreadyTakenException, ... (PER ME SI)
 // Ovviamente, se sei d'accordo, i metodi vanno fixati.
 // MIA RISPOSTA: SI, VA FATTO (GIA CREATA L'ECCEZIONE)
+// RINOMINARLA IN BUSINESSLOGICEXCEPTION
 
-//TODO: inserire gli altri metodi
-
-//TODO: capire come gestire bene le eccezioni (e.printstacktrace vs soluzione con log) (catch nel client chiamante)
-//      (no Exception nel catch, eccezioni più dettagliate)
+//TODO: Le eccezioni di "Infrastruttura" -> wrapparle in RemoteException e lanciarle al client
+//      Le eccezioni di Game Logic -> wrapparle in BusinessLogicException e lanciarle al client
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
@@ -31,13 +32,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
-    //TODO: GESTIRE ECCEZIONI BENE NEI METODI
+    //TODO: gestire bene le eccezioni
+
     @Override
     public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException {
         try{
             return gameManager.createGame(isDemo, v, nickname, maxPlayers);
-        } catch(Exception e){
-            e.printStackTrace();
+        } catch(CommunicationException e){
+            throw new RemoteException("Error in new game's creation:  " + e.getMessage());
+        } catch (IOException e){
             throw new RemoteException("Error in new game's creation:  " + e.getMessage());
         }
     }
@@ -47,7 +50,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         try{
             gameManager.joinGame(gameId, v, nickname);
         } catch (Exception e){
-            e.printStackTrace();
             throw new RemoteException("Error in joining game:  " + e.getMessage());
         }
     }
