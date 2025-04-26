@@ -171,13 +171,84 @@ public class TUIView implements View {
 
     @Override
     public void printPileCovered(List<Tile> tiles) {
+        StringBuilder topBorder = new StringBuilder();
+        StringBuilder mid1 = new StringBuilder();
+        StringBuilder mid2 = new StringBuilder();
+        StringBuilder mid3 = new StringBuilder();
+        StringBuilder bottomBorder = new StringBuilder();
+        int printed = 0;
+        int maxPerRow = 7;
+        int size = tiles.size();
+        for (int i = 0; i < size; i++) {
+            topBorder.append("+---------+ ");
+            mid1.append("|         | ");
+            mid2.append(String.format("|   %3d   | ", i + 1));
+            mid3.append("|         | ");
+            printed++;
+            if (printed == maxPerRow) {
+                bottomBorder.append(topBorder);
+                System.out.println(topBorder);
+                System.out.println(mid1);
+                System.out.println(mid2);
+                System.out.println(mid3);
+                System.out.println(bottomBorder);
+                topBorder.setLength(0);
+                mid1.setLength(0);
+                mid2.setLength(0);
+                mid3.setLength(0);
+                bottomBorder.setLength(0);
+                printed = 0;
+            }
+        }
+        if (printed > 0) {
+            bottomBorder.append(topBorder);
+            System.out.println(topBorder);
+            System.out.println(mid1);
+            System.out.println(mid2);
+            System.out.println(mid3);
+            System.out.println(bottomBorder);
+        }
 
     }
 
     @Override
     public void printPileShown(List<Tile> tiles) {
+        StringBuilder top = new StringBuilder();
+        StringBuilder mid = new StringBuilder();
+        StringBuilder bot = new StringBuilder();
+        StringBuilder border = new StringBuilder();
+        int size = tiles.size();
+        int printed = 0;
+        int maxPerRow = 7;
+        for (int i = 0; i < size; i++) {
+            Tile tile = tiles.get(i);
+            String[] rendered = renderTile(tile);
+
+
+            border.append("+---------+ ");
+            top.append("|").append(rendered[0]).append("| ");
+            mid.append("|").append(rendered[1]).append("| ");
+            bot.append("|").append(rendered[2]).append("| ");
+
+
+            if ((i + 1) % 7 == 0 || i == size - 1) {
+
+                System.out.println(border);
+                System.out.println(top);
+                System.out.println(mid);
+                System.out.println(bot);
+                System.out.println(border);
+
+
+                border.setLength(0);
+                top.setLength(0);
+                mid.setLength(0);
+                bot.setLength(0);
+            }
+        }
 
     }
+
 
     private String getTileContent (Tile tile){
         switch(tile){
