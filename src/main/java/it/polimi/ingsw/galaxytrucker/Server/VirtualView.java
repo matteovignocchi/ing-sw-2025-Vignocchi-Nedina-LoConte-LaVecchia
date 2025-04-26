@@ -4,7 +4,6 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-
 import java.util.List;
 
 public interface VirtualView {
@@ -35,7 +34,7 @@ public interface VirtualView {
     GameFase getCurrentGameState() throws Exception;
     GameFase getGameFase() throws Exception;
 
-    /// METODI CHE CHIAMO DIRETTAMENTE DAL SERVER ///
+    /// METODI CHE CHIAMO DIRETTAMENTE AL SERVER ///
     Tile getTileServer() throws Exception;
     Tile getUncoveredTile() throws Exception;
     void getBackTile(Tile tile) throws Exception;

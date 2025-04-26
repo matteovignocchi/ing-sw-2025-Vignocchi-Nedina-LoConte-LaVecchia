@@ -3,7 +3,6 @@ import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-
 import java.io.*;
 import java.util.Map;
 import java.util.Set;
@@ -35,24 +34,23 @@ public class GameManager {
         return gameId;
     }
 
-    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws CardEffectException, IOException {
+    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws IOException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new IOException("Game not found");
         controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
     }
 
-
     public synchronized void quitGame(int gameId, String nickname) throws IOException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new IOException("Game not found");
 
         Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new IOException("Player not found in this game");
+        if (player == null) throw new IOException("Player not found");
 
-        controller.removePlayer(nickname); // rimuove player e VirtualView
-        if (controller.checkNumberOfPlayers() == 0) { //e se ne rimane solo uno, assegniamo la vittoria al bro rimasto
-            removeGame(gameId); // rimuove anche il salvataggio
+        controller.removePlayer(nickname);
+        if (controller.checkNumberOfPlayers() == 0) {
+            removeGame(gameId);
         } else {
             saveGameState(gameId, controller);
         }
@@ -63,17 +61,16 @@ public class GameManager {
         if (controller == null) throw new IOException("Game not found");
 
         Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new IOException("Player not found in this game");
+        if (player == null) throw new IOException("Player not found");
 
         controller.markDisconnected(nickname);
         if (controller.countConnectedPlayers() <= 1) {
-            controller.pauseGame(); // ferma il gioco in attesa di riconnessioni o parte un timeout
+            controller.pauseGame(); // ferma il gioco
         }
         saveGameState(gameId, controller);
     }
 
-
-    public void reconnectPlayer(String nickname, VirtualView view) throws IOException {
+    public synchronized void reconnectPlayer(String nickname, VirtualView view) throws IOException {
         for (var entry : games.entrySet()) {
             Controller controller = entry.getValue();
             if (controller.getPlayerByNickname(nickname) != null) {
@@ -88,92 +85,77 @@ public class GameManager {
         throw new IOException("Player not found in any game");
     }
 
+    public synchronized void endGame(int gameId) throws Exception {
+        Controller controller = games.get(gameId);
+        if (controller == null) return;
+
+        for (String nickname : controller.getNicknames()) {
+            VirtualView view = controller.getView(nickname);
+            if (view != null) {
+                view.inform("La partita è terminata. Verrai disconnesso.");
+            }
+        }
+        removeGame(gameId);
+    }
+
     public synchronized void removeGame(int gameId) {
         Controller controller = games.remove(gameId);
-        if (controller != null) deleteSavedGame(gameId);
+        if (controller != null) {
+            deleteSavedGame(gameId);
+        }
     }
 
     ////////////////////////////////////////////////GESTIONE CONTROLLERE////////////////////////////////////////////////
 
-    //TODO: capire bene chi deve restituire cosa
-
-    //Giocatore in DRAW_PHASE, pesca la carta e passa in CARD_EFFECT.
-    public synchronized void drawCard_server(String nickname) throws IOException {
+    public synchronized Tile getTileServer(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
-        controller.drawCard(nickname);
-        saveGameState(getGameId(controller), controller);
+        return controller.getTileFromPile(nickname);
     }
 
-    //Prende una tile coperta e mette il player in TILE_MANAGEMENT.
-    public synchronized void getTileServer(String nickname) throws IOException {
+    public synchronized Tile getUncoveredTile(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
-        controller.getTileFromPile(nickname);
-        saveGameState(getGameId(controller), controller);
+        return controller.getUncoveredTile(nickname);
     }
 
-    //Prende una tile scoperta e mette il player in TILE_MANAGEMENT.
-    public synchronized void getUncoveredTile(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.getUncoveredTile(nickname);
-        saveGameState(getGameId(controller), controller);
-    }
-
-    //Attiva un timeout, cambia clessidra, se count ≥ 3 → fase WAITING_FOR_TURN.
-    public synchronized void spinTheHourglass(String nickname) throws IOException {
+    public synchronized void spinHourglass(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.spinHourglass(nickname);
         saveGameState(getGameId(controller), controller);
     }
 
-    //Imposta il player a "ready", passa a WAITING_FOR_PLAYERS.
-    public synchronized void declearReady(String nickname) throws IOException {
+    public synchronized void setReady(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.setPlayerReady(nickname);
         saveGameState(getGameId(controller), controller);
     }
 
-    //Rimette la tile nella pila, torna in BOARD_SETUP.
-    public synchronized void returTile(String nickname, Tile tile) throws IOException {
+    public synchronized void returnTile(String nickname, Tile tile) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.returnTile(nickname, tile);
         saveGameState(getGameId(controller), controller);
     }
 
-    //Posiziona tile nella nave.
     public synchronized void placeTile(String nickname, Tile tile, int x, int y) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.placeTile(nickname, tile, x, y);
         saveGameState(getGameId(controller), controller);
     }
 
-    //Ruota tile selezionata a destra.
-    public synchronized void rightRotatedTile(String nickname) throws IOException {
+    public synchronized void drawCard(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
-        controller.rotateTileRight(nickname);
+        controller.drawCard(nickname);
         saveGameState(getGameId(controller), controller);
     }
 
-    //Ruota tile selezionata a sinistra.
-    public synchronized void leftRotatedTile(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.rotateTileLeft(nickname);
-        saveGameState(getGameId(controller), controller);
-    }
-
-    //Visualizza un mazzo, solo stampa/inform → niente salvataggio.
     public void watchDeck(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.lookDeck(nickname);
     }
 
-    //Visualizza plancia di un altro giocatore.
-    public void lookDashBoard(String nickname, int targetPlayerId) throws IOException {
+    public void lookDashBoard(String nickname, int targetId) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
-        controller.lookDashBoard(nickname, targetPlayerId);
+        controller.lookDashBoard(nickname, targetId);
     }
-
-    //metodo logout non ha senso, al max possiamo fare un metodo endgame() quando i premi sono stati consegnati o
-    //è scaduto il timeout (?)
 
     ////////////////////////////////////////////////GESTIONE SALVATAGGIO////////////////////////////////////////////////
 
