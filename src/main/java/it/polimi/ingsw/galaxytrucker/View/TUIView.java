@@ -3,7 +3,7 @@ package it.polimi.ingsw.galaxytrucker.View;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
 import java.util.List;
 import java.util.Scanner;
@@ -11,13 +11,31 @@ import java.util.Scanner;
 public class TUIView implements View {
     private int idPlayer;
     private int server;
+    private GameFase game;
     private Scanner scanner = new Scanner(System.in);
+    private static final String RESET = "\u001B[0m";
+    private static final String YELLOW = "\u001B[43m";
+    private static final String RED = "\u001B[41m";
+    private static final String GREEN = "\u001B[42m";
+    private static final String BLUE = "\u001B[44m";
+    private static final String PURPLE = "\u001B[35m";
+    private static final String BROWN = "\u001B[33m";
+
 
 
     //per ora lascio il server come int
     public TUIView()  {
 
     }
+    @Override
+    public void start() {
+
+    }
+
+
+
+
+
     @Override
     public void inform(String message) {
         System.out.println("> " + message + "\n");
@@ -28,10 +46,12 @@ public class TUIView implements View {
     }
     @Override
     public void updateState(GameFase gameFase) {
+        game = gameFase;
     }
     @Override
     public void printTile(Tile tile) {
     }
+
     @Override
     public void printCard(Card card) {
     }
@@ -80,8 +100,7 @@ public class TUIView implements View {
         return scanner.nextLine();
     }
 
-
-   @Override
+    @Override
     public void printFirePower(float power){
         System.out.print("> " + power +"\n");
     }
@@ -90,6 +109,7 @@ public class TUIView implements View {
     public void printEnginePower(int x){
         System.out.print("> "+x+"\n");
     }
+
     @Override
     public void printNumOfCredits(int credits){
         System.out.print("> "+credits+"\n");
@@ -100,11 +120,6 @@ public class TUIView implements View {
 
     @Override
     public void setInt() {
-
-    }
-
-    @Override
-    public void start() {
 
     }
 
@@ -155,6 +170,183 @@ public class TUIView implements View {
 
     @Override
     public void printPileShown(List<Tile> tiles) {
+
+    }
+
+    private String getTileContent (Tile tile){
+        switch(tile){
+            case EmptySpace x ->{ return "   ";}
+            case EnergyCell x ->{ return "EC"+GREEN+x.getCapacity()+RESET;}
+            case Engine x ->{ return "ENG";
+                //oppure facciamo così, cioè il fatto che nel lato ci sia 6/7 spero basti?
+//                if(x.isDouble()){
+//                    return "EN2";
+//                }else{
+//                    return "EN1";
+//                }
+            }
+            case Cannon x ->{ return "CAN";
+//                if(x.isDouble()){
+//                    return "CN2";
+//                }else{
+//                    return "CN1";
+//                }
+            }
+            case HousingUnit x ->{
+                if(x.getType() == Human.HUMAN){
+                    return "HU"+x.returnLenght();
+                }else if(x.getType() == Human.BROWN_ALIEN){
+                    return BROWN+"HU"+RESET+x.returnLenght();
+                }else if(x.getType() == Human.PURPLE_ALIEN){
+                    return PURPLE+"HU"+RESET+x.returnLenght();
+                }
+            }
+            case MultiJoint x ->{return "MTJ";}
+            case Shield x ->{
+                //ricordarsi che nella costruzione della tile come i storage unit mettiamo gli angoli protetti
+                    return "SH";
+            }
+            case StorageUnit x -> {
+                if(x.isAdvanced()){
+                    return RED+"STU"+RESET;
+                }
+                return "STU";
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + tile);
+        }
+        return null;
+    }
+
+    public void updateView(Tile[][] dashboard) {
+        System.out.print("    ");
+        for (int col = 0; col < 7; col++) {
+            System.out.printf("   %2d    ", col + 4);
+        }
+        System.out.println();
+        for (int row = 0; row < 5; row++) {
+            StringBuilder border = new StringBuilder("    ");
+            StringBuilder top = new StringBuilder(String.format("%2d  ", row + 5));
+            StringBuilder mid = new StringBuilder("    ");
+            StringBuilder bot = new StringBuilder("    ");
+
+            for (int col = 0; col < 7; col++) {
+                Tile tile = dashboard[row][col];
+
+                border.append("+---------");
+                switch (tile) {
+                    case EmptySpace x -> {
+                        top.append("|         ");
+                        mid.append("|         ");
+                        bot.append("|         ");
+                    }
+                    default -> {
+                        String[] rendered = renderTile(tile);
+                        top.append("|").append(rendered[0]);
+                        mid.append("|").append(rendered[1]);
+                        bot.append("|").append(rendered[2]);
+                    }
+                }
+            }
+            border.append("+");
+            System.out.println(border);
+            System.out.println(top.append("| ").append(row + 1));
+            System.out.println(mid.append("|"));
+            System.out.println(bot.append("|"));
+        }
+
+        StringBuilder bottom = new StringBuilder("    ");
+        for (int col = 0; col < 7; col++) {
+            bottom.append("+---------");
+        }
+        bottom.append("+");
+        System.out.println(bottom);
+
+
+        System.out.print("    ");
+        for (int col = 0; col < 7; col++) {
+            System.out.printf("   %2d    ", col + 4);
+        }
+        System.out.println();
+    }
+
+    public String[] renderTile(Tile tile) {
+        String[] out = new String[3];
+        int a = tile.controlCorners(0);
+        int b = tile.controlCorners(1);
+        int c = tile.controlCorners(2);
+        int d = tile.controlCorners(3);
+        String label = getTileContent(tile);
+        switch (tile){
+            case EmptySpace x -> {
+                out[0] = String.format("         ");
+                out[1] = String.format("         ");
+                out[2] = String.format("         ");
+            }
+            case Engine x -> {
+                out[0] = String.format("    %d     ", a);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("    %d     ", c);
+            }
+            case Cannon x -> {
+                out[0] = String.format("    %d     ", a);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("    %d     ", c);
+            }
+            case EnergyCell x ->{
+                out[0] = String.format("    %d     ", a);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("    %d     ", c);
+            }
+            case MultiJoint x ->{
+                out[0] = String.format("    %d     ", a);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("    %d     ", c);
+            }
+            case HousingUnit x ->{
+                out[0] = String.format("    %d     ", a);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("    %d     ", c);
+            }
+            case Shield x ->{
+                if(x.getProtectedCorner(0)==8 && x.getProtectedCorner(1)==8){
+                    out[0] = String.format("    %s%d%s     ",GREEN, a, RESET);
+                    out[1] = String.format("%d %-5s %s%d%s",d,label,GREEN,b,RESET);
+                    out[2] = String.format("    %d     ", c);
+                }else if(x.getProtectedCorner(1)==8 && x.getProtectedCorner(2)==8){
+                    out[0] = String.format("    %d     ", a);
+                    out[1] = String.format("%d %-5s %s%d%s",d,label,GREEN,b,RESET);
+                    out[2] = String.format("    %s%d%s     ", GREEN,c,RESET);
+                }else if(x.getProtectedCorner(2)==8 && x.getProtectedCorner(3)==8){
+                    out[0] = String.format("    %d     ", a);
+                    out[1] = String.format("%s%d%s %-5s %d",GREEN,d,RESET,label,b);
+                    out[2] = String.format("    %s%d%s     ", GREEN,c,RESET);
+                }else if(x.getProtectedCorner(2)==8 && x.getProtectedCorner(0)==8){
+                    out[0] = String.format("    %s%d%s     ",GREEN, a, RESET);
+                    out[1] = String.format("%s%d%s %-5s %d",GREEN,d,RESET,label,b);
+                    out[2] = String.format("    %d     ", c);
+                }
+            }
+            case StorageUnit x ->{
+                List<Colour> listOfGoods = x.getListOfGoods();
+                int green = 0;
+                int red = 0;
+                int yellow = 0;
+                int blue = 0;
+                for (Colour good : listOfGoods) {
+                    switch (good) {
+                        case RED -> red++;
+                        case YELLOW -> yellow++;
+                        case GREEN -> green++;
+                        case BLUE -> blue++;
+                    }
+                }
+                out[0] = String.format("%s%d%s  %d   %s%d%s",RED,red,RESET, a,YELLOW,yellow,RESET);
+                out[1] = String.format("%d %-5s %d",d,label,b);
+                out[2] = String.format("%s%d%s  %d   %s%d%s",BLUE,blue,RESET, c,GREEN,green,RESET);
+            }
+            default ->{}
+        }
+        return out;
 
     }
 
