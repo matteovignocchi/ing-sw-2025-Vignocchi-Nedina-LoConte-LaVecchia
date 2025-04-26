@@ -54,6 +54,9 @@ public class TUIView implements View {
 
     @Override
     public void printCard(Card card) {
+        //ricordardi di chiedere al franci se esiste allora il toString allinterno della carta e come printa
+
+        System.out.println(card);
     }
 
     @Override
