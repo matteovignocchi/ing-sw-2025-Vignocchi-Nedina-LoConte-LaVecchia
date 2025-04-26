@@ -8,36 +8,43 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.util.List;
 
 public interface VirtualView {
+
+    /// METODI PER FARE LE PRINT A SCHERMO ///
     void inform(String message) throws Exception;
     void showUpdate() throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
     void reportError(String error) throws Exception;
     boolean ask(String message) throws Exception;
-    int askIndex() throws Exception;
-    int[] askCoordinates() throws Exception;
-    void updateGameState(GameFase fase) throws Exception;
     void printCard(Card card) throws Exception;
     void printListOfTileCovered(List<Tile> tiles) throws Exception;
     void printListOfTileShown(List<Tile> tiles) throws Exception;
     void printPlayerDashboard(Tile[][] dashboard) throws Exception;
-    String askString() throws Exception;
-    void startMach() throws Exception;
-    public boolean sendRegistration(String username, String password) throws Exception;
-    public boolean sendLogin(String username, String password) throws Exception;
-    void sendGameRequest(String message) throws Exception;
-    Object waitForResponce() throws Exception;
-    String waitForGameUpadate() throws Exception;
-    List<String> requestGameList() throws Exception;
-    List<String> getAvailableAction() throws Exception;
-
-    void sendAction(String key) throws Exception;
-    GameFase getCurrentGameState() throws Exception;
-
-    Tile getTile() throws Exception;
-
-
-    int[] askCoordinate() throws Exception;
-
     void printListOfGoods(List<Colour> listOfGoods) throws Exception;
 
+    /// METODI PER RICHIEDERE COSE ///
+    int askIndex() throws Exception;
+    String askString() throws Exception;
+    int[] askCoordinate() throws Exception;
+
+    /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
+    void updateGameState(GameFase fase) throws Exception;
+    void startMach() throws Exception;
+    public boolean sendLogin(String username, String password) throws Exception;
+    boolean sendGameRequest(String message) throws Exception;
+    Object waitForResponce() throws Exception;
+    String waitForGameUpadate() throws Exception;
+    GameFase getCurrentGameState() throws Exception;
     GameFase getGameFase() throws Exception;
+
+    /// METODI CHE CHIAMO DIRETTAMENTE DAL SERVER ///
+    Tile getTileServer() throws Exception;
+    Tile getUncoveredTile() throws Exception;
+    void getBackTile(Tile tile) throws Exception;
+    void positionTile(Tile tile) throws Exception;
+    void drawCard() throws Exception;
+    void rotateGlass() throws Exception;
+    void setReady() throws Exception;
+    void lookDeck() throws Exception;
+    void lookDashBoard() throws Exception;
+    void logOut() throws Exception;
+    void setNickname(String nickname) throws Exception;
 }

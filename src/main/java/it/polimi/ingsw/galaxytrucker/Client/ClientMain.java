@@ -20,10 +20,10 @@ import static java.lang.String.valueOf;
 
 public class ClientMain {
 
-    private static GameFase gameFase;
     private static View view;
     private static VirtualView virtualClient;
     private static boolean isConnected;
+    private static Tile tmpTile;
 
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
 
@@ -80,6 +80,7 @@ public class ClientMain {
                 boolean LoginSuccess = virtualClient.sendLogin(username, password);
                 if(LoginSuccess){
                     view.inform("Login successful");
+                    virtualClient.setNickname(username);
                     break;
                 }else{
                     view.reportError("Credential not valid");
@@ -110,20 +111,14 @@ public class ClientMain {
         }
     }
 
-    public void setGameFase(GameFase gameFase) {
-        ClientMain.gameFase = gameFase;
-    }
-
     private static void createNewGame() throws Exception{
-
         view.inform("Creating New Game");
-        virtualClient.sendGameRequest("CREATE");
-
-        String response = (String) virtualClient.waitForResponce();
-        view.inform(response);
-
-        if(response.contains("create")){
+        boolean response = virtualClient.sendGameRequest("CREATE");
+        if(response){
+            view.inform("Game created successfully");
             waitForPlayers();
+        }else{
+            view.inform("Game creation failed");
         }
     }
 
@@ -140,7 +135,7 @@ public class ClientMain {
     }
 
     private static void waitForPlayers() throws Exception{
-        view.inform("waiting for min 2 player in lobby");
+        view.inform("waiting for player in lobby");
         while(true){
             String status = virtualClient.waitForGameUpadate();
             if(status.contains("Start")){
@@ -152,53 +147,48 @@ public class ClientMain {
     }
 
     private static void joinExistingGame() throws Exception{
-        view.inform("Available Games");
-        List<String> availableGames = virtualClient.requestGameList();
-        for(int i = 0 ; i < availableGames.size(); i++){
-            view.inform((i+1) + "." + availableGames.get(i));
-        }
-        int choice = virtualClient.askIndex();
-        virtualClient.sendGameRequest("JOIN_" + availableGames.get(choice-1));
-        String response = (String) virtualClient.waitForResponce();
-        view.inform(response);
-        if(response.contains("join")){
+        boolean response= virtualClient.sendGameRequest("JOIN_");
+        if(response){
+            view.inform("Joining existing game");
             waitGameStart();
+        }else{
+            view.inform("Game not entered");
         }
 
     }
 
     private static void choosePossibleActions() throws Exception{
-        view.inform("Possible actions:");
-        List<String> possibleActions = virtualClient.getAvailableAction();
-
-        for(int i = 0 ; i < possibleActions.size(); i++){
-            view.inform((i+1)+":"+possibleActions.get(i));
+        String key = view.sendAvailableChoices();
+        switch (key) {
+            case "getblankettile"->  tmpTile = virtualClient.getTileServer();
+            case "takediscoverytile"-> tmpTile = virtualClient.getUncoveredTile();
+            case "returntile" -> virtualClient.getBackTile(tmpTile);
+            case "placetile" -> virtualClient.positionTile(tmpTile);
+            case "drawcard" -> virtualClient.drawCard();
+            case "spinthehourglass"-> virtualClient.rotateGlass();
+            case "declareready" -> virtualClient.setReady();
+            case "watchadeck" -> virtualClient.lookDeck();
+            case "watchaship" -> virtualClient.lookDashBoard();
+            case "rightrotatetile" -> rightRotatedTile(tmpTile);
+            case "leftrotatetile" -> leftRotatedTile(tmpTile);
+            case " logout" -> virtualClient.logOut();
         }
-        int choice = virtualClient.askIndex();
-        //chiedere perchè send action non è un void ma è un strin
-        virtualClient.sendAction(possibleActions.get(choice-1));
+    }
+
+    private static void rightRotatedTile(Tile tile) throws Exception{
+        tile.RotateRight();
+        view.inform("Rotated tile");
+        view.printTile(tile);
+    }
+    private static void leftRotatedTile(Tile tile) throws Exception{
+        tile.RotateLeft();
+        view.inform("Rotated tile");
+        view.printTile(tile);
     }
 
     //metodo gestione partita
-    private static void startGame() throws Exception{
-        GameFase gameState = virtualClient.getCurrentGameState();
-        switch (gameState) {
-            case BOARD_SETUP -> view.updateState(BOARD_SETUP);
-
-            case TILE_MANAGEMENT -> view.updateState(TILE_MANAGEMENT);
-
-            case WAITING_FOR_PLAYERS -> view.updateState(WAITING_FOR_PLAYERS);
-
-            case WAITING_FOR_TURN -> view.updateState(WAITING_FOR_TURN);
-
-            case SCORING ->  view.updateState(SCORING);
-
-            case DRAW_PHASE ->  view.updateState(DRAW_PHASE);
-
-            case CARD_EFFECT ->  view.updateState(CARD_EFFECT);
-
-            default -> view.reportError("Problem with communication server");
-        }
+    private static void startGame() throws Exception {
+        GameFase gameState;
         do {
             choosePossibleActions();
             gameState = virtualClient.getGameFase();

@@ -128,4 +128,9 @@ return 0;
     public void printCard(Card card) {
 
     }
+
+    @Override
+    public String sendAvailableChoices() throws Exception {
+        return "";
+    }
 }

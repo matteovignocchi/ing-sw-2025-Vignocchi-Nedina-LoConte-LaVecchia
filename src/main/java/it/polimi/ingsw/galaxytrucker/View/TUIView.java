@@ -5,6 +5,8 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,6 +14,7 @@ public class TUIView implements View {
     private int idPlayer;
     private int server;
     private GameFase game;
+    private boolean isDemo;
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[43m";
@@ -358,4 +361,63 @@ public class TUIView implements View {
     /// ///// DA QUI IN BASSO LAVORO IO ///////
 
 
+    //metodo per gestire i comandi da mandare al server
+    public String sendAvailableChoices() throws RemoteException {
+        List<String> listOfOptions = new ArrayList<>();
+        inform("Possible actions:");
+        switch (game) {
+            case BOARD_SETUP -> {
+                listOfOptions.add("get Blanket Tile");
+                listOfOptions.add("take Discovery Tile");
+                listOfOptions.add("Declare Ready");
+                listOfOptions.add("LogOut");
+                listOfOptions.add("Watch A Ship");
+                if(!isDemo){
+                    listOfOptions.add("Watch A Deck");
+                    listOfOptions.add("Spin The Hourglass");
+                }
+            }
+            case TILE_MANAGEMENT -> {
+                listOfOptions.add("return Tile");
+                listOfOptions.add("place Tile");
+                listOfOptions.add("LogOut");
+                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("RightRotate Tile");
+                listOfOptions.add("LeftRotate Tile");
+            }
+            case WAITING_FOR_PLAYERS -> {
+                if(!isDemo) {
+                    listOfOptions.add("Spin The Hourglass");
+                    listOfOptions.add("Watch A Deck");
+                }
+                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("logOut");
+            }
+            case WAITING_FOR_TURN  -> {
+                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("LogOut");
+            }
+            case DRAW_PHASE -> {
+                listOfOptions.add("Draw Card");
+                listOfOptions.add("LogOut");
+                listOfOptions.add("Guarda Una Nave");
+            }
+            case CARD_EFFECT -> {
+                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("LogOut");
+            }
+            case SCORING  -> listOfOptions.add("logOut");
+            default -> listOfOptions.add("error-404");
+        }
+        printListOfCommand(listOfOptions);
+        inform("select the command number");
+        int tmp = askIndex();
+        return listOfOptions.get(tmp).trim().toLowerCase();
+        }
+    private void printListOfCommand(List<String> listOfOptions){
+
+        for(int i = 0 ; i < listOfOptions.size(); i++) {
+            inform((i + 1) + ":" + listOfOptions.get(i));
+        }
+    }
 }

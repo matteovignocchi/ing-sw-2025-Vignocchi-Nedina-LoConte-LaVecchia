@@ -142,7 +142,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public int[] askCoordinates() {
+    public int[] askCoordinate() {
         return view.askCordinate();
     }
 
@@ -150,13 +150,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public String askString(){
         return view.askString();
     }
-
-
-    @Override
-    public int[] askCoordinate() {
-        return view.askCordinate();
-    }
-
 
     @Override
     public void printListOfGoods(List<Colour> listOfGoods) throws Exception {
@@ -185,12 +178,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         showUpdate();
     }
 
-    @Override
-    public boolean sendRegistration(String username, String password) throws Exception {
-        Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
-        sendRequest(registrationRequest);
-        return Boolean.parseBoolean((String) waitForResponce());
-    }
+//    @Override
+//    public boolean sendRegistration(String username, String password) throws Exception {
+//        Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
+//        sendRequest(registrationRequest);
+//        return Boolean.parseBoolean((String) waitForResponce());
+//    }
 
     @Override
     public boolean sendLogin(String username, String password) throws Exception {
@@ -201,9 +194,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void sendGameRequest(String message) throws IOException {
+    public boolean sendGameRequest(String message) throws IOException {
         Message gameRequest = Message.request(Message.OP_LOGIN, message);
         sendRequest(gameRequest);
+        return true;
     }
 
     @Override
@@ -222,29 +216,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         return response;
     }
 
-    @Override
-    public List<String> requestGameList() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_LIST_GAMES, null);
-        sendRequest(request);
-        Object response = waitForResponce();
-        return (List<String>) response;
-    }
+//    @Override
+//    public List<String> requestGameList() throws IOException, InterruptedException {
+//        Message request = Message.request(Message.OP_LIST_GAMES, null);
+//        sendRequest(request);
+//        Object response = waitForResponce();
+//        return (List<String>) response;
+//    }
 
-    @Override
-    public List<String> getAvailableAction() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_ACTIONS, null);
-        sendRequest(request);
-        Object response = waitForResponce();
-        return (List<String>) response;
-    }
-
-
-
-    @Override
-    public void sendAction(String key)  {
-
-    }
-
+//    @Override
+//    public List<String> getAvailableAction() throws IOException, InterruptedException {
+//        Message request = Message.request(Message.OP_ACTIONS, null);
+//        sendRequest(request);
+//        Object response = waitForResponce();
+//        return (List<String>) response;
+//    }
 
     @Override
     public GameFase getCurrentGameState() throws IOException, InterruptedException {
@@ -252,14 +238,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         sendRequest(request);
         Object response = waitForResponce();
         return (GameFase) response;
-    }
-
-    @Override
-    public Tile getTile() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_GET_TILE, null);
-        sendRequest(request);
-        Object response = waitForResponce();
-        return (Tile) response;
     }
 
     public void sendRequest(Message message) throws IOException {
@@ -272,7 +250,65 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
 
+    /// DA IMPLEMENTARE , NON VOGLIO FAR CASINI CON LA SOCKET QUINDI CHIEDO PRIMA AL TITONS////
 
+    @Override
+    public Tile getTileServer() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_GET_TILE, null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (Tile) response;
+    }
+
+    @Override
+    public Tile getUncoveredTile() throws Exception {
+        return null;
+    }
+
+    @Override
+    public void getBackTile(Tile tile) throws Exception {
+
+    }
+
+    @Override
+    public void positionTile(Tile tile) throws Exception {
+
+    }
+
+    @Override
+    public void drawCard() throws Exception {
+
+    }
+
+    @Override
+    public void rotateGlass() throws Exception {
+
+    }
+
+    @Override
+    public void setReady() throws Exception {
+
+    }
+
+    @Override
+    public void lookDeck() throws Exception {
+
+    }
+
+    @Override
+    public void lookDashBoard() throws Exception {
+
+    }
+
+    @Override
+    public void logOut() throws Exception {
+
+    }
+
+    @Override
+    public void setNickname(String nickname) throws Exception {
+
+    }
 
 
 }

@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
@@ -14,11 +15,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private final ServerRmi server;
     private View view;
     private GameFase gameFase;
+    private String nickname;
 
     public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
         super();
         this.server = server;
         this.view = view;
+    }
+    public void setNickname(String nickname) throws RemoteException {
+     this.nickname = nickname;
     }
 
     //PARTE VIEW
@@ -53,7 +58,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public int[] askCoordinates() throws RemoteException {
+    public int[] askCoordinate() throws RemoteException {
         return view.askCordinate();
 
     }
@@ -61,11 +66,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public String askString() throws RemoteException {
         return view.askString();
-    }
-
-    @Override
-    public int[] askCoordinate() throws RemoteException {
-        return view.askCordinate();
     }
 
     @Override
@@ -98,6 +98,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void updateGameState(GameFase fase) throws RemoteException{
         this.gameFase = fase;
+        view.updateState(gameFase);
         showUpdate();
     }
 
@@ -109,15 +110,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     }
 
-    @Override
-    public List<String> requestGameList() throws RemoteException {
-         return server.getAvaibleGames();
-    }
+//    @Override
+//    public List<String> requestGameList() throws RemoteException {
+//         return server.getAvaibleGames();
+//    }
 
-    @Override
-    public List<String> getAvailableAction() throws RemoteException {
-        return server.getAvailableChoices();
-    }
+
     //tutti questi metodi get non sono inutili dato che è sempre una
     //lista di comandi, tanto io mando il comando e il server me la printa
 
@@ -127,26 +125,39 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public Tile getTile() throws RemoteException {
-        return server.getTileServer();
-    }
-
-
-
-    //PARTE COMUNICAZIONE CON IL SERVER
-    @Override
-    public boolean sendRegistration(String username, String password) throws RemoteException {
-        return server.registerCredential(username, password);
-    }
-
-    @Override
     public boolean sendLogin(String username, String password) throws RemoteException {
         return server.authenticate(username, password);
     }
 
     @Override
-    public void sendGameRequest(String message) throws RemoteException {
-        server.handleGameRequest(message);
+    public boolean sendGameRequest(String message) throws RemoteException {
+        if(message.contains("create")){
+            boolean tmp = view.ask("would you like a demo version?");
+            int tmpInt= 5;
+            do{
+                view.inform("select max 4 players");
+                tmpInt = view.askIndex();
+            }while(tmpInt>4);
+            try {
+                server.createNewGame(tmp , this , nickname ,tmpInt );
+            } catch (BusinessLogicException e) {
+                throw new RuntimeException(e);
+            }
+        }
+     if(message.contains("login")){
+         view.inform("Available Games");
+         int[] availableGames = server.requestGamesList();
+         for(int i = 0 ; i < availableGames.length; i++){
+             view.inform((i+1) + "." + availableGames[i]);
+         }
+         int choice = askIndex();
+         try {
+             server.enterGame(availableGames[choice-1], this , nickname);
+         } catch (BusinessLogicException e) {
+             throw new RuntimeException(e);
+         }
+     }
+     return true;
     }
 
     @Override
@@ -156,12 +167,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public String waitForGameUpadate() throws RemoteException {
-        return server.waitForGameStart();
-    }
-
-    @Override
-    public void sendAction(String key) throws RemoteException {
-         server.handlePlayerAction("key");
+        try {
+            return server.waitForGameStart();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -169,5 +179,35 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return gameFase;
     }
 
+    public Tile getTileServer() throws Exception {
+        return server.getCoveredTileServer();
+    }
+    public Tile getUncoveredTile() throws Exception{
+        return server.getUncoveredTileServer();
+    }
+    public void getBackTile(Tile tile) throws Exception{
+        server.getBackTile();
+    }
+    public void positionTile(Tile tile) throws Exception{
+        server.positionTile();
+    }
+    public void drawCard() throws Exception {
+        server.drawCard();
+    }
+    public void rotateGlass() throws Exception{
+        server.rotateGlass();
+    }
+    public void setReady() throws Exception{
+        server.setReady();
+    }
+    public void lookDeck() throws Exception{
+        server.lookDeck();
+    }
+    public void lookDashBoard() throws Exception{
+        server.lookDashBoard();
+    }
+    public void logOut() throws Exception{
+        server.logOut();
+    }
 
 }

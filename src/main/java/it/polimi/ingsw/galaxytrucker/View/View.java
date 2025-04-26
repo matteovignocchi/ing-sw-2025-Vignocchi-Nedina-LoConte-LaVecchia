@@ -36,7 +36,10 @@ public interface View {
     void updateState(GameFase gameFase);
     void printTile(Tile tile);
     void printCard(Card card);
+    String sendAvailableChoices() throws Exception;
+
     //meetodo per richiedere
+
 
 }
 
