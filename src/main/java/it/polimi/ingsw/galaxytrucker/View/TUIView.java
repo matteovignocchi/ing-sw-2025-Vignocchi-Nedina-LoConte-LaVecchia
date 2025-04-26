@@ -210,7 +210,7 @@ public class TUIView implements View {
                 if(x.isAdvanced()){
                     return RED+"SU"+RESET+x.getMax();
                 }
-                return "STU";
+                return "SU"+x.getMax();
             }
             default -> throw new IllegalStateException("Unexpected value: " + tile);
         }
