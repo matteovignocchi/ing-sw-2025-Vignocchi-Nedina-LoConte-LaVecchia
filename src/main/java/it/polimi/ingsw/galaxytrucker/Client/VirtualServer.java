@@ -6,72 +6,24 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.List;
-
-
-// Interfaccia comune per i metodi chiamabili dal client verso il server (sia RMI che Socket).
-// I parametri sono progettati per l'interazione esterna: username, scelte, coordinate, ecc.
-
-
-//Ho pensato questa cosa: noi gestiamo i player con un int, ma è molto più comodo che loro si registrino con un
-//nickname, quindi possiamo lasciarglielo fare nel modo più comune (con una String) e, internamente, associamo
-//a ciascun nickname un intero, in modo tale da seguire la logica che abbiamo pensato fin dall'inizio, ma
-//permettendo comunque al player di avere un username che possa contenere qualunque carattere
-
 
 public interface VirtualServer extends Remote {
 
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
-
-
-
-    // Autenticazione e Account
-    void logout(String username) throws RemoteException;
-
-    // Azioni di gioco
-    void sendIndex(String username, int index) throws RemoteException;
-    void sendChoice(String username, boolean choice) throws RemoteException;
-    void sendCoordinates(String username, int x, int y) throws RemoteException;
-    void sendPlayerDash(String username, int dash) throws RemoteException;
-
-    // Aggiungerai altri metodi specifici man mano che le fasi evolvono.
-    //METODI AGGIUNTI PER ME E MATTEO , CI SERVONO PER FAR FUNZIONARE LE COSE , SE VI RENDETE CONTO CHE MANCA QUALCOSA A VOI AGGIUNGETECELO
-    //COME AVEVAMO FATTO IN CONTROLLER
-
-    List<String> getAvaibleGames() throws RemoteException;
-    Tile getTileServer() throws RemoteException;
-    boolean authenticate(String username, String password) throws RemoteException;
-    String waitForResponse() throws RemoteException;
-    void handlePlayerAction(String message) throws RemoteException;
-    void registerClient(VirtualView client) throws RemoteException;
-
-
-
-    /// METODI DA IMPLEMENTARE TRAMITE I BLANK CHE VI HO LASCIATO
-
-    int[] requestGamesList() throws RemoteException;
-    String waitForGameStart() throws Exception;
-    void rotateGlass() throws RemoteException;
-    void setReady()  throws RemoteException;
-    void lookDeck() throws RemoteException;
-    void lookDashBoard() throws RemoteException;
-    void logOut() throws RemoteException;
-    void activateCard() throws RemoteException;
-    void getBackTile() throws RemoteException;
-    void positionTile() throws RemoteException;
-    void drawCard() throws RemoteException;
-    Tile getCoveredTileServer() throws RemoteException;
-    Tile getUncoveredTileServer() throws RemoteException;
-
-
-
-
-
-
-
-
-
-
+    public boolean authenticate(String username, String password) throws RemoteException;
+    public String waitForResponse() throws RemoteException;
+    public void registerClient(VirtualView client) throws RemoteException;
+    public int[] requestGamesList() throws RemoteException;
+    public String waitForGameStart() throws Exception;
+    public void rotateGlass() throws RemoteException;
+    public void setReady()  throws RemoteException;
+    public void lookDeck() throws RemoteException;
+    public void lookDashBoard() throws RemoteException;
+    public void logOut() throws RemoteException;
+    public void getBackTile() throws RemoteException;
+    public void positionTile() throws RemoteException;
+    public void drawCard() throws RemoteException;
+    public Tile getCoveredTileServer(String nickname) throws RemoteException;
+    public Tile getUncoveredTileServer(String nickname) throws RemoteException;
 }
-

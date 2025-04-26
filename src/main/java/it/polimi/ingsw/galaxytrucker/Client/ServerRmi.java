@@ -26,6 +26,7 @@ import java.util.List;
 //TODO: Le eccezioni di "Infrastruttura" -> wrapparle in RemoteException e lanciarle al client
 //      Le eccezioni di Game Logic -> wrapparle in BusinessLogicException e lanciarle al client
 // Dire agli altri di gestirle con try-catch al chiamante (?)
+
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
@@ -58,47 +59,9 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         }
     }
 
-
-
-    @Override
-    public void logout(String username) throws RemoteException {
-
-    }
-
-    @Override
-    public void sendIndex(String username, int index) throws RemoteException {
-    }
-
-    @Override
-    public void sendChoice(String username, boolean choice) throws RemoteException {
-    }
-
-    @Override
-    public void sendCoordinates(String username, int x, int y) throws RemoteException {
-    }
-
-    @Override
-    public void sendPlayerDash(String username, int dash) throws RemoteException {
-    }
-
-    @Override
-    public List<String> getAvaibleGames() throws RemoteException {
-        return List.of();
-    }
-
-    @Override
-    public Tile getTileServer() throws RemoteException {
-        return null;
-    }
-
     @Override
     public boolean authenticate(String username, String password) throws RemoteException {
         return false;
-    }
-
-    @Override
-    public Void handleGameRequest(String message) throws RemoteException {
-        return null;
     }
 
     @Override
@@ -107,18 +70,18 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void handlePlayerAction(String message) throws RemoteException {
-
-    }
-
-    @Override
     public void registerClient(VirtualView client) throws RemoteException {
 
     }
 
     @Override
-    public void getUncoveredTile() throws RemoteException {
+    public int[] requestGamesList() throws RemoteException {
+        return new int[0];
+    }
 
+    @Override
+    public String waitForGameStart() throws Exception {
+        return "";
     }
 
     @Override
@@ -147,11 +110,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void activateCard() throws RemoteException {
-
-    }
-
-    @Override
     public void getBackTile() throws RemoteException {
 
     }
@@ -167,14 +125,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void rightRotatedTile() throws RemoteException {
-
+    public Tile getCoveredTileServer() throws RemoteException {
+        return null;
     }
 
     @Override
-    public void leftRotatedTile() throws RemoteException {
-
+    public Tile getUncoveredTileServer() throws RemoteException {
+        return null;
     }
-
 }
 
