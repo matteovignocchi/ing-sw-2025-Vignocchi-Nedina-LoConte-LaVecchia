@@ -204,11 +204,11 @@ public class TUIView implements View {
             case MultiJoint x ->{return "MTJ";}
             case Shield x ->{
                 //ricordarsi che nella costruzione della tile come i storage unit mettiamo gli angoli protetti
-                    return "SH";
+                    return "SHL";
             }
             case StorageUnit x -> {
                 if(x.isAdvanced()){
-                    return RED+"STU"+RESET;
+                    return RED+"SU"+RESET+x.getMax();
                 }
                 return "STU";
             }
