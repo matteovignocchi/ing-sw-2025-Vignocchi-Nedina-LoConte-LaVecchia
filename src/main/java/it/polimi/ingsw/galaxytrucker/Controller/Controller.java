@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -10,6 +11,8 @@ import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.View;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -25,7 +28,7 @@ public class Controller implements Serializable {
     private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>();
     private final AtomicInteger player_id_counter;
     private final int Max_Players;
-    private GameFase principalGameFase = GameFase.BOARD_SETUP; //iniazilizzato a fase 0
+    private GameFase principalGameFase; //iniazilizzato a fase 0
     private GameFase preGameFase;
     private final boolean isDemo;
 
@@ -57,19 +60,22 @@ public class Controller implements Serializable {
                                                     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public synchronized void addPlayer(String nickname, VirtualView view) throws RemoteException {
-        if (PlayerByNickname.containsKey(nickname)) throw new IllegalArgumentException("Nickname already used");
-        if (PlayerByNickname.size() >= Max_Players) throw new IllegalStateException("Game is full");
+    public synchronized void addPlayer(String nickname, VirtualView view, boolean isDemo) throws BusinessLogicException {
+        if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
+        if (PlayerByNickname.size() >= Max_Players) throw new BusinessLogicException("Game is full");
 
-        Player player = new Player(player_id_counter.getAndIncrement(), true);
+        Player player = new Player(player_id_counter.getAndIncrement(), isDemo);
         PlayerByNickname.put(nickname, player);
         ViewByNickname.put(nickname, view);
-        if (PlayerByNickname.size() == Max_Players) startingGame();
+        if (PlayerByNickname.size() == Max_Players)
+            startGame();
     }
 
-    private void startingGame() {
-        principalGameFase = GameFase.TILE_MANAGEMENT; //da capire qual è la fase giusta
-        PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.TILE_MANAGEMENT));
+    private void startGame() {
+        principalGameFase = GameFase.BOARD_SETUP; //capire se serve fase nel controller
+        PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        ViewByNickname.values().forEach( v -> v.updateGameState(GameFase.BOARD_SETUP)); //send actions gestisce lui
+        //show update qui necessario ? tutto in stato predefinito
     }
 
     public Player getPlayerByNickname(String nickname) {
