@@ -28,32 +28,31 @@ public class GameManager {
     public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException {
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, maxPlayers);
-        controller.addPlayer(nickname, v, isDemo);
+        controller.addPlayer(nickname, v);
         games.put(gameId, controller);
         saveGameState(gameId, controller);
         return gameId;
     }
 
-    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws IOException {
+    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws IOException, BusinessLogicException {
         Controller controller = games.get(gameId);
-        if (controller == null) throw new IOException("Game not found");
-        controller.addPlayer(nickname, v, isDemo);
+        if (controller == null) throw new BusinessLogicException("Game not found");
+        controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
     }
 
-    public synchronized void quitGame(int gameId, String nickname) throws IOException {
+    public synchronized void quitGame(int gameId, String nickname) throws IOException, BusinessLogicException {
         Controller controller = games.get(gameId);
-        if (controller == null) throw new IOException("Game not found");
+        if (controller == null) throw new BusinessLogicException("Game not found");
 
         Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new IOException("Player not found");
+        if (player == null) throw new BusinessLogicException("Player not found");
 
         controller.removePlayer(nickname);
-        if (controller.checkNumberOfPlayers() == 0) {
+        if (controller.checkNumberOfPlayers() == 0)
             removeGame(gameId);
-        } else {
+        else
             saveGameState(gameId, controller);
-        }
     }
 
     public synchronized void stopGame(int gameId, String nickname) throws IOException {

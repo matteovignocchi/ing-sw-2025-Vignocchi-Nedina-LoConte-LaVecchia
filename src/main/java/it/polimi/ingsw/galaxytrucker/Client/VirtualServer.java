@@ -11,6 +11,7 @@ public interface VirtualServer extends Remote {
 
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
+    public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException;
 
     // non servono, da togliere
     public boolean authenticate(String username, String password) throws RemoteException;
@@ -23,7 +24,6 @@ public interface VirtualServer extends Remote {
     public void setReady()  throws RemoteException;
     public void lookDeck() throws RemoteException;
     public void lookDashBoard() throws RemoteException;
-    public void logOut() throws RemoteException;
     public void getBackTile() throws RemoteException;
     public void positionTile() throws RemoteException;
     public void drawCard() throws RemoteException;
