@@ -168,7 +168,7 @@ public class TUIView implements View {
     }
                                                                                         /// position diventa una mappa stringa intero
     @Override
-    public void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
             case BOARD_SETUP -> inform(" -Nickname: "+nickname+" -Position : Too early to know where you'll finish!"+" -Credits : too rich!"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
             case TILE_MANAGEMENT, DRAW_PHASE -> {}

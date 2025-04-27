@@ -70,7 +70,7 @@ return 0;
     }
 
     @Override
-    public void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
 
     }
 
