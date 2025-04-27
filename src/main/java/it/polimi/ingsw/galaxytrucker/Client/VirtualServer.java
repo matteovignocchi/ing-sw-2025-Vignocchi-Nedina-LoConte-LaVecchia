@@ -24,6 +24,6 @@ public interface VirtualServer extends Remote {
     public void getBackTile() throws RemoteException;
     public void positionTile() throws RemoteException;
     public void drawCard() throws RemoteException;
-    public Tile getCoveredTileServer(String nickname) throws RemoteException;
-    public Tile getUncoveredTileServer(String nickname) throws RemoteException;
+    public Tile getCoveredTileServer() throws RemoteException;
+    public Tile getUncoveredTileServer() throws RemoteException;
 }
