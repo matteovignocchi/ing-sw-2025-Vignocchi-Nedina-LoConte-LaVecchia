@@ -19,6 +19,7 @@ public interface VirtualView {
     void printPlayerDashboard(Tile[][] dashboard) throws Exception;
     void printListOfGoods(List<Colour> listOfGoods) throws Exception;
     void printTile(Tile tile) throws Exception;
+    void printDeck(List<Card> deck) throws Exception;
 
     /// METODI PER RICHIEDERE COSE ///
     int askIndex() throws Exception;

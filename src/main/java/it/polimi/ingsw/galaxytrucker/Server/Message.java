@@ -9,8 +9,9 @@ public class Message implements Serializable {
     public static final String TYPE_UPDATE = "UPDATE";
     public static final String TYPE_NOTIFICATION = "NOTIFICATION";
     public static final String OP_LOGIN = "LOGIN";
+    public static final String OP_LOGOUT = "LOGOUT";
     public static final String OP_REGISTER = "REGISTER";
-
+    public static final String OP_UPDATE_VIEW = "UPDATE_VIEW";
     public static final String OP_ACTIONS = "ACTIONS";
     public static final String OP_LEAVE_GAME = "LEAVE_GAME";
     public static final String OP_START_GAME = "START_GAME";
@@ -21,12 +22,22 @@ public class Message implements Serializable {
     public static final String OP_PRINT_GOODS = "PRINT_GOODS";
     public static final String OP_PRINT_DASHBOARD = "PRINT_DASHBOARD";
     public static final String OP_GAME_PHASE = "GAME_PHASE";
-
+    public static final String OP_PRINT_DECK = "PRINT_DECK";
+    public static final String OP_PRINT_TILE = "PRINT_TILE";
     public static final String OP_GET_TILE = "GET_TILE";
+    public static final String OP_GET_UNCOVERED = "GET_UNCOVERED";
     public static final String OP_GET_CARD = "GET_CARD";
     public static final String OP_INDEX = "INDEX";
     public static final String OP_COORDINATE = "COORDINATE";
     public static final String OP_STRING = "STRING";
+    public static final String OP_ASK = "ASK";
+    public static final String OP_RETURN_TILE = "RETURN_TILE";
+    public static final String OP_POSITION_TILE = "POSITION_TILE";
+    public static final String OP_ROTATE_GLASS = "ROTATE_GLASS";
+    public static final String OP_SET_READY = "SET_READY";
+    public static final String OP_LOOK_DECK = "LOOK_DECK";
+    public static final String OP_LOOK_SHIP = "LOOK_SHIP";
+    public static final String OP_SET_NICKNAME = "OP_NICKNAME";
 
 
     private final String messageType;

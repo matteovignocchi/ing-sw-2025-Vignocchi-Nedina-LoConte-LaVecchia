@@ -976,6 +976,8 @@ public class Controller implements Serializable {
     2. chiamo activate card
     3. check se deck vuoto (attivata ultima carta) si passa alla fase di premizione
      */
+                            /// METODI PER GESTIONE GENERALE DELLE FASI ///
+
 
 
 }

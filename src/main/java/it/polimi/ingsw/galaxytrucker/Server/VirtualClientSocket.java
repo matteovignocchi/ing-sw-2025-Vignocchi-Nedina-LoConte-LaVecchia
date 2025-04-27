@@ -19,6 +19,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final View view;
     private GameFase gameFase;
     private Object lastResponse;
+    private String nickname;
+
+    /// METODI DI INIZIALIZZAZIONE ///
 
     public VirtualClientSocket(String host, int port , View view) throws IOException {
         this.socket = new Socket(host, port);
@@ -27,7 +30,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         this.view = view;
         new Thread(this).start();
     }
-
     @Override
     public void run() {
         try {
@@ -37,24 +39,30 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_UPDATE -> {
                         switch (msg.getOperation()) {
-                            case Message.OP_GAME_PHASE -> {
-                                gameFase = (GameFase) msg.getPayload();
+                            case Message.OP_GAME_PHASE -> this.updateGameState((GameFase)  msg.getPayload());
+                            case Message.OP_PRINT_CARD -> this.printCard((Card) msg.getPayload());
+                            case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
+                            case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
+                            case Message.OP_PRINT_GOODS -> this.printListOfGoods((List<Colour>) msg.getPayload());
+                            case Message.OP_PRINT_DASHBOARD -> this.printPlayerDashboard((Tile[][]) msg.getPayload());
+                            case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
+                            case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
+                            case Message.OP_SET_NICKNAME -> this.setNickname((String)msg.getPayload());
+                            case Message.OP_UPDATE_VIEW -> {
+                                UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
+                                this.showUpdate(
+                                        payload.getNickname(),
+                                        payload.getFirePower(),
+                                        payload.getPowerEngine(),
+                                        payload.getCredits(),
+                                        payload.getPosition(),
+                                        payload.hasPurpleAlien(),
+                                        payload.hasBrownAlien(),
+                                        payload.getNumberOfHuman(),
+                                        payload.getNumberOfEnergy()
+                                );
                             }
-                            case Message.OP_PRINT_CARD -> {
-                                view.printCard((Card) msg.getPayload());
-                            }
-                            case Message.OP_PRINT_COVERED -> {
-                                view.printPileCovered((List<Tile>) msg.getPayload());
-                            }
-                            case Message.OP_PRINT_SHOWN -> {
-                                view.printPileShown((List<Tile>) msg.getPayload());
-                            }
-                            case Message.OP_PRINT_GOODS -> {
-                                view.printListOfGoods((List<Colour>) msg.getPayload());
-                            }
-                            case Message.OP_PRINT_DASHBOARD -> {
-                                view.printDashShip((Tile[][]) msg.getPayload());
-                            }
+                            default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
                         }
                     }
                     case Message.TYPE_RESPONSE -> {
@@ -63,32 +71,37 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             notifyAll();
                         }
                     }
-                    case Message.TYPE_ERROR -> {
-                        view.reportError((String) msg.getPayload());
-                    }
-                    case Message.TYPE_NOTIFICATION -> {
-                        view.inform((String) msg.getPayload());
-                    }
+                    case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
+                    case Message.TYPE_NOTIFICATION -> this.inform((String) msg.getPayload());
                     case Message.TYPE_REQUEST -> {
                         switch (msg.getOperation()) {
                             case Message.OP_INDEX -> {
-                                view.inform((String) msg.getPayload());
-                                view.askIndex();
+                                this.inform((String) msg.getPayload());
+                                this.askIndex();
+                                Message response = new Message(Message.TYPE_RESPONSE, null, msg.getPayload());
+                                sendRequest(response);
                             }
                             case Message.OP_COORDINATE -> {
-                                view.inform((String) msg.getPayload());
-                                view.askCordinate();
+                                this.inform((String) msg.getPayload());
+                                int[] x = this.askCoordinate();
+                                Message response = new Message(Message.TYPE_RESPONSE, null, x);
+                                sendRequest(response);
                             }
                             case Message.OP_STRING-> {
-                                view.inform((String) msg.getPayload());
-                                view.askString();
+                                this.inform((String) msg.getPayload());
+                                 String s = this.askString();
+                                Message response = new Message(Message.TYPE_RESPONSE, null,s);
+                                sendRequest(response);
                             }
-
+                            case Message.OP_ASK -> {
+                                boolean x = this.ask((String)msg.getPayload());
+                                Message response = new Message(Message.TYPE_RESPONSE, null, x);
+                                sendRequest(response);
+                            }
                         }
                     }
-
                     default -> {
-                        view.reportError("Unknown message type: " + msg.getMessageType());
+                        this.reportError("Unknown message type: " + msg.getMessageType());
                     }
                 }
             }
@@ -103,87 +116,97 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
     }
 
+    private void sendRequest(Message message) throws IOException {
+        out.writeObject(message);
+        out.flush();
+    }
+
+    /// METODI  PER PRINTARE A CLIENT ///
+
+    @Override
+    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
+        view.updateView(nickname ,firePower ,powerEngine , credits , position , purpleAline, brownAlien, numberOfHuman, numberOfEnergy);
+    }
     @Override
     public void inform(String message) throws IOException {
         view.inform(message);
     }
-
-    @Override
-    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
-
-    }
-
-
     @Override
     public void reportError(String error){
         view.reportError(error);
     }
+    @Override
+    public void printListOfTileCovered(List<Tile> tiles) {
+        view.printPileCovered(tiles);
+    }
+    @Override
+    public void printListOfTileShown(List<Tile> tiles)  {
+        view.printPileShown(tiles);
+    }
+    @Override
+    public void printListOfGoods(List<Colour> listOfGoods) throws Exception {
+        view.printListOfGoods(listOfGoods);
+    }
+    @Override
+    public void printCard(Card card){
+        view.printCard(card);
+    }
+    @Override
+    public void printTile(Tile tile){
+        view.printTile(tile);
+    }
+    @Override
+    public void printPlayerDashboard(Tile[][] dashBoard){
+        view.printDashShip(dashBoard);
+    }
+    @Override
+    public void printDeck(List<Card> deck){
+        view.printDeck(deck);
+    }
+
+    /// METODI PER CHIEDERE AL CLIENT DA PARTE DEL SERVER ///
 
     @Override
     public boolean ask(String message){
         return view.ask(message);
     }
-
-
-
-    @Override
-    public void printListOfTileCovered(List<Tile> tiles) {
-        view.printPileCovered(tiles);
-    }
-
-    @Override
-    public void printListOfTileShown(List<Tile> tiles)  {
-        view.printListOfTiles(tiles);
-    }
-
     @Override
     public int askIndex(){
         return view.askIndex();
     }
-
     @Override
     public int[] askCoordinate() {
         return view.askCordinate();
     }
-
     @Override
     public String askString(){
         return view.askString();
     }
 
-    @Override
-    public void printListOfGoods(List<Colour> listOfGoods) throws Exception {
-        view.printListOfGoods(listOfGoods);
-    }
 
-
-    @Override
-    public void printCard(Card card){
-        view.printCard(card);
-    }
-
-    @Override
-    public void printPlayerDashboard(Tile[][] dashboard)  {
-        view.printDashShip(dashboard);
-    }
+    /// METODI PER SETTARE COSA AL CLIENT ///
 
     @Override
     public void startMach() {
-
     }
-
     @Override
     public void updateGameState(GameFase fase){
         this.gameFase = fase;
         view.updateState(gameFase);
     }
+    @Override
+    public GameFase getCurrentGameState() throws IOException, InterruptedException {
+        Message request = Message.request(Message.OP_GAME_PHASE,null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (GameFase) response;
+    }
+    @Override
+    public GameFase getGameFase(){
+        return gameFase;
+    }
 
-//    @Override
-//    public boolean sendRegistration(String username, String password) throws Exception {
-//        Message registrationRequest = Message.request(Message.OP_REGISTER, new LoginRequest(username,password));
-//        sendRequest(registrationRequest);
-//        return Boolean.parseBoolean((String) waitForResponce());
-//    }
+    /// METODI PER IL LOGIN ///
 
     @Override
     public boolean sendLogin(String username, String password) throws Exception {
@@ -192,14 +215,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         return Boolean.parseBoolean((String) waitForResponce());
 
     }
-
     @Override
     public boolean sendGameRequest(String message) throws IOException {
         Message gameRequest = Message.request(Message.OP_LOGIN, message);
         sendRequest(gameRequest);
         return true;
     }
-
     @Override
     public  synchronized Object waitForResponce() throws InterruptedException {
         while (lastResponse == null) wait();
@@ -207,7 +228,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         lastResponse = null;
         return response;
     }
-
     @Override
     public String waitForGameUpadate() throws InterruptedException {
         while (lastResponse == null) wait();
@@ -216,41 +236,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         return response;
     }
 
-//    @Override
-//    public List<String> requestGameList() throws IOException, InterruptedException {
-//        Message request = Message.request(Message.OP_LIST_GAMES, null);
-//        sendRequest(request);
-//        Object response = waitForResponce();
-//        return (List<String>) response;
-//    }
-
-//    @Override
-//    public List<String> getAvailableAction() throws IOException, InterruptedException {
-//        Message request = Message.request(Message.OP_ACTIONS, null);
-//        sendRequest(request);
-//        Object response = waitForResponce();
-//        return (List<String>) response;
-//    }
-
-    @Override
-    public GameFase getCurrentGameState() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_GAME_PHASE,null);
-        sendRequest(request);
-        Object response = waitForResponce();
-        return (GameFase) response;
-    }
-
-    public void sendRequest(Message message) throws IOException {
-        out.writeObject(message);
-        out.flush();
-    }
-
-    public GameFase getGameFase(){
-        return gameFase;
-    }
-
-
-    /// DA IMPLEMENTARE , NON VOGLIO FAR CASINI CON LA SOCKET QUINDI CHIEDO PRIMA AL TITONS////
+    /// METODI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
 
     @Override
     public Tile getTileServer() throws IOException, InterruptedException {
@@ -262,53 +248,60 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public Tile getUncoveredTile() throws Exception {
-        return null;
+        Message request = Message.request(Message.OP_GET_UNCOVERED, null);
+        sendRequest(request);
+        Object response = waitForResponce();
+        return (Tile) response;
     }
 
     @Override
     public void getBackTile(Tile tile) throws Exception {
-
+        Message request =  Message.request(Message.OP_RETURN_TILE , tile);
+        sendRequest(request);
     }
-
     @Override
     public void positionTile(Tile tile) throws Exception {
-
+        Message request = Message.request(Message.OP_POSITION_TILE , tile);
+        sendRequest(request);
     }
 
     @Override
     public void drawCard() throws Exception {
-
+        Message request = Message.request(Message.OP_GET_CARD, null);
+        sendRequest(request);
     }
 
     @Override
     public void rotateGlass() throws Exception {
-
+        Message request = Message.request(Message.OP_ROTATE_GLASS , null);
+        sendRequest(request);
     }
-
     @Override
     public void setReady() throws Exception {
-
+        Message request = Message.request(Message.OP_SET_READY, null);
+        sendRequest(request);
     }
 
     @Override
     public void lookDeck() throws Exception {
-
+        Message request = Message.request(Message.OP_LOOK_DECK, null);
+        sendRequest(request);
     }
 
     @Override
     public void lookDashBoard() throws Exception {
-
+        Message request = Message.request(Message.OP_LOOK_SHIP, null);
+        sendRequest(request);
     }
 
     @Override
     public void logOut() throws Exception {
-
+        Message request = Message.request(Message.OP_LOGOUT, null);
+        sendRequest(request);
     }
-
     @Override
     public void setNickname(String nickname) throws Exception {
-
+        this.nickname = nickname;
     }
-
-
 }
+

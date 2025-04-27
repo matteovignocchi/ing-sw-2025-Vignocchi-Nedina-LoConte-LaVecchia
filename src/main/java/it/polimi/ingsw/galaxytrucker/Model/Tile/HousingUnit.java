@@ -103,4 +103,8 @@ public class HousingUnit extends Tile{
     public boolean isConnected(){
         return isConnected;
     }
+
+    public List<Human> getListOfToken(){
+        return listOfToken;
+    }
 }
