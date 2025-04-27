@@ -109,7 +109,7 @@ public class Controller implements Serializable {
                 int position = f_board.getPositionOfPlayer(player);//implementato in flight... vai a vedere
                 boolean hasPurpleAlien = player.presencePurpleAlien();
                 boolean hasBrownAlien = player.presenceBrownAlien();
-                int Human = player.countTotalCrew(); //deve implementare oleg, che cazzo ne so io
+                int Human = player.getTotalHuman(); //deve implementare oleg, che cazzo ne so io
                 int Energy = player.getTotalEnergy();
 
 
@@ -117,7 +117,7 @@ public class Controller implements Serializable {
                 v.updateGameState(GameFase.BOARD_SETUP);
                 v.showUpdate(nickname, fire_power, power_engine, credits, position, hasPurpleAlien, hasBrownAlien, Human, Energy);
             }catch (Exception e){
-                System.err.println("Communication error with a client: " e.getMessage());
+                System.err.println("Communication error with a client: " + e.getMessage());
             }
         });
     }
