@@ -26,6 +26,7 @@ public class ClientMain {
     private static VirtualView virtualClient;
     private static boolean isConnected;
     private static Tile tmpTile;
+    private static int idCurrentGame;
 
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
 
@@ -115,8 +116,8 @@ public class ClientMain {
 
     private static void createNewGame() throws Exception{
         view.inform("Creating New Game");
-        boolean response = virtualClient.sendGameRequest("CREATE");
-        if(response){
+        int response = virtualClient.sendGameRequest("CREATE");
+        if(response != 0){
             view.inform("Game created successfully");
             waitForPlayers();
         }else{
@@ -149,8 +150,8 @@ public class ClientMain {
     }
 
     private static void joinExistingGame() throws Exception{
-        boolean response= virtualClient.sendGameRequest("JOIN_");
-        if(response){
+        int response= virtualClient.sendGameRequest("JOIN_");
+        if(response != 0){
             view.inform("Joining existing game");
             waitGameStart();
         }else{
@@ -173,7 +174,10 @@ public class ClientMain {
             case "watchaship" -> virtualClient.lookDashBoard();
             case "rightrotatetile" -> rightRotatedTile(tmpTile);
             case "leftrotatetile" -> leftRotatedTile(tmpTile);
-            case " logout" -> virtualClient.logOut();
+            case " logout" -> {
+                virtualClient.logOut();
+                idCurrentGame = 0;
+            }
         }
     }
 

@@ -32,7 +32,7 @@ public interface VirtualView {
     void updateGameState(GameFase fase);
     void startMach() throws Exception;
     boolean sendLogin(String username, String password) throws Exception;
-    boolean sendGameRequest(String message) throws Exception;
+    int sendGameRequest(String message) throws Exception;
     Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
     GameFase getCurrentGameState() throws Exception;

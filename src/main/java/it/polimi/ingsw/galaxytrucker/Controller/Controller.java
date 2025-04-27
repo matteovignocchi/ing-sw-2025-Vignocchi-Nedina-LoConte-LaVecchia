@@ -104,7 +104,7 @@ public class Controller implements Serializable {
                 int position = f_board.getPositionOfPlayer(player);//implementato in flight... vai a vedere
                 boolean hasPurpleAlien = player.presencePurpleAlien();
                 boolean hasBrownAlien = player.presenceBrownAlien();
-                int Human = player.countTotalCrew(); //deve implementare oleg
+                int Human = player.getTotalHuman();
                 int Energy = player.getTotalEnergy();
 
 
