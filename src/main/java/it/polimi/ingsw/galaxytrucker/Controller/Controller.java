@@ -74,8 +74,10 @@ public class Controller implements Serializable {
     private void startGame() {
         principalGameFase = GameFase.BOARD_SETUP; //capire se serve fase nel controller
         PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        ViewByNickname.values().forEach( v -> v.updateGameState(GameFase.BOARD_SETUP)); //send actions gestisce lui
-        //show update qui necessario ? tutto in stato predefinito
+        ViewByNickname.values().forEach( v -> {
+            v.updateGameState(GameFase.BOARD_SETUP);
+            v.showUpdate();
+        });
     }
 
     public Player getPlayerByNickname(String nickname) {
