@@ -5,10 +5,7 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: cambiare synchronized -> lock
 
+//TODO: capire bene e applicare quanto detto da Matteo Bianchi nella mail
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
@@ -124,6 +122,7 @@ public class GameManager {
         Player p = controller.getPlayerByNickname(nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
         v.updateGameState(GameFase.TILE_MANAGEMENT);
+        //update ?, capire meglio il metodo
         return controller.getTile(randomIdx);
     }
 
@@ -139,25 +138,25 @@ public class GameManager {
         return uncoveredTiles;
     }
 
-    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, Tile tile) throws BusinessLogicException{
+    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
         Controller controller = games.get(gameId);
         if (controller == null) throw new BusinessLogicException("Game not found");
         VirtualView v = controller.getViewByNickname(nickname);
         if (v == null) throw new BusinessLogicException("Player not found");
 
-        List <Tile> uncoveredTiles = controller.getShownTiles();
-        if(!uncoveredTiles.contains(tile)) throw new BusinessLogicException("Tile has been taken");
+        List<Tile> uncoveredTiles = controller.getShownTiles();
+        Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
+        if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
 
-        return controller.getShownTile(uncoveredTiles.indexOf(tile));
+        Player p = controller.getPlayerByNickname(nickname);
+        p.setGameFase(GameFase.TILE_MANAGEMENT);
+        v.updateGameState(GameFase.TILE_MANAGEMENT);
+        //update ?, capire meglio il metodo
+        return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-
-    public synchronized Tile getUncoveredTile(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        return controller.getUncoveredTile(nickname);
-    }
 
     public synchronized void spinHourglass(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);

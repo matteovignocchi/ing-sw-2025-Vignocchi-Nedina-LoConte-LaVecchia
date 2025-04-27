@@ -35,7 +35,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
-    //TODO: gestire bene le eccezioni (il businesslogic error necessari in questi metodi inziali ?) vedere poi con l'implementazione
+    //TODO: gestire bene le eccezioni (il businesslogic error necessario in questi metodi inziali ?) vedere poi con l'implementazione
     //TODO: capire eccezioni IOException se così vanno bene
     @Override
     public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
@@ -81,6 +81,9 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         }
     }
 
+    //TODO: eliminare IOException? Tutte le eccezioni lanciate da metodi implicitamente(ex. pileOfTile.remove in metodo getTile
+    // in controller, lancia eccezioni implicite come IndexOutOfBoundaries ecc..) tutte catturate da BusinessLogic? o ci vuole un catch generico?
+    // capire questo discorso eccezioni.
     @Override
     public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         try{
@@ -93,9 +96,9 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public Tile chooseUncoveredTile(int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException {
+    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
         try{
-            return gameManager.chooseUncoveredTile(gameId, nickname, tile);
+            return gameManager.chooseUncoveredTile(gameId, nickname, idTile);
         } catch (BusinessLogicException e){
             throw new BusinessLogicException("Business-Logic error in choosing the uncovered tile:  " + e.getMessage(), e);
         } catch(IOException e){

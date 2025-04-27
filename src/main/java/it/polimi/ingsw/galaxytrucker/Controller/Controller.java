@@ -65,7 +65,7 @@ public class Controller implements Serializable {
     //TODO: vedere se cambiare synchronized -> lock (soprattutto in update, operazioni lente)
 
     //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
-
+    //TODO: capire come funziona update per bene
     //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
 
     //Devo gestire l'eccezione (Exception) a livello di Controller?
@@ -144,10 +144,6 @@ public class Controller implements Serializable {
         playersInGame.remove(PlayerByNickname.get(nickname));
     }
 
-
-
-
-
     public Player getPlayerByNickname(String nickname) {
         return PlayerByNickname.get(nickname);
     }
@@ -155,6 +151,11 @@ public class Controller implements Serializable {
     public VirtualView getViewByNickname(String nickname){
         return ViewByNickname.get(nickname);
     }
+
+
+
+
+
 
     public void remapView(String nickname, VirtualView view){
         ViewByNickname.put(nickname, view);
@@ -197,16 +198,6 @@ public class Controller implements Serializable {
     }
 
     public int getMaxPlayers(){ return MaxPlayers; }
-
-    //da verificare se la fase è giusta
-    public void startGameIfReady() {
-        if (playersInGame.size() == MaxPlayers) {
-            principalGameFase = GameFase.TILE_MANAGEMENT;
-            setGameFaseForEachPlayer(GameFase.TILE_MANAGEMENT);
-            // TODO: notifica view se serve
-            // TODO: capire bene come gestire le fasi
-        }
-    }
 
     //MEDOTI PER PRENDERE LE GAMEFASE
     public List<GameFase> getGameFasesForEachPlayer() {
@@ -269,11 +260,9 @@ public class Controller implements Serializable {
     }
 
     public Tile getShownTile(int index) {
-        Tile tmp = shownTile.get(index);
-        shownTile.remove(index);
-        return tmp;
-
+        return shownTile.remove(index);
     }
+
 
     public List<Tile> getPileOfTile() {
         return pileOfTile;
@@ -284,9 +273,7 @@ public class Controller implements Serializable {
     }
 
     public Tile getTile(int index) {
-        Tile tmp = pileOfTile.get(index);
-        pileOfTile.remove(index);
-        return tmp;
+        return pileOfTile.remove(index);
     }
 
     // metodo che restituisce il numero di crewMate nella nave
