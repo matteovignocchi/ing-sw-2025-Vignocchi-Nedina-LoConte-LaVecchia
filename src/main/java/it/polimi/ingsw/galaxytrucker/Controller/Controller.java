@@ -11,7 +11,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -21,15 +20,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Serializable {
 
-    private List<Player> playersInGame = new ArrayList<>(); //forse può essere eliminato
+    private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
     private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
-    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>();
+    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
     private final AtomicInteger player_id_counter;
     private final int Max_Players;
+    private final boolean isDemo;
+
     private GameFase principalGameFase; //inutile
     private GameFase preGameFase; //inutile
     private boolean isStarted; // utile ?
-    private final boolean isDemo;
+
 
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
@@ -62,6 +63,8 @@ public class Controller implements Serializable {
 
     //TODO: vedere se cambiare synchronized -> lock (soprattutto in update, operazioni lente)
 
+    //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
+
     //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
 
     //Devo gestire l'eccezione (Exception) a livello di Controller?
@@ -87,6 +90,7 @@ public class Controller implements Serializable {
     //NON perché "è sua responsabilità" gestire i problemi di rete.
 
     //Secondo me eliminare try catch
+    //UPDATE TUTTO TRANNE NAVE
     public synchronized void update (){
         //modificare
         ViewByNickname.forEach( (nickname, v) -> {
@@ -119,20 +123,25 @@ public class Controller implements Serializable {
         Player player = new Player(player_id_counter.getAndIncrement(), isDemo);
         PlayerByNickname.put(nickname, player);
         ViewByNickname.put(nickname, view);
+        playersInGame.add(player); //capire se va bene
         view.inform(String.format("Player %s added to game", nickname));
         if (PlayerByNickname.size() == Max_Players)
             startGame();
     }
 
     private synchronized void startGame() {
-        PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         this.update();
     }
 
     public void removePlayer(String nickname){
-        PlayerByNickname.remove(nickname);
-        ViewByNickname.remove(nickname);
-    } //va rimosso anche dalla lista players_in_game??
+        //PlayerByNickname.remove(nickname);
+        //ViewByNickname.remove(nickname);
+        //TODO: se corretto, passare direttamente il player da eliminare, non il nick
+        //TODO: eliminarlo dalla lista dei giocatori in volo? le carte non si applicano a lui. il razzo sulla plancia conta?
+        playersInGame.remove(PlayerByNickname.get(nickname));
+    }
 
 
 
@@ -140,6 +149,10 @@ public class Controller implements Serializable {
 
     public Player getPlayerByNickname(String nickname) {
         return PlayerByNickname.get(nickname);
+    }
+
+    public VirtualView getViewByNickname(String nickname){
+        return ViewByNickname.get(nickname);
     }
 
     public void remapView(String nickname, VirtualView view){

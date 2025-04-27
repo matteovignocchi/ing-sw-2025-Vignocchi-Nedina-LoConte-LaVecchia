@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 //TODO:
 // 1)eccezioni, capire bene quando e dove + remoteException per disconnessione
 // 5)Capire bene come gestire i corner case, leggi su discord appena rispondono, fondamentale per sistemare i metodi
+
+//TODO: cambiare synchronized -> lock
 
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
@@ -48,6 +51,7 @@ public class GameManager {
         Player player = controller.getPlayerByNickname(nickname);
         if (player == null) throw new BusinessLogicException("Player not found");
 
+        //se corretto il metodo in controller, passargli il player, non il nick
         controller.removePlayer(nickname);
         if (controller.checkNumberOfPlayers() == 0)
             removeGame(gameId);
@@ -104,12 +108,19 @@ public class GameManager {
         }
     }
 
+    //aggiustare
+    public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
+        Controller controller = games.get(gameId);
+        if (controller == null) throw new BusinessLogicException("Game not found");
+        VirtualView v = controller.getViewByNickname(nickname);
+        if (v == null) throw new BusinessLogicException("Player not found");
+
+        List<Tile> coveredTiles = controller.getPileOfTile();
+        v.printListOfTileCovered(coveredTiles); //gestire il discorso eccezioni
+    }
+
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    public synchronized Tile getTileServer(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        return controller.getTileFromPile(nickname);
-    }
 
     public synchronized Tile getUncoveredTile(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
