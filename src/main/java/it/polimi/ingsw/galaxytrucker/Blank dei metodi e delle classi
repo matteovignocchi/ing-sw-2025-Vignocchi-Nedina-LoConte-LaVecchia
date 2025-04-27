@@ -10,12 +10,12 @@ Tile tmp = virtualServer.getTileServer(//qua se ti serve passo qualcosa);
 
 SERVER:
 List<Tile> tmp1 = controller.getPileOfTIle();
-VirtualServer.printListOfTIle(VirtualClient,tmp1);
+VirtualClient.printListOfTIle(tmp1);
 int tmp = VirtualClient.askCordinate();
 Tile tile = PileOfTiles.get(tmp);
 PileOfTiles.remove(tmp);
-VirtualServer.setGameFase(VirtualClient,TILE_MANAGEMENT);
-VirtualServer.printTIle(VirtualCLient,tile);
+VirtualClient.setGameFase(TILE_MANAGEMENT);
+VirtualClient.printTIle(tile);
 return tile;
 
 METODO GETUNCOVEREDTILE()
@@ -25,12 +25,12 @@ Tile tmp = virtualServer.getUncoveredTile()
 
 SERVER:
 List<Tile> tmp1 = controller.getPileOfTIle();
-VirtualServer.printListOfTIle(VirtualClient,tmp1);
+VirtualClient.printListOfTIle(tmp1);
 int tmp = VirtualClient.askCordinate();
 Tile tile = PileOfTiles.get(tmp);
 PileOfTiles.remove(tmp);
-VirtualServer.setGamePhase(VirtualClient,TILE_MANAGEMENT);
-VirtualServer.printTIle(VirtualCLient,tile);
+VirtualClient.setGamePhase(TILE_MANAGEMENT);
+VirtualClient.printTIle(tile);
 return tile;
 
 i due metodi getTile modificano la fase del player in TILE_MANAGMENT prima di tornare la tile , quindi ora scriverò i metodi possibili qua
@@ -42,8 +42,8 @@ virtualClient.returnTile(tile);
 
 Server :
 controller.addTouncoveredTile(tile);
-VirtualServer.setGameFase(VirtualClient,BOARD_SETUP);
-VirtualServer.updateView(VirtualCLient);
+VirtualClient.setGameFase(BOARD_SETUP);
+VirtualClient.updateView();
 
 PLACE TILE()
 
@@ -51,10 +51,10 @@ CLIENT:
 VirtualClient.Place(tile)
 
 SERVER:
-int[] cord = VirtualServer.askCordinate(VirtualClient);
+int[] cord = VirtualClient.askCordinate();
 controller.addTileToPlayer(VirtualCLient(intendo id del player) , cord[0] , cord[1] , tile);
-VirtualServer.setGamePhase(VirtualClient,BOARD_SETUP);
-VirtualServer.updateView(VirtualCLient);
+VirtualClient.setGamePhase(BOARD_SETUP);
+VirtualClient.updateView();
 
 RIGHT E LEFT ROTATE ME LE GESTISCO IO DIREI A STO PUNTO
 
@@ -74,20 +74,20 @@ WATCH A SHIP:
 CLIENT:
 VirtualClient.watchAShip()
 SERVER:
-VirtualServer.printList(VirtualClient,Lista con scritto player1 , player 2 ....);
-VirtualServer.inform(VirtualClient, "seleziona indice");
+VirtualClient.printList(Lista con scritto player1 , player 2 ....);
+VirtualClient.inform( "seleziona indice");
 int index = VirtualServer.AskIndex(VirtualCLient);
-VirtualServer.printDashBoard(VirtualClient , controller.getPlayersInGame.get(index).getDashBoard());
+VirtualClient.printDashBoard(controller.getPlayersInGame.get(index).getDashBoard());
 
 WATCH A DECK :
 
 CLIENT:
 VirtualClient.watchADeck();
 SERVER:
-VirtualServer.printList(VirtualClient,Lista con scritto deck1 deck2...);
-VirtualServer.inform(VirtualClient, "seleziona indice");
-int index = VirtualServer.AskIndex(VirtualCLient);
-VirtualServer.printDeck(VirtualClient , controller.getDeck().get(index));
+VirtualClient.printList(VirtualClient,Lista con scritto deck1 deck2...);
+VirtualClient.inform("seleziona indice");
+int index = VirtualClient.AskIndex();
+VirtualClient.printDeck(  controller.getDeck().get(index));
 
 SPIN THE HOURGLASSES
 
@@ -100,7 +100,7 @@ trovo il controller della partita di riferimento  poi:
 controller.spinHourglasses()
 dopo che è finito il tread e ho aggiornato il parametro che indica quante volte ho spinnato finora:
 forEachPlayer:
-VirtualServer.UpdateView() // questo perche alla devo aggiornare il parametro di clessidra a schermo
+VirtualClient.UpdateView() // questo perche alla devo aggiornare il parametro di clessidra a schermo
 la clessidra deve essere girata la terza volta solo da un player ready , quindi il controller fa sto controllo. se non è ready non succede nulla
 
 DECLEAREADY:
@@ -111,17 +111,17 @@ SERVER:
 controller.setGamePhase(Nickname , WAITING_FOR_PLAYERS);
 controller.checkPhasePlayer(WAITING_FOR_PLAYERS)
 if(!controller.checkPhasePlayer(WAITING_FOR_PLAYERS)){
-VirtualServer.setGamePhase(VirtualClient , WAITING_FOR_PLAYERS);
-VirtualServer.updateView(VirtualClient);}
+VirtualClient.setGamePhase(WAITING_FOR_PLAYERS);
+VirtualClient.updateView();}
 else{ // questo else va fatto anche per la questione clessidrà
 ForEachplayer:
-VirtualServer.setGamePhase(VirtualClient , WAITING_FOR_TURN);
-VirtualServer.updateView(VirtualClient);
+VirtualClient.setGamePhase( WAITING_FOR_TURN);
+VirtualClient.updateView();
 controller.checkAssembly();
 
 solo per il primo player:
-VirtualServer.setGamePhase(VirtualClient , DRAW_PHASE);
-VirtualServer.updateView(VirtualClient);
+VirtualClient.setGamePhase( DRAW_PHASE);
+VirtualClient.updateView();
 
 }
 
@@ -134,17 +134,17 @@ VirtualClient.drawCard();
 SERVER:
 Card c = controller.drawCard();
 ForEachPlayer :
-VirtualServer.printCard(c);
+VirtualClient.printCard(c);
 
 dopo:
 controller.activateCard(c);
 la activate delle card bisogna scegliere come cambiarla
 la cosa carina sarebbe avere per ogni player p su cui sto iterando:
-VirtualServer.setGamePhase(VirtualClient , CARD_EFFECT);
-VirtualServer.updateView(VirtualClient);
+VirtualClient.setGamePhase(CARD_EFFECT);
+VirtualClient.updateView();
 //effetto delle carte con i botta e risposta stampando nella view passando da virtualServer
-VirtualServer.setGamePhase(VirtualClient , WAITING_FOR_TURN);
-VirtualServer.updateView(VirtualClient);
+VirtualClient.setGamePhase(WAITING_FOR_TURN);
+VirtualClient.updateView();
 
 finita la activate card bidogna individuare il nuovo primo giocatore e fare
 VirtualServer.setGamePhase(VirtualClient , DRAW_PHASE);
@@ -153,9 +153,9 @@ VirtualServer.setGamePhase(VirtualClient , DRAW_PHASE);
 Finite le carte o i player :
 ForEachPlayer:
 int[] finalScoring = controller.finalScore(player p);
-VirtualServer.setGamePhase(VirtualClient , SCORING);
-VirtualServer.updateView(VirtualClient);
-VirtualServer.printFinalScoring(VirtualCLient , finalScoring)
+VirtualClient.setGamePhase(SCORING);
+VirtualClient.updateView();
+VirtualClient.printFinalScoring(finalScoring)
 
 
 

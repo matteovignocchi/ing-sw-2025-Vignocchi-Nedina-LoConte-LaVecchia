@@ -32,8 +32,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void showUpdate() throws RemoteException {
-        view.updateState(gameFase);
+    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+        view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
 
     @Override
@@ -99,7 +99,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void updateGameState(GameFase fase) throws RemoteException{
         this.gameFase = fase;
         view.updateState(gameFase);
-        showUpdate();
     }
 
 

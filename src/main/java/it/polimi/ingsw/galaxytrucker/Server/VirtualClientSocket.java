@@ -39,7 +39,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                         switch (msg.getOperation()) {
                             case Message.OP_GAME_PHASE -> {
                                 gameFase = (GameFase) msg.getPayload();
-                                showUpdate();
                             }
                             case Message.OP_PRINT_CARD -> {
                                 view.printCard((Card) msg.getPayload());
@@ -110,9 +109,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void showUpdate(){
-        view.updateState(gameFase);
+    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
+
     }
+
 
     @Override
     public void reportError(String error){
@@ -175,7 +175,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void updateGameState(GameFase fase){
         this.gameFase = fase;
-        showUpdate();
+        view.updateState(gameFase);
     }
 
 //    @Override

@@ -16,19 +16,12 @@ public interface View {
     int askIndex();
     void setInt();
     void start();
-    void printFirePower(float power);
-    void printEnginePower(int power);
-    void printNumOfCredits(int credits);
     void printListOfGoods(List<Colour> Goods);
     void printListOfTiles(List<Tile> Tiles);
     void printDashShip(Tile[][] ship);
-    void printBonusBrown(boolean bonusBrown);
-    void printBonusPurple(boolean bonusPurple);
-
-    void printList(String key, List<Object> list);
-
+    void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy); //metodo poi per gui per vedere ordine di gioco (mappa position e stirnga del player)
     void printNewFase(GameFase gameFase);
-    void printLap(int i);
+
     void printPileCovered(List<Tile> tiles);
     void printPileShown(List<Tile> tiles);
     String askString();
