@@ -68,7 +68,7 @@ public class TUIView implements View {
                 System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+"crew mates\n");
                 System.out.println("-Player with less fire power gets: \n");
                 for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
                 }
             }
             case SecondWarzoneCard c ->{
@@ -77,7 +77,7 @@ public class TUIView implements View {
                 System.out.println("-Player with less engine power loses"+c.getNumGoods()+"goods\n");
                 System.out.println("-Player with less crew mates gets: \n");
                 for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
                 }
             }
             case MeteoritesRainCard c ->{
@@ -88,7 +88,36 @@ public class TUIView implements View {
             }
             case OpenSpaceCard c ->{inform("===Open Space===\n");}
             case StardustCard c ->{inform("===Stardust===\n");}
-            case PiratesCard c ->{inform("===Pirates===\n");}
+            case PiratesCard c ->{
+                inform("===Pirates===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+                for(int i = 0; i < c.getShots_directions().size(); i++){
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
+                }
+            }
+            case PlanetsCard c->{
+                inform("===Planets===\n");
+                System.out.println("- Days: "+c.getDays()+"\n");
+                for(int i =0; i< c.getRewardGoods().size(); i++){
+                    System.out.println("- Planet "+(i+1)+": ");
+                    printListOfGoods(c.getRewardGoods().get(i));
+                    System.out.println();
+                }
+            }
+            case PlaugeCard c->{
+                inform("===Plauge===\n");
+            }
+            case SlaversCard c->{
+                inform("===Slavers===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crew mates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+            }
+            case SmugglersCard c->{
+                inform("===Smugglers===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
+                printListOfGoods(c.getRewardGoods());
+                System.out.println("\n- Days: "+c.getDays()+"\n");
+            }
+
         }
     }
 
@@ -226,6 +255,24 @@ public class TUIView implements View {
 
 
     @Override
+    public void printTile(Tile tile) {
+        StringBuilder top = new StringBuilder();
+        StringBuilder mid = new StringBuilder();
+        StringBuilder bot = new StringBuilder();
+        StringBuilder border = new StringBuilder();
+        String[] rendered = new String[3];
+        border.append("+---------+ ");
+        top.append("|").append(rendered[0]).append("| ");
+        mid.append("|").append(rendered[1]).append("| ");
+        bot.append("|").append(rendered[2]).append("| ");
+        System.out.println(border);
+        System.out.println(top);
+        System.out.println(mid);
+        System.out.println(bot);
+        System.out.println(border);
+    }
+
+    @Override
     public void printPileCovered(List<Tile> tiles) {
         StringBuilder topBorder = new StringBuilder();
         StringBuilder mid1 = new StringBuilder();
@@ -268,32 +315,13 @@ public class TUIView implements View {
     }
 
     @Override
-    public void printTile(Tile tile) {
-        StringBuilder top = new StringBuilder();
-        StringBuilder mid = new StringBuilder();
-        StringBuilder bot = new StringBuilder();
-        StringBuilder border = new StringBuilder();
-        String[] rendered = new String[3];
-        border.append("+---------+ ");
-        top.append("|").append(rendered[0]).append("| ");
-        mid.append("|").append(rendered[1]).append("| ");
-        bot.append("|").append(rendered[2]).append("| ");
-        System.out.println(border);
-        System.out.println(top);
-        System.out.println(mid);
-        System.out.println(bot);
-        System.out.println(border);
-    }
-
-    @Override
     public void printPileShown(List<Tile> tiles) {
         StringBuilder top = new StringBuilder();
         StringBuilder mid = new StringBuilder();
         StringBuilder bot = new StringBuilder();
         StringBuilder border = new StringBuilder();
         int size = tiles.size();
-        int printed = 0;
-        int maxPerRow = 7;
+
         for (int i = 0; i < size; i++) {
             Tile tile = tiles.get(i);
             String[] rendered = renderTile(tile);
@@ -320,6 +348,7 @@ public class TUIView implements View {
                 bot.setLength(0);
             }
         }
+
 
     }
 
