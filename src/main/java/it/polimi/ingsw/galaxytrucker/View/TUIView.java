@@ -1,7 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
 import it.polimi.ingsw.galaxytrucker.GameFase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
@@ -52,14 +52,44 @@ public class TUIView implements View {
         game = gameFase;
     }
     @Override
-    public void printTile(Tile tile) {
-    }
-
-    @Override
     public void printCard(Card card) {
         //ricordardi di chiedere al franci se esiste allora il toString allinterno della carta e come printa
-
-        System.out.println(card);
+        switch (card){
+            case AbandonedShipCard c ->{
+                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
+            }
+            case AbandonedStationCard c ->{
+                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
+                printListOfGoods(c.getStationGoods());
+            }
+            case FirstWarzoneCard c ->{
+                inform("===War Zone===\n");
+                System.out.println("-Player with less crew mates loses "+c.getDays()+"flight days\n");
+                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+"crew mates\n");
+                System.out.println("-Player with less fire power gets: \n");
+                for(int i = 0; i < c.getShotsDirections().size(); i++){
+                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                }
+            }
+            case SecondWarzoneCard c ->{
+                inform("===War Zone===\n");
+                System.out.println("-Player with less fire power loses "+c.getDays()+"flight days\n");
+                System.out.println("-Player with less engine power loses"+c.getNumGoods()+"goods\n");
+                System.out.println("-Player with less crew mates gets: \n");
+                for(int i = 0; i < c.getShotsDirections().size(); i++){
+                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                }
+            }
+            case MeteoritesRainCard c ->{
+                inform("===Meteorites Rain===\n");
+                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
+                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
+                }
+            }
+            case OpenSpaceCard c ->{inform("===Open Space===\n");}
+            case StardustCard c ->{inform("===Stardust===\n");}
+            case PiratesCard c ->{inform("===Pirates===\n");}
+        }
     }
 
     @Override
@@ -74,7 +104,6 @@ public class TUIView implements View {
                 decision = true;
             } else if (response.equals("no")) {
                 flag = false;
-                decision = false;
             }
             else {
                 reportError("The response entered is invalid. Try again: ");
@@ -106,23 +135,6 @@ public class TUIView implements View {
         return scanner.nextLine();
     }
 
-    @Override
-    public void printFirePower(float power){
-        System.out.print("> " + power +"\n");
-    }
-    @Override
-
-    public void printEnginePower(int x){
-        System.out.print("> "+x+"\n");
-    }
-
-    @Override
-    public void printNumOfCredits(int credits){
-        System.out.print("> "+credits+"\n");
-    }
-
-
-
 
     @Override
     public void setInt() {
@@ -131,7 +143,15 @@ public class TUIView implements View {
 
     @Override
     public void printListOfGoods(List<Colour> Goods) {
-
+        inform("List of goods: ");
+        for(Colour colour : Goods) {
+            switch (colour){
+            case BLUE -> System.out.println(BLUE+"Blue "+RESET);
+            case RED -> System.out.println(RED+"Red "+RESET);
+            case GREEN -> System.out.println(GREEN+"Green "+RESET);
+            case YELLOW -> System.out.println(YELLOW+"Yellow "+RESET);
+            }
+        }
     }
 
     @Override
@@ -140,161 +160,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public void printDashShip(Tile[][] ship) {
-
-    }
-
-    @Override
-    public void printBonusBrown(boolean bonusBrown) {
-
-    }
-
-    @Override
-    public void printBonusPurple(boolean bonusPurple) {
-
-    }
-
-    @Override
-    public void printList(String key, List<Object> list) {
-
-    }
-
-    @Override
-    public void printNewFase(GameFase gameFase) {
-
-    }
-
-    @Override
-    public void printLap(int i) {
-
-    }
-
-    @Override
-    public void printPileCovered(List<Tile> tiles) {
-        StringBuilder topBorder = new StringBuilder();
-        StringBuilder mid1 = new StringBuilder();
-        StringBuilder mid2 = new StringBuilder();
-        StringBuilder mid3 = new StringBuilder();
-        StringBuilder bottomBorder = new StringBuilder();
-        int printed = 0;
-        int maxPerRow = 7;
-        int size = tiles.size();
-        for (int i = 0; i < size; i++) {
-            topBorder.append("+---------+ ");
-            mid1.append("|         | ");
-            mid2.append(String.format("|   %3d   | ", i + 1));
-            mid3.append("|         | ");
-            printed++;
-            if (printed == maxPerRow) {
-                bottomBorder.append(topBorder);
-                System.out.println(topBorder);
-                System.out.println(mid1);
-                System.out.println(mid2);
-                System.out.println(mid3);
-                System.out.println(bottomBorder);
-                topBorder.setLength(0);
-                mid1.setLength(0);
-                mid2.setLength(0);
-                mid3.setLength(0);
-                bottomBorder.setLength(0);
-                printed = 0;
-            }
-        }
-        if (printed > 0) {
-            bottomBorder.append(topBorder);
-            System.out.println(topBorder);
-            System.out.println(mid1);
-            System.out.println(mid2);
-            System.out.println(mid3);
-            System.out.println(bottomBorder);
-        }
-
-    }
-
-    @Override
-    public void printPileShown(List<Tile> tiles) {
-        StringBuilder top = new StringBuilder();
-        StringBuilder mid = new StringBuilder();
-        StringBuilder bot = new StringBuilder();
-        StringBuilder border = new StringBuilder();
-        int size = tiles.size();
-        int printed = 0;
-        int maxPerRow = 7;
-        for (int i = 0; i < size; i++) {
-            Tile tile = tiles.get(i);
-            String[] rendered = renderTile(tile);
-
-
-            border.append("+---------+ ");
-            top.append("|").append(rendered[0]).append("| ");
-            mid.append("|").append(rendered[1]).append("| ");
-            bot.append("|").append(rendered[2]).append("| ");
-
-
-            if ((i + 1) % 7 == 0 || i == size - 1) {
-
-                System.out.println(border);
-                System.out.println(top);
-                System.out.println(mid);
-                System.out.println(bot);
-                System.out.println(border);
-
-
-                border.setLength(0);
-                top.setLength(0);
-                mid.setLength(0);
-                bot.setLength(0);
-            }
-        }
-
-    }
-
-
-    private String getTileContent (Tile tile){
-        switch(tile){
-            case EmptySpace x ->{ return "   ";}
-            case EnergyCell x ->{ return "EC"+GREEN+x.getCapacity()+RESET;}
-            case Engine x ->{ return "ENG";
-                //oppure facciamo così, cioè il fatto che nel lato ci sia 6/7 spero basti?
-//                if(x.isDouble()){
-//                    return "EN2";
-//                }else{
-//                    return "EN1";
-//                }
-            }
-            case Cannon x ->{ return "CAN";
-//                if(x.isDouble()){
-//                    return "CN2";
-//                }else{
-//                    return "CN1";
-//                }
-            }
-            case HousingUnit x ->{
-                if(x.getType() == Human.HUMAN){
-                    return "HU"+x.returnLenght();
-                }else if(x.getType() == Human.BROWN_ALIEN){
-                    return BROWN+"HU"+RESET+x.returnLenght();
-                }else if(x.getType() == Human.PURPLE_ALIEN){
-                    return PURPLE+"HU"+RESET+x.returnLenght();
-                }
-            }
-            case MultiJoint x ->{return "MTJ";}
-            case Shield x ->{
-                //ricordarsi che nella costruzione della tile come i storage unit mettiamo gli angoli protetti
-                    return "SHL";
-            }
-            case StorageUnit x -> {
-                if(x.isAdvanced()){
-                    return RED+"SU"+RESET+x.getMax();
-                }
-                return "SU"+x.getMax();
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + tile);
-        }
-        return null;
-    }
-
-    public void updateView(Tile[][] dashboard) {
+    public void printDashShip(Tile[][] dashboard) {
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
             System.out.printf("   %2d    ", col + 4);
@@ -345,6 +211,149 @@ public class TUIView implements View {
         }
         System.out.println();
     }
+
+    @Override
+    public void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+        //swtich case
+    }
+
+
+    @Override
+    public void printNewFase(GameFase gameFase) {
+
+    }
+
+
+
+    @Override
+    public void printPileCovered(List<Tile> tiles) {
+        StringBuilder topBorder = new StringBuilder();
+        StringBuilder mid1 = new StringBuilder();
+        StringBuilder mid2 = new StringBuilder();
+        StringBuilder mid3 = new StringBuilder();
+        StringBuilder bottomBorder = new StringBuilder();
+        int printed = 0;
+        int maxPerRow = 7;
+        int size = tiles.size();
+        for (int i = 0; i < size; i++) {
+            topBorder.append("+---------+ ");
+            mid1.append("|         | ");
+            mid2.append(String.format("|   %3d   | ", i + 1));
+            mid3.append("|         | ");
+            printed++;
+            if (printed == maxPerRow) {
+                bottomBorder.append(topBorder);
+                System.out.println(topBorder);
+                System.out.println(mid1);
+                System.out.println(mid2);
+                System.out.println(mid3);
+                System.out.println(bottomBorder);
+                topBorder.setLength(0);
+                mid1.setLength(0);
+                mid2.setLength(0);
+                mid3.setLength(0);
+                bottomBorder.setLength(0);
+                printed = 0;
+            }
+        }
+        if (printed > 0) {
+            bottomBorder.append(topBorder);
+            System.out.println(topBorder);
+            System.out.println(mid1);
+            System.out.println(mid2);
+            System.out.println(mid3);
+            System.out.println(bottomBorder);
+        }
+
+    }
+
+    @Override
+    public void printTile(Tile tile) {
+        StringBuilder top = new StringBuilder();
+        StringBuilder mid = new StringBuilder();
+        StringBuilder bot = new StringBuilder();
+        StringBuilder border = new StringBuilder();
+        String[] rendered = new String[3];
+        border.append("+---------+ ");
+        top.append("|").append(rendered[0]).append("| ");
+        mid.append("|").append(rendered[1]).append("| ");
+        bot.append("|").append(rendered[2]).append("| ");
+        System.out.println(border);
+        System.out.println(top);
+        System.out.println(mid);
+        System.out.println(bot);
+        System.out.println(border);
+    }
+
+    @Override
+    public void printPileShown(List<Tile> tiles) {
+        StringBuilder top = new StringBuilder();
+        StringBuilder mid = new StringBuilder();
+        StringBuilder bot = new StringBuilder();
+        StringBuilder border = new StringBuilder();
+        int size = tiles.size();
+        int printed = 0;
+        int maxPerRow = 7;
+        for (int i = 0; i < size; i++) {
+            Tile tile = tiles.get(i);
+            String[] rendered = renderTile(tile);
+
+
+            border.append("+---------+ ");
+            top.append("|").append(rendered[0]).append("| ");
+            mid.append("|").append(rendered[1]).append("| ");
+            bot.append("|").append(rendered[2]).append("| ");
+
+
+            if ((i + 1) % 7 == 0 || i == size - 1) {
+
+                System.out.println(border);
+                System.out.println(top);
+                System.out.println(mid);
+                System.out.println(bot);
+                System.out.println(border);
+
+
+                border.setLength(0);
+                top.setLength(0);
+                mid.setLength(0);
+                bot.setLength(0);
+            }
+        }
+
+    }
+
+
+    private String getTileContent (Tile tile){
+        switch(tile){
+            case EmptySpace x ->{ return "   ";}
+            case EnergyCell x ->{ return "EC"+GREEN+x.getCapacity()+RESET;}
+            case Engine x ->{ return "ENG";}
+            case Cannon x ->{ return "CAN";}
+            case HousingUnit x ->{
+                if(x.getType() == Human.HUMAN){
+                    return "HU"+x.returnLenght();
+                }else if(x.getType() == Human.BROWN_ALIEN){
+                    return BROWN+"HU"+RESET+x.returnLenght();
+                }else if(x.getType() == Human.PURPLE_ALIEN){
+                    return PURPLE+"HU"+RESET+x.returnLenght();
+                }
+            }
+            case MultiJoint x ->{return "MTJ";}
+            case Shield x ->{return "SHL";}
+            case StorageUnit x -> {
+                if(x.isAdvanced()){
+                    return RED+"SU"+RESET+x.getMax();
+                }
+                return "SU"+x.getMax();
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + tile);
+        }
+        return null;
+    }
+
+
+
 
     public String[] renderTile(Tile tile) {
         String[] out = new String[3];

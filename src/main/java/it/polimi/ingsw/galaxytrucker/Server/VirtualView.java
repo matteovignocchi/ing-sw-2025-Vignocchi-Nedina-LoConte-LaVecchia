@@ -10,7 +10,7 @@ public interface VirtualView {
 
     /// METODI PER FARE LE PRINT A SCHERMO ///
     void inform(String message) throws Exception;
-    void showUpdate() throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
+    void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
     void reportError(String error) throws Exception;
     boolean ask(String message) throws Exception;
     void printCard(Card card) throws Exception;
@@ -27,7 +27,7 @@ public interface VirtualView {
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
     void updateGameState(GameFase fase) throws Exception;
     void startMach() throws Exception;
-    public boolean sendLogin(String username, String password) throws Exception;
+    boolean sendLogin(String username, String password) throws Exception;
     boolean sendGameRequest(String message) throws Exception;
     Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
