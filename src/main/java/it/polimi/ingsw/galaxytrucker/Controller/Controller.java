@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Serializable {
 
-    private List<Player> players_in_Game = new ArrayList<>();
+    private List<Player> players_in_Game = new ArrayList<>(); //forse può essere eliminato
     private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>();
     private final AtomicInteger player_id_counter;
@@ -60,6 +60,7 @@ public class Controller implements Serializable {
                                                     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    //faccaimo una v.inform("player aggiunto")????
     public synchronized void addPlayer(String nickname, VirtualView view, boolean isDemo) throws BusinessLogicException {
         if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (PlayerByNickname.size() >= Max_Players) throw new BusinessLogicException("Game is full");
@@ -71,12 +72,53 @@ public class Controller implements Serializable {
             startGame();
     }
 
+    //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
+
+    //Devo gestire l'eccezione (Exception) a livello di Controller?
+    //
+    //In teoria no! Il Controller non dovrebbe occuparsi di gestire problemi di rete o errori di comunicazione.
+    //Il Controller gestisce solo la logica di gioco, non l'infrastruttura di comunicazione.
+    //
+    //Se c'è un problema di comunicazione (RemoteException, Exception dalla VirtualView),
+    //dovrebbe essere gestito nei livelli superiori, tipo ServerRMI o il GameManager.
+    //
+    //Quindi hai ragione.
+    //Nel Controller noi possiamo:
+    //
+    //propagare l'eccezione (throws Exception)
+    //
+    //oppure lanciarla come unchecked (RuntimeException) se proprio vogliamo essere estremi.
+    //
+    //MA visto che i tuoi metodi tipo addPlayer e startGame sono private e interni,
+    //è molto meglio avvolgere tutto nel try-catch per sicurezza (così eviti di far esplodere tutto se solo un client ha problemi).
+    //E loggare l'errore senza mandare tutto in crash.
+    //
+    //Quindi: la gestione con try-catch nel Controller è accettabile solo per robustezza,
+    //NON perché "è sua responsabilità" gestire i problemi di rete.
+
     private void startGame() {
         principalGameFase = GameFase.BOARD_SETUP; //capire se serve fase nel controller
         PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        ViewByNickname.values().forEach( v -> {
-            v.updateGameState(GameFase.BOARD_SETUP);
-            v.showUpdate();
+        ViewByNickname.forEach( (nickname, v) -> {
+            try{
+                Player player = PlayerByNickname.get(nickname);
+
+                double fire_power = getFirePower(nickname);
+                int power_engine = getPowerEngine(nickname);
+                int credits = player.getCredit();
+                int position = f_board.getPositionOfPlayer(player);//implementato in flight... vai a vedere
+                boolean hasPurpleAlien = player.presencePurpleAlien();
+                boolean hasBrownAlien = player.presenceBrownAlien();
+                int Human = player.countTotalCrew(); //deve implementare oleg, che cazzo ne so io
+                int Energy = player.getTotalEnergy();
+
+
+                v.inform("Game started. It's time to build your ship!"); //inutile logicamente, ma utile a far capire lo stato del gioco al client
+                v.updateGameState(GameFase.BOARD_SETUP);
+                v.showUpdate(nickname, fire_power, power_engine, credits, position, hasPurpleAlien, hasBrownAlien, Human, Energy);
+            }catch (Exception e){
+                System.err.println("Communication error with a client: " e.getMessage());
+            }
         });
     }
 
