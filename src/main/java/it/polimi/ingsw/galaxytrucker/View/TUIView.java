@@ -30,7 +30,27 @@ public class TUIView implements View {
     public TUIView()  {}
     @Override
     public void start() {
-
+        inform("Welcome to the Galaxy Trucker!");
+        inform("This is the conversion table regarding our gameplay and display conventions.");
+        inform("The tile is presented with four numbers, one for each direction, representing either the number of connectors or special parts of the tile, which we will explain later.");
+        inform("Each tile contains an acronym that indicates its type.");
+        inform("These are the numbers that the sides of a tile can take:");
+        inform("0 means no connectors");
+        inform("1 means one connector");
+        inform("2 means two connectors");
+        inform("3 means universal connector");
+        inform("4 means single cannon");
+        inform("5 means double cannon");
+        inform("6 means single rocket");
+        inform("7 means double rocket");
+        inform("These are the acronyms for each type of tile:");
+        inform("HU stands for housing unit, when it is white is for humans, when it is"+PURPLE+" purple"+RESET+" it is for humans or the purple alien, when it is"+BROWN+ " brown"+RESET+" it is for humans or brown alien. After HU there is the counter of tokens on the unit");
+        inform("EC stands for energy cell, after that there is the number of tokens on the cell");
+        inform("CAN stands for cannon, the side with 4 (single cannon) or 5 (double cannon), it indicates the direction the cannon is facing");
+        inform("ENG stands for engine, the side with 6 (single engine) or 7 (double engine), it indicates the direction the engine is facing");
+        inform("MTJ stands for multi joint");
+        inform("SHL stands for shield, the green connectors are the protected side of the shield");
+        inform("SU stands for storage unit, when is white is the standard unit, when it is"+RED+" red"+RESET+" it is advanced, after that there is the max capacity of the unit. In each corner, there is a counter showing how many goods of that color are present.");
     }
 
 
@@ -483,40 +503,40 @@ public class TUIView implements View {
         List<String> listOfOptions = new ArrayList<>();
         switch (game) {
             case BOARD_SETUP -> {
-                listOfOptions.add("get Blanket Tile");
-                listOfOptions.add("take Discovery Tile");
+                listOfOptions.add("Get a covered tile");
+                listOfOptions.add("Get a shown tile");
                 listOfOptions.add("Declare Ready");
-                listOfOptions.add("LogOut");
-                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("Watch a player's ship");
                 if(!isDemo){
-                    listOfOptions.add("Watch A Deck");
-                    listOfOptions.add("Spin The Hourglass");
+                    listOfOptions.add("Watch a deck");
+                    listOfOptions.add("Spin the hourglass");
                 }
+                listOfOptions.add("LogOut");
             }
             case TILE_MANAGEMENT -> {
-                listOfOptions.add("return Tile");
-                listOfOptions.add("place Tile");
+                listOfOptions.add("Return the tile");
+                listOfOptions.add("Place the tile");
+                listOfOptions.add("Left rotate the tile");
+                listOfOptions.add("Right rotate the tile");
+                listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("LogOut");
-                listOfOptions.add("Watch A Ship");
-                listOfOptions.add("RightRotate Tile");
-                listOfOptions.add("LeftRotate Tile");
             }
             case WAITING_FOR_PLAYERS -> {
                 if(!isDemo) {
-                    listOfOptions.add("Spin The Hourglass");
-                    listOfOptions.add("Watch A Deck");
+                    listOfOptions.add("Spin the hourglass");
+                    listOfOptions.add("Watch a deck");
                 }
-                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("logOut");
             }
             case WAITING_FOR_TURN, CARD_EFFECT  -> {
-                listOfOptions.add("Watch A Ship");
+                listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("LogOut");
             }
             case DRAW_PHASE -> {
-                listOfOptions.add("Draw Card");
+                listOfOptions.add("Draw a card");
+                listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("LogOut");
-                listOfOptions.add("Guarda Una Nave");
             }
             case SCORING  -> listOfOptions.add("logOut");
             default -> listOfOptions.add("error-404");
@@ -527,7 +547,7 @@ public class TUIView implements View {
     @Override
     public String sendAvailableChoices() {
         List<String> listOfOptions = commandConstructor();
-        inform("select the command number");
+        inform("Insert the command number");
         int tmp = askIndex();
         return listOfOptions.get(tmp).trim().toLowerCase();
         }
