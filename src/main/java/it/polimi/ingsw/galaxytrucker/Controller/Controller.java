@@ -24,8 +24,8 @@ public class Controller implements Serializable {
     private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
     private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
-    private final AtomicInteger player_id_counter;
-    private final int Max_Players;
+    private final AtomicInteger playerIdCounter;
+    private final int MaxPlayers;
     private final boolean isDemo;
 
     private GameFase principalGameFase; //inutile
@@ -40,7 +40,7 @@ public class Controller implements Serializable {
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
 
-    public Controller(boolean isDemo, int Max_Players) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int MaxPlayers) throws CardEffectException, IOException {
         if(isDemo) {
             f_board = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -51,9 +51,9 @@ public class Controller implements Serializable {
             decks = deckCreator.CreateSecondLevelDeck();
         }
         this.isDemo = isDemo;
-        this.Max_Players = Max_Players;
+        this.MaxPlayers = MaxPlayers;
         this.isStarted = false;
-        this.player_id_counter = new AtomicInteger(1); //verificare che matcha con la logica
+        this.playerIdCounter = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
     }
@@ -119,14 +119,14 @@ public class Controller implements Serializable {
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
         if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
-        if (PlayerByNickname.size() >= Max_Players) throw new BusinessLogicException("Game is full");
+        if (PlayerByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
 
-        Player player = new Player(player_id_counter.getAndIncrement(), isDemo);
+        Player player = new Player(playerIdCounter.getAndIncrement(), isDemo);
         PlayerByNickname.put(nickname, player);
         ViewByNickname.put(nickname, view);
         playersInGame.add(player); //capire se va bene
         view.inform(String.format("Player %s added to game", nickname));
-        if (PlayerByNickname.size() == Max_Players)
+        if (PlayerByNickname.size() == MaxPlayers)
             startGame();
     }
 
@@ -196,11 +196,11 @@ public class Controller implements Serializable {
         return false;
     }
 
-    public int getMax_Players(){ return Max_Players; }
+    public int getMaxPlayers(){ return MaxPlayers; }
 
     //da verificare se la fase è giusta
     public void startGameIfReady() {
-        if (playersInGame.size() == Max_Players) {
+        if (playersInGame.size() == MaxPlayers) {
             principalGameFase = GameFase.TILE_MANAGEMENT;
             setGameFaseForEachPlayer(GameFase.TILE_MANAGEMENT);
             // TODO: notifica view se serve
@@ -277,6 +277,10 @@ public class Controller implements Serializable {
 
     public List<Tile> getPileOfTile() {
         return pileOfTile;
+    }
+
+    public List<Tile> getShownTiles(){
+        return shownTile;
     }
 
     public Tile getTile(int index) {

@@ -6,12 +6,16 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 public interface VirtualServer extends Remote {
 
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
     public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    public Tile chooseUncoveredTile(int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
 
     // non servono, da togliere
     public boolean authenticate(String username, String password) throws RemoteException;
@@ -27,6 +31,4 @@ public interface VirtualServer extends Remote {
     public void getBackTile() throws RemoteException;
     public void positionTile() throws RemoteException;
     public void drawCard() throws RemoteException;
-    public Tile getCoveredTileServer() throws RemoteException;
-    public Tile getUncoveredTileServer() throws RemoteException;
 }

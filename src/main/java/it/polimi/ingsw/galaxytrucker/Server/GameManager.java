@@ -1,13 +1,16 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO:
@@ -108,15 +111,44 @@ public class GameManager {
         }
     }
 
-    //aggiustare
+    //TODO: capire se nei metodi seguenti, i controlli sul controller e player null sono superflui oppure ok
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new BusinessLogicException("Game not found");
         VirtualView v = controller.getViewByNickname(nickname);
         if (v == null) throw new BusinessLogicException("Player not found");
+        int size = controller.getPileOfTile().size();
+        if(size < 1) throw new BusinessLogicException("Pile of tiles is empty");
 
-        List<Tile> coveredTiles = controller.getPileOfTile();
-        v.printListOfTileCovered(coveredTiles); //gestire il discorso eccezioni
+        int randomIdx = ThreadLocalRandom.current().nextInt(size);
+        Player p = controller.getPlayerByNickname(nickname);
+        p.setGameFase(GameFase.TILE_MANAGEMENT);
+        v.updateGameState(GameFase.TILE_MANAGEMENT);
+        return controller.getTile(randomIdx);
+    }
+
+    public synchronized List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
+        Controller controller = games.get(gameId);
+        if (controller == null) throw new BusinessLogicException("Game not found");
+        VirtualView v = controller.getViewByNickname(nickname);
+        if (v == null) throw new BusinessLogicException("Player not found");
+
+        List<Tile> uncoveredTiles = controller.getShownTiles();
+        if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
+
+        return uncoveredTiles;
+    }
+
+    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, Tile tile) throws BusinessLogicException{
+        Controller controller = games.get(gameId);
+        if (controller == null) throw new BusinessLogicException("Game not found");
+        VirtualView v = controller.getViewByNickname(nickname);
+        if (v == null) throw new BusinessLogicException("Player not found");
+
+        List <Tile> uncoveredTiles = controller.getShownTiles();
+        if(!uncoveredTiles.contains(tile)) throw new BusinessLogicException("Tile has been taken");
+
+        return controller.getShownTile(uncoveredTiles.indexOf(tile));
     }
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
