@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
@@ -25,10 +26,10 @@ public class GameManager {
         loadSavedGames(); // Caricamento automatico all'avvio
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws CardEffectException, IOException {
+    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException {
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, maxPlayers);
-        controller.addPlayer(nickname, v);
+        controller.addPlayer(nickname, v, isDemo);
         games.put(gameId, controller);
         saveGameState(gameId, controller);
         return gameId;
