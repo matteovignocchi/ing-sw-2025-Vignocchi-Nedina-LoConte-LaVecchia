@@ -11,7 +11,10 @@ public interface VirtualServer extends Remote {
 
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
+
+    // non servono, da togliere
     public boolean authenticate(String username, String password) throws RemoteException;
+
     public String waitForResponse() throws RemoteException;
     public void registerClient(VirtualView client) throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
