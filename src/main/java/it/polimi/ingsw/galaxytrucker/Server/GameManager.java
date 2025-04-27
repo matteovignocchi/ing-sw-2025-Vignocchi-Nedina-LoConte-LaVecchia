@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
@@ -38,7 +37,7 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws IOException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new IOException("Game not found");
-        controller.addPlayer(nickname, v);
+        controller.addPlayer(nickname, v, isDemo);
         saveGameState(gameId, controller);
     }
 

@@ -70,6 +70,11 @@ return 0;
     }
 
     @Override
+    public void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+
+    }
+
+    @Override
     public void printBonusBrown(boolean bonusBrown) {
 
     }
@@ -86,6 +91,11 @@ return 0;
 
     @Override
     public void printNewFase(GameFase gameFase) {
+
+    }
+
+    @Override
+    public void printDeck(List<Card> deck) {
 
     }
 

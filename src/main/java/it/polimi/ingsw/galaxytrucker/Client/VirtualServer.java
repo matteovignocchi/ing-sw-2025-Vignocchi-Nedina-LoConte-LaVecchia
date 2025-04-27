@@ -14,9 +14,9 @@ public interface VirtualServer extends Remote {
 
     // non servono, da togliere
     public boolean authenticate(String username, String password) throws RemoteException;
+    public void registerClient(VirtualView client) throws RemoteException;
 
     public String waitForResponse() throws RemoteException;
-    public void registerClient(VirtualView client) throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
     public String waitForGameStart() throws Exception;
     public void rotateGlass() throws RemoteException;

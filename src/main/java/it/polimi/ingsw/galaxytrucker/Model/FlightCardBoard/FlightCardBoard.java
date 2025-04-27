@@ -73,6 +73,13 @@ public class FlightCardBoard {
 
     public List<Player> getOrderedPlayers(){ return new ArrayList<>(orderedPlayersInFlight); }
 
+    public int getPositionOfPlayer(Player p) {
+        if (!orderedPlayersInFlight.contains(p)) {
+            throw new IllegalArgumentException("Player not found in flight board");
+        }
+        return p.getPos();
+    }
+
     /**
      * The following method adds a player to the flight List, not in order.
      *
