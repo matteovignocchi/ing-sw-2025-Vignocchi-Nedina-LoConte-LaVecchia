@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * abstract class for the general structure of the tile and
  * define the common methods to move it and return some information about the tile
@@ -15,10 +17,17 @@ package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
 
 public abstract class Tile {
+    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     public int[] corners = new int[4];
-    public boolean isShown = false;
-    public boolean isTake= false;
+    private final int idTile;
 
+    //la super è chiamata implicitamente in tutte le istanza
+    protected Tile() {
+        this.idTile = ID_GENERATOR.getAndIncrement();
+    }
+    public int getIdTile() {
+        return idTile;
+    }
     /**
      * method to shift right the vector of corners by one position
      * works directly with the array corners of the class
@@ -45,23 +54,6 @@ public abstract class Tile {
         corners[3] = tmp;
     }
     /**
-     * method to reveal the face of the card
-     * works directly with the flag of the class
-     */
-    public void showTile()
-    {
-        isShown = true;
-    }
-
-    /**
-     * the method changes the status of the tile
-     */
-    public void takeTile(){
-        isTake = !isTake;
-    }
-
-
-    /**
      * method that return the array "corners"
      */
     public int[] getCorners() {
@@ -74,19 +66,5 @@ public abstract class Tile {
      */
     public int controlCorners(int i){
         return corners[i];
-    }
-
-    /**
-     * @return the flag isShown
-     */
-    public boolean isShown() {
-        return isShown;
-    }
-
-    /**
-     * @return the flag isTake
-     */
-    public boolean isTake() {
-        return isTake;
     }
 }

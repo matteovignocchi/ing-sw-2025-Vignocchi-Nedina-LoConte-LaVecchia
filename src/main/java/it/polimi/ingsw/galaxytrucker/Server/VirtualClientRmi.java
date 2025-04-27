@@ -32,7 +32,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER PRINTARE A CLIENT ///
 
     @Override
-    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
         view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
     @Override
@@ -122,7 +122,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return server.authenticate(username, password);
     }
     @Override
-    public boolean sendGameRequest(String message) throws RemoteException {
+    public int sendGameRequest(String message) throws RemoteException {
         if(message.contains("create")){
             boolean tmp = view.ask("would you like a demo version?");
             int tmpInt= 5;
@@ -131,7 +131,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 tmpInt = view.askIndex();
             }while(tmpInt>4);
             try {
-                server.createNewGame(tmp , this , nickname ,tmpInt );
+                 return server.createNewGame(tmp , this , nickname ,tmpInt );
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }
@@ -144,12 +144,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }
             int choice = askIndex();
             try {
-                server.enterGame(availableGames[choice-1], this , nickname);
+                 server.enterGame(availableGames[choice-1], this , nickname);
+                 return availableGames[choice-1];
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }
         }
-        return true;
+        return 0;
     }
     @Override
     public Object waitForResponce() throws RemoteException {
