@@ -270,7 +270,7 @@ public class Player implements Serializable {
      * @param tile
      */
     public void addToDiscardPile(Tile tile) throws IndexOutOfBoundsException{
-        if(gameFase!=GameFase.FASE0) discardPile.add(tile);
+        if(gameFase!=GameFase.BOARD_SETUP) discardPile.add(tile);
         else {
             if(discardPile.size()>=2) throw new IndexOutOfBoundsException();
             discardPile.add(tile);
