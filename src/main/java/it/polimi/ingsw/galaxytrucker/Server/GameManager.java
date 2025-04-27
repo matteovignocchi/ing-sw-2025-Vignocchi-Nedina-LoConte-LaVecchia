@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 //TODO:
 // 1)eccezioni, capire bene quando e dove + remoteException per disconnessione
 // 5)Capire bene come gestire i corner case, leggi su discord appena rispondono, fondamentale per sistemare i metodi
