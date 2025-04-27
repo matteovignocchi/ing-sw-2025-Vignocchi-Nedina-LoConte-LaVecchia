@@ -85,53 +85,59 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void rotateGlass() throws RemoteException {
-
-    }
-
-    @Override
-    public void setReady() throws RemoteException {
-
-    }
-
-    @Override
-    public void lookDeck() throws RemoteException {
-
-    }
-
-    @Override
-    public void lookDashBoard() throws RemoteException {
-
-    }
-
-    @Override
-    public void logOut() throws RemoteException {
-
-    }
-
-    @Override
-    public void getBackTile() throws RemoteException {
-
-    }
-
-    @Override
-    public void positionTile() throws RemoteException {
-
-    }
-
-    @Override
-    public void drawCard() throws RemoteException {
-
-    }
-
-    @Override
     public Tile getCoveredTileServer() throws RemoteException {
-        return null;
+        throw new RemoteException("Method requires player context.");
     }
 
     @Override
     public Tile getUncoveredTileServer() throws RemoteException {
-        return null;
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void rotateGlass() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void setReady() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void lookDeck() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void lookDashBoard() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void logOut() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void getBackTile() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void positionTile() throws RemoteException {
+        throw new RemoteException("Method requires player context.");
+    }
+
+    @Override
+    public void drawCard(String username) throws RemoteException, BusinessLogicException {
+        try {
+            gameManager.drawCard_server(username);
+        } catch (IOException e) {
+            throw new RemoteException("Network error while drawing card: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new BusinessLogicException("Business error while drawing card: " + e.getMessage(), e);
+        }
     }
 }
 
