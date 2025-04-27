@@ -270,11 +270,29 @@ public class Player implements Serializable {
      * @param tile
      */
     public void addToDiscardPile(Tile tile) throws IndexOutOfBoundsException{
-        if(gameFase!=GameFase.FASE0) discardPile.add(tile);
+        if(gameFase!=GameFase.BOARD_SETUP) discardPile.add(tile);
         else {
             if(discardPile.size()>=2) throw new IndexOutOfBoundsException();
             discardPile.add(tile);
         }
+    }
+
+    public int getTotalHuman(){
+        int tmp = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case HousingUnit h  -> {
+                        for(Human x : h.getListOfToken()){
+                            if(x==Human.HUMAN) tmp++;
+                        }
+                    }
+                    default -> tmp = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     /**
@@ -509,6 +527,8 @@ public class Player implements Serializable {
     private boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
+
+
     public boolean isIsolated(int x, int y) {
         Tile tmp = Dash_Matrix[x][y];
         if(tmp == null) return true;

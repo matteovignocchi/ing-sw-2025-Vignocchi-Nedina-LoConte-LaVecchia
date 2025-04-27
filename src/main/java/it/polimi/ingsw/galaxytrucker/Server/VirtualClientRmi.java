@@ -1,5 +1,4 @@
 package it.polimi.ingsw.galaxytrucker.Server;
-
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GameFase;
@@ -25,109 +24,103 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void setNickname(String nickname) throws RemoteException {
      this.nickname = nickname;
     }
-
-    //PARTE VIEW
     public void setView(View view) {
         this.view = view;
     }
 
+
+    /// METODI PER PRINTARE A CLIENT ///
+
     @Override
-    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
         view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
-
     @Override
     public void inform(String message) throws RemoteException {
         view.inform(message);
     }
-
-
     @Override
     public void reportError(String error) throws RemoteException {
         view.reportError(error);
     }
+    @Override
+    public void printListOfTileCovered(List<Tile> tiles) throws RemoteException {
+        view.printPileCovered(tiles);
+    }
+    @Override
+    public void printListOfTileShown(List<Tile> tiles) throws RemoteException {
+        view.printPileShown(tiles);
+    }
+    @Override
+    public void printListOfGoods(List<Colour> listOfGoods) {
+        view.printListOfGoods(listOfGoods);
+    }
+    @Override
+    public void printCard(Card card) throws RemoteException {
+        view.printCard(card);
+    }
+    @Override
+    public void printTile(Tile tile) throws RemoteException {
+        view.printTile(tile);
+    }
+    @Override
+    public void printPlayerDashboard(Tile[][] dashboard) throws RemoteException {
+        this.view.printDashShip(dashboard);
+    }
+    @Override
+    public void printDeck(List<Card> deck) throws RemoteException {
+        view.printDeck(deck);
+    }
+
+
+    /// METODI PER CHIEDERE COSE AL CLIENT DA PARTE DAL SERVER ///
 
     @Override
     public boolean ask(String message) throws RemoteException {
         return view.ask(message);
     }
-
     @Override
     public int askIndex() throws RemoteException {
         return view.askIndex();
     }
-
     @Override
     public int[] askCoordinate() throws RemoteException {
         return view.askCordinate();
 
     }
-
     @Override
     public String askString() throws RemoteException {
         return view.askString();
     }
 
-    @Override
-    public void printCard(Card card) throws RemoteException {
-        view.printCard(card);
-    }
 
-    @Override
-    public void printListOfTileCovered(List<Tile> tiles) throws RemoteException {
-        view.printPileCovered(tiles);
-    }
+    /// METODI PER SETTARE COSE AL CLIENT RIGUARDO AL GAMEFLOW ///
 
-    @Override
-    public void printListOfTileShown(List<Tile> tiles) throws RemoteException {
-        view.printPileShown(tiles);
-    }
-
-    @Override
-    public void printListOfGoods(List<Colour> listOfGoods) {
-        view.printListOfGoods(listOfGoods);
-    }
-
-    @Override
-    public void printPlayerDashboard(Tile[][] dashboard) throws RemoteException {
-        this.view.printDashShip(dashboard);
-    }
-
-
-    //FASI DI GIOCO
     @Override
     public void updateGameState(GameFase fase) throws RemoteException{
         this.gameFase = fase;
         view.updateState(gameFase);
     }
-
-
-
-    //PARTI DI GIOCO
     @Override
     public void startMach() throws RemoteException {
 
     }
-
-//    @Override
-//    public List<String> requestGameList() throws RemoteException {
-//         return server.getAvaibleGames();
-//    }
-
-
-    //tutti questi metodi get non sono inutili dato che è sempre una
-    //lista di comandi, tanto io mando il comando e il server me la printa
-
     @Override
     public GameFase getCurrentGameState() throws RemoteException {
         return gameFase;
     }
+    @Override
+    public GameFase getGameFase() {
+        return gameFase;
+    }
+
+
+    /// METODI PER IL LOGIN ///
 
     @Override
     public boolean sendLogin(String username, String password) throws RemoteException {
         return server.authenticate(username, password);
     }
-
     @Override
     public boolean sendGameRequest(String message) throws RemoteException {
         if(message.contains("create")){
@@ -143,27 +136,25 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 throw new RuntimeException(e);
             }
         }
-     if(message.contains("login")){
-         view.inform("Available Games");
-         int[] availableGames = server.requestGamesList();
-         for(int i = 0 ; i < availableGames.length; i++){
-             view.inform((i+1) + "." + availableGames[i]);
-         }
-         int choice = askIndex();
-         try {
-             server.enterGame(availableGames[choice-1], this , nickname);
-         } catch (BusinessLogicException e) {
-             throw new RuntimeException(e);
-         }
-     }
-     return true;
+        if(message.contains("login")){
+            view.inform("Available Games");
+            int[] availableGames = server.requestGamesList();
+            for(int i = 0 ; i < availableGames.length; i++){
+                view.inform((i+1) + "." + availableGames[i]);
+            }
+            int choice = askIndex();
+            try {
+                server.enterGame(availableGames[choice-1], this , nickname);
+            } catch (BusinessLogicException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return true;
     }
-
     @Override
     public Object waitForResponce() throws RemoteException {
         return server.waitForResponse();
     }
-
     @Override
     public String waitForGameUpadate() throws RemoteException {
         try {
@@ -173,38 +164,46 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
     }
 
-    @Override
-    public GameFase getGameFase() {
-        return gameFase;
-    }
 
+    /// COMANDI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
+
+    @Override
     public Tile getTileServer() throws Exception {
         return server.getCoveredTileServer();
     }
+    @Override
     public Tile getUncoveredTile() throws Exception{
         return server.getUncoveredTileServer();
     }
+    @Override
     public void getBackTile(Tile tile) throws Exception{
         server.getBackTile();
     }
+    @Override
     public void positionTile(Tile tile) throws Exception{
         server.positionTile();
     }
+    @Override
     public void drawCard() throws Exception {
         server.drawCard();
     }
+    @Override
     public void rotateGlass() throws Exception{
         server.rotateGlass();
     }
+    @Override
     public void setReady() throws Exception{
         server.setReady();
     }
+    @Override
     public void lookDeck() throws Exception{
         server.lookDeck();
     }
+    @Override
     public void lookDashBoard() throws Exception{
         server.lookDashBoard();
     }
+    @Override
     public void logOut() throws Exception{
         server.logOut();
     }

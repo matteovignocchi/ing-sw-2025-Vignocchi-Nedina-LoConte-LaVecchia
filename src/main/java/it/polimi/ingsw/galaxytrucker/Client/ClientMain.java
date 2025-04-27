@@ -7,6 +7,8 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -180,7 +182,7 @@ public class ClientMain {
         view.inform("Rotated tile");
         view.printTile(tile);
     }
-    private static void leftRotatedTile(Tile tile) throws Exception{
+    private static void leftRotatedTile(@NotNull Tile tile) throws Exception{
         tile.RotateLeft();
         view.inform("Rotated tile");
         view.printTile(tile);

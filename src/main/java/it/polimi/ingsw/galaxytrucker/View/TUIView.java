@@ -5,7 +5,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -27,9 +26,8 @@ public class TUIView implements View {
 
 
     //per ora lascio il server come int
-    public TUIView()  {
-
-    }
+    //alla fine di ogni comando scritto dagli altri una show update
+    public TUIView()  {}
     @Override
     public void start() {
 
@@ -51,76 +49,6 @@ public class TUIView implements View {
     public void updateState(GameFase gameFase) {
         game = gameFase;
     }
-    @Override
-    public void printCard(Card card) {
-        //ricordardi di chiedere al franci se esiste allora il toString allinterno della carta e come printa
-        switch (card){
-            case AbandonedShipCard c ->{
-                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
-            }
-            case AbandonedStationCard c ->{
-                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
-                printListOfGoods(c.getStationGoods());
-            }
-            case FirstWarzoneCard c ->{
-                inform("===War Zone===\n");
-                System.out.println("-Player with less crew mates loses "+c.getDays()+"flight days\n");
-                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+"crew mates\n");
-                System.out.println("-Player with less fire power gets: \n");
-                for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-                }
-            }
-            case SecondWarzoneCard c ->{
-                inform("===War Zone===\n");
-                System.out.println("-Player with less fire power loses "+c.getDays()+"flight days\n");
-                System.out.println("-Player with less engine power loses"+c.getNumGoods()+"goods\n");
-                System.out.println("-Player with less crew mates gets: \n");
-                for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-                }
-            }
-            case MeteoritesRainCard c ->{
-                inform("===Meteorites Rain===\n");
-                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
-                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
-                }
-            }
-            case OpenSpaceCard c ->{inform("===Open Space===\n");}
-            case StardustCard c ->{inform("===Stardust===\n");}
-            case PiratesCard c ->{
-                inform("===Pirates===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-                for(int i = 0; i < c.getShots_directions().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
-                }
-            }
-            case PlanetsCard c->{
-                inform("===Planets===\n");
-                System.out.println("- Days: "+c.getDays()+"\n");
-                for(int i =0; i< c.getRewardGoods().size(); i++){
-                    System.out.println("- Planet "+(i+1)+": ");
-                    printListOfGoods(c.getRewardGoods().get(i));
-                    System.out.println();
-                }
-            }
-            case PlaugeCard c->{
-                inform("===Plauge===\n");
-            }
-            case SlaversCard c->{
-                inform("===Slavers===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crew mates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-            }
-            case SmugglersCard c->{
-                inform("===Smugglers===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
-                printListOfGoods(c.getRewardGoods());
-                System.out.println("\n- Days: "+c.getDays()+"\n");
-            }
-
-        }
-    }
-
     @Override
     public boolean ask(String message) {
         boolean flag = true;
@@ -148,6 +76,8 @@ public class TUIView implements View {
         coordinate[0] = scanner.nextInt();
         inform("Insert the column:");
         coordinate[1] = scanner.nextInt();
+        coordinate[0] = coordinate[0] - 5;
+        coordinate[1] = coordinate[1] - 4;
         return coordinate;
     }
 
@@ -156,7 +86,7 @@ public class TUIView implements View {
         int index;
         inform("Insert index:");
         index = scanner.nextInt();
-        return index;
+        return index - 1;
     }
 
     @Override
@@ -183,10 +113,6 @@ public class TUIView implements View {
         }
     }
 
-    @Override
-    public void printListOfTiles(List<Tile> Tiles) {
-
-    }
 
     @Override
     public void printDashShip(Tile[][] dashboard) {
@@ -240,18 +166,102 @@ public class TUIView implements View {
         }
         System.out.println();
     }
-
+                                                                                        /// position diventa una mappa stringa intero
     @Override
-    public void updateView(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
-        //swtich case
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+        switch(game){
+            case BOARD_SETUP -> inform(" -Nickname: "+nickname+" -Position : Too early to know where you'll finish!"+" -Credits : too rich!"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case TILE_MANAGEMENT, DRAW_PHASE -> {}
+            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+" -Position : "+position+" -Credits : Silvio Berlusconi"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+" -Position : "+position+" -Credits : "+credits+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case SCORING -> inform(" -Nickname: "+nickname+" -Position : "+position);
+            case EXIT -> inform("Goodbye!");
+        }
+        printListOfCommand();
     }
 
-
+    //metodo che riceve una lista, in cui prendi
     @Override
     public void printNewFase(GameFase gameFase) {
 
     }
 
+    @Override
+    public void printDeck(List<Card> deck) {
+        inform("Deck: ");
+        for(Card card : deck) {
+            printCard(card);
+            System.out.println();
+        }
+    }
+
+    @Override
+    public void printCard(Card card) {
+        switch (card){
+            case AbandonedShipCard c ->{
+                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
+            }
+            case AbandonedStationCard c ->{
+                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
+                printListOfGoods(c.getStationGoods());
+            }
+            case FirstWarzoneCard c ->{
+                inform("===War Zone===\n");
+                System.out.println("-Player with less crew mates loses "+c.getDays()+"flight days\n");
+                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+"crew mates\n");
+                System.out.println("-Player with less fire power gets: \n");
+                for(int i = 0; i < c.getShotsDirections().size(); i++){
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                }
+            }
+            case SecondWarzoneCard c ->{
+                inform("===War Zone===\n");
+                System.out.println("-Player with less fire power loses "+c.getDays()+"flight days\n");
+                System.out.println("-Player with less engine power loses"+c.getNumGoods()+"goods\n");
+                System.out.println("-Player with less crew mates gets: \n");
+                for(int i = 0; i < c.getShotsDirections().size(); i++){
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+                }
+            }
+            case MeteoritesRainCard c ->{
+                inform("===Meteorites Rain===\n");
+                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
+                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
+                }
+            }
+            case OpenSpaceCard c -> inform("===Open Space===\n");
+            case StardustCard c -> inform("===Stardust===\n");
+            case PiratesCard c ->{
+                inform("===Pirates===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+                for(int i = 0; i < c.getShots_directions().size(); i++){
+                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
+                }
+            }
+            case PlanetsCard c->{
+                inform("===Planets===\n");
+                System.out.println("- Days: "+c.getDays()+"\n");
+                for(int i =0; i< c.getRewardGoods().size(); i++){
+                    System.out.println("- Planet "+(i+1)+": ");
+                    printListOfGoods(c.getRewardGoods().get(i));
+                    System.out.println();
+                }
+            }
+            case PlaugeCard c-> inform("===Plauge===\n");
+
+            case SlaversCard c->{
+                inform("===Slavers===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crew mates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+            }
+            case SmugglersCard c->{
+                inform("===Smugglers===\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
+                printListOfGoods(c.getRewardGoods());
+                System.out.println("\n- Days: "+c.getDays()+"\n");
+            }
+            default -> {}
+        }
+    }
 
 
     @Override
@@ -384,7 +394,7 @@ public class TUIView implements View {
 
 
 
-    public String[] renderTile(Tile tile) {
+    private String[] renderTile(Tile tile) {
         String[] out = new String[3];
         int a = tile.controlCorners(0);
         int b = tile.controlCorners(1);
@@ -469,11 +479,8 @@ public class TUIView implements View {
 
     /// ///// DA QUI IN BASSO LAVORO IO ///////
 
-
-    //metodo per gestire i comandi da mandare al server
-    public String sendAvailableChoices() throws RemoteException {
+    private List<String> commandConstructor(){
         List<String> listOfOptions = new ArrayList<>();
-        inform("Possible actions:");
         switch (game) {
             case BOARD_SETUP -> {
                 listOfOptions.add("get Blanket Tile");
@@ -502,7 +509,7 @@ public class TUIView implements View {
                 listOfOptions.add("Watch A Ship");
                 listOfOptions.add("logOut");
             }
-            case WAITING_FOR_TURN  -> {
+            case WAITING_FOR_TURN, CARD_EFFECT  -> {
                 listOfOptions.add("Watch A Ship");
                 listOfOptions.add("LogOut");
             }
@@ -511,20 +518,22 @@ public class TUIView implements View {
                 listOfOptions.add("LogOut");
                 listOfOptions.add("Guarda Una Nave");
             }
-            case CARD_EFFECT -> {
-                listOfOptions.add("Watch A Ship");
-                listOfOptions.add("LogOut");
-            }
             case SCORING  -> listOfOptions.add("logOut");
             default -> listOfOptions.add("error-404");
         }
-        printListOfCommand(listOfOptions);
+        return listOfOptions;
+    }
+    //metodo per gestire i comandi da mandare al server
+    @Override
+    public String sendAvailableChoices() {
+        List<String> listOfOptions = commandConstructor();
         inform("select the command number");
         int tmp = askIndex();
         return listOfOptions.get(tmp).trim().toLowerCase();
         }
-    private void printListOfCommand(List<String> listOfOptions){
-
+    private void printListOfCommand(){
+        List<String> listOfOptions = commandConstructor();
+        inform("Possible actions:");
         for(int i = 0 ; i < listOfOptions.size(); i++) {
             inform((i + 1) + ":" + listOfOptions.get(i));
         }

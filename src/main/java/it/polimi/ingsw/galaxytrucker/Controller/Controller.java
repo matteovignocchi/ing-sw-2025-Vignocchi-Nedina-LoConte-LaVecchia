@@ -11,8 +11,11 @@ import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.View;
+
 import java.io.IOException;
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,17 +23,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Serializable {
 
-    private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
+    private List<Player> players_in_Game = new ArrayList<>(); //forse può essere eliminato
     private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
-    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
+    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>();
     private final AtomicInteger player_id_counter;
     private final int Max_Players;
+    private GameFase principalGameFase; //iniazilizzato a fase 0
+    private GameFase preGameFase;
     private final boolean isDemo;
-
-    private GameFase principalGameFase; //inutile
-    private GameFase preGameFase; //inutile
-    private boolean isStarted; // utile ?
-
 
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
@@ -51,7 +51,6 @@ public class Controller implements Serializable {
         }
         this.isDemo = isDemo;
         this.Max_Players = Max_Players;
-        this.isStarted = false;
         this.player_id_counter = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
@@ -61,9 +60,17 @@ public class Controller implements Serializable {
                                                     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //TODO: vedere se cambiare synchronized -> lock (soprattutto in update, operazioni lente)
+    //faccaimo una v.inform("player aggiunto")????
+    public synchronized void addPlayer(String nickname, VirtualView view, boolean isDemo) throws BusinessLogicException {
+        if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
+        if (PlayerByNickname.size() >= Max_Players) throw new BusinessLogicException("Game is full");
 
-    //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
+        Player player = new Player(player_id_counter.getAndIncrement(), isDemo);
+        PlayerByNickname.put(nickname, player);
+        ViewByNickname.put(nickname, view);
+        if (PlayerByNickname.size() == Max_Players)
+            startGame();
+    }
 
     //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
 
@@ -89,10 +96,9 @@ public class Controller implements Serializable {
     //Quindi: la gestione con try-catch nel Controller è accettabile solo per robustezza,
     //NON perché "è sua responsabilità" gestire i problemi di rete.
 
-    //Secondo me eliminare try catch
-    //UPDATE TUTTO TRANNE NAVE
-    public synchronized void update (){
-        //modificare
+    private void startGame() {
+        principalGameFase = GameFase.BOARD_SETUP; //capire se serve fase nel controller
+        PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         ViewByNickname.forEach( (nickname, v) -> {
             try{
                 Player player = PlayerByNickname.get(nickname);
@@ -103,7 +109,7 @@ public class Controller implements Serializable {
                 int position = f_board.getPositionOfPlayer(player);//implementato in flight... vai a vedere
                 boolean hasPurpleAlien = player.presencePurpleAlien();
                 boolean hasBrownAlien = player.presenceBrownAlien();
-                int Human = player.countTotalCrew(); //deve implementare oleg
+                int Human = player.countTotalCrew(); //deve implementare oleg, che cazzo ne so io
                 int Energy = player.getTotalEnergy();
 
 
@@ -116,44 +122,14 @@ public class Controller implements Serializable {
         });
     }
 
-    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException {
-        if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
-        if (PlayerByNickname.size() >= Max_Players) throw new BusinessLogicException("Game is full");
-
-        Player player = new Player(player_id_counter.getAndIncrement(), isDemo);
-        PlayerByNickname.put(nickname, player);
-        ViewByNickname.put(nickname, view);
-        playersInGame.add(player); //capire se va bene
-        view.inform(String.format("Player %s added to game", nickname));
-        if (PlayerByNickname.size() == Max_Players)
-            startGame();
-    }
-
-    private synchronized void startGame() {
-        //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        this.update();
-    }
-
-    public void removePlayer(String nickname){
-        //PlayerByNickname.remove(nickname);
-        //ViewByNickname.remove(nickname);
-        //TODO: se corretto, passare direttamente il player da eliminare, non il nick
-        //TODO: eliminarlo dalla lista dei giocatori in volo? le carte non si applicano a lui. il razzo sulla plancia conta?
-        playersInGame.remove(PlayerByNickname.get(nickname));
-    }
-
-
-
-
-
     public Player getPlayerByNickname(String nickname) {
         return PlayerByNickname.get(nickname);
     }
 
-    public VirtualView getViewByNickname(String nickname){
-        return ViewByNickname.get(nickname);
-    }
+    public void removePlayer(String nickname){
+        PlayerByNickname.remove(nickname);
+        ViewByNickname.remove(nickname);
+    } //va rimosso anche dalla lista players_in_game??
 
     public void remapView(String nickname, VirtualView view){
         ViewByNickname.put(nickname, view);
@@ -187,7 +163,7 @@ public class Controller implements Serializable {
     }
 
     public boolean controlPresenceOfPlayer(int id) {
-        for (Player p : playersInGame) {
+        for (Player p : players_in_Game) {
             if (p.getId() == id) {
                 return true;
             }
@@ -199,7 +175,7 @@ public class Controller implements Serializable {
 
     //da verificare se la fase è giusta
     public void startGameIfReady() {
-        if (playersInGame.size() == Max_Players) {
+        if (players_in_Game.size() == Max_Players) {
             principalGameFase = GameFase.TILE_MANAGEMENT;
             setGameFaseForEachPlayer(GameFase.TILE_MANAGEMENT);
             // TODO: notifica view se serve
@@ -210,14 +186,14 @@ public class Controller implements Serializable {
     //MEDOTI PER PRENDERE LE GAMEFASE
     public List<GameFase> getGameFasesForEachPlayer() {
         List<GameFase> gameFases = new ArrayList<>();
-        for(Player x : playersInGame) {
+        for(Player x : players_in_Game ) {
             gameFases.add(x.getGameFase());
         }
         return gameFases;
     }
 
     public GameFase getGameFase(int id) {
-        for(Player p : playersInGame) {
+        for(Player p : players_in_Game ) {
             if(id == p.getId()) {
                 return p.getGameFase();
             }
@@ -226,12 +202,12 @@ public class Controller implements Serializable {
     }
 
     public void setGameFaseForEachPlayer(GameFase gameFase) {
-        for(Player p : playersInGame) {
+        for(Player p : players_in_Game ) {
             p.setGameFase(gameFase);
         }
     }
     public void setGameFase(GameFase gameFase, int id) {
-        for(Player p : playersInGame) {
+        for(Player p : players_in_Game ) {
             if(id == p.getId()) {
                 p.setGameFase(gameFase);
             }
@@ -571,7 +547,7 @@ public class Controller implements Serializable {
     }
 
     public void addHuman() throws Exception {
-        for (Player p : playersInGame) {
+        for (Player p : players_in_Game) {
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
