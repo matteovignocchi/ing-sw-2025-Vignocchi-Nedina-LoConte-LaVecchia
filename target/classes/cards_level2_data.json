@@ -1,0 +1,121 @@
+[
+  {
+    "type": "AbandonedShipCard",
+    "days" : 1,
+    "credits": 6,
+    "num_crewmates" : 4
+  },
+  {
+    "type": "AbandonedShipCard",
+    "days" : 2,
+    "credits": 8,
+    "num_crewmates" : 5
+  },
+  {
+    "type": "AbandonedStationCard",
+    "days" : 1,
+    "num_crewmates" : 7,
+    "station_goods" : ["RED" , "YELLOW"]
+  },
+  {
+    "type": "AbandonedStationCard",
+    "days" : 2,
+    "num_crewmates" : 8,
+    "station_goods" : ["YELLOW" , "YELLOW", "GREEN"]
+  },
+  {
+    "type": "PiratesCard",
+    "fire_power": 6,
+    "days": 2,
+    "credits": 7,
+    "shots_directions": [0, 0, 0],
+    "shots_size": [true, false, true]
+  },
+  {
+    "type": "SlaversCard",
+    "days": 2,
+    "credits": 8,
+    "num_crewmates" : 4,
+    "fire_power": 7
+  },
+  {
+    "type": "SmugglersCard",
+    "days": 1,
+    "fire_power": 8,
+    "num_removed_goods": 3,
+    "reward_goods": ["RED", "YELLOW", "YELLOW"]
+  },
+  {
+    "type": "StardustCard"
+  },
+  {
+    "type": "PlaugeCard"
+  },
+  {
+    "type": "OpenSpaceCard"
+  },
+  {
+    "type": "OpenSpaceCard"
+  },
+  {
+    "type": "OpenSpaceCard"
+  },
+  {
+    "type": "MeteoritesRainCard",
+    "directions": [0, 0, 2, 2],
+    "size": [true, true, false, false]
+  },
+  {
+    "type": "MeteoritesRainCard",
+    "directions": [0, 0, 1, 1, 1],
+    "size": [false, false, true, false, false]
+  },
+  {
+    "type": "MeteoritesRainCard",
+    "directions": [ 0, 0, 3, 3, 3],
+    "size": [false, false, true, false, false]
+  },
+  {
+    "type": "PlanetsCard",
+    "days": 4,
+    "reward_goods": [
+      ["RED", "RED", "RED", "YELLOW"],
+      ["RED", "RED", "GREEN", "GREEN"],
+      ["RED", "BLUE", "BLUE", "BLUE", "BLUE"]
+    ]
+  },
+  {
+    "type": "PlanetsCard",
+    "days": 3,
+    "reward_goods": [
+      ["RED", "RED"],
+      ["GREEN", "GREEN", "GREEN", "GREEN"]
+    ]
+  },
+  {
+    "type": "PlanetsCard",
+    "days": 2,
+    "reward_goods": [
+      ["RED", "YELLOW"],
+      ["YELLOW", "GREEN", "BLUE"],
+      ["GREEN", "GREEN"],
+      ["YELLOW"]
+    ]
+  },
+  {
+    "type": "PlanetsCard",
+    "days": 3,
+    "reward_goods": [
+      ["GREEN", "GREEN", "GREEN", "GREEN"],
+      ["YELLOW", "YELLOW"],
+      ["BLUE", "BLUE", "BLUE", "BLUE"]
+    ]
+  },
+  {
+    "type": "SecondWarzoneCard",
+    "days": 4,
+    "num_goods": 3,
+    "shots_directions": [0, 3, 1, 2],
+    "shots_size": [false, false, false, true]
+  }
+]
