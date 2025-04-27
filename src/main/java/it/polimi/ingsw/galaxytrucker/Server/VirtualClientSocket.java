@@ -123,14 +123,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     /// METODI  PER PRINTARE A CLIENT ///
 
+
     @Override
-    public void showUpdate(String nickname, Float firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
-        view.updateView(nickname ,firePower ,powerEngine , credits , position , purpleAline, brownAlien, numberOfHuman, numberOfEnergy);
-    }
-    @Override
-    public void inform(String message) throws IOException {
+    public void inform(String message){
         view.inform(message);
     }
+
+    @Override
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
+        view.updateView(nickname , firePower , powerEngine , credits , position , purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
+    }
+
     @Override
     public void reportError(String error){
         view.reportError(error);

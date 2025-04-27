@@ -4,13 +4,15 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+
+import java.rmi.RemoteException;
 import java.util.List;
 
 public interface VirtualView {
 
     /// METODI PER FARE LE PRINT A SCHERMO ///
-    void inform(String message);
-    void showUpdate(String nickname, Double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
+    void inform(String message) throws RemoteException;
+    void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
     void reportError(String error) throws Exception;
     boolean ask(String message) throws Exception;
     void printCard(Card card) throws Exception;
