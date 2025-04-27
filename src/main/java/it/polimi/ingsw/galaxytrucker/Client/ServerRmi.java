@@ -7,7 +7,6 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 
 //TODO: RemoteException è pensata per errori di trasporto, tipo:
 // 1) il client si è disconnesso
@@ -48,6 +47,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         }
     }
 
+    //TODO: capire se unificare il caso in cui mi unisco a una partita in cui già c'ero o sono metodi diversi
     @Override
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException {
         try{
@@ -60,9 +60,28 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public boolean authenticate(String username, String password) throws RemoteException {
-        return false;
+    public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        try{
+            gameManager.quitGame(gameId, nickname);
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
+        } catch(IOException e){
+            throw new RemoteException("Error in joining game:  " + e.getMessage());
+        }
     }
+
+    //aggiustare
+    @Override
+    public Tile getCoveredTileServer(int gameId, String nickname) throws RemoteException {
+        try{
+            gameManager.getCoveredTile(gameId, nickname);
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
+        } catch(IOException e){
+            throw new RemoteException("Error in joining game:  " + e.getMessage());
+        }
+    }
+
 
     @Override
     public String waitForResponse() throws RemoteException {
@@ -82,11 +101,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     @Override
     public String waitForGameStart() throws Exception {
         return "";
-    }
-
-    @Override
-    public Tile getCoveredTileServer() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
     }
 
     @Override
@@ -111,16 +125,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     @Override
     public void lookDashBoard() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
-    }
-
-    @Override
-    public void logOut() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
-    }
-
-    @Override
-    public void getBackTile() throws RemoteException {
         throw new RemoteException("Method requires player context.");
     }
 
