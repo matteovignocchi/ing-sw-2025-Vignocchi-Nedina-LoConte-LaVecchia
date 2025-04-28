@@ -116,7 +116,7 @@ public class GameManager {
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
-        Player p = controller.getPlayerByNickname(nickname);
+        Player p = getPlayerCheck(controller, nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
         updateGameState(v, GameFase.TILE_MANAGEMENT);
         //update (?)
@@ -140,7 +140,7 @@ public class GameManager {
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
 
-        Player p = controller.getPlayerByNickname(nickname);
+        Player p = getPlayerCheck(controller, nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
         updateGameState(v, GameFase.TILE_MANAGEMENT);
         //update (?)
@@ -150,7 +150,7 @@ public class GameManager {
     public synchronized void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
-        Player p = controller.getPlayerByNickname(nickname);
+        Player p = getPlayerCheck(controller, nickname);
 
         controller.addToShownTile(tile);
         p.setGameFase(GameFase.BOARD_SETUP);
@@ -161,13 +161,15 @@ public class GameManager {
     public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
-        Player p = controller.getPlayerByNickname(nickname);
+        Player p = getPlayerCheck(controller, nickname);
 
         p.addTile(cord[0], cord[1], tile);
         p.setGameFase(GameFase.BOARD_SETUP);
         updateGameState(v, GameFase.BOARD_SETUP);
         //update + update nave
     }
+
+    public void setReady
 
     public synchronized void spinHourglass(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
