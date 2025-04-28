@@ -5,6 +5,7 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: cambiare synchronized -> lock
 
+//TODO: discorso controller.getPlayerByNick oppure getPlayerByNickCheck (nei vecchi metodi)
+//TODO: controllo che i parametri non nulli nelle invocazioni dei metodi
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
@@ -103,6 +106,8 @@ public class GameManager {
         }
     }
 
+    ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
+
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
@@ -114,6 +119,7 @@ public class GameManager {
         Player p = controller.getPlayerByNickname(nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
         updateGameState(v, GameFase.TILE_MANAGEMENT);
+        //update (?)
         return controller.getTile(randomIdx);
     }
 
@@ -122,7 +128,7 @@ public class GameManager {
 
         List<Tile> uncoveredTiles = controller.getShownTiles();
         if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
-
+        //update (?)
         return uncoveredTiles;
     }
 
@@ -137,11 +143,31 @@ public class GameManager {
         Player p = controller.getPlayerByNickname(nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
         updateGameState(v, GameFase.TILE_MANAGEMENT);
+        //update (?)
         return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
-    ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
+    public synchronized void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        VirtualView v = getViewCheck(controller, nickname);
+        Player p = controller.getPlayerByNickname(nickname);
 
+        controller.addToShownTile(tile);
+        p.setGameFase(GameFase.BOARD_SETUP);
+        updateGameState(v, GameFase.BOARD_SETUP);
+        //update(?)
+    }
+
+    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        VirtualView v = getViewCheck(controller, nickname);
+        Player p = controller.getPlayerByNickname(nickname);
+
+        p.addTile(cord[0], cord[1], tile);
+        p.setGameFase(GameFase.BOARD_SETUP);
+        updateGameState(v, GameFase.BOARD_SETUP);
+        //update + update nave
+    }
 
     public synchronized void spinHourglass(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
@@ -268,15 +294,6 @@ public class GameManager {
         return -1;
     }
 
-    private void checkNickname(String nickname) throws BusinessLogicException {
-        if (nickname == null || nickname.isBlank())
-            throw new BusinessLogicException("Invalid Nickname");
-    }
-
-    private void checkTile(Tile tile) throws BusinessLogicException {
-        if (tile == null)
-            throw new BusinessLogicException("Invalid Tile");
-    }
 
     public Set<Integer> listActiveGames() {
         return games.keySet();

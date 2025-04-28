@@ -16,7 +16,8 @@ public interface VirtualServer extends Remote {
     public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException;
-
+    //Il vecchio returnTile, scarta la tessera e la mette nella lista delle tiles scoperte
+    public void dropTile () throws RemoteException, BusinessLogicException;
 
     // non servono, da togliere
     public boolean authenticate(String username, String password) throws RemoteException;
