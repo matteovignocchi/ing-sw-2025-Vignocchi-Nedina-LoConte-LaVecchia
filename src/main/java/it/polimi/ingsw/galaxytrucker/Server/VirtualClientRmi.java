@@ -45,7 +45,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void printListOfTileCovered(List<Tile> tiles) throws RemoteException {
-        view.printPileCovered(tiles);
+        view.printPileCovered();
     }
     @Override
     public void printListOfTileShown(List<Tile> tiles) throws RemoteException {

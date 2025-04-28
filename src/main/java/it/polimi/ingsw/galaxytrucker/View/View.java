@@ -21,7 +21,7 @@ public interface View {
     void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy); //metodo poi per gui per vedere ordine di gioco (mappa position e stirnga del player)
     void printNewFase(GameFase gameFase);
     void printDeck(List<Card> deck);
-    void printPileCovered(List<Tile> tiles);
+    void printPileCovered();
     void printPileShown(List<Tile> tiles);
     String askString();
     void reportError(String message);

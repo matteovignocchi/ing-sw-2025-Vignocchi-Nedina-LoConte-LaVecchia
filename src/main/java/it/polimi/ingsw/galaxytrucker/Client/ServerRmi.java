@@ -1,5 +1,4 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.GameManager;
@@ -9,24 +8,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 
-//TODO: RemoteException è pensata per errori di trasporto, tipo:
-// 1) il client si è disconnesso
-// 2) la rete è caduta
-// 3) l’oggetto remoto non è raggiungibile
-// Ma se un utente sbaglia password, o inserisce un nickname già preso, non è un errore di rete → è logica applicativa!
-// Le eccezioni checked custom vengono serializzate automaticamente e propagate al client purché:
-// la classe dell’eccezione sia disponibile anche nel classpath del client.
-// Quindi: le eccezioni custom devono stare in un modulo condiviso, accessibile da client e server (es. shared package o jar comune).
-// Quindi, domanda per te Gabriele Antonio La Vecchia, creiamo una CommunicationException e la estendiamo (ad esempio) con:
-// InvalidGameIdException, UsernameAlreadyTakenException, ... (PER ME SI)
-// Ovviamente, se sei d'accordo, i metodi vanno fixati.
-// MIA RISPOSTA: SI, VA FATTO (GIA CREATA L'ECCEZIONE)
-// RINOMINARLA IN BUSINESSLOGICEXCEPTION
-
-//TODO: Le eccezioni di "Infrastruttura" -> wrapparle in RemoteException e lanciarle al client
-//      Le eccezioni di Game Logic -> wrapparle in BusinessLogicException e lanciarle al client
-// Dire agli altri di gestirle con try-catch al chiamante (?)
-
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
@@ -35,88 +16,118 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
-    //TODO: gestire bene le eccezioni (il businesslogic error necessario in questi metodi inziali ?) vedere poi con l'implementazione
-    //TODO: capire eccezioni IOException se così vanno bene
-    @Override
-    public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
-        try{
-            return gameManager.createGame(isDemo, v, nickname, maxPlayers);
-        } catch(BusinessLogicException e){
-            throw new BusinessLogicException("Business-logic error during game's creation: " + e.getMessage(), e);
-        } catch (IOException e){
-            throw new RemoteException("IO error during game's creation: ", e);
+    /**
+     * Metodo helper per centralizzare la gestione delle chiamate al GameManager e delle eccezioni.
+     *
+     * @param methodName Il nome del metodo del GameManager che viene chiamato. Usato per creare
+     * messaggi di errore più informativi.
+     * @param call Un'interfaccia funzionale (GameManagerCall) che incapsula la chiamata al metodo del GameManager.
+     * @param <T> Il tipo di ritorno del metodo del GameManager.
+     * @return Il risultato della chiamata al metodo del GameManager.
+     * @throws RemoteException Se si verifica un errore di comunicazione RMI (es. problemi di rete).
+     * @throws BusinessLogicException Se il GameManager lancia un'eccezione a causa di un errore nella logica di gioco.
+     */
+    private <T> T handleGameManagerCall(String methodName, GameManagerCall<T> call) throws RemoteException, BusinessLogicException {
+        try {
+            return call.execute(); // Esegue la chiamata al metodo del GameManager
+        } catch (BusinessLogicException e) {
+            throw new BusinessLogicException("Logic error in " + methodName + ": " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new RemoteException("I/O error in " + methodName + ": " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RemoteException("Unexpected error in " + methodName + ": " + e.getMessage(), e);
         }
     }
 
-    //TODO: capire se unificare il caso in cui mi unisco a una partita in cui già c'ero o sono metodi diversi
+    /**
+     * Interfaccia funzionale per rappresentare una chiamata a un metodo del GameManager.  Permette
+     * di passare il codice da eseguire al metodo handleGameManagerCall.
+     *
+     * @param <T> Il tipo di ritorno del metodo del GameManager.
+     */
+    private interface GameManagerCall<T> {
+        T execute() throws BusinessLogicException, IOException;
+    }
+
+    @Override
+    public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
+        if (v == null) { throw new RemoteException("VirtualView cannot be null"); }
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+        if (maxPlayers <= 1 || maxPlayers > 4) { throw new RemoteException("the maximum number of players must be between 2 and 4"); }
+
+        return handleGameManagerCall("createNewGame", () -> gameManager.createGame(isDemo, v, nickname, maxPlayers));
+    }
+
     @Override
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException {
-        try{
+        if (v == null) { throw new RemoteException("VirtualView cannot be null"); }
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+
+        handleGameManagerCall("enterGame", () -> {
             gameManager.joinGame(gameId, v, nickname);
-        } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
-        } catch(IOException e){
-            throw new RemoteException("Error in joining game:  " + e.getMessage());
-        }
+            return null;
+        });
     }
 
     @Override
     public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        try{
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+
+        handleGameManagerCall("logOut", () -> {
             gameManager.quitGame(gameId, nickname);
-        } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in logging out:  " + e.getMessage(), e);
-        } catch(IOException e){
-            throw new RemoteException("Error in logging out:  " + e.getMessage());
-        }
+            return null;
+        });
     }
 
-    //aggiustare
     @Override
     public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        try{
-            return gameManager.getCoveredTile(gameId, nickname);
-        } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in getting a tile:  " + e.getMessage(), e);
-        }
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty");}
+
+        return handleGameManagerCall("getCoveredTile", () -> gameManager.getCoveredTile(gameId, nickname));
     }
 
-    //TODO: eliminare IOException? Tutte le eccezioni lanciate da metodi implicitamente(ex. pileOfTile.remove in metodo getTile
-    // in controller, lancia eccezioni implicite come IndexOutOfBoundaries ecc..) tutte catturate da BusinessLogic? o ci vuole un catch generico?
-    // capire questo discorso eccezioni.
     @Override
     public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        try{
-            return gameManager.getUncoveredTilesList(gameId, nickname);
-        } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in getting the uncovered tiles' pile:  " + e.getMessage(), e);
-        } catch(IOException e){
-            throw new RemoteException("Error in getting the uncovered tiles' pile:  " + e.getMessage());
-        }
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+
+        return handleGameManagerCall("getUncoveredTilesList", () -> gameManager.getUncoveredTilesList(gameId, nickname));
     }
 
     @Override
     public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
-        try{
-            return gameManager.chooseUncoveredTile(gameId, nickname, idTile);
-        } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in choosing the uncovered tile:  " + e.getMessage(), e);
-        } catch(IOException e){
-            throw new RemoteException("Error in choosing the uncovered tile:  " + e.getMessage());
-        }
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+        if (idTile < 0) { throw new RemoteException("Tile must be greater than 0"); }
+
+        return handleGameManagerCall("chooseUncoveredTile", () -> gameManager.chooseUncoveredTile(gameId, nickname, idTile));
     }
 
+    @Override
+    public void dropTile(int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+        if (tile == null) { throw new RemoteException("Tile cannot be null"); }
 
+        handleGameManagerCall("dropTile", () -> {
+            gameManager.dropTile(gameId, nickname, tile);
+            return null;
+        });
+    }
+
+    @Override
+    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+        if (tile == null) { throw new RemoteException("Tile cannot be null"); }
+        if (cord == null || cord.length != 2 || cord[0] < 0 || cord[1] < 0) { throw new RemoteException("Invalid parameters"); }
+
+        handleGameManagerCall("placeTile", () -> {
+            gameManager.placeTile(gameId, nickname, tile, cord);
+            return null;
+        });
+    }
 
 
     @Override
     public String waitForResponse() throws RemoteException {
         return "";
-    }
-
-    @Override
-    public void registerClient(VirtualView client) throws RemoteException {
-
     }
 
     @Override
@@ -150,19 +161,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void positionTile() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
+    public void getBackTile() throws RemoteException {
+        throw new RemoteException("Method getBackTile not yet implemented");
     }
 
     @Override
-    public void drawCard(String username) throws RemoteException, BusinessLogicException {
-        try {
-            gameManager.drawCard_server(username);
-        } catch (IOException e) {
-            throw new RemoteException("Network error while drawing card: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new BusinessLogicException("Business error while drawing card: " + e.getMessage(), e);
-        }
+    public void drawCard() throws RemoteException {
+        throw new RemoteException("Method drawCard not yet implemented");
     }
 }
 

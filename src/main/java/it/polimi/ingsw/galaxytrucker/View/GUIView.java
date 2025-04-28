@@ -105,7 +105,7 @@ return 0;
     }
 
     @Override
-    public void printPileCovered(List<Tile> tiles) {
+    public void printPileCovered() {
 
     }
 

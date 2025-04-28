@@ -17,11 +17,8 @@ public interface VirtualServer extends Remote {
     public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException;
     //Il vecchio returnTile, scarta la tessera e la mette nella lista delle tiles scoperte
-    public void dropTile () throws RemoteException, BusinessLogicException;
-
-    // non servono, da togliere
-    public boolean authenticate(String username, String password) throws RemoteException;
-    public void registerClient(VirtualView client) throws RemoteException;
+    public void dropTile (int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
+    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException;
 
     public String waitForResponse() throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
@@ -31,6 +28,5 @@ public interface VirtualServer extends Remote {
     public void lookDeck() throws RemoteException;
     public void lookDashBoard() throws RemoteException;
     public void getBackTile() throws RemoteException;
-    public void positionTile() throws RemoteException;
     public void drawCard() throws RemoteException;
 }

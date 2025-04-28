@@ -303,7 +303,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public void printPileCovered(List<Tile> tiles) {
+    public void printPileCovered() {
         StringBuilder topBorder = new StringBuilder();
         StringBuilder mid1 = new StringBuilder();
         StringBuilder mid2 = new StringBuilder();
@@ -311,7 +311,7 @@ public class TUIView implements View {
         StringBuilder bottomBorder = new StringBuilder();
         int printed = 0;
         int maxPerRow = 7;
-        int size = tiles.size();
+        int size = 20;
         for (int i = 0; i < size; i++) {
             topBorder.append("+---------+ ");
             mid1.append("|         | ");
