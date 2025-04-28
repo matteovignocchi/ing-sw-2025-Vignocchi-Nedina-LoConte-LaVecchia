@@ -157,10 +157,6 @@ public class Controller implements Serializable {
         return playersInGame;
     }
 
-    public void setPlayerReady(Player p){
-        getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
-    }
-
 
 
     public void remapView(String nickname, VirtualView view){
@@ -200,6 +196,26 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setPlayerReady(Player p){
+        getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
+    }
+
+    public void startFlight(){
+        if(!isDemo) mergeDecks();s
+
+        playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
+        ViewByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
+
+        Player firstPlayer = f_board.getOrderedPlayers().getFirst();
+        String firstPlayerNick = PlayerByNickname.entrySet().stream()
+                        .filter(e -> e.getValue().equals(firstPlayer))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
+        firstPlayer.setGameFase(GameFase.DRAW_PHASE);
+        ViewByNickname.get(firstPlayerNick).updateGameState(GameFase.DRAW_PHASE);
+    }
 
 
 

@@ -2,11 +2,9 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.GameFase;
-import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
-import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -110,7 +108,7 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    //TODO: dire al fra di spostare parte di questi metodi nel controller (creando gli appositi)
+    //TODO: dire al fra/floris se spostare parte di questi metodi nel controller (creando gli appositi)
 
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
@@ -182,9 +180,7 @@ public class GameManager {
 
         List<Player> playersInGame = controller.getPlayersInGame();
         if(playersInGame.stream().allMatch( e -> e.getGameFase() == GameFase.WAITING_FOR_PLAYERS)) {
-            //metodo per settare il gioco pronto per il viaggio
-            //il primo va messo in fase di draw card
-            for (Player player : playersInGame) p.setGameFase(GameFase.WAITING_FOR_TURN);
+            controller.startFlight();
         } else{
             p.setGameFase(GameFase.WAITING_FOR_PLAYERS);
             updateGameState(v, GameFase.WAITING_FOR_PLAYERS);
