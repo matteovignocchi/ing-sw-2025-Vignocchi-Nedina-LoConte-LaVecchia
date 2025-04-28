@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
@@ -14,7 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: sistemare metodi che Gabri cambierà con le nuove logiche delle eccezioni ( ricorda quelli di Matteo Bianchi)
 
-//TODO: cambiare synchronized -> lock
+//TODO: cambiare synchronized -> lock. capire dove mettere tali controlli (qui vs controller) (per i metodi che modificano
+// il model, forse meglio in controller. per quelli che modificano la mappa games, qui in gamemanager)
 
 //TODO: discorso controller.getPlayerByNick oppure getPlayerByNickCheck (nei vecchi metodi)
 //TODO: controllo che i parametri non nulli nelle invocazioni dei metodi
@@ -108,6 +110,8 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
+    //TODO: dire al fra di spostare parte di questi metodi nel controller (creando gli appositi)
+
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
@@ -158,7 +162,7 @@ public class GameManager {
         //update(?)
     }
 
-    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+    public synchronized void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
         Player p = getPlayerCheck(controller, nickname);
@@ -169,17 +173,29 @@ public class GameManager {
         //update + update nave
     }
 
-    public void setReady
+    public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        VirtualView v = getViewCheck(controller, nickname);
+        Player p = getPlayerCheck(controller, nickname);
+
+        controller.setPlayerReady(p);
+
+        List<Player> playersInGame = controller.getPlayersInGame();
+        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GameFase.WAITING_FOR_PLAYERS)) {
+            //metodo per settare il gioco pronto per il viaggio
+            //il primo va messo in fase di draw card
+            for (Player player : playersInGame) p.setGameFase(GameFase.WAITING_FOR_TURN);
+        } else{
+            p.setGameFase(GameFase.WAITING_FOR_PLAYERS);
+            updateGameState(v, GameFase.WAITING_FOR_PLAYERS);
+        }
+
+        //update (?)
+    }
 
     public synchronized void spinHourglass(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
         controller.spinHourglass(nickname);
-        saveGameState(getGameId(controller), controller);
-    }
-
-    public synchronized void setReady(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.setPlayerReady(nickname);
         saveGameState(getGameId(controller), controller);
     }
 

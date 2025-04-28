@@ -80,8 +80,9 @@ public class FlightCardBoard {
         return p.getPos();
     }
 
+    //metodo forse utile per le riconessioni. per inserire all'inizio, si usa setPlayerReadyToFly
     /**
-     * The following method adds a player to the flight List, not in order.
+     * The following method adds a player to the flight List
      *
      * @param p player to be added
      * @throws IllegalArgumentException if p==null or p is already in list
@@ -92,6 +93,47 @@ public class FlightCardBoard {
         if(orderedPlayersInFlight.contains(p)) throw new IllegalArgumentException("Player is already in flight");
         if(orderedPlayersInFlight.size() >= 4) throw new RuntimeException("Too many players in flight");
 
+        orderedPlayersInFlight.add(p);
+    }
+
+    //commentare. setta il lap e pos del player, e lo adda alla lista
+    public void setPlayerReadyToFly(Player p, boolean isDemo) {
+        if(orderedPlayersInFlight.contains(p)) throw new IllegalArgumentException("Player is already in flight");
+        int size = orderedPlayersInFlight.size();
+        if(size >= 4) throw new RuntimeException("Too many players in flight");
+
+        p.setLap(1);
+        if(isDemo){
+            switch(size){
+                case 0:
+                    p.setPos(5);
+                    break;
+                case 1:
+                    p.setPos(3);
+                    break;
+                case 2:
+                    p.setPos(2);
+                    break;
+                case 3:
+                    p.setPos(1);
+                    break;
+            }
+        } else {
+            switch(size){
+                case 0:
+                    p.setPos(7);
+                    break;
+                case 1:
+                    p.setPos(4);
+                    break;
+                case 2:
+                    p.setPos(2);
+                    break;
+                case 3:
+                    p.setPos(1);
+                    break;
+            }
+        }
         orderedPlayersInFlight.add(p);
     }
 
