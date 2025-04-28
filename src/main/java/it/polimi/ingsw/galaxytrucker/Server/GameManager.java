@@ -11,13 +11,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-//TODO:
-// 1)eccezioni, capire bene quando e dove + remoteException per disconnessione
-// 5)Capire bene come gestire i corner case, leggi su discord appena rispondono, fondamentale per sistemare i metodi
+//TODO: sistemare metodi che Gabri cambierà con le nuove logiche delle eccezioni ( ricorda quelli di Matteo Bianchi)
 
 //TODO: cambiare synchronized -> lock
 
-//TODO: capire bene e applicare quanto detto da Matteo Bianchi nella mail
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
@@ -31,6 +28,7 @@ public class GameManager {
     }
 
     public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException {
+        checkNickname(nickname);
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, maxPlayers);
         controller.addPlayer(nickname, v);
@@ -40,20 +38,14 @@ public class GameManager {
     }
 
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws IOException, BusinessLogicException {
-        Controller controller = games.get(gameId);
-        if (controller == null) throw new BusinessLogicException("Game not found");
+        Controller controller = getControllerCheck(gameId);
         controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
     }
 
-    public synchronized void quitGame(int gameId, String nickname) throws IOException, BusinessLogicException {
-        Controller controller = games.get(gameId);
-        if (controller == null) throw new BusinessLogicException("Game not found");
-
-        Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new BusinessLogicException("Player not found");
-
-        //se corretto il metodo in controller, passargli il player, non il nick
+    public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException, IOException {
+        Controller controller = getControllerCheck(gameId);
+        Player player = getPlayerCheck(controller, nickname);
         controller.removePlayer(nickname);
         if (controller.checkNumberOfPlayers() == 0)
             removeGame(gameId);
@@ -61,12 +53,13 @@ public class GameManager {
             saveGameState(gameId, controller);
     }
 
-    public synchronized void stopGame(int gameId, String nickname) throws IOException {
+
+    public synchronized void stopGame(int gameId, String nickname) throws BusinessLogicException, IOException {
         Controller controller = games.get(gameId);
-        if (controller == null) throw new IOException("Game not found");
+        if (controller == null) throw new BusinessLogicException("Game not found");
 
         Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new IOException("Player not found");
+        if (player == null) throw new BusinessLogicException("Player not found");
 
         controller.markDisconnected(nickname);
         if (controller.countConnectedPlayers() <= 1) {
@@ -90,9 +83,9 @@ public class GameManager {
         throw new IOException("Player not found in any game");
     }
 
-    public synchronized void endGame(int gameId) throws Exception {
+    public synchronized void endGame(int gameId) throws IOException, BusinessLogicException {
         Controller controller = games.get(gameId);
-        if (controller == null) return;
+        if (controller == null) { throw new BusinessLogicException("Game not found"); }
 
         for (String nickname : controller.getNicknames()) {
             VirtualView view = controller.getView(nickname);
@@ -110,28 +103,22 @@ public class GameManager {
         }
     }
 
-    //TODO: capire se nei metodi seguenti, i controlli sul controller e player null sono superflui oppure ok
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
-        Controller controller = games.get(gameId);
-        if (controller == null) throw new BusinessLogicException("Game not found");
-        VirtualView v = controller.getViewByNickname(nickname);
-        if (v == null) throw new BusinessLogicException("Player not found");
+        Controller controller = getControllerCheck(gameId);
+        VirtualView v = getViewCheck(controller, nickname);
+
         int size = controller.getPileOfTile().size();
-        if(size < 1) throw new BusinessLogicException("Pile of tiles is empty");
+        if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
         Player p = controller.getPlayerByNickname(nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
-        v.updateGameState(GameFase.TILE_MANAGEMENT);
-        //update ?, capire meglio il metodo
+        updateGameState(v, GameFase.TILE_MANAGEMENT);
         return controller.getTile(randomIdx);
     }
 
     public synchronized List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
-        Controller controller = games.get(gameId);
-        if (controller == null) throw new BusinessLogicException("Game not found");
-        VirtualView v = controller.getViewByNickname(nickname);
-        if (v == null) throw new BusinessLogicException("Player not found");
+        Controller controller = getControllerCheck(gameId);
 
         List<Tile> uncoveredTiles = controller.getShownTiles();
         if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
@@ -140,10 +127,8 @@ public class GameManager {
     }
 
     public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
-        Controller controller = games.get(gameId);
-        if (controller == null) throw new BusinessLogicException("Game not found");
-        VirtualView v = controller.getViewByNickname(nickname);
-        if (v == null) throw new BusinessLogicException("Player not found");
+        Controller controller = getControllerCheck(gameId);
+        VirtualView v = getViewCheck(controller, nickname);
 
         List<Tile> uncoveredTiles = controller.getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
@@ -151,8 +136,7 @@ public class GameManager {
 
         Player p = controller.getPlayerByNickname(nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
-        v.updateGameState(GameFase.TILE_MANAGEMENT);
-        //update ?, capire meglio il metodo
+        updateGameState(v, GameFase.TILE_MANAGEMENT);
         return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
@@ -171,13 +155,15 @@ public class GameManager {
         saveGameState(getGameId(controller), controller);
     }
 
-    public synchronized void returnTile(String nickname, Tile tile) throws IOException {
+    public synchronized void returnTile(String nickname, Tile tile) throws IOException, BusinessLogicException {
+        checkTile(tile);
         Controller controller = findControllerByPlayer(nickname);
         controller.returnTile(nickname, tile);
         saveGameState(getGameId(controller), controller);
     }
 
-    public synchronized void placeTile(String nickname, Tile tile, int x, int y) throws IOException {
+    public synchronized void placeTile(String nickname, Tile tile, int x, int y) throws IOException, BusinessLogicException {
+        checkTile(tile);
         Controller controller = findControllerByPlayer(nickname);
         controller.placeTile(nickname, tile, x, y);
         saveGameState(getGameId(controller), controller);
@@ -237,6 +223,33 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE UTILITA'///////////////////////////////////////////////////
 
+    private Controller getControllerCheck(int gameId) throws BusinessLogicException {
+        Controller controller = games.get(gameId);
+        if (controller == null) throw new BusinessLogicException("Game not found");
+        return controller;
+    }
+
+    private Player getPlayerCheck(Controller controller, String nickname) throws BusinessLogicException {
+        Player player = controller.getPlayerByNickname(nickname);
+        if (player == null) throw new BusinessLogicException("Player not found");
+        return player;
+    }
+
+    private VirtualView getViewCheck(Controller controller, String nickname) throws BusinessLogicException {
+        VirtualView view = controller.getViewByNickname(nickname);
+        if (view == null) throw new BusinessLogicException("Player not found");
+        return view;
+    }
+
+    //"BEST EFFORT COMMUNICATION": provo a comunicare, ma se fallisce vado avanti lo stesso, perché l'affidabilità
+    // del server è più importante della singola comunicazione. Se il client si è disconnesso non blocco tutto.
+    private void updateGameState(VirtualView v, GameFase fase) {
+        try {
+            v.updateGameState(fase);
+        } catch (Exception ignored) { //magari eccezione specifica(parla con Floris)
+        }
+    }
+
     private Controller findControllerByPlayer(String nickname) throws IOException {
         for (Controller controller : games.values()) {
             if (controller.getPlayerByNickname(nickname) != null) {
@@ -255,8 +268,14 @@ public class GameManager {
         return -1;
     }
 
-    public Controller getController(int gameId) {
-        return games.get(gameId);
+    private void checkNickname(String nickname) throws BusinessLogicException {
+        if (nickname == null || nickname.isBlank())
+            throw new BusinessLogicException("Invalid Nickname");
+    }
+
+    private void checkTile(Tile tile) throws BusinessLogicException {
+        if (tile == null)
+            throw new BusinessLogicException("Invalid Tile");
     }
 
     public Set<Integer> listActiveGames() {
