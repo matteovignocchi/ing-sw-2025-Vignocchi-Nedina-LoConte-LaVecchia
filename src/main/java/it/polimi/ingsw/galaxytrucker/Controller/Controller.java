@@ -202,7 +202,7 @@ public class Controller implements Serializable {
     }
 
     public void startFlight(){
-        if(!isDemo) mergeDecks();s
+        if(!isDemo) mergeDecks();
 
         playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
         ViewByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
