@@ -7,6 +7,7 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 
 //TODO: RemoteException è pensata per errori di trasporto, tipo:
 // 1) il client si è disconnesso
@@ -34,8 +35,8 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         this.gameManager = gameManager;
     }
 
-    //TODO: gestire bene le eccezioni (i businesslogic error necessari in questi metodi inziali ?) vedere poi con l'implementazione
-
+    //TODO: gestire bene le eccezioni (il businesslogic error necessario in questi metodi inziali ?) vedere poi con l'implementazione
+    //TODO: capire eccezioni IOException se così vanno bene
     @Override
     public int createNewGame (boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
         try{
@@ -64,23 +65,48 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         try{
             gameManager.quitGame(gameId, nickname);
         } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
+            throw new BusinessLogicException("Business-Logic error in logging out:  " + e.getMessage(), e);
         } catch(IOException e){
-            throw new RemoteException("Error in joining game:  " + e.getMessage());
+            throw new RemoteException("Error in logging out:  " + e.getMessage());
         }
     }
 
     //aggiustare
     @Override
-    public Tile getCoveredTileServer(int gameId, String nickname) throws RemoteException {
+    public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         try{
-            gameManager.getCoveredTile(gameId, nickname);
+            return gameManager.getCoveredTile(gameId, nickname);
         } catch (BusinessLogicException e){
-            throw new BusinessLogicException("Business-Logic error in joining game:  " + e.getMessage(), e);
-        } catch(IOException e){
-            throw new RemoteException("Error in joining game:  " + e.getMessage());
+            throw new BusinessLogicException("Business-Logic error in getting a tile:  " + e.getMessage(), e);
         }
     }
+
+    //TODO: eliminare IOException? Tutte le eccezioni lanciate da metodi implicitamente(ex. pileOfTile.remove in metodo getTile
+    // in controller, lancia eccezioni implicite come IndexOutOfBoundaries ecc..) tutte catturate da BusinessLogic? o ci vuole un catch generico?
+    // capire questo discorso eccezioni.
+    @Override
+    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        try{
+            return gameManager.getUncoveredTilesList(gameId, nickname);
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException("Business-Logic error in getting the uncovered tiles' pile:  " + e.getMessage(), e);
+        } catch(IOException e){
+            throw new RemoteException("Error in getting the uncovered tiles' pile:  " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
+        try{
+            return gameManager.chooseUncoveredTile(gameId, nickname, idTile);
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException("Business-Logic error in choosing the uncovered tile:  " + e.getMessage(), e);
+        } catch(IOException e){
+            throw new RemoteException("Error in choosing the uncovered tile:  " + e.getMessage());
+        }
+    }
+
+
 
 
     @Override
@@ -101,11 +127,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     @Override
     public String waitForGameStart() throws Exception {
         return "";
-    }
-
-    @Override
-    public Tile getUncoveredTileServer() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
     }
 
     @Override
