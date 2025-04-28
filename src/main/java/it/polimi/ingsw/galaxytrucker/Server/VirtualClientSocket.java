@@ -140,7 +140,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
     @Override
     public void printListOfTileCovered(List<Tile> tiles) {
-        view.printPileCovered(tiles);
+        view.printPileCovered();
     }
     @Override
     public void printListOfTileShown(List<Tile> tiles)  {
