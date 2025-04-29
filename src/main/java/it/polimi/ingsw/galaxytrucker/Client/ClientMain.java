@@ -44,43 +44,20 @@ public class ClientMain {
                 Registry registry = LocateRegistry.getRegistry(host, 1099);
                 ServerRmi server = (ServerRmi) registry.lookup("GameServer");
                 virtualClient = new VirtualClientRmi(server, view);
-                server.registerClient(virtualClient);
+//                server.registerClient(virtualClient);
                 view.start();
 
             }else{
                 int port = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
                 virtualClient = new VirtualClientSocket(host , port , view);
                 view.start();
-
             }
-
             isConnected = true;
             view.inform("Connected with success");
             while(isConnected){
-//                view.inform("Choose to sign up or log in:");
-//                view.inform("1. Register");
-//                view.inform("2. Login");
-//                int choice = view.askIndex();
-//
-//                if (choice != 1 && choice != 2) {
-//                    view.reportError("Invalid choice. Please select 1 or 2.");
-//                    continue;
-//                }
-//                if(choice == 1){
-//                    view.inform("Choose your username and password:");
-//                    String username = virtualClient.askString();
-//                    String password = virtualClient.askString();
-//                    boolean registrationSuccess = virtualClient.sendRegistration(username, password);
-//                    if (!registrationSuccess) {
-//                        view.reportError("Registration failed. Try again.");
-//                        continue;
-//                    }
-//                    view.inform("Registration successful. Now log in:");
-//                }
-                view.inform("Insert your username and password:");
+                view.inform("Insert your username :");
                 String username = virtualClient.askString();
-                String password = virtualClient.askString();
-                boolean LoginSuccess = virtualClient.sendLogin(username, password);
+                boolean LoginSuccess = virtualClient.sendLogin(username);
                 if(LoginSuccess){
                     view.inform("Login successful");
                     virtualClient.setNickname(username);
@@ -89,7 +66,6 @@ public class ClientMain {
                     view.reportError("Credential not valid");
                 }
             }
-
             while(isConnected){
                 view.inform("-----MENU-----");
                 view.inform("1. Create new game");
@@ -119,6 +95,7 @@ public class ClientMain {
         int response = virtualClient.sendGameRequest("CREATE");
         if(response != 0){
             view.inform("Game created successfully");
+            virtualClient.setGameId(response);
             waitForPlayers();
         }else{
             view.inform("Game creation failed");
@@ -153,6 +130,7 @@ public class ClientMain {
         int response= virtualClient.sendGameRequest("JOIN_");
         if(response != 0){
             view.inform("Joining existing game");
+            virtualClient.setGameId(response);
             waitGameStart();
         }else{
             view.inform("Game not entered");

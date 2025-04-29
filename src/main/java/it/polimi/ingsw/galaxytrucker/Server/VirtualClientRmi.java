@@ -15,17 +15,23 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private View view;
     private GameFase gameFase;
     private String nickname;
+    private int gameId;
 
     public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
         super();
         this.server = server;
         this.view = view;
     }
+    @Override
     public void setNickname(String nickname) throws RemoteException {
      this.nickname = nickname;
     }
+    @Override
     public void setView(View view) {
         this.view = view;
+    }
+    public void setGameId(int gameId) throws RemoteException {
+        this.gameId = gameId;
     }
 
 
@@ -118,8 +124,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER IL LOGIN ///
 
     @Override
-    public boolean sendLogin(String username, String password) throws RemoteException {
-        return server.authenticate(username, password);
+    public boolean sendLogin(String username) throws RemoteException {
+        return server.authenticate(username);
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {
@@ -170,19 +176,25 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public Tile getTileServer() throws Exception {
-        return server.getCoveredTileServer();
+        return server.getCoveredTile(gameId, nickname);
     }
     @Override
     public Tile getUncoveredTile() throws Exception{
-        return server.getUncoveredTileServer();
+        List<Tile> tmp = server.getUncoveredTilesList(gameId, nickname);
+        view.printPileShown(tmp);
+        int index = askIndex();
+        Tile tmpTile =tmp.get(index);
+            return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
     }
     @Override
     public void getBackTile(Tile tile) throws Exception{
-        server.getBackTile();
+        server.dropTile(gameId,nickname,tile);
     }
     @Override
     public void positionTile(Tile tile) throws Exception{
-        server.positionTile();
+        view.inform("choose coordinate");
+        int[] tmp = view.askCordinate();
+        server.placeTile(gameId, nickname, tile, tmp);
     }
     @Override
     public void drawCard() throws Exception {
