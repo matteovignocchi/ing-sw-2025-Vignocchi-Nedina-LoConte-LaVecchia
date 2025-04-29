@@ -1063,8 +1063,9 @@ public class Controller implements Serializable {
         }
     }
 
-
-    //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
+    public List<Card> showDeck (int idxDeck){
+        return new ArrayList<>(decks.get(idxDeck).getCards());
+    }
 
     /*metodo per pescare una carta e attivarla:
     1. pesco con il metodo draw (che rimuove dal deck) (metodo a parte view, la riceve e chiama activate card)

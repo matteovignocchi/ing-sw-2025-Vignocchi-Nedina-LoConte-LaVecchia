@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 
@@ -17,16 +18,15 @@ public interface VirtualServer extends Remote {
     public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException;
-    //Il vecchio returnTile, scarta la tessera e la mette nella lista delle tiles scoperte
     public void dropTile (int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
     public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException;
     public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    public List<Card> showDeck(int gameId, int idxDeck) throws IOException, BusinessLogicException;
 
     public String waitForResponse() throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
     public String waitForGameStart() throws Exception;
-    public void lookDeck() throws RemoteException;
     public void lookDashBoard() throws RemoteException;
     public void getBackTile() throws RemoteException;
     public void drawCard() throws RemoteException;

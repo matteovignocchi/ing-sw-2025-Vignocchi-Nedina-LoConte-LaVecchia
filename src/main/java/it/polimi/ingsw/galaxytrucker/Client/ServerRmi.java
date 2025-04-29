@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
@@ -125,27 +126,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        //TODO: scrivere bene la firma
-        gameManager.flipHourglass(gameId, nickname);
-    }
-
-    @Override
-    public String waitForResponse() throws RemoteException {
-        return "";
-    }
-
-    @Override
-    public int[] requestGamesList() throws RemoteException {
-        return new int[0];
-    }
-
-    @Override
-    public String waitForGameStart() throws Exception {
-        return "";
-    }
-
-    @Override
     public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
 
@@ -156,8 +136,32 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void lookDeck() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
+    public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        //TODO: scrivere bene la firma e le eccezioni
+        gameManager.flipHourglass(gameId, nickname);
+    }
+
+    //valori possibili per showDeck: 0,1,2,
+    @Override
+    public List<Card> showDeck(int gameId, int idxDeck) throws RemoteException, BusinessLogicException {
+        //TODO: scrivere bene la firma e le eccezioni
+        gameManager.showDeck(gameId, idxDeck);
+    }
+
+
+    @Override
+    public int[] requestGamesList() throws RemoteException {
+        return new int[0];
+    }
+
+    @Override
+    public String waitForResponse() throws RemoteException {
+        return "";
+    }
+
+    @Override
+    public String waitForGameStart() throws Exception {
+        return "";
     }
 
     @Override
