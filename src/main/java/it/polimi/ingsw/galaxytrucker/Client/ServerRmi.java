@@ -124,6 +124,11 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    @Override
+    public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        //TODO: scrivere bene la firma
+        gameManager.flipHourglass(gameId, nickname);
+    }
 
     @Override
     public String waitForResponse() throws RemoteException {
@@ -138,11 +143,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     @Override
     public String waitForGameStart() throws Exception {
         return "";
-    }
-
-    @Override
-    public void rotateGlass() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
     }
 
     @Override

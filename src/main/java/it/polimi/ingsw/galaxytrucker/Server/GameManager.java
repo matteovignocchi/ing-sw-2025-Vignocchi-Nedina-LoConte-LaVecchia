@@ -5,13 +5,14 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: cambiare synchronized -> lock
-
+//TODO: aggiungere le chiamate di rollback (notifyview/update) e le chiamate di saveGame (persistenza) dove serve
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
@@ -165,7 +166,7 @@ public class GameManager {
         //update + update nave
     }
 
-    public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException {
+    public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
         VirtualView v = getViewCheck(controller, nickname);
         Player p = getPlayerCheck(controller, nickname);
@@ -183,25 +184,12 @@ public class GameManager {
         //update (?)
     }
 
-    public synchronized void spinHourglass(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.spinHourglass(nickname);
-        saveGameState(getGameId(controller), controller);
+    public synchronized void flipHourglass(int gameId, String nickname) throws IOException, BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        controller.flipHourglass(nickname);
     }
 
-    public synchronized void returnTile(String nickname, Tile tile) throws IOException, BusinessLogicException {
-        checkTile(tile);
-        Controller controller = findControllerByPlayer(nickname);
-        controller.returnTile(nickname, tile);
-        saveGameState(getGameId(controller), controller);
-    }
 
-    public synchronized void placeTile(String nickname, Tile tile, int x, int y) throws IOException, BusinessLogicException {
-        checkTile(tile);
-        Controller controller = findControllerByPlayer(nickname);
-        controller.placeTile(nickname, tile, x, y);
-        saveGameState(getGameId(controller), controller);
-    }
 
     public synchronized void drawCard(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);

@@ -2,14 +2,12 @@ package it.polimi.ingsw.galaxytrucker.Controller;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard2;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerException;
-import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,37 +21,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Controller implements Serializable {
 
     private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
-    private final transient Map<String, VirtualView> ViewByNickname = new ConcurrentHashMap<>();
-    private final Map<String, Player> PlayerByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
+    private final transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
+    private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
 
     private GameFase principalGameFase; //inutile
-    private GameFase preGameFase; //inutile
-    private boolean isStarted; // utile ?
 
-
+    private Hourglass hourglass;
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
-    private final FlightCardBoard f_board;
+    private final FlightCardBoard fBoard;
     private Deck deck;
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
 
     public Controller(boolean isDemo, int MaxPlayers) throws CardEffectException, IOException {
         if(isDemo) {
-            f_board = new FlightCardBoard();
+            fBoard = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
             deck = deckCreator.CreateDemoDeck();
         }else{
-            f_board = new FlightCardBoard2();
+            fBoard = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
             decks = deckCreator.CreateSecondLevelDeck();
         }
+        this.hourglass = new Hourglass(this::onHourglassStateChange);
         this.isDemo = isDemo;
         this.MaxPlayers = MaxPlayers;
-        this.isStarted = false;
         this.playerIdCounter = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
@@ -67,6 +63,7 @@ public class Controller implements Serializable {
 
     //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
     //TODO: capire come funziona update per bene
+    //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli)
     //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
 
     //Devo gestire l'eccezione (Exception) a livello di Controller?
@@ -95,14 +92,14 @@ public class Controller implements Serializable {
     //UPDATE TUTTO TRANNE NAVE
     public synchronized void update (){
         //modificare
-        ViewByNickname.forEach( (nickname, v) -> {
+        viewsByNickname.forEach( (nickname, v) -> {
             try{
-                Player player = PlayerByNickname.get(nickname);
+                Player player = playersByNickname.get(nickname);
 
                 double fire_power = getFirePower(nickname);
                 int power_engine = getPowerEngine(nickname);
                 int credits = player.getCredit();
-                int position = f_board.getPositionOfPlayer(player);//implementato in flight... vai a vedere
+                int position = fBoard.getPositionOfPlayer(player);//implementato in flight... vai a vedere
                 boolean hasPurpleAlien = player.presencePurpleAlien();
                 boolean hasBrownAlien = player.presenceBrownAlien();
                 int Human = player.getTotalHuman();
@@ -119,22 +116,16 @@ public class Controller implements Serializable {
     }
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
-        if (PlayerByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
-        if (PlayerByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
+        if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
+        if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
 
         Player player = new Player(playerIdCounter.getAndIncrement(), isDemo);
-        PlayerByNickname.put(nickname, player);
-        ViewByNickname.put(nickname, view);
+        playersByNickname.put(nickname, player);
+        viewsByNickname.put(nickname, view);
         playersInGame.add(player); //capire se va bene
         view.inform(String.format("Player %s added to game", nickname));
-        if (PlayerByNickname.size() == MaxPlayers)
+        if (playersByNickname.size() == MaxPlayers)
             startGame();
-    }
-
-    private synchronized void startGame() {
-        //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
-        this.update();
     }
 
     public void removePlayer(String nickname){
@@ -142,29 +133,37 @@ public class Controller implements Serializable {
         //ViewByNickname.remove(nickname);
         //TODO: se corretto, passare direttamente il player da eliminare, non il nick
         //TODO: eliminarlo dalla lista dei giocatori in volo? le carte non si applicano a lui. il razzo sulla plancia conta?
-        playersInGame.remove(PlayerByNickname.get(nickname));
+        playersInGame.remove(playersByNickname.get(nickname));
     }
 
     public Player getPlayerByNickname(String nickname) {
-        return PlayerByNickname.get(nickname);
+        return playersByNickname.get(nickname);
     }
 
     public VirtualView getViewByNickname(String nickname){
-        return ViewByNickname.get(nickname);
+        return viewsByNickname.get(nickname);
     }
 
     public List<Player> getPlayersInGame(){
         return playersInGame;
     }
 
+    private void broadcastInform(String msg) {
+        viewsByNickname.values().forEach(v -> {
+            try { v.inform(msg); }
+            catch (IOException e) { //TODO: come gestire? chiedere a fra che lui lo aveva visto
+                 }
+        });
+    }
+
 
 
     public void remapView(String nickname, VirtualView view){
-        ViewByNickname.put(nickname, view);
+        viewsByNickname.put(nickname, view);
     }
 
     public int countConnectedPlayers() {
-        return (int) PlayerByNickname.values().stream().filter(Player::isConnected).count();
+        return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
     }
 
     public GameFase getPrincipalGameFase() {
@@ -172,7 +171,7 @@ public class Controller implements Serializable {
     }
 
     public void markDisconnected(String nickname) {
-        Player player = PlayerByNickname.get(nickname);
+        Player player = playersByNickname.get(nickname);
         if (player != null) player.setConnected(false);
     }
 
@@ -187,7 +186,7 @@ public class Controller implements Serializable {
 
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
-        return PlayerByNickname.size();
+        return playersByNickname.size();
     }
 
     public int getMaxPlayers(){ return MaxPlayers; }
@@ -197,24 +196,85 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private synchronized void startGame() {
+        //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        startHourglass();
+        this.update();
+    }
+
     public void setPlayerReady(Player p){
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
     }
 
-    public void startFlight(){
+    public void startFlight() throws RemoteException {
         if(!isDemo) mergeDecks();
 
+        broadcastInform("Flight started!");
         playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
-        ViewByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
+        viewsByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
 
-        Player firstPlayer = f_board.getOrderedPlayers().getFirst();
-        String firstPlayerNick = PlayerByNickname.entrySet().stream()
+        Player firstPlayer = fBoard.getOrderedPlayers().getFirst();
+        String firstPlayerNick = playersByNickname.entrySet().stream()
                         .filter(e -> e.getValue().equals(firstPlayer))
                         .map(Map.Entry::getKey)
                         .findFirst()
                         .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
         firstPlayer.setGameFase(GameFase.DRAW_PHASE);
-        ViewByNickname.get(firstPlayerNick).updateGameState(GameFase.DRAW_PHASE);
+        VirtualView v = viewsByNickname.get(firstPlayerNick);
+        v.inform("You're the leader! Draw a card");
+        v.updateGameState(GameFase.DRAW_PHASE);
+    }
+
+    public  synchronized void startHourglass(){
+        hourglass.flip();
+        broadcastInform("Hourglass started!");
+    }
+
+    public void flipHourglass (String nickname) throws RemoteException, BusinessLogicException {
+        Player p = getPlayerByNickname(nickname);
+        int flips = hourglass.getFlips();
+        HourglassState state = hourglass.getState();
+
+        switch(flips){
+            case 1:
+                if(state == HourglassState.EXPIRED){
+                    hourglass.flip();
+                    broadcastInform("Hourglass flipped a second time!");
+                } else {
+                    getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
+                }
+                break;
+            case 2:
+                if(state == HourglassState.EXPIRED){
+                    getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
+                } else if (p.getGameFase() == GameFase.WAITING_FOR_PLAYERS) {
+                    hourglass.flip();
+                    broadcastInform("Hourglass flipped the last time!");
+                } else {
+                    getViewByNickname(nickname).inform("You cannot flip the hourglass for the last time: " +
+                            "You are not ready");
+                }
+                break;
+            default: throw new BusinessLogicException("Impossible to flip the hourglass another time!");
+        }
+    }
+
+    private void onHourglassStateChange(Hourglass h) throws RemoteException {
+        int flips = h.getFlips();
+
+        switch (flips) {
+            case 1:
+                broadcastInform("First Hourglass expired");
+                break;
+            case 2:
+                broadcastInform("Second Hourglass expired");
+                break;
+            case 3:
+                broadcastInform("Time’s up! Building phase ended.");
+                startFlight();
+                break;
+        }
     }
 
 
@@ -223,7 +283,7 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public boolean askPlayerDecision(String condition, Player id) throws Exception {
-        VirtualView x = ViewByNickname.get(id);
+        VirtualView x = viewsByNickname.get(id);
         return x.ask(condition);
     }
 
@@ -279,7 +339,7 @@ public class Controller implements Serializable {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                Tile y = PlayerByNickname.get(p).getTile(i, j);
+                Tile y = playersByNickname.get(p).getTile(i, j);
                 Boolean var = false;
                 switch (y) {
                     case Engine c -> {
@@ -297,7 +357,7 @@ public class Controller implements Serializable {
                 }
             }
         }
-        if (PlayerByNickname.get(p).presenceBrownAlien() && tmp != 0) {
+        if (playersByNickname.get(p).presenceBrownAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
@@ -308,7 +368,7 @@ public class Controller implements Serializable {
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = PlayerByNickname.get(p).getTile(i, j);
+                Tile y = playersByNickname.get(p).getTile(i, j);
                 boolean var;
                 switch (y) {
                     case Engine c -> {
@@ -329,7 +389,7 @@ public class Controller implements Serializable {
 
             }
         }
-        if (PlayerByNickname.get(p).presencePurpleAlien() && tmp != 0) {
+        if (playersByNickname.get(p).presencePurpleAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
@@ -345,10 +405,10 @@ public class Controller implements Serializable {
     }
 
     public void removeGoods(String p, int num) throws Exception {
-        int totalEnergy = getTotalEnergy(PlayerByNickname.get(p));
-        int totalGood = getTotalGood(PlayerByNickname.get(p));
+        int totalEnergy = getTotalEnergy(playersByNickname.get(p));
+        int totalGood = getTotalGood(playersByNickname.get(p));
 
-        List<Colour> TotalGood = PlayerByNickname.get(p).getTotalListOfGood();
+        List<Colour> TotalGood = playersByNickname.get(p).getTotalListOfGood();
         int r = 0;
         int g = 0;
         int b = 0;
@@ -364,7 +424,7 @@ public class Controller implements Serializable {
         if(num == totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                    Tile y = PlayerByNickname.get(p).getTile(i, j);
+                    Tile y = playersByNickname.get(p).getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
                             for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -377,9 +437,9 @@ public class Controller implements Serializable {
         if(num < totalGood){
             while(num != 0){
                 if(r != 0){
-                    ViewByNickname.get(p).inform("selezionare cella ed eliminare rosso");
-                    int[] vari = ViewByNickname.get(p).askCoordinate();
-                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
+                    viewsByNickname.get(p).inform("selezionare cella ed eliminare rosso");
+                    int[] vari = viewsByNickname.get(p).askCoordinate();
+                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -395,9 +455,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && num!=0 && g != 0){
-                    ViewByNickname.get(p).inform("selezionare cella ed eliminare giallo");
-                    int[] vari = ViewByNickname.get(p).askCoordinate();
-                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
+                    viewsByNickname.get(p).inform("selezionare cella ed eliminare giallo");
+                    int[] vari = viewsByNickname.get(p).askCoordinate();
+                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -413,9 +473,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && g == 0 && v != 0 && num!=0){
-                    ViewByNickname.get(p).inform("selezionare cella ed eliminare verde");
-                    int[] vari = ViewByNickname.get(p).askCoordinate();
-                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
+                    viewsByNickname.get(p).inform("selezionare cella ed eliminare verde");
+                    int[] vari = viewsByNickname.get(p).askCoordinate();
+                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -431,9 +491,9 @@ public class Controller implements Serializable {
 
                 }
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
-                    ViewByNickname.get(p).inform("selezionare cella ed eliminare blu");
-                    int[] vari = ViewByNickname.get(p).askCoordinate();
-                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
+                    viewsByNickname.get(p).inform("selezionare cella ed eliminare blu");
+                    int[] vari = viewsByNickname.get(p).askCoordinate();
+                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -453,7 +513,7 @@ public class Controller implements Serializable {
         if(num > totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                    Tile y = PlayerByNickname.get(p).getTile(i, j);
+                    Tile y = playersByNickname.get(p).getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
                             for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -465,9 +525,9 @@ public class Controller implements Serializable {
             int finish = num-totalGood;
             if(finish < totalEnergy){
                 while(finish > 0){
-                    ViewByNickname.get(p).inform("selezionare cella ed eliminare una batteria");
-                    int[] vari = ViewByNickname.get(p).askCoordinate();
-                    Tile y = PlayerByNickname.get(p).getTile(vari[0], vari[1]);
+                    viewsByNickname.get(p).inform("selezionare cella ed eliminare una batteria");
+                    int[] vari = viewsByNickname.get(p).askCoordinate();
+                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
                     switch (y){
                         case EnergyCell c -> {
                             if(c.getCapacity() != 0) c.useBattery();
@@ -480,7 +540,7 @@ public class Controller implements Serializable {
             }else{
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 7; j++){
-                        Tile y = PlayerByNickname.get(p).getTile(i, j);
+                        Tile y = playersByNickname.get(p).getTile(i, j);
                         switch (y){
                             case EnergyCell c -> {
                                 for(int bb = 0 ; bb < c.getCapacity() ; i++) c.useBattery();
@@ -497,12 +557,12 @@ public class Controller implements Serializable {
 
     public void addGoods(String player, List<Colour> list) throws Exception {
         boolean flag = true;
-        VirtualView x = ViewByNickname.get(player);
+        VirtualView x = viewsByNickname.get(player);
         if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         while (list.size() != 0 && flag == true) {
             x.inform("seleziona una HOusing unit");
             int[] vari = x.askCoordinate();
-            Tile t = PlayerByNickname.get(player).getTile(vari[0], vari[1]);
+            Tile t = playersByNickname.get(player).getTile(vari[0], vari[1]);
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
@@ -577,21 +637,21 @@ public class Controller implements Serializable {
     }
 
     public void removeCrewmate(String player, int num) throws Exception {
-        int totalCrew = getNumCrew(PlayerByNickname.get(player));
-        VirtualView x = ViewByNickname.get(player);
+        int totalCrew = getNumCrew(playersByNickname.get(player));
+        VirtualView x = viewsByNickname.get(player);
         if (num >= totalCrew) {
-            PlayerByNickname.get(player).isEliminated();
+            playersByNickname.get(player).isEliminated();
         } else {
             while (num > 0) {
                 x.inform("seleziona un HOusing unit");
                 int[] vari = x.askCoordinate();
-                Tile y = PlayerByNickname.get(player).getTile(vari[0], vari[1]);
+                Tile y = playersByNickname.get(player).getTile(vari[0], vari[1]);
                 switch (y){
                     case HousingUnit h -> {
                         if(h.returnLenght()>0){
                             int tmp = h.removeHumans(1);
-                            if(tmp == 2) PlayerByNickname.get(player).setBrownAlien();
-                            if(tmp == 3) PlayerByNickname.get(player).setPurpleAlien();
+                            if(tmp == 2) playersByNickname.get(player).setBrownAlien();
+                            if(tmp == 3) playersByNickname.get(player).setPurpleAlien();
                             num--;
                         }else{
                             x.inform("seleziona una housing unit valida");
@@ -614,19 +674,19 @@ public class Controller implements Serializable {
     }
 
     public void startPlauge(String player) throws Exception {
-        int firstNumber = getNumCrew(PlayerByNickname.get(player));
+        int firstNumber = getNumCrew(playersByNickname.get(player));
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = PlayerByNickname.get(player).getTile(i, j);
+                Tile y = playersByNickname.get(player).getTile(i, j);
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            ViewByNickname.get(player).askIndex();
+                            viewsByNickname.get(player).askIndex();
                             int x = c.removeHumans(1);
                             tmp++;
-                            if (x == 2) PlayerByNickname.get(player).setBrownAlien();
-                            if (x == 3) PlayerByNickname.get(player).setPurpleAlien();
+                            if (x == 2) playersByNickname.get(player).setBrownAlien();
+                            if (x == 3) playersByNickname.get(player).setPurpleAlien();
                         }
 
                     }
@@ -635,7 +695,7 @@ public class Controller implements Serializable {
                 }
             }
             if (tmp == firstNumber) {
-                PlayerByNickname.get(player).setEliminated();
+                playersByNickname.get(player).setEliminated();
             }
         }
     }
@@ -649,11 +709,11 @@ public class Controller implements Serializable {
      */
     public boolean isProtected(String p1, int d) throws Exception {
         boolean flag = false;
-        VirtualView x = ViewByNickname.get(p1);
+        VirtualView x = viewsByNickname.get(p1);
         while (!flag) {
             if (x.ask("vuoi usare uno scudo?")) {
                 int[] coordinate = x.askCoordinate();
-                Tile y = PlayerByNickname.get(p1).getTile(coordinate[0], coordinate[1]);
+                Tile y = playersByNickname.get(p1).getTile(coordinate[0], coordinate[1]);
                 switch (y) {
                     case Shield shield -> {
                         if (!(shield.getProtectedCorner(d) == 8)) {
@@ -691,25 +751,25 @@ public class Controller implements Serializable {
         if (dir == 0) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    PlayerByNickname.get(p).removeFrom0(dir2);
+                    playersByNickname.get(p).removeFrom0(dir2);
                 }
             }
         } else if (dir == 2) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    PlayerByNickname.get(p).removeFrom2(dir2);
+                    playersByNickname.get(p).removeFrom2(dir2);
                 }
             }
         } else if (dir == 1) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    PlayerByNickname.get(p).removeFrom1(dir2);
+                    playersByNickname.get(p).removeFrom1(dir2);
                 }
             }
         } else if (dir == 3) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
-                    PlayerByNickname.get(p).removeFrom3(dir2);
+                    playersByNickname.get(p).removeFrom3(dir2);
                 }
             }
         }
@@ -723,26 +783,26 @@ public class Controller implements Serializable {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
-        for (String p : PlayerByNickname.keySet()) {
+        for (String p : playersByNickname.keySet()) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        PlayerByNickname.get(p).removeFrom0(dir2);
+                        playersByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
+                    if (!type && playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            PlayerByNickname.get(p).removeFrom2(dir2);
+                            playersByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && checkProtection(dir, dir2, p)) {
-                        PlayerByNickname.get(p).removeFrom0(dir2);
+                        playersByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
+                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            PlayerByNickname.get(p).removeFrom2(dir2);
+                            playersByNickname.get(p).removeFrom2(dir2);
                         }
                     }
 
@@ -750,11 +810,11 @@ public class Controller implements Serializable {
             } else if (dir == 1) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        PlayerByNickname.get(p).removeFrom0(dir2);
+                        playersByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
+                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            PlayerByNickname.get(p).removeFrom2(dir2);
+                            playersByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
@@ -762,11 +822,11 @@ public class Controller implements Serializable {
             } else if (dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, p)) {
-                        PlayerByNickname.get(p).removeFrom0(dir2);
+                        playersByNickname.get(p).removeFrom0(dir2);
                     }
-                    if (!type && !PlayerByNickname.get(p).checkNoConnector(dir, dir2)) {
+                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
-                            PlayerByNickname.get(p).removeFrom2(dir2);
+                            playersByNickname.get(p).removeFrom2(dir2);
                         }
                     }
                 }
@@ -780,7 +840,7 @@ public class Controller implements Serializable {
 
     private boolean manageEnergyCell(String player) throws Exception {
 
-        VirtualView x = ViewByNickname.get(player);
+        VirtualView x = viewsByNickname.get(player);
         int[] coordinate = new int[2];
         boolean exits = false;
 
@@ -791,7 +851,7 @@ public class Controller implements Serializable {
         } else {
             while (!exits) {
                 coordinate = x.askCoordinate();
-                Tile p = PlayerByNickname.get(player).getTile(coordinate[0], coordinate[1]);
+                Tile p = playersByNickname.get(player).getTile(coordinate[0], coordinate[1]);
                 switch (p) {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
@@ -823,8 +883,8 @@ public class Controller implements Serializable {
             boolean flag = true;
             int i = 0;
             while (flag && i < 5) {
-                if (PlayerByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
-                    Tile y = PlayerByNickname.get(player).getTile(i, dir2 - 4);
+                if (playersByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
+                    Tile y = playersByNickname.get(player).getTile(i, dir2 - 4);
                     switch (y) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
@@ -846,10 +906,10 @@ public class Controller implements Serializable {
             boolean flag = true;
             int i = 5;
             while (flag && i >= 1) {
-                if (PlayerByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = PlayerByNickname.get(player).getTile(dir2 - 5, i);
-                    Tile y2 = PlayerByNickname.get(player).getTile(dir2 - 5, i + 1);
-                    Tile y3 = PlayerByNickname.get(player).getTile(dir2 - 5, i - 1);
+                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
+                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
+                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
                     switch (y1) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
@@ -899,10 +959,10 @@ public class Controller implements Serializable {
             boolean flag = true;
             int i = 1;
             while (flag && i<6) {
-                if (PlayerByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = PlayerByNickname.get(player).getTile(dir2 - 5, i);
-                    Tile y2 = PlayerByNickname.get(player).getTile(dir2 - 5, i + 1);
-                    Tile y3 = PlayerByNickname.get(player).getTile(dir2 - 5, i - 1);
+                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
+                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
+                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
                     switch (y1) {
                         case Cannon c -> {
                             if (!c.isDouble()) {
@@ -959,7 +1019,7 @@ public class Controller implements Serializable {
 
 
     public FlightCardBoard getFlightCardBoard() {
-        return f_board;
+        return fBoard;
     }
 
     // TODO: capire se gestire le eccezioni col try catch qui o nel virtual client (al confine con la
@@ -976,8 +1036,8 @@ public class Controller implements Serializable {
         try{
             CardEffectVisitor visitor = new CardEffectVisitor(this);
             card.accept(visitor);
-            f_board.eliminateOverlappedPlayers();
-            f_board.orderPlayersInFlightList();
+            fBoard.eliminateOverlappedPlayers();
+            fBoard.orderPlayersInFlightList();
         } catch (CardEffectException e) {
             System.err.println("Error: " + e.getMessage());
             // TODO: poi si dovrebbe notificare il problema al player, ad esmepio con view.notifyPlayer
