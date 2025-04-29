@@ -18,7 +18,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+//TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
+//      un po tante liste ahahah
 public class Controller implements Serializable {
 
     private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
@@ -152,8 +153,9 @@ public class Controller implements Serializable {
         return ViewByNickname.get(nickname);
     }
 
-
-
+    public List<Player> getPlayersInGame(){
+        return playersInGame;
+    }
 
 
 
@@ -188,68 +190,38 @@ public class Controller implements Serializable {
         return PlayerByNickname.size();
     }
 
-    public boolean controlPresenceOfPlayer(int id) {
-        for (Player p : playersInGame) {
-            if (p.getId() == id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public int getMaxPlayers(){ return MaxPlayers; }
 
-    //MEDOTI PER PRENDERE LE GAMEFASE
-    public List<GameFase> getGameFasesForEachPlayer() {
-        List<GameFase> gameFases = new ArrayList<>();
-        for(Player x : playersInGame) {
-            gameFases.add(x.getGameFase());
-        }
-        return gameFases;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //GESTIONE MODEL 1
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setPlayerReady(Player p){
+        getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
     }
 
-    public GameFase getGameFase(int id) {
-        for(Player p : playersInGame) {
-            if(id == p.getId()) {
-                return p.getGameFase();
-            }
-        }
-        return null;
+    public void startFlight(){
+        if(!isDemo) mergeDecks();
+
+        playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
+        ViewByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
+
+        Player firstPlayer = f_board.getOrderedPlayers().getFirst();
+        String firstPlayerNick = PlayerByNickname.entrySet().stream()
+                        .filter(e -> e.getValue().equals(firstPlayer))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
+        firstPlayer.setGameFase(GameFase.DRAW_PHASE);
+        ViewByNickname.get(firstPlayerNick).updateGameState(GameFase.DRAW_PHASE);
     }
 
-    public void setGameFaseForEachPlayer(GameFase gameFase) {
-        for(Player p : playersInGame) {
-            p.setGameFase(gameFase);
-        }
-    }
-    public void setGameFase(GameFase gameFase, int id) {
-        for(Player p : playersInGame) {
-            if(id == p.getId()) {
-                p.setGameFase(gameFase);
-            }
-        }
-    }
-
-    public void setNextPrincipalGameFase() {
-        switch (principalGameFase) {
-            case BOARD_SETUP -> {
-                preGameFase = principalGameFase;
-                principalGameFase = GameFase.WAITING_FOR_TURN;
-            }
-            case WAITING_FOR_TURN -> {
-                preGameFase = principalGameFase;
-                principalGameFase = GameFase.SCORING;
-            }
-            default -> principalGameFase = preGameFase;
-        }
-    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //GESTIONE MODEL
+    //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
     public boolean askPlayerDecision(String condition, Player id) throws Exception {
         VirtualView x = ViewByNickname.get(id);
         return x.ask(condition);
@@ -980,6 +952,10 @@ public class Controller implements Serializable {
         }
         return false;
     }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     public FlightCardBoard getFlightCardBoard() {
