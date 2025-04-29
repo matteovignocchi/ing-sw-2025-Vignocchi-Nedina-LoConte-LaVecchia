@@ -27,7 +27,6 @@ public interface VirtualServer extends Remote {
     public String waitForResponse() throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
     public String waitForGameStart() throws Exception;
-    public void lookDashBoard() throws RemoteException;
-    public void getBackTile() throws RemoteException;
+    public void lookDashBoard(int gameId, String nickname) throws RemoteException;
     public void drawCard() throws RemoteException;
 }

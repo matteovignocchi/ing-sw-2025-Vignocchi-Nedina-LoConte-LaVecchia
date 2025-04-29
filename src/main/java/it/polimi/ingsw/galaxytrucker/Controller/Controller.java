@@ -63,9 +63,7 @@ public class Controller implements Serializable {
     //TODO: vedere se cambiare synchronized -> lock (soprattutto in update, operazioni lente)
 
     //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
-    //TODO: capire come funziona update per bene
-    //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli)
-    //      sia qui nel gamemanager
+    //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli) sia qui nel gamemanager
 
 
 
@@ -130,7 +128,7 @@ public class Controller implements Serializable {
         return playersInGame;
     }
 
-    private void broadcastInform(String msg) {
+    public void broadcastInform(String msg) {
         viewsByNickname.values().forEach(v -> {
             try { v.inform(msg); }
             catch (IOException e) { //TODO: come gestire? chiedere a fra che lui lo aveva visto
@@ -153,8 +151,20 @@ public class Controller implements Serializable {
     }
 
     public void markDisconnected(String nickname) {
-        Player player = playersByNickname.get(nickname);
-        if (player != null) player.setConnected(false);
+        Player p = playersByNickname.get(nickname);
+        if (p != null && playersInGame.remove(p)) {
+            broadcastInform(nickname + " is disconnected");
+        }
+    }
+
+    public void markReconnected(String nickname, VirtualView view) throws Exception {
+        viewsByNickname.put(nickname, view); //Aaggiorno la view nella mappa
+        Player p = playersByNickname.get(nickname);
+        if (p != null && !playersInGame.contains(p)) {
+            playersInGame.add(p);
+            broadcastInform(nickname + "is riconnected");
+            updatePlayer(nickname);
+        }
     }
 
     public void pauseGame() {
@@ -178,7 +188,7 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private synchronized void startGame() {
+    public synchronized void startGame() {
         //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         startHourglass();
