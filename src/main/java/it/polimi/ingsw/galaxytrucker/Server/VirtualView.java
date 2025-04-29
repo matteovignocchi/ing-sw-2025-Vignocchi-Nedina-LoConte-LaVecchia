@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.GameFase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.rmi.RemoteException;
 import java.util.List;
@@ -22,7 +23,8 @@ public interface VirtualView {
     void printListOfGoods(List<Colour> listOfGoods) throws Exception;
     void printTile(Tile tile) throws Exception;
     void printDeck(List<Card> deck) throws Exception;
-
+    void setView(View view) throws Exception;
+    void setGameId(int gameid) throws RemoteException;
     /// METODI PER RICHIEDERE COSE ///
     int askIndex() throws Exception;
     String askString() throws Exception;
@@ -31,7 +33,7 @@ public interface VirtualView {
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
     void updateGameState(GameFase fase);
     void startMach() throws Exception;
-    boolean sendLogin(String username, String password) throws Exception;
+    boolean sendLogin(String username) throws Exception;
     int sendGameRequest(String message) throws Exception;
     Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
