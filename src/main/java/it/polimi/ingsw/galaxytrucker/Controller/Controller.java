@@ -65,56 +65,36 @@ public class Controller implements Serializable {
     //TODO: capire come funziona update per bene
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli)
     //      sia qui nel gamemanager
-    //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
-
-    //Devo gestire l'eccezione (Exception) a livello di Controller?
-    //
-    //In teoria no! Il Controller non dovrebbe occuparsi di gestire problemi di rete o errori di comunicazione.
-    //Il Controller gestisce solo la logica di gioco, non l'infrastruttura di comunicazione.
-    //
-    //Se c'è un problema di comunicazione (RemoteException, Exception dalla VirtualView),
-    //dovrebbe essere gestito nei livelli superiori, tipo ServerRMI o il GameManager.
-    //
-    //Quindi hai ragione.
-    //Nel Controller noi possiamo:
-    //
-    //propagare l'eccezione (throws Exception)
-    //
-    //oppure lanciarla come unchecked (RuntimeException) se proprio vogliamo essere estremi.
-    //
-    //MA visto che i tuoi metodi tipo addPlayer e startGame sono private e interni,
-    //è molto meglio avvolgere tutto nel try-catch per sicurezza (così eviti di far esplodere tutto se solo un client ha problemi).
-    //E loggare l'errore senza mandare tutto in crash.
-    //
-    //Quindi: la gestione con try-catch nel Controller è accettabile solo per robustezza,
-    //NON perché "è sua responsabilità" gestire i problemi di rete.
-
-    //Secondo me eliminare try catch
-    //UPDATE TUTTO TRANNE NAVE
-    public synchronized void update (){
-        //modificare
-        viewsByNickname.forEach( (nickname, v) -> {
-            try{
-                Player player = playersByNickname.get(nickname);
-
-                double fire_power = getFirePower(nickname);
-                int power_engine = getPowerEngine(nickname);
-                int credits = player.getCredit();
-                int position = fBoard.getPositionOfPlayer(player);//implementato in flight... vai a vedere
-                boolean hasPurpleAlien = player.presencePurpleAlien();
-                boolean hasBrownAlien = player.presenceBrownAlien();
-                int Human = player.getTotalHuman();
-                int Energy = player.getTotalEnergy();
 
 
-                v.inform("Game started. It's time to build your ship!"); //inutile logicamente, ma utile a far capire lo stato del gioco al client
-                v.updateGameState(GameFase.BOARD_SETUP);
-                v.showUpdate(nickname, fire_power, power_engine, credits, position, hasPurpleAlien, hasBrownAlien, Human, Energy);
-            }catch (Exception e){
-                System.err.println("Communication error with a client: " + e.getMessage());
-            }
-        });
+
+    public synchronized void updatePlayer(String nickname) throws Exception {
+        VirtualView v = getViewByNickname(nickname);
+        Player    p = getPlayerByNickname(nickname);
+
+        double firePower    = getFirePower(nickname);
+        int enginePower  = getPowerEngine(nickname);
+        int credits      = p.getCredit();
+        int position     = fBoard.getPositionOfPlayer(p);
+        boolean purpleAlien = p.presencePurpleAlien();
+        boolean brownAlien  = p.presenceBrownAlien();
+        int humans       = p.getTotalHuman();
+        int energyCells  = p.getTotalEnergy();
+
+        v.updateGameState(p.getGameFase());
+        v.showUpdate(
+                nickname,
+                firePower,
+                enginePower,
+                credits,
+                position,
+                purpleAlien,
+                brownAlien,
+                humans,
+                energyCells
+        );
     }
+
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
