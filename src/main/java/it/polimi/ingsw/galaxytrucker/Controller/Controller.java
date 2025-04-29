@@ -72,14 +72,14 @@ public class Controller implements Serializable {
         VirtualView v = getViewByNickname(nickname);
         Player    p = getPlayerByNickname(nickname);
 
-        double firePower    = getFirePower(nickname);
-        int enginePower  = getPowerEngine(nickname);
-        int credits      = p.getCredit();
-        int position     = fBoard.getPositionOfPlayer(p);
+        double firePower = getFirePower(nickname);
+        int enginePower = getPowerEngine(nickname);
+        int credits = p.getCredit();
+        int position = fBoard.getPositionOfPlayer(p);
         boolean purpleAlien = p.presencePurpleAlien();
-        boolean brownAlien  = p.presenceBrownAlien();
-        int humans       = p.getTotalHuman();
-        int energyCells  = p.getTotalEnergy();
+        boolean brownAlien = p.presenceBrownAlien();
+        int humans = p.getTotalHuman();
+        int energyCells = p.getTotalEnergy();
 
         v.updateGameState(p.getGameFase());
         v.showUpdate(
