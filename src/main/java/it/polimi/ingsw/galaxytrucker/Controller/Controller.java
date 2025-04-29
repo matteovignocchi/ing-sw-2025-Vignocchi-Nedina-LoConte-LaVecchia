@@ -15,6 +15,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
@@ -241,7 +242,7 @@ public class Controller implements Serializable {
         }
     }
 
-    private void onHourglassStateChange(Hourglass h) throws RemoteException {
+    public void onHourglassStateChange(Hourglass h) throws RemoteException {
         int flips = h.getFlips();
 
         switch (flips) {
@@ -258,7 +259,37 @@ public class Controller implements Serializable {
         }
     }
 
+    //TODO: da finire
+    public void startAwardsPhase(){
+        List<Player> orderedPlayers = fBoard.getOrderedPlayers();
 
+        int minExpConnectors = playersInGame.stream()
+                .mapToInt(Player::countExposedConnectors)
+                .min()
+                .orElseThrow( () -> new IllegalArgumentException("No Player in Game"));
+        List<Player> bestShipPlayers = playersInGame.stream()
+                .filter(p -> p.countExposedConnectors() == minExpConnectors)
+                .toList();
+
+        //TODO: giusto, ma vedere se eliminabile questo if(demo): la info è già contenuta nella fBoard!
+        if(isDemo){
+            int j = fBoard.getBonus_first_position();
+            //va bene questo -- ?
+            for (Player p : orderedPlayers) {
+                p.addCredits(j);
+                j--;
+            }
+            bestShipPlayers.forEach(p -> p.addCredits(2));
+        } else {
+            int j = fBoard.getBonus_first_position();
+            //va bene questo -2 ?
+            for (Player p : orderedPlayers) {
+                p.addCredits(j);
+                j = j - 2;
+            }
+            bestShipPlayers.forEach(p -> p.addCredits(4));
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 2
