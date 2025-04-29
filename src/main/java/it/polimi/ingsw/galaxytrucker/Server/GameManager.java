@@ -10,14 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+//TODO: cambiare synchronized -> lock
 
-//TODO: sistemare metodi che Gabri cambierà con le nuove logiche delle eccezioni ( ricorda quelli di Matteo Bianchi)
-
-//TODO: cambiare synchronized -> lock. capire dove mettere tali controlli (qui vs controller) (per i metodi che modificano
-// il model, forse meglio in controller. per quelli che modificano la mappa games, qui in gamemanager)
-
-//TODO: discorso controller.getPlayerByNick oppure getPlayerByNickCheck (nei vecchi metodi)
-//TODO: controllo che i parametri non nulli nelle invocazioni dei metodi
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
@@ -299,13 +293,13 @@ public class GameManager {
         throw new IOException("Player not found in any game");
     }
 
-    private int getGameId(Controller controller) {
-        for (Map.Entry<Integer, Controller> entry : games.entrySet()) {
-            if (entry.getValue().equals(controller)) {
-                return entry.getKey();
-            }
-        }
-        return -1;
+    private int getGameId(Controller controller) throws BusinessLogicException {
+        return games.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().equals(controller))
+                .findFirst()
+                .orElseThrow(() -> new BusinessLogicException("Controller not associated with any game"))
+                .getKey();
     }
 
 

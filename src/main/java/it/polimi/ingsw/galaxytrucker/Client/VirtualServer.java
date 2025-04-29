@@ -19,12 +19,12 @@ public interface VirtualServer extends Remote {
     //Il vecchio returnTile, scarta la tessera e la mette nella lista delle tiles scoperte
     public void dropTile (int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
     public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException;
+    public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException;
 
     public String waitForResponse() throws RemoteException;
     public int[] requestGamesList() throws RemoteException;
     public String waitForGameStart() throws Exception;
     public void rotateGlass() throws RemoteException;
-    public void setReady()  throws RemoteException;
     public void lookDeck() throws RemoteException;
     public void lookDashBoard() throws RemoteException;
     public void getBackTile() throws RemoteException;

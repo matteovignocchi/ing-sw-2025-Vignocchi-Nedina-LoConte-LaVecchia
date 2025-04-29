@@ -146,8 +146,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void setReady() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
+    public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
+
+        handleGameManagerCall("setReady", () -> {
+            gameManager.setReady(gameId, nickname);
+            return null;
+        });
     }
 
     @Override
