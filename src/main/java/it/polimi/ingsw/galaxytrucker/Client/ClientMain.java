@@ -21,7 +21,6 @@ import static it.polimi.ingsw.galaxytrucker.GameFase.*;
 import static java.lang.String.valueOf;
 
 public class ClientMain {
-    //prova per commit
 
     private static View view;
     private static VirtualView virtualClient;
