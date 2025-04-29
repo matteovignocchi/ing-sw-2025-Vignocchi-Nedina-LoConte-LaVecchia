@@ -64,6 +64,7 @@ public class Controller implements Serializable {
     //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
     //TODO: capire come funziona update per bene
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli)
+    //      sia qui nel gamemanager
     //il motivo per cui inserisco un try catch è legato alla robustezza del codice:
 
     //Devo gestire l'eccezione (Exception) a livello di Controller?
@@ -1066,9 +1067,11 @@ public class Controller implements Serializable {
     //metodo per far vedere a schermo al player il deck (solo 3 dei 4)
 
     /*metodo per pescare una carta e attivarla:
-    1. pesco con il metodo draw (che rimuove dal deck)
-    2. chiamo activate card
-    3. check se deck vuoto (attivata ultima carta) si passa alla fase di premizione
+    1. pesco con il metodo draw (che rimuove dal deck) (metodo a parte view, la riceve e chiama activate card)
+    2. chiamo activate card (gestione chiedere agli utenti, come?)
+    3. check se deck vuoto (attivata ultima carta):
+     si, si passa alla fase di premizione (cambio fase, inform e update (?))
+     no, rimodifico le fasi per una nuova drawcard
      */
 
 

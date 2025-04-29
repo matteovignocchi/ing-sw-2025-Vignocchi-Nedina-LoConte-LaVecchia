@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
@@ -189,13 +190,13 @@ public class GameManager {
         controller.flipHourglass(nickname);
     }
 
-
-
-    public synchronized void drawCard(String nickname) throws IOException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.drawCard(nickname);
-        saveGameState(getGameId(controller), controller);
+    public synchronized void drawCard(int idGame, Card card) throws IOException, BusinessLogicException {
+        Controller controller = getControllerCheck(idGame);
+        controller.activateCard(card);
+        //gestire le fasi (ricalcolare il leader (sua fase DrawCard)), informare e updatare le views
     }
+
+
 
     public void watchDeck(String nickname) throws IOException {
         Controller controller = findControllerByPlayer(nickname);
