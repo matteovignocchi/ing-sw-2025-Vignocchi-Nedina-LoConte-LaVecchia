@@ -18,6 +18,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
+//TODO: gestire fase del game (?) per riconnessioni dei players.
+//TODO: gestire e applicare i metodi che applicano gli effetti delle tiles (ex. addHuman per le celle)
+// alla fine della fase di assemblaggio (sta parte rivederla)
+//TODO: rivedere bene le inform e inserirle dove mancano
 public class Controller implements Serializable {
 
     private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
@@ -257,6 +261,14 @@ public class Controller implements Serializable {
 
     //TODO: da finire
     public void startAwardsPhase(){
+        int malusBrokenTile = fBoard.getBrokenMalus();
+        int bonusBestShip = fBoard.getBonusBestShip();
+        int redGoodBonus = fBoard.getBonusRedCargo();
+        int yellowGoodBonus = fBoard.getBonusYellowCargo();
+        int greenGoodBonus = fBoard.getBonusGreenCargo();
+        int blueGoodBonus = fBoard.getBonusBlueCargo();
+        int[] arrivalBonus = {fBoard.getBonusFirstPosition(), fBoard.getBonusSecondPosition(),
+                fBoard.getBonusThirdPosition(), fBoard.getBonusFourthPosition()};
         List<Player> orderedPlayers = fBoard.getOrderedPlayers();
 
         int minExpConnectors = playersInGame.stream()
@@ -267,24 +279,40 @@ public class Controller implements Serializable {
                 .filter(p -> p.countExposedConnectors() == minExpConnectors)
                 .toList();
 
-        //TODO: giusto, ma vedere se eliminabile questo if(demo): la info è già contenuta nella fBoard!
-        if(isDemo){
-            int j = fBoard.getBonus_first_position();
-            //va bene questo -- ?
-            for (Player p : orderedPlayers) {
-                p.addCredits(j);
-                j--;
-            }
-            bestShipPlayers.forEach(p -> p.addCredits(2));
-        } else {
-            int j = fBoard.getBonus_first_position();
-            //va bene questo -2 ?
-            for (Player p : orderedPlayers) {
-                p.addCredits(j);
-                j = j - 2;
-            }
-            bestShipPlayers.forEach(p -> p.addCredits(4));
+        for (int i = 0; i < orderedPlayers.size(); i++) {
+            orderedPlayers.get(i).addCredits(arrivalBonus[i]);
         }
+
+        for (Player p : bestShipPlayers) {
+            p.addCredits(bonusBestShip);
+        }
+
+        for (Player p : playersInGame) {
+            List<Colour> goods = p.getTotalListOfGood();
+            for(Colour c : goods){
+                switch(c){
+                    case Colour.RED:
+                        p.addCredits(redGoodBonus);
+                        break;
+                    case Colour.YELLOW:
+                        p.addCredits(yellowGoodBonus);
+                        break;
+                    case Colour.GREEN:
+                        p.addCredits(greenGoodBonus);
+                        break;
+                    case Colour.BLUE:
+                        p.addCredits(blueGoodBonus);
+                        break;
+                }
+            }
+
+            int numBrokenTiles = p.checkDiscardPile();
+            p.addCredits(numBrokenTiles * malusBrokenTile);
+
+            //TODO: trovare la view associata al player e informarla del numero x di crediti fatti:
+            // se x>0, vinto, se no perso (farlo qui o in un for separato?)
+        }
+        //TODO: mettere tutti in fase di exit e proseguire con la fine del gioco
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1081,7 +1109,6 @@ public class Controller implements Serializable {
      si, si passa alla fase di premizione (cambio fase, inform e update (?))
      no, rimodifico le fasi per una nuova drawcard
      */
-
 
 }
 

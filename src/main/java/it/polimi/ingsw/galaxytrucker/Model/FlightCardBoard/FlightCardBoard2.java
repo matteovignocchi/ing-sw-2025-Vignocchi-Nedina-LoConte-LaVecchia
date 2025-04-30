@@ -10,13 +10,12 @@ import java.util.ArrayList;
 public class FlightCardBoard2 extends FlightCardBoard {
 
     public FlightCardBoard2() {
-        this.position_number = 24;
-        this.bonus_first_position = 8;
-        this.bonus_second_position = 6;
-        this.bonus_third_position = 4;
-        this.bonus_fourth_position = 2;
-        this.bonus_MostBeautifulShip = 4;
-        this.orderedPlayersInFlight = new ArrayList<Player>();
+        this.spacesNumber = 24;
+        this.bonusFirstPosition = 8;
+        this.bonusSecondPosition = 6;
+        this.bonusThirdPosition = 4;
+        this.bonusFourthPosition = 2;
+        this.bonusBestShip = 4;
     }
 }
 

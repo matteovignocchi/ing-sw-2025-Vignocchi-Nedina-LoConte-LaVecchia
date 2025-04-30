@@ -12,63 +12,73 @@ import java.util.List;
  */
 
 public class FlightCardBoard {
-    public int position_number;
-    protected int bonus_MostBeautifulShip;
-    protected int bonus_first_position;
-    protected int bonus_second_position;
-    protected int bonus_third_position;
-    protected int bonus_fourth_position;
+    public int spacesNumber;
+    protected int bonusBestShip;
+    protected int bonusFirstPosition;
+    protected int bonusSecondPosition;
+    protected int bonusThirdPosition;
+    protected int bonusFourthPosition;
+    protected int redGoodBonus;
+    protected int yellowGoodBonus;
+    protected int greenGoodBonus;
+    protected int blueGoodBonus;
+    protected int malusBrokenTile;
     protected List<Player> orderedPlayersInFlight;
 
     public FlightCardBoard() {
         //si inizia a contare da 1 le posizioni
-        this.position_number = 18;
-        this.bonus_first_position = 4;
-        this.bonus_second_position = 3;
-        this.bonus_third_position = 2;
-        this.bonus_fourth_position = 1;
-        this.bonus_MostBeautifulShip = 2;
+        this.spacesNumber = 18;
+        this.bonusFirstPosition = 4;
+        this.bonusSecondPosition = 3;
+        this.bonusThirdPosition = 2;
+        this.bonusFourthPosition = 1;
+        this.bonusBestShip = 2;
+        this.redGoodBonus = 4;
+        this.yellowGoodBonus = 3;
+        this.greenGoodBonus = 2;
+        this.blueGoodBonus = 1;
+        this.malusBrokenTile = -1;
         this.orderedPlayersInFlight = new ArrayList<Player>();
     }
 
     public int getBonusRedCargo() {
-        return 4;
+        return redGoodBonus;
     }
 
     public int getBonusYellowCargo() {
-        return 3;
+        return yellowGoodBonus;
     }
 
     public int getBonusGreenCargo() {
-        return 2;
+        return greenGoodBonus;
     }
 
     public int getBonusBlueCargo() {
-        return 1;
+        return blueGoodBonus;
     }
 
-    public int getDamageMalus(){
-        return -1;
+    public int getBrokenMalus(){
+        return malusBrokenTile;
     }
 
-    public int getBonus_MostBeautifulShip() {
-        return bonus_MostBeautifulShip;
+    public int getBonusBestShip() {
+        return bonusBestShip;
     }
 
-    public int getBonus_first_position(){
-        return bonus_first_position;
+    public int getBonusFirstPosition(){
+        return bonusFirstPosition;
     }
 
-    public int getBonus_second_position(){
-        return bonus_second_position;
+    public int getBonusSecondPosition(){
+        return bonusSecondPosition;
     }
 
-    public int getBonus_third_position(){
-        return bonus_third_position;
+    public int getBonusThirdPosition(){
+        return bonusThirdPosition;
     }
 
-    public int getBonus_fourth_position(){
-        return bonus_fourth_position;
+    public int getBonusFourthPosition(){
+        return bonusFourthPosition;
     }
 
     public List<Player> getOrderedPlayers(){ return new ArrayList<>(orderedPlayersInFlight); }
@@ -168,11 +178,11 @@ public class FlightCardBoard {
      * @return final position with wrap-around
      */
     public int checkOverLap(Player p, int temp) {
-        if (temp > position_number) {
-            temp = temp - position_number;
+        if (temp > spacesNumber) {
+            temp = temp - spacesNumber;
             p.setLap(p.getLap()+1);
         } else if (temp < 1){
-            temp = temp + position_number;
+            temp = temp + spacesNumber;
             p.setLap(p.getLap()-1);
         }
         return temp;
@@ -212,7 +222,7 @@ public class FlightCardBoard {
                             rocketsFound = true;
                         }
                     } else {
-                        if((p_start < other_pos && other_pos <= position_number) || (0 < other_pos && other_pos <= p_final)){
+                        if((p_start < other_pos && other_pos <= spacesNumber) || (0 < other_pos && other_pos <= p_final)){
                             count++;
                             rocketsFound = true;
                         }
@@ -224,7 +234,7 @@ public class FlightCardBoard {
                             rocketsFound = true;
                         }
                     } else {
-                        if((0 < other_pos && other_pos < p_start) || (p_final <= other_pos && other_pos <= position_number)){
+                        if((0 < other_pos && other_pos < p_start) || (p_final <= other_pos && other_pos <= spacesNumber)){
                             count--;
                             rocketsFound = true;
                         }
