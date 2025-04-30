@@ -15,6 +15,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Controller implements Serializable {
 
     private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
-    private final transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
+    private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
@@ -33,7 +34,7 @@ public class Controller implements Serializable {
 
     private GameFase principalGameFase; //inutile
 
-    private Hourglass hourglass;
+    private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
     private final FlightCardBoard fBoard;
@@ -138,7 +139,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public synchronized void markReconnected(String nickname, VirtualView view) throws Exception {
+    public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
         viewsByNickname.put(nickname, view); //Aaggiorno la view nella mappa
         Player p = playersByNickname.get(nickname);
         if (p != null && !playersInGame.contains(p)) {
@@ -146,6 +147,11 @@ public class Controller implements Serializable {
             broadcastInform(nickname + "is riconnected");
             updatePlayer(nickname);
         }
+    }
+
+    public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
+        this.viewsByNickname = new ConcurrentHashMap<>();
+        this.hourglass       = new Hourglass(hourglassListener);
     }
 
     public String getNickname(Player player) throws BusinessLogicException {
@@ -169,8 +175,8 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public synchronized void startGame() {
-        //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        broadcastInform("Game is starting! Place your tiles on the board.");
         startHourglass();
     }
 

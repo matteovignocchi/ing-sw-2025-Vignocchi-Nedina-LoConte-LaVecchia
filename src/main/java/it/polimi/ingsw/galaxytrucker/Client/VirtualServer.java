@@ -24,9 +24,9 @@ public interface VirtualServer extends Remote {
     public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public List<Card> showDeck(int gameId, int idxDeck) throws IOException, BusinessLogicException;
 
-    public String waitForResponse() throws RemoteException;
-    public int[] requestGamesList() throws RemoteException;
-    public String waitForGameStart() throws Exception;
-    public void lookDashBoard(int gameId, String nickname) throws RemoteException;
+    public String waitForResponse() throws RemoteException; //serve?
+    public int[] requestGamesList() throws RemoteException; //serve?
+    public String waitForGameStart() throws Exception; //serve?
+    public void lookDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public void drawCard() throws RemoteException;
 }

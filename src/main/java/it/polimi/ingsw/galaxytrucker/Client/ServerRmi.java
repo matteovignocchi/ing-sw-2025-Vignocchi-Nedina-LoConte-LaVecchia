@@ -47,14 +47,14 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
      * @param <T> Il tipo di ritorno del metodo del GameManager.
      */
     private interface GameManagerCall<T> {
-        T execute() throws BusinessLogicException, IOException;
+        T execute() throws Exception;
     }
 
     @Override
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
         if (v == null) { throw new RemoteException("VirtualView cannot be null"); }
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
-        if (maxPlayers <= 1 || maxPlayers > 4) { throw new RemoteException("the maximum number of players must be between 2 and 4"); }
+        if (maxPlayers < 2 || maxPlayers > 4) { throw new RemoteException("the maximum number of players must be between 2 and 4"); }
 
         return handleGameManagerCall("createNewGame", () -> gameManager.createGame(isDemo, v, nickname, maxPlayers));
     }
@@ -137,17 +137,19 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     @Override
     public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        //TODO: scrivere bene la firma e le eccezioni
-        gameManager.flipHourglass(gameId, nickname);
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
+
+        handleGameManagerCall("flipHourglass", () -> {
+            gameManager.flipHourglass(gameId, nickname);
+            return null;
+        });
     }
 
     //valori possibili per showDeck: 0,1,2,
     @Override
     public List<Card> showDeck(int gameId, int idxDeck) throws RemoteException, BusinessLogicException {
-        //TODO: scrivere bene la firma e le eccezioni
-        gameManager.showDeck(gameId, idxDeck);
+        return handleGameManagerCall("showDeck", () -> gameManager.showDeck(gameId, idxDeck));
     }
-
 
     @Override
     public int[] requestGamesList() throws RemoteException {
@@ -165,8 +167,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void lookDashBoard(int gameId, String nickname) throws RemoteException {
+    public void lookDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
+        handleGameManagerCall("lookDashBoard", () -> {
+            gameManager.lookDashBoard(nickname, gameId);
+            return null;
+        });
     }
 
     @Override
