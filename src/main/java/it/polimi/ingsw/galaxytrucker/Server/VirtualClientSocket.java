@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.rmi.RemoteException;
 import java.util.List;
 
 public class VirtualClientSocket implements Runnable, VirtualView {
@@ -130,7 +131,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception {
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
         view.updateView(nickname , firePower , powerEngine , credits , position , purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
     }
 
@@ -193,7 +194,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void startMach() {
     }
     @Override
-    public void updateGameState(GameFase fase){
+    public void updateGameState(GameFase fase) throws RemoteException {
         this.gameFase = fase;
         view.updateState(gameFase);
     }

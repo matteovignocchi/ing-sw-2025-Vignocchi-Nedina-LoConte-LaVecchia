@@ -13,7 +13,7 @@ public interface VirtualView {
 
     /// METODI PER FARE LE PRINT A SCHERMO ///
     void inform(String message) throws RemoteException;
-    void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws Exception; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
+    void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
     void reportError(String error) throws Exception;
     boolean ask(String message) throws Exception;
     void printCard(Card card) throws Exception;
@@ -31,7 +31,7 @@ public interface VirtualView {
     int[] askCoordinate() throws Exception;
 
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
-    void updateGameState(GameFase fase);
+    void updateGameState(GameFase fase) throws RemoteException;
     void startMach() throws Exception;
     boolean sendLogin(String username) throws Exception;
     int sendGameRequest(String message) throws Exception;

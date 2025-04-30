@@ -103,7 +103,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER SETTARE COSE AL CLIENT RIGUARDO AL GAMEFLOW ///
 
     @Override
-    public void updateGameState(GameFase fase) throws RemoteException{
+    public void updateGameState(GameFase fase) throws RemoteException {
         this.gameFase = fase;
         view.updateState(gameFase);
     }

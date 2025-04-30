@@ -6,6 +6,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,7 +35,7 @@ public class GameManager {
 
         controller.addPlayer(nickname, v);
         saveGameState(gameId, controller);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
         return gameId;
     }
 
@@ -44,15 +45,15 @@ public class GameManager {
         if(controller.getPlayerByNickname(nickname) != null){
             cancelTimeout(gameId);
             controller.markReconnected(nickname, v);
-            controller.broadcastInform(nickname + "is riconnected");
+            controller.broadcastInform(nickname + "is reconnected");
         } else {
             controller.addPlayer(nickname, v);
             if(controller.countConnectedPlayers() == controller.getMaxPlayers()){
-                controller.startGame();
+                beginGame(gameId);
             }
         }
         saveGameState(gameId, controller);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
     }
 
     public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException, IOException {
@@ -83,7 +84,7 @@ public class GameManager {
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
         return controller.getTile(randomIdx);
     }
 
@@ -105,7 +106,7 @@ public class GameManager {
 
         Player p = getPlayerCheck(controller, nickname);
         p.setGameFase(GameFase.TILE_MANAGEMENT);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
         return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
@@ -115,7 +116,7 @@ public class GameManager {
 
         controller.addToShownTile(tile);
         p.setGameFase(GameFase.BOARD_SETUP);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
     }
 
     public synchronized void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws Exception {
@@ -124,7 +125,7 @@ public class GameManager {
 
         p.addTile(cord[0], cord[1], tile);
         p.setGameFase(GameFase.BOARD_SETUP);
-        controller.updatePlayer(nickname);
+        sendUpdate(gameId, nickname);
     }
 
     public synchronized void setReady(int gameId, String nickname) throws Exception {
@@ -138,7 +139,7 @@ public class GameManager {
             controller.startFlight();
         } else{
             p.setGameFase(GameFase.WAITING_FOR_PLAYERS);
-            controller.updatePlayer(nickname);
+            sendUpdate(gameId, nickname);
         }
     }
 
@@ -162,10 +163,10 @@ public class GameManager {
     }
 
     //da finire
-    public void lookDashBoard(String nickname, int targetId) throws Exception {
+    public void lookDashBoard(String nickname, int gameId) throws Exception {
         Controller controller = findControllerByPlayer(nickname);
-        controller.lookDashBoard(nickname, targetId);
-        controller.updatePlayer(nickname);
+        controller.lookDashBoard(nickname, gameId);
+        sendUpdate(gameId, nickname);
     }
 
     ////////////////////////////////////////////////GESTIONE SALVATAGGIO////////////////////////////////////////////////
@@ -224,19 +225,6 @@ public class GameManager {
         return view;
     }
 
-    //"BEST EFFORT COMMUNICATION": provo a comunicare, ma se fallisce vado avanti lo stesso, perché l'affidabilità
-    // del server è più importante della singola comunicazione. Se il client si è disconnesso non blocco tutto.
-    private void updateGameState(int gameId, String nickname, VirtualView v, GameFase fase) throws BusinessLogicException {
-        try {
-            v.updateGameState(fase);
-        } catch (Exception e) {//magari eccezione specifica(parla con Floris)
-            Controller controller = games.get(gameId);
-            controller.markDisconnected(nickname);
-            controller.broadcastInform("Player"+ nickname + "has crashed");
-            setTimeout(gameId);
-        }
-    }
-
     private Controller findControllerByPlayer(String nickname) throws IOException {
         for (Controller controller : games.values()) {
             if (controller.getPlayerByNickname(nickname) != null) {
@@ -245,16 +233,6 @@ public class GameManager {
         }
         throw new IOException("Player not found in any game");
     }
-
-    private int getGameId(Controller controller) throws BusinessLogicException {
-        return games.entrySet()
-                .stream()
-                .filter(entry -> entry.getValue().equals(controller))
-                .findFirst()
-                .orElseThrow(() -> new BusinessLogicException("Controller not associated with any game"))
-                .getKey();
-    }
-
 
     public Set<Integer> listActiveGames() {
         return games.keySet();
@@ -282,20 +260,54 @@ public class GameManager {
 
     private void cancelTimeout(int gameId) {
         ScheduledFuture<?> old = timeout.remove(gameId);
-        if (old != null) old.cancel(false);
+        if (old != null) {
+            old.cancel(false);
+        }
     }
 
     private void onTimeout(int gameId) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-
         int connected = controller.countConnectedPlayers();
+
         if (connected == 1) {
-            String winner = controller.getPlayersInGame().getFirst().toString();//sono sicuro che il tostring restiuisce il nick?
+            Player player_winner = controller.getPlayersInGame().get(0);
+            String winner = controller.getNickname(player_winner);
             try {
                 controller.getViewByNickname(winner).inform("You won the game!");
             } catch (IOException ignored) {}
         }
         // se 0 o >1: nessun vincitore
         removeGame(gameId);
+    }
+
+    //Manda l’aggiornamento allo user; se il client non risponde, gestisce la disconnessione
+    private void sendUpdate(int gameId, String nickname) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        try {
+            controller.updatePlayer(nickname);
+            cancelTimeout(gameId);// se era partito un timeout per questo game, lo cancelliamo
+        } catch (RemoteException e) {
+            controller.markDisconnected(nickname);// client non risponde → lo marchiamo disconnesso
+            controller.broadcastInform(nickname + "is disconnected");
+
+            int connected = controller.countConnectedPlayers();
+            if (connected <= 1) {
+                try {
+                    setTimeout(gameId);
+                } catch (BusinessLogicException ignore) {
+                    // non dovrebbe succedere, ma in caso lo ignoriamo
+                }
+            }
+        }
+    }
+
+    private void beginGame(int gameId) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        controller.startGame();
+
+        for (Player p : controller.getPlayersInGame()) {
+            String nick = controller.getNickname(p);
+            sendUpdate(gameId, nick);
+        }
     }
 }

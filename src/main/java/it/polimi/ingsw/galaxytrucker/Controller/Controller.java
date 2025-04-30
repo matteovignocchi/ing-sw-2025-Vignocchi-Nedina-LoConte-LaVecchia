@@ -15,7 +15,6 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
@@ -59,17 +58,14 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //TODO: vedere se cambiare synchronized -> lock (soprattutto in update, operazioni lente)
-
     //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli) sia qui nel gamemanager
 
 
 
-    public synchronized void updatePlayer(String nickname) throws Exception {
+    public synchronized void updatePlayer(String nickname) throws RemoteException {
         VirtualView v = getViewByNickname(nickname);
-        Player    p = getPlayerByNickname(nickname);
+        Player p = getPlayerByNickname(nickname);
 
         double firePower = getFirePower(nickname);
         int enginePower = getPowerEngine(nickname);
@@ -81,18 +77,9 @@ public class Controller implements Serializable {
         int energyCells = p.getTotalEnergy();
 
         v.updateGameState(p.getGameFase());
-        v.showUpdate(
-                nickname,
-                firePower,
-                enginePower,
-                credits,
-                position,
-                purpleAlien,
-                brownAlien,
-                humans,
-                energyCells
-        );
+        v.showUpdate(nickname, firePower, enginePower, credits, position, purpleAlien, brownAlien, humans, energyCells);
     }
+
 
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
@@ -108,14 +95,6 @@ public class Controller implements Serializable {
             startGame();
     }
 
-    public void removePlayer(String nickname){
-        //PlayerByNickname.remove(nickname);
-        //ViewByNickname.remove(nickname);
-        //TODO: se corretto, passare direttamente il player da eliminare, non il nick
-        //TODO: eliminarlo dalla lista dei giocatori in volo? le carte non si applicano a lui. il razzo sulla plancia conta?
-        playersInGame.remove(playersByNickname.get(nickname));
-    }
-
     public Player getPlayerByNickname(String nickname) {
         return playersByNickname.get(nickname);
     }
@@ -129,17 +108,15 @@ public class Controller implements Serializable {
     }
 
     public void broadcastInform(String msg) {
-        viewsByNickname.values().forEach(v -> {
-            try { v.inform(msg); }
-            catch (IOException e) { //TODO: come gestire? chiedere a fra che lui lo aveva visto
-                 }
-        });
-    }
-
-
-
-    public void remapView(String nickname, VirtualView view){
-        viewsByNickname.put(nickname, view);
+        List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
+        for(String nickname : nicknames) {
+            VirtualView v = viewsByNickname.get(nickname);
+            try {
+                v.inform(msg);
+            } catch (IOException e) {
+                markDisconnected(nickname); //il client non risponde: disconnesso (il metodo informa tutti)
+            }
+        }
     }
 
     public int countConnectedPlayers() {
@@ -150,14 +127,14 @@ public class Controller implements Serializable {
         return principalGameFase;
     }
 
-    public void markDisconnected(String nickname) {
+    public synchronized void markDisconnected(String nickname) {
         Player p = playersByNickname.get(nickname);
         if (p != null && playersInGame.remove(p)) {
             broadcastInform(nickname + " is disconnected");
         }
     }
 
-    public void markReconnected(String nickname, VirtualView view) throws Exception {
+    public synchronized void markReconnected(String nickname, VirtualView view) throws Exception {
         viewsByNickname.put(nickname, view); //Aaggiorno la view nella mappa
         Player p = playersByNickname.get(nickname);
         if (p != null && !playersInGame.contains(p)) {
@@ -167,14 +144,13 @@ public class Controller implements Serializable {
         }
     }
 
-    public void pauseGame() {
-        principalGameFase = GameFase.WAITING_FOR_PLAYERS;
-    }//non so se la fase è corretta, cioè il gioco deve continuare se crasha, a meno che non resta un solo player e attivo un timeout
-    //Metodo da rivedere
-
-    public void resumeGame() {
-        principalGameFase = GameFase.DRAW_PHASE;
-    }//metodo da rivedere
+    public String getNickname(Player player) throws BusinessLogicException {
+        return playersByNickname.entrySet().stream()
+                .filter(e -> e.getValue().equals(player))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new BusinessLogicException("Player not found"));
+    }
 
     //essendoci già condizione su if non penso servi
     public int checkNumberOfPlayers() {
@@ -192,7 +168,6 @@ public class Controller implements Serializable {
         //PlayerByNickname.values().forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
         startHourglass();
-        this.update();
     }
 
     public void setPlayerReady(Player p){
@@ -204,7 +179,13 @@ public class Controller implements Serializable {
 
         broadcastInform("Flight started!");
         playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
-        viewsByNickname.forEach((s, v) -> v.updateGameState(GameFase.WAITING_FOR_TURN) );
+        viewsByNickname.forEach((s, v) -> {
+            try {
+                v.updateGameState(GameFase.WAITING_FOR_TURN);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         Player firstPlayer = fBoard.getOrderedPlayers().getFirst();
         String firstPlayerNick = playersByNickname.entrySet().stream()
@@ -252,7 +233,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void onHourglassStateChange(Hourglass h) throws RemoteException {
+    public void onHourglassStateChange(Hourglass h){
         int flips = h.getFlips();
 
         switch (flips) {
@@ -264,7 +245,12 @@ public class Controller implements Serializable {
                 break;
             case 3:
                 broadcastInform("Time’s up! Building phase ended.");
-                startFlight();
+                try {
+                    startFlight();
+                } catch (RemoteException e) {
+                    //TODO:gabri riempi il catch qui, non so cosa deve catturare
+                    // questo try-catch sistema quel problema che dava all'inizio nel costruttore
+                }
                 break;
         }
     }
@@ -304,7 +290,7 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public boolean askPlayerDecision(String condition, Player id) throws Exception {
+    public boolean askPlayerDecision(String condition, Player id) {
         VirtualView x = viewsByNickname.get(id);
         return x.ask(condition);
     }
@@ -357,7 +343,7 @@ public class Controller implements Serializable {
      *
      * @return the total amount of engine power
      */
-    public int getPowerEngine(String p) throws Exception {
+    public int getPowerEngine(String p) {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
@@ -386,7 +372,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public double getFirePower(String p) throws Exception {
+    public double getFirePower(String p){
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -426,7 +412,7 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
-    public void removeGoods(String p, int num) throws Exception {
+    public void removeGoods(String p, int num)  {
         int totalEnergy = getTotalEnergy(playersByNickname.get(p));
         int totalGood = getTotalGood(playersByNickname.get(p));
 
@@ -577,7 +563,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void addGoods(String player, List<Colour> list) throws Exception {
+    public void addGoods(String player, List<Colour> list) throws RemoteException {
         boolean flag = true;
         VirtualView x = viewsByNickname.get(player);
         if(!x.ask("vuoi aggiungere un goods?")) flag=false;
@@ -860,7 +846,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String player) throws Exception {
+    private boolean manageEnergyCell(String player)  {
 
         VirtualView x = viewsByNickname.get(player);
         int[] coordinate = new int[2];

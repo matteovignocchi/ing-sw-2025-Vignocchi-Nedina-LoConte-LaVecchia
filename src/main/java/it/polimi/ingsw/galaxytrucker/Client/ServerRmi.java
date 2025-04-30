@@ -165,13 +165,8 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void lookDashBoard() throws RemoteException {
-        throw new RemoteException("Method requires player context.");
-    }
+    public void lookDashBoard(int gameId, String nickname) throws RemoteException {
 
-    @Override
-    public void getBackTile() throws RemoteException {
-        throw new RemoteException("Method getBackTile not yet implemented");
     }
 
     @Override
