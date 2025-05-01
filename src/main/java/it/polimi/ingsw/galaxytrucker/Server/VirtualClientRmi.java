@@ -178,25 +178,46 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public Tile getTileServer() throws RemoteException {
-        return server.getCoveredTile(gameId, nickname);
+        try {
+            return server.getCoveredTile(gameId, nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public Tile getUncoveredTile() throws RemoteException{
-        List<Tile> tmp = server.getUncoveredTilesList(gameId, nickname);
+        List<Tile> tmp = null;
+        try {
+            tmp = server.getUncoveredTilesList(gameId, nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
         view.printPileShown(tmp);
         int index = askIndex();
         Tile tmpTile =tmp.get(index);
+        try {
             return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void getBackTile(Tile tile) throws RemoteException{
-        server.dropTile(gameId,nickname,tile);
+        try {
+            server.dropTile(gameId,nickname,tile);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         view.inform("choose coordinate");
         int[] tmp = view.askCordinate();
-        server.placeTile(gameId, nickname, tile, tmp);
+        try {
+            server.placeTile(gameId, nickname, tile, tmp);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void drawCard() throws RemoteException {
@@ -204,28 +225,47 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void rotateGlass() throws RemoteException{
-        server.rotateGlass(gameId,nickname);
+        try {
+            server.rotateGlass(gameId,nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void setReady() throws RemoteException{
-        server.setReady(gameId,nickname);
+        try {
+            server.setReady(gameId,nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void lookDeck() throws RemoteException{
         view.inform("choose deck : 1 / 2 / 3");
         int index = askIndex();
-        server.showDeck(gameId, index);
+        try {
+            server.showDeck(gameId, index);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void lookDashBoard() throws RemoteException{
         String tmp = view.choosePlayer();
-        server.lookDashBoard(gameId,tmp);
+        try {
+            server.lookDashBoard(gameId,tmp);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void logOut() throws RemoteException{
-        server.logOut(gameId,nickname);
+        try {
+            server.logOut(gameId,nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
-
     @Override
     public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
         view.updateMap(Position);
