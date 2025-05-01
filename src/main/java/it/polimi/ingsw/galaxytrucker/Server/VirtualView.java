@@ -8,6 +8,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public interface VirtualView {
 
@@ -52,4 +53,5 @@ public interface VirtualView {
     void lookDashBoard() throws Exception;
     void logOut() throws Exception;
     void setNickname(String nickname) throws Exception;
+    void updateMapPosition(Map<String, Integer> Position) throws Exception;
 }

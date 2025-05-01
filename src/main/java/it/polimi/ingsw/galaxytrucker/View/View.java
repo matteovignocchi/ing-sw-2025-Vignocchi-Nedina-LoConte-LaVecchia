@@ -6,6 +6,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
 import java.util.List;
+import java.util.Map;
 
 
 public interface View {
@@ -29,6 +30,7 @@ public interface View {
     void printTile(Tile tile);
     void printCard(Card card);
     String sendAvailableChoices() throws Exception;
+    void updateMap(Map<String, Tile> map);
 
     //meetodo per richiedere
 
