@@ -13,7 +13,7 @@ import java.util.Map;
 public interface VirtualView {
 
     /// METODI PER FARE LE PRINT A SCHERMO ///
-    void inform(String message) throws RemoteException;
+    void inform(String message) throws Exception;
     void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
     void reportError(String error) throws Exception;
     boolean ask(String message) throws Exception;
@@ -25,14 +25,14 @@ public interface VirtualView {
     void printTile(Tile tile) throws Exception;
     void printDeck(List<Card> deck) throws Exception;
     void setView(View view) throws Exception;
-    void setGameId(int gameid) throws RemoteException;
+    void setGameId(int gameId) throws RemoteException;
     /// METODI PER RICHIEDERE COSE ///
     int askIndex() throws Exception;
     String askString() throws Exception;
     int[] askCoordinate() throws Exception;
 
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
-    void updateGameState(GameFase fase) throws RemoteException;
+    void updateGameState(GameFase fase) throws Exception;
     void startMach() throws Exception;
     boolean sendLogin(String username) throws Exception;
     int sendGameRequest(String message) throws Exception;

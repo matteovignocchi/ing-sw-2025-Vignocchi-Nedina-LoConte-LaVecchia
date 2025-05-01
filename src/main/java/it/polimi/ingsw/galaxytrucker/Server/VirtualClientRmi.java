@@ -177,11 +177,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// COMANDI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
 
     @Override
-    public Tile getTileServer() throws Exception {
+    public Tile getTileServer() throws RemoteException {
         return server.getCoveredTile(gameId, nickname);
     }
     @Override
-    public Tile getUncoveredTile() throws Exception{
+    public Tile getUncoveredTile() throws RemoteException{
         List<Tile> tmp = server.getUncoveredTilesList(gameId, nickname);
         view.printPileShown(tmp);
         int index = askIndex();
@@ -189,45 +189,45 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
     }
     @Override
-    public void getBackTile(Tile tile) throws Exception{
+    public void getBackTile(Tile tile) throws RemoteException{
         server.dropTile(gameId,nickname,tile);
     }
     @Override
-    public void positionTile(Tile tile) throws Exception{
+    public void positionTile(Tile tile) throws RemoteException{
         view.inform("choose coordinate");
         int[] tmp = view.askCordinate();
         server.placeTile(gameId, nickname, tile, tmp);
     }
     @Override
-    public void drawCard() throws Exception {
+    public void drawCard() throws RemoteException {
         server.drawCard();
     }
     @Override
-    public void rotateGlass() throws Exception{
+    public void rotateGlass() throws RemoteException{
         server.rotateGlass(gameId,nickname);
     }
     @Override
-    public void setReady() throws Exception{
+    public void setReady() throws RemoteException{
         server.setReady(gameId,nickname);
     }
     @Override
-    public void lookDeck() throws Exception{
+    public void lookDeck() throws RemoteException{
         view.inform("choose deck : 1 / 2 / 3");
         int index = askIndex();
         server.showDeck(gameId, index);
     }
     @Override
-    public void lookDashBoard() throws Exception{
+    public void lookDashBoard() throws RemoteException{
         String tmp = view.choosePlayer();
         server.lookDashBoard(gameId,tmp);
     }
     @Override
-    public void logOut() throws Exception{
+    public void logOut() throws RemoteException{
         server.logOut(gameId,nickname);
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position) throws Exception {
+    public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
         view.updateMap(Position);
     }
 }

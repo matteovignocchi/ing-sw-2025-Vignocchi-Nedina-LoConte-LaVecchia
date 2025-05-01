@@ -38,6 +38,10 @@ public class Message implements Serializable {
     public static final String OP_LOOK_DECK = "LOOK_DECK";
     public static final String OP_LOOK_SHIP = "LOOK_SHIP";
     public static final String OP_SET_NICKNAME = "OP_NICKNAME";
+    public static final String OP_SET_VIEW = "SET_VIEW";
+    public static final String OP_SET_GAMEID = "SET_GAMEID";
+    public static final String OP_MAP_POSITION = "MAP_POSITION";
+
 
 
     private final String messageType;

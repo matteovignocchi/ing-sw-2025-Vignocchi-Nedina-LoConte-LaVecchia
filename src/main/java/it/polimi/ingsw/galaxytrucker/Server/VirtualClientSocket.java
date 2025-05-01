@@ -12,14 +12,16 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public class VirtualClientSocket implements Runnable, VirtualView {
     private final Socket socket;
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
-    private final View view;
+    private  View view;
     private GameFase gameFase;
     private Object lastResponse;
+    private int gameId;
     private String nickname;
 
     /// METODI DI INIZIALIZZAZIONE ///
@@ -49,6 +51,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
                             case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
                             case Message.OP_SET_NICKNAME -> this.setNickname((String)msg.getPayload());
+                            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
+                            case Message.OP_SET_GAMEID -> this.setGameId((int)msg.getPayload());
+                            case Message.OP_MAP_POSITION -> this.updateMapPosition((Map) msg.getPayload());
                             case Message.OP_UPDATE_VIEW -> {
                                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                                 this.showUpdate(
@@ -148,7 +153,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         view.printPileShown(tiles);
     }
     @Override
-    public void printListOfGoods(List<Colour> listOfGoods) throws Exception {
+    public void printListOfGoods(List<Colour> listOfGoods) {
         view.printListOfGoods(listOfGoods);
     }
     @Override
@@ -166,6 +171,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void printDeck(List<Card> deck){
         view.printDeck(deck);
+    }
+
+    @Override
+    public void setView(View view)  {
+        this.view=view;
+    }
+
+    @Override
+    public void setGameId(int gameId) {
+        this.gameId=gameId;
     }
 
     /// METODI PER CHIEDERE AL CLIENT DA PARTE DEL SERVER ///
@@ -193,11 +208,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void startMach() {
     }
+
     @Override
-    public void updateGameState(GameFase fase) throws RemoteException {
+    public void updateGameState(GameFase fase){
         this.gameFase = fase;
         view.updateState(gameFase);
     }
+
     @Override
     public GameFase getCurrentGameState() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GAME_PHASE,null);
@@ -209,21 +226,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public GameFase getGameFase(){
         return gameFase;
     }
-
     /// METODI PER IL LOGIN ///
 
-    @Override
-    public boolean sendLogin(String username, String password) throws Exception {
-        Message loginRequest = Message.request(Message.OP_LOGIN, new LoginRequest(username, password));
-        sendRequest(loginRequest);
-        return Boolean.parseBoolean((String) waitForResponce());
 
-    }
     @Override
-    public boolean sendGameRequest(String message) throws IOException {
+    public int sendGameRequest(String message) throws IOException, InterruptedException {
         Message gameRequest = Message.request(Message.OP_LOGIN, message);
         sendRequest(gameRequest);
-        return true;
+        return ((int) waitForResponce());
+    }
+
+    @Override
+    public boolean sendLogin(String username) throws IOException, InterruptedException {
+        Message loginRequest = Message.request(Message.OP_LOGIN, username);
+        sendRequest(loginRequest);
+        return Boolean.parseBoolean((String) waitForResponce());
     }
     @Override
     public  synchronized Object waitForResponce() throws InterruptedException {
@@ -304,8 +321,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         sendRequest(request);
     }
     @Override
-    public void setNickname(String nickname) throws Exception {
+    public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    @Override
+    public void updateMapPosition(Map<String, Integer> Position)  {
+        view.updateMap(Position);
     }
 }
 
