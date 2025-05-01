@@ -21,7 +21,6 @@ import static it.polimi.ingsw.galaxytrucker.GameFase.*;
 import static java.lang.String.valueOf;
 
 public class ClientMain {
-//ci sto riprovando
     private static View view;
     private static VirtualView virtualClient;
     private static boolean isConnected;

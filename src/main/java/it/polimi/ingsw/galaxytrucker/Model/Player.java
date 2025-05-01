@@ -547,34 +547,19 @@ public class Player implements Serializable {
         return true;
     }
 
-    //funzione numero 1 da chiamare , è quella che si fa dopo la fine dellassemblaggio nave.
-    public void controlAssembly(){
+    public void controlAssembly(int x , int y){
         controlEngine();
         controlCannon();
-
         boolean flag = true;
         while(flag){
             flag = false;
-            boolean tmp = controlAssembly2();
+            boolean tmp = controlAssembly2(x,y);
             if(tmp) flag = true;
         }
-//        controlAssembly2();
-
-        for (int i = 0 ; i < 5; i++) {
-            for (int j = 0 ; j < 7; j++) {
-                if(validityCheck(i, j) == Status.USED) {
-                    System.out.print("U");
-                }else{
-                    System.out.print("L");
-                }
-            }
-            System.out.println();
-        }
         controlOfConnection();
-
     }
 
-    public boolean controlAssembly2() {
+    public boolean controlAssembly2(int xx, int yy) {
         //istanzio le mie variabili
         int count = 0;
         boolean[][] visited = new boolean[5][7];
@@ -586,99 +571,6 @@ public class Player implements Serializable {
         int [] opp = {2,3,0,1};
         //addo
         queue.add(new int[] {2,3});
-        visited[2][3] = true;
-
-        //inizio algoritmo di ricerca per nodale:
-        while (!queue.isEmpty()) {
-            int[] curr = queue.poll();
-            int x = curr[0];
-            int y = curr[1];
-
-            for(int i = 0; i < 4; i++) {
-                int nx = x + dx[i];
-                int ny = y + dy[i];
-
-                if(isOutOfBounds(nx,ny) || visited[nx][ny]) continue;
-                if(validStatus[nx][ny] == Status.FREE) continue;
-                int currentSide = Dash_Matrix[x][y].controlCorners(i);
-                int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
-                if(connected(currentSide,nearSide)){
-                    queue.add(new int[] {nx,ny});
-                    visited[nx][ny] = true;
-                }else{
-                     wrongConnection[nx][ny] = true;
-                }
-
-            }
-
-        }
-        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 7; j++) {
-                if(!visited[i][j] || wrongConnection[i][j]) {
-                    if(!(validStatus[i][j] == Status.FREE)){
-                        count++;
-                    }
-                    this.removeTile(i, j);
-
-
-                }
-            }
-        }
-            for(int i = 0; i < 5; i++) {
-                for(int j = 0; j < 7; j++) {
-                    if(isIsolated(i,j) && validStatus[i][j] == Status.USED){
-                        this.removeTile(i,j);
-                        count ++;
-                    }
-                }
-            }
-// funzioni che servono per il debug , le lascio che non si sa mai dovessi avere altri problemi
-//            for(int i = 0; i < 5; i++) {
-//                for(int j = 0; j < 7; j++) {
-//                    System.out.print(visited[i][j] ? "V" : "N");
-//                }
-//                System.out.println();
-//            }
-//            for(int i = 0; i < 5; i++) {
-//                for(int j = 0; j < 7; j++) {
-//                    System.out.print(wrongConnection[i][j] ? "R" : "W");
-//                }
-//                System.out.println();
-//            }
-//        System.out.println("////////////");
-        return count != 0;
-    }
-
-
-    //funzione da chiamare dopo che la nava è stata colpita e qualocosa è stato rotto
-    public void controlAssemblyWithCordinate(int x, int y) throws IllegalArgumentException {
-        Tile tmp =  Dash_Matrix[x][y];
-        switch (tmp){
-            case HousingUnit h -> {
-                boolean flag = true;
-                while(flag){
-                    flag = false;
-                    boolean tmp2 = controlWithCordinate(x,y);
-                    if(tmp2) flag = true;
-                }
-
-            }
-            default -> throw new IllegalArgumentException("bisogna inserire una housing unit da cui partire");
-        }
-
-    }
-
-    public boolean controlWithCordinate(int xx, int yy){
-        int count = 0;
-        boolean[][] visited = new boolean[5][7];
-        boolean[][] wrongConnection = new boolean[5][7];
-        Queue<int[]> queue = new LinkedList<>();
-        //array di dir per suo nel codice:
-        int [] dx = {-1, 0, 1, 0};
-        int [] dy = {0, 1, 0, -1};
-        int [] opp = {2,3,0,1};
-        //addo
-        queue.add(new int[] {xx,yy});
         visited[xx][yy] = true;
 
         //inizio algoritmo di ricerca per nodale:
@@ -701,9 +593,7 @@ public class Player implements Serializable {
                 }else{
                     wrongConnection[nx][ny] = true;
                 }
-
             }
-
         }
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 7; j++) {
@@ -712,8 +602,6 @@ public class Player implements Serializable {
                         count++;
                     }
                     this.removeTile(i, j);
-
-
                 }
             }
         }
@@ -727,6 +615,7 @@ public class Player implements Serializable {
         }
         return count != 0;
     }
+
 
 
 

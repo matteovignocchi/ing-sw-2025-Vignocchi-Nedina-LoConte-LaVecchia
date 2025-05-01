@@ -125,7 +125,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public boolean sendLogin(String username) throws RemoteException {
-        return server.authenticate(username);
+//        return server.authenticate(username);
+        return true;
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {
@@ -202,23 +203,25 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void rotateGlass() throws Exception{
-        server.rotateGlass();
+        server.rotateGlass(gameId,nickname);
     }
     @Override
     public void setReady() throws Exception{
-        server.setReady();
+        server.setReady(gameId,nickname);
     }
     @Override
     public void lookDeck() throws Exception{
-        server.lookDeck();
+        view.inform("choose deck : 1 / 2 / 3");
+        int index = askIndex();
+        server.showDeck(gameId, index);
     }
     @Override
     public void lookDashBoard() throws Exception{
-        server.lookDashBoard();
+        server.lookDashBoard(gameId,nickname);
     }
     @Override
     public void logOut() throws Exception{
-        server.logOut();
+        server.logOut(gameId,nickname);
     }
 
 }

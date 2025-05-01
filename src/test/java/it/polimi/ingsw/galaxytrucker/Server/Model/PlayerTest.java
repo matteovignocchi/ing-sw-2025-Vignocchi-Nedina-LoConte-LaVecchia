@@ -133,7 +133,7 @@ class PlayerTest {
         player.addTile(2,2,multiJoint3);
         player.addTile(3,1,multiJoint3);
         player.addTile(4,1,multiJoint3);
-        player.controlAssembly();
+        player.controlAssembly(2,3);
         player.controlAssemblyWithCordinate(2,3);
         assertAll(
                 ()->assertSame(Status.FREE, player.validityCheck(0,0)),
