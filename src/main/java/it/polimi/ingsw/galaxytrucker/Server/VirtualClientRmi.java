@@ -9,6 +9,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.Map;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
     private final ServerRmi server;
@@ -217,11 +218,16 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void lookDashBoard() throws Exception{
-        server.lookDashBoard(gameId,nickname);
+        String tmp = view.choosePlayer();
+        server.lookDashBoard(gameId,tmp);
     }
     @Override
     public void logOut() throws Exception{
         server.logOut(gameId,nickname);
     }
 
+    @Override
+    public void updateMapPosition(Map<String, Integer> Position) throws Exception {
+        view.updateMap(Position);
+    }
 }

@@ -149,6 +149,10 @@ public class Player implements Serializable {
 
     }
 
+    public Tile[][] getDashMatrix() {
+        return Dash_Matrix;
+    }
+
     /**
      * set true when the player is ready to play
      */
@@ -437,9 +441,7 @@ public class Player implements Serializable {
                         if(e.controlCorners(2) != 7 && e.controlCorners(2) != 6){
                             removeTile(i, j);
                         }else {
-                            for (int x = 4; x > i; x--) {
-                                removeTile(i, j);
-                            }
+                            if(i<4)removeTile(i+1, j);
                         }
                     }
                     default -> {}
@@ -461,24 +463,16 @@ public class Player implements Serializable {
                         for (int x = 0; x < 4; x++) {
                             if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
                                 if (x == 0) {
-                                    for (int y = i-1; y != 0; y--) {
-                                        removeTile(y, j);
-                                    }
+                                   if(i>0) removeTile(i-1, j);
                                 }
                                 if (x == 1) {
-                                    for (int y = j+1; y < 7; y++) {
-                                        removeTile(i, y);
-                                    }
+                                    if(j<6) removeTile(i, j+1);
                                 }
                                 if (x == 2) {
-                                    for (int y = i+1; y < 5; y++) {
-                                        removeTile(y, j);
-                                    }
+                                    if(i<4) removeTile(i+1, j);
                                 }
                                 if (x == 3) {
-                                    for (int y = j-1; y != 0; y--) {
-                                        removeTile(i, y);
-                                    }
+                                    if(j>0) removeTile(i, j-1);
                                 }
                             }
                         }
@@ -488,7 +482,6 @@ public class Player implements Serializable {
             }
         }
     }
-
     //funzioni di supporto ai metodi
 
     public void controlOfConnection(){
@@ -508,8 +501,6 @@ public class Player implements Serializable {
                                 case HousingUnit e1->e.setConnected(true);
                                 default -> {}
                             }
-
-
                         }
                     }
                     default -> {}

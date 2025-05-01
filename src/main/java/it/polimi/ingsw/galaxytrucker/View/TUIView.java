@@ -7,7 +7,10 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class TUIView implements View {
     private int idPlayer;
@@ -22,8 +25,7 @@ public class TUIView implements View {
     private static final String BLUE = "\u001B[44m";
     private static final String PURPLE = "\u001B[35m";
     private static final String BROWN = "\u001B[33m";
-
-
+    private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
 
     //per ora lascio il server come int
     //alla fine di ogni comando scritto dagli altri una show update
@@ -68,6 +70,21 @@ public class TUIView implements View {
     @Override
     public void updateState(GameFase gameFase) {
         game = gameFase;
+    }
+    @Override
+    public void updateMap(Map<String, Integer> map) {
+        mapPosition = map;
+    }
+    @Override
+    public String choosePlayer(){
+        for(String s : mapPosition.keySet()){
+            System.out.println(s + ": " + mapPosition.get(s));
+        }
+        System.out.println();
+        inform("Selecet che index of the player");
+        int i = askIndex();
+        List<String> keys = new ArrayList<>(mapPosition.keySet());
+        return keys.get(i);
     }
     @Override
     public boolean ask(String message) {

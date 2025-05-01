@@ -184,16 +184,97 @@ public class Controller implements Serializable {
 
     public synchronized void startGame() {
         playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        for (String s : viewsByNickname.keySet()) {
+            try {
+                viewsByNickname.get(s).updateMapPosition(playerPosition);
+            } catch (Exception e) {
+                markDisconnected(s);
+                throw new RuntimeException(e);
+            }
+        }
         broadcastInform("Game is starting! Place your tiles on the board.");
         startHourglass();
     }
 
     public void setPlayerReady(Player p){
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
+        int tmp = getTmp();
+        switch(tmp){
+            case 0:{
+                if(isDemo){
+                    p.setPos(4);
+                }else{
+                    p.setPos(6);
+                }
+            }
+            case 1:{
+                if(isDemo){
+                    p.setPos(2);
+                }else{
+                    p.setPos(3);
+                }
+            }
+            case 2:{
+                if(isDemo){
+                    p.setPos(1);
+                }else{
+                    p.setPos(1);
+                }
+            }
+            case 3:{
+                if(isDemo){
+                    p.setPos(0);
+                }else{
+                    p.setPos(0);
+                }
+            }
+            default:break;
+        }
+    }
+    private int getTmp() {
+        int tmp = 0;
+        int counter = 0;
+        for(Player player : playersInGame){
+            if(tmp >= player.getPos()) {
+                counter++;
+            }
+        }
+        int size = playersInGame.size();
+        switch(size){
+            case 4 ->{
+                switch(counter){
+                    case 0 -> tmp = 3;
+                    case 1 -> tmp = 2;
+                    case 2 -> tmp = 1;
+                }
+            }
+            case 3 ->{
+                switch(counter){
+                    case 0 -> tmp = 2;
+                    case 1 -> tmp = 1;
+                }
+            }
+            case 2 ->{
+                if (counter == 0) {
+                    tmp = 1;
+                }
+            }
+        }
+        return tmp;
     }
 
     public void startFlight() throws RemoteException {
         if(!isDemo) mergeDecks();
+        for(String nickname : playersByNickname.keySet()){
+            checkPLayerAssembly(nickname , 2 , 3);
+            try {
+                viewsByNickname.get(nickname).updateMapPosition(playerPosition);
+                updatePlayer(nickname);
+                viewsByNickname.get(nickname).printPlayerDashboard(playersByNickname.get(nickname).getDashMatrix());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         broadcastInform("Flight started!");
         playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
@@ -348,22 +429,21 @@ public class Controller implements Serializable {
     }
 
     public Tile getShownTile(int index) {
-        return shownTile.remove(index);
+        Tile tmp = shownTile.get(index);
+        shownTile.remove(index);
+        return tmp;
     }
-
-
     public List<Tile> getPileOfTile() {
         return pileOfTile;
     }
-
     public List<Tile> getShownTiles(){
         return shownTile;
     }
-
     public Tile getTile(int index) {
-        return pileOfTile.remove(index);
+        Tile tmp = pileOfTile.get(index);
+        pileOfTile.remove(index);
+        return tmp;
     }
-
     // metodo che restituisce il numero di crewMate nella nave
     public int getNumCrew(Player p) {
         int tmp = 0;
@@ -900,24 +980,28 @@ public class Controller implements Serializable {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
                     playersByNickname.get(p).removeFrom0(dir2);
+                    askStartHousingForControl(p);
                 }
             }
         } else if (dir == 2) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(p, dir) && !type)) {
                     playersByNickname.get(p).removeFrom2(dir2);
+                    askStartHousingForControl(p);
                 }
             }
         } else if (dir == 1) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
                     playersByNickname.get(p).removeFrom1(dir2);
+                    askStartHousingForControl(p);
                 }
             }
         } else if (dir == 3) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(p, dir) && !type)) {
                     playersByNickname.get(p).removeFrom3(dir2);
+                    askStartHousingForControl(p);
                 }
             }
         }
@@ -936,10 +1020,12 @@ public class Controller implements Serializable {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, p)) {
                         playersByNickname.get(p).removeFrom0(dir2);
+                        askStartHousingForControl(p);
                     }
                     if (!type && playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
                             playersByNickname.get(p).removeFrom2(dir2);
+                            askStartHousingForControl(p);
                         }
                     }
                 }
@@ -947,34 +1033,26 @@ public class Controller implements Serializable {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && checkProtection(dir, dir2, p)) {
                         playersByNickname.get(p).removeFrom0(dir2);
+                        askStartHousingForControl(p);
                     }
                     if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
                             playersByNickname.get(p).removeFrom2(dir2);
+                            askStartHousingForControl(p);
                         }
                     }
 
                 }
-            } else if (dir == 1) {
+            } else if (dir == 1 || dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, p)) {
                         playersByNickname.get(p).removeFrom0(dir2);
+                        askStartHousingForControl(p);
                     }
                     if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
                         if (!isProtected(p, dir)) {
                             playersByNickname.get(p).removeFrom2(dir2);
-                        }
-                    }
-                }
-
-            } else if (dir == 3) {
-                if (dir2 > 4 && dir2 < 10) {
-                    if (type && !checkProtection(dir, dir2, p)) {
-                        playersByNickname.get(p).removeFrom0(dir2);
-                    }
-                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p, dir)) {
-                            playersByNickname.get(p).removeFrom2(dir2);
+                            askStartHousingForControl(p);
                         }
                     }
                 }
@@ -1182,7 +1260,7 @@ public class Controller implements Serializable {
         return false;
     }
 
-    public void askStartHousingForControll(String nickname) {
+    public void askStartHousingForControl(String nickname) {
         int[] xy;
         try {
             viewsByNickname.get(nickname).inform("choose your starting hounsing unit");
@@ -1216,6 +1294,16 @@ public class Controller implements Serializable {
 
     private void checkPLayerAssembly(String id , int x , int y){
         playersByNickname.get(id).controlAssembly(x,y);
+        try {
+            updatePlayer(id);
+            viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
+        } catch (RemoteException e) {
+            markDisconnected2(id);
+            throw new RuntimeException(e);
+        } catch (Exception e) {
+            markDisconnected2(id);
+            throw new RuntimeException(e);
+        }
     }
 
 

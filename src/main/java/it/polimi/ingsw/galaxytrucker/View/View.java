@@ -30,7 +30,8 @@ public interface View {
     void printTile(Tile tile);
     void printCard(Card card);
     String sendAvailableChoices() throws Exception;
-    void updateMap(Map<String, Tile> map);
+    void updateMap(Map<String, Integer> map);
+    String choosePlayer();
 
     //meetodo per richiedere
 
