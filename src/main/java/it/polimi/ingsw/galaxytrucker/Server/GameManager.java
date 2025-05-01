@@ -312,7 +312,7 @@ public class GameManager {
             String winner = controller.getNickname(player_winner);
             try {
                 controller.getViewByNickname(winner).inform("You won the game!");
-            } catch (IOException ignored) {}
+            } catch (Exception ignored) {}
         }
         // se 0 o >1: nessun vincitore
         removeGame(gameId);
