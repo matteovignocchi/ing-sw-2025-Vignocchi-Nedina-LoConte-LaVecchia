@@ -325,7 +325,7 @@ public class GameManager {
             controller.updatePlayer(nickname);
             cancelTimeout(gameId);// se era partito un timeout per questo game, lo cancelliamo
         } catch (RemoteException e) {
-            controller.markDisconnected(nickname);// client non risponde → lo marchiamo disconnesso
+            controller.markDisconnected2(nickname);// client non risponde → lo marchiamo disconnesso
             controller.broadcastInform(nickname + "is disconnected");
 
             int connected = controller.countConnectedPlayers();
