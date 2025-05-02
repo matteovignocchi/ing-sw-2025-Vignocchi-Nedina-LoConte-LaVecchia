@@ -129,7 +129,7 @@ public class Controller implements Serializable {
             try {
                 v.inform(msg);
             } catch (IOException e) {
-                markDisconnected(nickname); //il client non risponde: disconnesso (il metodo informa tutti)
+                markDisconnected2(nickname); //il client non risponde: disconnesso (il metodo informa tutti)
             } catch (Exception e) {
                 markDisconnected2(nickname);
                 throw new RuntimeException(e);
@@ -145,12 +145,6 @@ public class Controller implements Serializable {
         return principalGameFase;
     }
 
-    public synchronized void markDisconnected(String nickname) {
-        Player p = playersByNickname.get(nickname);
-        if (p != null && playersInGame.remove(p)) {
-            broadcastInform(nickname + " is disconnected");
-        }
-    }
     public void markDisconnected2(String nickname) {
         Player p = playersByNickname.get(nickname);
         if (p != null) {
@@ -201,7 +195,7 @@ public class Controller implements Serializable {
             try {
                 viewsByNickname.get(s).updateMapPosition(playerPosition);
             } catch (Exception e) {
-                markDisconnected(s);
+                markDisconnected2(s);
                 throw new RuntimeException(e);
             }
         }
@@ -295,7 +289,7 @@ public class Controller implements Serializable {
             try {
                 v.updateGameState(GameFase.WAITING_FOR_TURN);
             } catch (RemoteException e) {
-                markDisconnected(s);
+                markDisconnected2(s);
                 throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
