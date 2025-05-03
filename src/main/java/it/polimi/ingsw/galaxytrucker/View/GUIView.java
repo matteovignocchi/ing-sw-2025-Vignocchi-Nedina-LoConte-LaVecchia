@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -90,7 +90,7 @@ return 0;
     }
 
     @Override
-    public void printNewFase(GameFase gameFase) {
+    public void printNewFase(GamePhase gamePhase) {
 
     }
 
@@ -125,7 +125,7 @@ return 0;
     }
 
     @Override
-    public void updateState(GameFase gameFase) {
+    public void updateState(GamePhase gamePhase) {
 
     }
 

@@ -1,5 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
@@ -14,10 +14,9 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.List;
 import java.util.Scanner;
 
-import static it.polimi.ingsw.galaxytrucker.GameFase.*;
+import static it.polimi.ingsw.galaxytrucker.GamePhase.*;
 import static java.lang.String.valueOf;
 
 public class ClientMain {
@@ -171,7 +170,7 @@ public class ClientMain {
 
     //metodo gestione partita
     private static void startGame() throws Exception {
-        GameFase gameState;
+        GamePhase gameState;
         do {
             choosePossibleActions();
             gameState = virtualClient.getGameFase();

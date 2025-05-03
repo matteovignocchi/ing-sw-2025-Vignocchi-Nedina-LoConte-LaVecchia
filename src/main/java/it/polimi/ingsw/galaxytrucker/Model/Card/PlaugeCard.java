@@ -10,6 +10,6 @@ public class PlaugeCard implements Card {
 
     @Override
     public void accept(CardVisitor visitor) throws CardEffectException {
-            visitor.visit(this);
+        visitor.visit(this);
     }
 }

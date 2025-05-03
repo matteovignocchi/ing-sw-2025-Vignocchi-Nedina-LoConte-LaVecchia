@@ -1,7 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server;
+
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
     private final ServerRmi server;
     private View view;
-    private GameFase gameFase;
+    private GamePhase gamePhase;
     private String nickname;
     private int gameId;
 
@@ -25,7 +26,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void setNickname(String nickname) throws RemoteException {
-     this.nickname = nickname;
+        this.nickname = nickname;
     }
     @Override
     public void setView(View view) {
@@ -104,21 +105,21 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER SETTARE COSE AL CLIENT RIGUARDO AL GAMEFLOW ///
 
     @Override
-    public void updateGameState(GameFase fase) throws RemoteException {
-        this.gameFase = fase;
-        view.updateState(gameFase);
+    public void updateGameState(GamePhase fase) throws RemoteException {
+        this.gamePhase = fase;
+        view.updateState(gamePhase);
     }
     @Override
     public void startMach() throws RemoteException {
 
     }
     @Override
-    public GameFase getCurrentGameState() throws RemoteException {
-        return gameFase;
+    public GamePhase getCurrentGameState() throws RemoteException {
+        return gamePhase;
     }
     @Override
-    public GameFase getGameFase() {
-        return gameFase;
+    public GamePhase getGameFase() {
+        return gamePhase;
     }
 
 
@@ -139,7 +140,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 tmpInt = view.askIndex();
             }while(tmpInt>4);
             try {
-                 return server.createNewGame(tmp , this , nickname ,tmpInt );
+                return server.createNewGame(tmp , this , nickname ,tmpInt );
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }
@@ -152,8 +153,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }
             int choice = askIndex();
             try {
-                 server.enterGame(availableGames[choice-1], this , nickname);
-                 return availableGames[choice-1];
+                server.enterGame(availableGames[choice-1], this , nickname);
+                return availableGames[choice-1];
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }

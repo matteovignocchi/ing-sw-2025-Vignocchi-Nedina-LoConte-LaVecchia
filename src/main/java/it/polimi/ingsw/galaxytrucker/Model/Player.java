@@ -1,11 +1,12 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
 import java.io.Serializable;
 import java.util.*;
+
 
 /**
  * class for the ship dashboard of the player
@@ -31,7 +32,7 @@ public class Player implements Serializable {
     protected int lap;
     protected int position;
     private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
-    private GameFase gameFase;
+    private GamePhase gamePhase;
 
     /**
      * constructor that initialize all the variables
@@ -45,7 +46,7 @@ public class Player implements Serializable {
         this.position = 0;
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
-        this.gameFase = GameFase.BOARD_SETUP;
+        this.gamePhase = GamePhase.BOARD_SETUP;
         credit = 0;
         purpleAlien = false;
         brownAlien = false;
@@ -254,12 +255,12 @@ public class Player implements Serializable {
      */
     public boolean presenceBrownAlien() { return this.brownAlien; }
 
-    public void setGameFase(GameFase gameFase) {
-        this.gameFase = gameFase;
+    public void setGameFase(GamePhase gamePhase) {
+        this.gamePhase = gamePhase;
     }
 
-    public GameFase getGameFase() {
-        return gameFase;
+    public GamePhase getGameFase() {
+        return gamePhase;
     }
 
     /**
@@ -274,7 +275,7 @@ public class Player implements Serializable {
      * @param tile
      */
     public void addToDiscardPile(Tile tile) throws IndexOutOfBoundsException{
-        if(gameFase!=GameFase.BOARD_SETUP) discardPile.add(tile);
+        if(gamePhase != GamePhase.BOARD_SETUP) discardPile.add(tile);
         else {
             if(discardPile.size()>=2) throw new IndexOutOfBoundsException();
             discardPile.add(tile);
@@ -463,7 +464,7 @@ public class Player implements Serializable {
                         for (int x = 0; x < 4; x++) {
                             if (Dash_Matrix[i][j].controlCorners(x) == 4 || Dash_Matrix[i][j].controlCorners(x) == 5) {
                                 if (x == 0) {
-                                   if(i>0) removeTile(i-1, j);
+                                    if(i>0) removeTile(i-1, j);
                                 }
                                 if (x == 1) {
                                     if(j<6) removeTile(i, j+1);
@@ -972,5 +973,4 @@ public class Player implements Serializable {
         return tmp;
     }
 }
-
 

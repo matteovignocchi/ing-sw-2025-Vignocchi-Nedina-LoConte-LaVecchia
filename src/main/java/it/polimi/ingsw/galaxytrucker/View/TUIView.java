@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class TUIView implements View {
     private int idPlayer;
     private int server;
-    private GameFase game;
+    private GamePhase game;
     private boolean isDemo;
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
@@ -67,8 +66,8 @@ public class TUIView implements View {
         System.err.print("\n[ERROR] " + message + "\n> ");
     }
     @Override
-    public void updateState(GameFase gameFase) {
-        game = gameFase;
+    public void updateState(GamePhase gamePhase) {
+        game = gamePhase;
     }
     @Override
     public void updateMap(Map<String, Integer> map) {
@@ -141,10 +140,10 @@ public class TUIView implements View {
         inform("List of goods: ");
         for(Colour colour : Goods) {
             switch (colour){
-            case BLUE -> System.out.println(BLUE+"Blue "+RESET);
-            case RED -> System.out.println(RED+"Red "+RESET);
-            case GREEN -> System.out.println(GREEN+"Green "+RESET);
-            case YELLOW -> System.out.println(YELLOW+"Yellow "+RESET);
+                case BLUE -> System.out.println(BLUE+"Blue "+RESET);
+                case RED -> System.out.println(RED+"Red "+RESET);
+                case GREEN -> System.out.println(GREEN+"Green "+RESET);
+                case YELLOW -> System.out.println(YELLOW+"Yellow "+RESET);
             }
         }
     }
@@ -211,7 +210,7 @@ public class TUIView implements View {
         string.append("/");
         inform(string.toString());
     }
-                                                                                        /// position diventa una mappa stringa intero
+    /// position diventa una mappa stringa intero
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
@@ -227,7 +226,7 @@ public class TUIView implements View {
 
     //metodo che riceve una lista, in cui prendi
     @Override
-    public void printNewFase(GameFase gameFase) {
+    public void printNewFase(GamePhase gamePhase) {
 
     }
 
@@ -575,7 +574,7 @@ public class TUIView implements View {
         inform("Insert the command number");
         int tmp = askIndex();
         return listOfOptions.get(tmp).trim().toLowerCase();
-        }
+    }
     private void printListOfCommand(){
         List<String> listOfOptions = commandConstructor();
         inform("Possible actions:");
@@ -584,3 +583,4 @@ public class TUIView implements View {
         }
     }
 }
+

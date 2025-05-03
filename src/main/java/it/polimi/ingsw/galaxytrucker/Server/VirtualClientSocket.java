@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -19,7 +19,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
     private  View view;
-    private GameFase gameFase;
+    private GamePhase gamePhase;
     private Object lastResponse;
     private int gameId;
     private String nickname;
@@ -42,7 +42,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_UPDATE -> {
                         switch (msg.getOperation()) {
-                            case Message.OP_GAME_PHASE -> this.updateGameState((GameFase)  msg.getPayload());
+                            case Message.OP_GAME_PHASE -> this.updateGameState((GamePhase)  msg.getPayload());
                             case Message.OP_PRINT_CARD -> this.printCard((Card) msg.getPayload());
                             case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
                             case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
@@ -95,7 +95,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             }
                             case Message.OP_STRING-> {
                                 this.inform((String) msg.getPayload());
-                                 String s = this.askString();
+                                String s = this.askString();
                                 Message response = new Message(Message.TYPE_RESPONSE, null,s);
                                 sendRequest(response);
                             }
@@ -210,21 +210,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void updateGameState(GameFase fase){
-        this.gameFase = fase;
-        view.updateState(gameFase);
+    public void updateGameState(GamePhase fase){
+        this.gamePhase = fase;
+        view.updateState(gamePhase);
     }
 
     @Override
-    public GameFase getCurrentGameState() throws IOException, InterruptedException {
+    public GamePhase getCurrentGameState() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GAME_PHASE,null);
         sendRequest(request);
         Object response = waitForResponce();
-        return (GameFase) response;
+        return (GamePhase) response;
     }
     @Override
-    public GameFase getGameFase(){
-        return gameFase;
+    public GamePhase getGameFase(){
+        return gamePhase;
     }
     /// METODI PER IL LOGIN ///
 

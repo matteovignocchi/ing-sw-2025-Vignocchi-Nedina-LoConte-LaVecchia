@@ -52,7 +52,7 @@ public class PiratesCard implements Card {
 
     @Override
     public void accept(CardVisitor visitor) throws CardEffectException{
-            visitor.visit(this);
+        visitor.visit(this);
     }
 
     /**

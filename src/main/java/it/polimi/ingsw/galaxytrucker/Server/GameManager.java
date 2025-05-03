@@ -1,7 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -9,7 +9,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -86,7 +89,7 @@ public class GameManager {
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
-        p.setGameFase(GameFase.TILE_MANAGEMENT);
+        p.setGameFase(GamePhase.TILE_MANAGEMENT);
         sendUpdate(gameId, nickname);
         return controller.getTile(randomIdx);
     }
@@ -107,7 +110,7 @@ public class GameManager {
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
 
         Player p = getPlayerCheck(controller, nickname);
-        p.setGameFase(GameFase.TILE_MANAGEMENT);
+        p.setGameFase(GamePhase.TILE_MANAGEMENT);
         sendUpdate(gameId, nickname);
         return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
@@ -117,7 +120,7 @@ public class GameManager {
         Player p = getPlayerCheck(controller, nickname);
 
         controller.addToShownTile(tile);
-        p.setGameFase(GameFase.BOARD_SETUP);
+        p.setGameFase(GamePhase.BOARD_SETUP);
         sendUpdate(gameId, nickname);
     }
 
@@ -126,7 +129,7 @@ public class GameManager {
         Player p = getPlayerCheck(controller, nickname);
 
         p.addTile(cord[0], cord[1], tile);
-        p.setGameFase(GameFase.BOARD_SETUP);
+        p.setGameFase(GamePhase.BOARD_SETUP);
         sendUpdate(gameId, nickname);
     }
 
@@ -137,10 +140,10 @@ public class GameManager {
         controller.setPlayerReady(p);
 
         List<Player> playersInGame = controller.getPlayersInGame();
-        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GameFase.WAITING_FOR_PLAYERS)) {
+        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
             controller.startFlight();
         } else{
-            p.setGameFase(GameFase.WAITING_FOR_PLAYERS);
+            p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
             sendUpdate(gameId, nickname);
         }
     }
@@ -330,7 +333,7 @@ public class GameManager {
 
             int connected = controller.countConnectedPlayers();
             if (connected <= 1) {
-                    setTimeout(gameId);
+                setTimeout(gameId);
             }
         }
     }

@@ -1,8 +1,5 @@
 package it.polimi.ingsw.galaxytrucker;
-
-//sostituire fase con phase
-
-public enum GameFase {
+public enum GamePhase {
     BOARD_SETUP,
     TILE_MANAGEMENT,
     WAITING_FOR_PLAYERS,

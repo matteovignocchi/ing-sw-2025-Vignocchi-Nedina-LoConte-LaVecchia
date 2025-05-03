@@ -1,13 +1,16 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.GameFase;
-import it.polimi.ingsw.galaxytrucker.Model.*;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard2;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerException;
+import it.polimi.ingsw.galaxytrucker.Model.Hourglass;
+import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
@@ -31,7 +35,7 @@ public class Controller implements Serializable {
     private final int MaxPlayers;
     private final boolean isDemo;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
-    private GameFase principalGameFase; //inutile
+    private GamePhase principalGamePhase; //inutile
 
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
@@ -141,8 +145,8 @@ public class Controller implements Serializable {
         return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
     }
 
-    public GameFase getPrincipalGameFase() {
-        return principalGameFase;
+    public GamePhase getPrincipalGameFase() {
+        return principalGamePhase;
     }
 
     public void markDisconnected2(String nickname) {
@@ -150,7 +154,7 @@ public class Controller implements Serializable {
         if (p != null) {
             broadcastInform(nickname + " is disconnected");
             p.setConnected(false);
-            p.setGameFase(GameFase.EXIT);
+            p.setGameFase(GamePhase.EXIT);
         }
     }
 
@@ -190,7 +194,7 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public synchronized void startGame() {
-        playersInGame.forEach(p -> p.setGameFase(GameFase.BOARD_SETUP));
+        playersInGame.forEach(p -> p.setGameFase(GamePhase.BOARD_SETUP));
         for (String s : viewsByNickname.keySet()) {
             try {
                 viewsByNickname.get(s).updateMapPosition(playerPosition);
@@ -284,10 +288,10 @@ public class Controller implements Serializable {
         }
 
         broadcastInform("Flight started!");
-        playersInGame.forEach(p -> p.setGameFase(GameFase.WAITING_FOR_TURN));
+        playersInGame.forEach(p -> p.setGameFase(GamePhase.WAITING_FOR_TURN));
         viewsByNickname.forEach((s, v) -> {
             try {
-                v.updateGameState(GameFase.WAITING_FOR_TURN);
+                v.updateGameState(GamePhase.WAITING_FOR_TURN);
             } catch (RemoteException e) {
                 markDisconnected2(s);
                 throw new RuntimeException(e);
@@ -298,15 +302,15 @@ public class Controller implements Serializable {
 
         Player firstPlayer = fBoard.getOrderedPlayers().getFirst();
         String firstPlayerNick = playersByNickname.entrySet().stream()
-                        .filter(e -> e.getValue().equals(firstPlayer))
-                        .map(Map.Entry::getKey)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
-        firstPlayer.setGameFase(GameFase.DRAW_PHASE);
+                .filter(e -> e.getValue().equals(firstPlayer))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
+        firstPlayer.setGameFase(GamePhase.DRAW_PHASE);
         VirtualView v = viewsByNickname.get(firstPlayerNick);
         try {
             v.inform("You're the leader! Draw a card");
-            v.updateGameState(GameFase.DRAW_PHASE);
+            v.updateGameState(GamePhase.DRAW_PHASE);
         } catch (Exception e) {
             markDisconnected2(firstPlayerNick);
             throw new RuntimeException(e);
@@ -345,7 +349,7 @@ public class Controller implements Serializable {
                         markDisconnected2(nickname);
                         throw new RuntimeException(e);
                     }
-                } else if (p.getGameFase() == GameFase.WAITING_FOR_PLAYERS) {
+                } else if (p.getGameFase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
                     broadcastInform("Hourglass flipped the last time!");
                 } else {
@@ -1412,5 +1416,4 @@ public class Controller implements Serializable {
      */
 
 }
-
 

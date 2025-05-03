@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.GameFase;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -32,14 +32,14 @@ public interface VirtualView {
     int[] askCoordinate() throws Exception;
 
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
-    void updateGameState(GameFase fase) throws Exception;
+    void updateGameState(GamePhase fase) throws Exception;
     void startMach() throws Exception;
     boolean sendLogin(String username) throws Exception;
     int sendGameRequest(String message) throws Exception;
     Object waitForResponce() throws Exception;
     String waitForGameUpadate() throws Exception;
-    GameFase getCurrentGameState() throws Exception;
-    GameFase getGameFase() throws Exception;
+    GamePhase getCurrentGameState() throws Exception;
+    GamePhase getGameFase() throws Exception;
 
     /// METODI CHE CHIAMO DIRETTAMENTE AL SERVER ///
     Tile getTileServer() throws Exception;

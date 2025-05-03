@@ -198,7 +198,7 @@ VirtualClient.printFinalScoring(finalScoring)
                             //  non succederà nulla
                             //  bisogna fare in modo che se count è >=2 il metodo possa essere chiamato solo da chi è ready , e se lo chiama chi non ha il flag ready non succede nulla
                             //  alla fine di ogni thread ci sarà prima della update view() un metodo che controlla count , e se è >=3 cambierà lo stato a tutti
-                            //  i giocatori mettondolo a pronto e il gameFase passerà a WAITING_FOR_TURN.
+                            //  i giocatori mettondolo a pronto e il gamePhase passerà a WAITING_FOR_TURN.
                             //  il controller farà una check di tutte le regole di assemblaggio e aggiornerà di nuovo le view dei player
 
 
@@ -243,7 +243,7 @@ VirtualClient.printFinalScoring(finalScoring)
                               ///METODI DELLA CARTA///
                             //una volta che tutti i player sono ready o l'ultima clessidrà il server posizionerà tutti player in
                             // WAITING_FOR_TURN , farà fare i controlli su tutte la plance al controller e metterà al primo giocatore che ha finito
-                            // in gameFase DRAW_FASE e il resto rimane in WAITING_FOR_TURN
+                            // in gamePhase DRAW_FASE e il resto rimane in WAITING_FOR_TURN
 
     /// drawCard_server() :
                             //1) server riceve il comdando e stampa a tutti a schermo la carta pescata , poi andando in ordine

@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * abstract class for the general structure of the tile and
  * define the common methods to move it and return some information about the tile
@@ -68,3 +67,4 @@ public abstract class Tile {
         return corners[i];
     }
 }
+

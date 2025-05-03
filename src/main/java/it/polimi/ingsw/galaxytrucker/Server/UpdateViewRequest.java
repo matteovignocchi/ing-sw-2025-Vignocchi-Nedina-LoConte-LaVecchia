@@ -62,4 +62,3 @@ public class UpdateViewRequest implements Serializable {
         return numberOfEnergy;
     }
 }
-

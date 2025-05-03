@@ -8,7 +8,7 @@ import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
  */
 
 public abstract class CardEffectException extends BusinessLogicException {
-  public CardEffectException(String message) {
-       super(message);
-   }
+    public CardEffectException(String message) {
+        super(message);
+    }
 }

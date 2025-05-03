@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * class for the housing unit
  * max is the parameter for the slots
