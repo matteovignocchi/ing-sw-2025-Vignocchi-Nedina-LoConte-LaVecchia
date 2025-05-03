@@ -29,7 +29,6 @@ public class TUIView implements View {
 
     //per ora lascio il server come int
     //alla fine di ogni comando scritto dagli altri una show update
-    public TUIView()  {}
     @Override
     public void start() {
         inform("Welcome to the Galaxy Trucker!");
@@ -202,6 +201,15 @@ public class TUIView implements View {
             System.out.printf("   %2d    ", col + 4);
         }
         System.out.println();
+    }
+
+    public void printMapPosition(){
+        StringBuilder string = new StringBuilder();
+        for(String key : mapPosition.keySet()){
+            string.append(" /").append(key).append(": ").append(mapPosition.get(key));
+        }
+        string.append("/");
+        inform(string.toString());
     }
                                                                                         /// position diventa una mappa stringa intero
     @Override
