@@ -2,24 +2,23 @@ package it.polimi.ingsw.galaxytrucker.Controller;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard2;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerException;
-import it.polimi.ingsw.galaxytrucker.Model.Hourglass;
-import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+//TODO: Franci, vedere come modificare il metodo sendUpdate che prima era in gamemanager, e ora in controller
 
 //TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
 //      un po tante liste ahahah
@@ -28,12 +27,14 @@ import java.util.function.Consumer;
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
 //TODO: rivedere bene le inform e inserirle dove mancano (Oleg:gestire bene anche le try-catch)
 public class Controller implements Serializable {
-    private List<Player> playersInGame = new ArrayList<>(); //giocatori effettivamente in gioco
+    //private List<Player> playersInGame = new ArrayList<>();
+    private final int gameId;
     private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
-    private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>(); //in gioco + disconnessi
+    private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
+    private final Consumer<Integer> onGameEnd;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase; //inutile
 
@@ -45,7 +46,7 @@ public class Controller implements Serializable {
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
 
-    public Controller(boolean isDemo, int MaxPlayers) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd) throws CardEffectException, IOException {
         if(isDemo) {
             fBoard = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -55,6 +56,8 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             decks = deckCreator.CreateSecondLevelDeck();
         }
+        this.gameId = gameId;
+        this.onGameEnd = onGameEnd;
         this.hourglass = new Hourglass(this::onHourglassStateChange);
         this.isDemo = isDemo;
         this.MaxPlayers = MaxPlayers;
@@ -66,7 +69,6 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //TODO: Capire discorso playersInGame vs PlayersByNick.values(). iterare su playersInGame, non sui valori della mappa
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli) sia qui nel gamemanager
 
 
@@ -87,7 +89,7 @@ public class Controller implements Serializable {
         try {
             v.updateGameState(p.getGameFase());
         } catch (Exception e) {
-            markDisconnected2(nickname);
+            markDisconnected2(nickname); //da cambiare
             throw new RuntimeException(e);
         }
         v.showUpdate(nickname, firePower, enginePower, credits, position, purpleAlien, brownAlien, humans, energyCells);
@@ -107,7 +109,7 @@ public class Controller implements Serializable {
         try {
             view.inform(String.format("Player %s added to game", nickname));
         } catch (Exception e) {
-            markDisconnected2(nickname);
+            markDisconnected2(nickname); //da cambiare
             throw new RuntimeException(e);
         }
         if (playersByNickname.size() == MaxPlayers)
@@ -122,9 +124,11 @@ public class Controller implements Serializable {
         return viewsByNickname.get(nickname);
     }
 
+    /*
     public List<Player> getPlayersInGame(){
         return playersInGame;
     }
+     */
 
     public void broadcastInform(String msg) {
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
@@ -133,7 +137,7 @@ public class Controller implements Serializable {
             try {
                 v.inform(msg);
             } catch (IOException e) {
-                markDisconnected2(nickname); //il client non risponde: disconnesso (il metodo informa tutti)
+                markDisconnected2(nickname); //il client non risponde: disconnesso (il metodo informa tutti) //da cambiare, no markDisconnected2
             } catch (Exception e) {
                 markDisconnected2(nickname);
                 throw new RuntimeException(e);
@@ -149,6 +153,8 @@ public class Controller implements Serializable {
         return principalGamePhase;
     }
 
+    //TODO: da rivedere e fare meglio
+    /*
     public void markDisconnected2(String nickname) {
         Player p = playersByNickname.get(nickname);
         if (p != null) {
@@ -157,6 +163,7 @@ public class Controller implements Serializable {
             p.setGameFase(GamePhase.EXIT);
         }
     }
+     */
 
     public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
         viewsByNickname.put(nickname, view); //Aaggiorno la view nella mappa
@@ -188,110 +195,108 @@ public class Controller implements Serializable {
 
     public int getMaxPlayers(){ return MaxPlayers; }
 
+    private Player getPlayerCheck(String nickname) throws BusinessLogicException {
+        Player player = getPlayerByNickname(nickname);
+        if (player == null) throw new BusinessLogicException("Player not found");
+        return player;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    //TODO: discutere di sto updateMapPosition
+    //TODO: vedere discorso Exception vs IOException: catcharli entrambi ? come gestirli?
+
     public synchronized void startGame() {
-        playersInGame.forEach(p -> p.setGameFase(GamePhase.BOARD_SETUP));
+        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.BOARD_SETUP));
+
         for (String s : viewsByNickname.keySet()) {
+            VirtualView v = viewsByNickname.get(s);
             try {
-                viewsByNickname.get(s).updateMapPosition(playerPosition);
+                v.updateMapPosition(playersByNickname.get(s).getPos()); //parlarne
+                //TODO: update qui(?)
+                v.inform("Game is starting!");
             } catch (Exception e) {
                 markDisconnected2(s);
                 throw new RuntimeException(e);
             }
         }
-        broadcastInform("Game is starting! Place your tiles on the board.");
+
         startHourglass();
     }
 
-    public void setPlayerReady(Player p){
+    //TODO: franci in tutti questi metodini, dove l'update (della fase e del model)?
+    public synchronized Tile getCoveredTile(String nickname) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+
+        int size = getPileOfTile().size();
+        if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
+
+        int randomIdx = ThreadLocalRandom.current().nextInt(size);
+        p.setGameFase(GamePhase.TILE_MANAGEMENT);
+        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+
+        return getTile(randomIdx);
+    }
+
+    public synchronized Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
+        List<Tile> uncoveredTiles = getShownTiles();
+        Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
+        if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
+
+        Player p = getPlayerCheck(nickname);
+        p.setGameFase(GamePhase.TILE_MANAGEMENT);
+        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+        return getShownTile(uncoveredTiles.indexOf(opt.get()));
+    }
+
+    public synchronized void dropTile (String nickname, Tile tile) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+
+        addToShownTile(tile);
+        p.setGameFase(GamePhase.BOARD_SETUP);
+        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+    }
+
+    public synchronized void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+
+        p.addTile(cord[0], cord[1], tile);
+        p.setGameFase(GamePhase.BOARD_SETUP);
+        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+    }
+
+    public synchronized void setReady(String nickname) throws BusinessLogicException, RemoteException {
+        Player p = getPlayerCheck(nickname);
+
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
-        int tmp = getTmp();
-        switch(tmp){
-            case 0:{
-                if(isDemo){
-                    p.setPos(4);
-                }else{
-                    p.setPos(6);
-                }
-            }
-            case 1:{
-                if(isDemo){
-                    p.setPos(2);
-                }else{
-                    p.setPos(3);
-                }
-            }
-            case 2:{
-                if(isDemo){
-                    p.setPos(1);
-                }else{
-                    p.setPos(1);
-                }
-            }
-            case 3:{
-                if(isDemo){
-                    p.setPos(0);
-                }else{
-                    p.setPos(0);
-                }
-            }
-            default:break;
+
+        List<Player> playersInGame = getPlayersInGame();
+        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
+            startFlight();
+        } else{
+            p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
+            sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
         }
-    }
-    private int getTmp() {
-        int tmp = 0;
-        int counter = 0;
-        for(Player player : playersInGame){
-            if(tmp >= player.getPos()) {
-                counter++;
-            }
-        }
-        int size = playersInGame.size();
-        switch(size){
-            case 4 ->{
-                switch(counter){
-                    case 0 -> tmp = 3;
-                    case 1 -> tmp = 2;
-                    case 2 -> tmp = 1;
-                }
-            }
-            case 3 ->{
-                switch(counter){
-                    case 0 -> tmp = 2;
-                    case 1 -> tmp = 1;
-                }
-            }
-            case 2 ->{
-                if (counter == 0) {
-                    tmp = 1;
-                }
-            }
-        }
-        return tmp;
     }
 
-    public void startFlight() throws RemoteException {
+    public void startFlight() {
         if(!isDemo) mergeDecks();
-        for(String nickname : playersByNickname.keySet()){
-            checkPLayerAssembly(nickname , 2 , 3);
-            try {
-                viewsByNickname.get(nickname).updateMapPosition(playerPosition);
-                updatePlayer(nickname);
-                viewsByNickname.get(nickname).printPlayerDashboard(playersByNickname.get(nickname).getDashMatrix());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         broadcastInform("Flight started!");
-        playersInGame.forEach(p -> p.setGameFase(GamePhase.WAITING_FOR_TURN));
-        viewsByNickname.forEach((s, v) -> {
+        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.WAITING_FOR_TURN));
+
+        viewsByNickname.forEach((nick, v) -> {
+            checkPlayerAssembly(nick , 2 , 3);
+            //TODO: controlli tiles e attivare l'effetto delle tessere (aggiungere umani, potenza di fuoco ecc..)
             try {
-                v.updateGameState(GamePhase.WAITING_FOR_TURN);
+                //viewsByNickname.get(nick).updateMapPosition(playerPosition);
+                //updatePlayer(nick);
+                //non mi convince
+                //viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                //v.updateGameState(GamePhase.WAITING_FOR_TURN);
+                //TODO: franci gestire bene l'update
             } catch (RemoteException e) {
                 markDisconnected2(s);
                 throw new RuntimeException(e);
@@ -310,7 +315,8 @@ public class Controller implements Serializable {
         VirtualView v = viewsByNickname.get(firstPlayerNick);
         try {
             v.inform("You're the leader! Draw a card");
-            v.updateGameState(GamePhase.DRAW_PHASE);
+            //v.updateGameState(GamePhase.DRAW_PHASE);
+            //TODO: franci gestire bene l'update
         } catch (Exception e) {
             markDisconnected2(firstPlayerNick);
             throw new RuntimeException(e);
@@ -378,17 +384,11 @@ public class Controller implements Serializable {
                 break;
             case 3:
                 broadcastInform("Time’s up! Building phase ended.");
-                try {
-                    startFlight();
-                } catch (RemoteException e) {
-                    //TODO:gabri riempi il catch qui, non so cosa deve catturare
-                    // questo try-catch sistema quel problema che dava all'inizio nel costruttore
-                }
+                startFlight();
                 break;
         }
     }
 
-    //TODO: da finire
     public void startAwardsPhase(){
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -400,11 +400,11 @@ public class Controller implements Serializable {
                 fBoard.getBonusThirdPosition(), fBoard.getBonusFourthPosition()};
         List<Player> orderedPlayers = fBoard.getOrderedPlayers();
 
-        int minExpConnectors = playersInGame.stream()
+        int minExpConnectors = playersByNickname.values().stream()
                 .mapToInt(Player::countExposedConnectors)
                 .min()
                 .orElseThrow( () -> new IllegalArgumentException("No Player in Game"));
-        List<Player> bestShipPlayers = playersInGame.stream()
+        List<Player> bestShipPlayers = playersByNickname.values().stream()
                 .filter(p -> p.countExposedConnectors() == minExpConnectors)
                 .toList();
 
@@ -416,7 +416,7 @@ public class Controller implements Serializable {
             p.addCredits(bonusBestShip);
         }
 
-        for (Player p : playersInGame) {
+        for (Player p : playersByNickname.values()) {
             List<Colour> goods = p.getTotalListOfGood();
             for(Colour c : goods){
                 switch(c){
@@ -438,10 +438,27 @@ public class Controller implements Serializable {
             int numBrokenTiles = p.checkDiscardPile();
             p.addCredits(numBrokenTiles * malusBrokenTile);
 
-            //TODO: trovare la view associata al player e informarla del numero x di crediti fatti:
-            // se x>0, vinto, se no perso (farlo qui o in un for separato?)
+            String nick = playersByNickname.entrySet().stream()
+                    .filter(e -> e.getValue().equals(p))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
+            VirtualView v = viewsByNickname.get(nick);
+            int totalCredits = p.getCredit();
+            //TODO: metto il player in fase di exit e lo updato nella view
+            p.setGameFase(GamePhase.EXIT);
+            try{
+                if(totalCredits>0) v.inform("Your total credits are: " + totalCredits + " You won!");
+                else v.inform("Your total credits are: " + totalCredits + " You lost!");
+                v.inform("Game over. thank you for playing!");
+                //TODO: update view
+            } catch (Exception e) {
+                markDisconnected2(nick);
+                throw new RuntimeException(e);
+            }
         }
-        //TODO: mettere tutti in fase di exit e proseguire con la fine del gioco
+
+        onGameEnd.accept(this.gameId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1337,10 +1354,10 @@ public class Controller implements Serializable {
                 }
             }
         }
-        checkPLayerAssembly(nickname,  xy[0], xy[1]);
+        checkPlayerAssembly(nickname,  xy[0], xy[1]);
     }
 
-    private void checkPLayerAssembly(String id , int x , int y){
+    private void checkPlayerAssembly(String id , int x , int y){
         playersByNickname.get(id).controlAssembly(x,y);
         try {
             updatePlayer(id);

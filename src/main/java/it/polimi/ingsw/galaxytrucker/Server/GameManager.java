@@ -37,7 +37,7 @@ public class GameManager {
 
     public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException{
         int gameId = idCounter.getAndIncrement();
-        Controller controller = new Controller(isDemo, maxPlayers);
+        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
 
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
@@ -79,19 +79,9 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    //TODO: dire al fra/floris se spostare parte di questi metodi nel controller (creando gli appositi)
-
     public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        int size = controller.getPileOfTile().size();
-        if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
-
-        int randomIdx = ThreadLocalRandom.current().nextInt(size);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname);
-        return controller.getTile(randomIdx);
+        return controller.getCoveredTile(nickname);
     }
 
     public synchronized List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
@@ -104,48 +94,22 @@ public class GameManager {
 
     public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-
-        List<Tile> uncoveredTiles = controller.getShownTiles();
-        Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
-        if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
-
-        Player p = getPlayerCheck(controller, nickname);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname);
-        return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
+        return controller.chooseUncoveredTile(nickname, idTile);
     }
 
     public synchronized void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        controller.addToShownTile(tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname);
+        controller.dropTile(nickname, tile);
     }
 
     public synchronized void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        p.addTile(cord[0], cord[1], tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname);
+        controller.placeTile(nickname, tile, cord);
     }
 
     public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        controller.setPlayerReady(p);
-
-        List<Player> playersInGame = controller.getPlayersInGame();
-        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
-            controller.startFlight();
-        } else{
-            p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
-            sendUpdate(gameId, nickname);
-        }
+        controller.setReady(nickname);
     }
 
     public synchronized void flipHourglass(int gameId, String nickname) throws BusinessLogicException, RemoteException {
@@ -258,12 +222,6 @@ public class GameManager {
         Controller controller = games.get(gameId);
         if (controller == null) throw new BusinessLogicException("Game not found");
         return controller;
-    }
-
-    private Player getPlayerCheck(Controller controller, String nickname) throws BusinessLogicException {
-        Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new BusinessLogicException("Player not found");
-        return player;
     }
 
     private VirtualView getViewCheck(Controller controller, String nickname) throws BusinessLogicException {
