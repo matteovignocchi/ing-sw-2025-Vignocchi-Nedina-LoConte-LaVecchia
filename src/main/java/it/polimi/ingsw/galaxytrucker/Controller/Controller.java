@@ -17,11 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 //TODO: Franci, vedere come modificare il metodo sendUpdate che prima era in gamemanager, e ora in controller
+//TODO: Franci, discorso tipi di eccezioni da catchare nel try-catch delle inform-update
 
-//TODO: capire gestione dei players in gioco (mappa, lista playersInGame, lista players in volo in flightcardboar)
-//      un po tante liste ahahah
 //TODO: gestire fase del game (?) per riconnessioni dei players. (Oleg: ho un idea per questa cosa)
 //TODO: gestire e applicare i metodi che applicano gli effetti delle tiles (ex. addHuman per le celle)
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
@@ -263,9 +263,8 @@ public class Controller implements Serializable {
         Player p = getPlayerCheck(nickname);
 
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
-
-        List<Player> playersInGame = getPlayersInGame();
-        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
+        ;
+        if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
         } else{
             p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
@@ -273,14 +272,20 @@ public class Controller implements Serializable {
         }
     }
 
-    public void startFlight() {
+    public synchronized void startFlight() throws BusinessLogicException {
         if(!isDemo) mergeDecks();
+        //metto in lista gli eventuali players disconnesi che non hanno chiamato il metodo setReady
+        List<Player> playersInFlight = fBoard.getOrderedPlayers();
+        for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
+
         broadcastInform("Flight started!");
         playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.CARD_EFFECT));
 
         viewsByNickname.forEach((nick, v) -> {
             checkPlayerAssembly(nick , 2 , 3);
             //TODO: controlli tiles e attivare l'effetto delle tessere (ex. aggiungere umani per celle ecc..)
+            //TODO: questa chiamata va fatta per le view dei giocatori connessi. Non checkare prima se il giocatore
+            // connesso o meno, e lasciare partire l'eccezione? (che lo mette disconnesso anche se già lo è)
             try {
                 //viewsByNickname.get(nick).updateMapPosition(playerPosition);
                 //updatePlayer(nick);
@@ -296,21 +301,35 @@ public class Controller implements Serializable {
             }
         });
 
-        Player firstPlayer = fBoard.getOrderedPlayers().getFirst();
-        String firstPlayerNick = playersByNickname.entrySet().stream()
-                .filter(e -> e.getValue().equals(firstPlayer))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
-        firstPlayer.setGameFase(GamePhase.DRAW_PHASE);
-        VirtualView v = viewsByNickname.get(firstPlayerNick);
-        try {
-            v.inform("You're the leader! Draw a card");
-            //v.updateGameState(GamePhase.DRAW_PHASE);
-            //TODO: franci gestire bene l'update
-        } catch (Exception e) {
-            markDisconnected2(firstPlayerNick);
-            throw new RuntimeException(e);
+        activateDrawPhase();
+    }
+
+    public synchronized void activateDrawPhase() throws BusinessLogicException {
+        List<Player> candidates = fBoard.getOrderedPlayers().stream()
+                .filter(Player::isConnected)
+                .toList();
+
+        if(candidates.isEmpty()) throw new BusinessLogicException("No player connected");
+
+        for(Player leader : candidates) {
+            String leaderNick = playersByNickname.entrySet().stream()
+                    .filter(e -> e.getValue().equals(leader))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessLogicException("Impossible to find first player's nickname"));
+            VirtualView v = viewsByNickname.get(leaderNick);
+            leader.setGameFase(GamePhase.DRAW_PHASE);
+
+            try {
+                v.inform("You're the leader! Draw a card");
+                //v.updateGameState(GamePhase.DRAW_PHASE);
+                //TODO: franci gestire bene l'update
+                return;
+            } catch (Exception e) {
+                markDisconnected2(leaderNick);
+                leader.setGameFase(GamePhase.CARD_EFFECT);
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -363,7 +382,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void onHourglassStateChange(Hourglass h){
+    public void onHourglassStateChange(Hourglass h) throws BusinessLogicException {
         int flips = h.getFlips();
 
         switch (flips) {
@@ -413,21 +432,21 @@ public class Controller implements Serializable {
         activateCard(card);
 
         if(deck.isEmpty()){
-            playersByNickname.forEach( (s, p) -> {
-                p.setGameFase(GamePhase.SCORING);
-                //TODO: update per ogni player
-            });
             startAwardsPhase();
         } else {
             playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.CARD_EFFECT));
-            //DEVE ESSERE NO OFF, CAPIRE STA GESTIONE DEI DISCONNESSI
-            Player newFirstPlayer = fBoard.getOrderedPlayers().getFirst();
-            newFirstPlayer.setGameFase(GamePhase.DRAW_PHASE);
-            //TODO: update per tutti
+            activateDrawPhase();
+            //TODO: update per tutti (così facendo, il leader effettivo verrà updatato due volte, non penso sia un problema, capire)
         }
     }
 
     public void startAwardsPhase(){
+
+        playersByNickname.forEach( (s, p) -> {
+            p.setGameFase(GamePhase.SCORING);
+            //TODO: update per ogni player
+        });
+
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
         int redGoodBonus = fBoard.getBonusRedCargo();
@@ -483,8 +502,9 @@ public class Controller implements Serializable {
                     .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
             VirtualView v = viewsByNickname.get(nick);
             int totalCredits = p.getCredit();
-            //TODO: metto il player in fase di exit e lo updato nella view
             p.setGameFase(GamePhase.EXIT);
+            //TODO: anche qui, se una view è disconnessa, provo lo stesso ad updatarle -> finirò nel catch e
+            // lo rimetterò disconnesso anche se già lo è
             try{
                 if(totalCredits>0) v.inform("Your total credits are: " + totalCredits + " You won!");
                 else v.inform("Your total credits are: " + totalCredits + " You lost!");
