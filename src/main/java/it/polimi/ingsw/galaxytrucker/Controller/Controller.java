@@ -15,6 +15,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -89,31 +90,23 @@ public class Controller implements Serializable {
         try {
             v.updateGameState(p.getGameFase());
         } catch (Exception e) {
-            markDisconnected2(nickname); //da cambiare
+            markDisconnected(nickname);
             throw new RuntimeException(e);
         }
         v.showUpdate(nickname, firePower, enginePower, credits, position, purpleAlien, brownAlien, humans, energyCells);
     }
 
-
-
-    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
+    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException {
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
 
-        Player player = new Player(playerIdCounter.getAndIncrement(), isDemo);
-        playersByNickname.put(nickname, player);
+        Player p = new Player(playerIdCounter.getAndIncrement(), isDemo);
+        p.setConnected(true);
+        playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
-        playersInGame.add(player); //capire se va bene
-        playerPosition.put(nickname, 0);
-        try {
-            view.inform(String.format("Player %s added to game", nickname));
-        } catch (Exception e) {
-            markDisconnected2(nickname); //da cambiare
-            throw new RuntimeException(e);
-        }
-        if (playersByNickname.size() == MaxPlayers)
-            startGame();
+
+        view.inform("Player " + nickname + " added to game");
+        broadcastInform(nickname + "joined");
     }
 
     public Player getPlayerByNickname(String nickname) {
@@ -124,11 +117,6 @@ public class Controller implements Serializable {
         return viewsByNickname.get(nickname);
     }
 
-    /*
-    public List<Player> getPlayersInGame(){
-        return playersInGame;
-    }
-     */
 
     public void broadcastInform(String msg) {
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
@@ -137,9 +125,9 @@ public class Controller implements Serializable {
             try {
                 v.inform(msg);
             } catch (IOException e) {
-                markDisconnected2(nickname); //il client non risponde: disconnesso (il metodo informa tutti) //da cambiare, no markDisconnected2
+                markDisconnected(nickname); //il client non risponde: disconnesso (il metodo informa tutti) //da cambiare, no markDisconnected2
             } catch (Exception e) {
-                markDisconnected2(nickname);
+                markDisconnected(nickname);
                 throw new RuntimeException(e);
             }
         }
@@ -153,26 +141,25 @@ public class Controller implements Serializable {
         return principalGamePhase;
     }
 
-    //TODO: da rivedere e fare meglio
-    /*
-    public void markDisconnected2(String nickname) {
+    public synchronized void markDisconnected(String nickname) {
         Player p = playersByNickname.get(nickname);
-        if (p != null) {
-            broadcastInform(nickname + " is disconnected");
+        if (p != null && p.isConnected()) {
             p.setConnected(false);
-            p.setGameFase(GamePhase.EXIT);
+            broadcastInform(nickname + " is disconnected");
         }
     }
-     */
 
     public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
-        viewsByNickname.put(nickname, view); //Aaggiorno la view nella mappa
+        viewsByNickname.put(nickname, view);
+
         Player p = playersByNickname.get(nickname);
-        if (p != null && !playersInGame.contains(p)) {
-            playersInGame.add(p);
-            broadcastInform(nickname + "is riconnected");
-            updatePlayer(nickname);
+        if (p == null) { throw new BusinessLogicException("Player not found: " + nickname); }
+
+        if (!p.isConnected()) {
+            p.setConnected(true);
+            broadcastInform(nickname + " is reconnected");
         }
+        updatePlayer(nickname);
     }
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
@@ -193,6 +180,11 @@ public class Controller implements Serializable {
         return playersByNickname.size();
     }
 
+    public boolean isGameStarted() {
+        return playersByNickname.values().stream()
+                .anyMatch(p -> p.getGameFase() != GamePhase.WAITING_FOR_PLAYERS);
+    }
+
     public int getMaxPlayers(){ return MaxPlayers; }
 
     private Player getPlayerCheck(String nickname) throws BusinessLogicException {
@@ -201,6 +193,9 @@ public class Controller implements Serializable {
         return player;
     }
 
+    public Set<String> getAllNicknames() {
+        return playersByNickname.keySet();
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
@@ -218,12 +213,12 @@ public class Controller implements Serializable {
                 v.updateMapPosition(playersByNickname.get(s).getPos()); //parlarne
                 //TODO: update qui(?)
                 v.inform("Game is starting!");
+                //TODO; gira clessidra no?
             } catch (Exception e) {
-                markDisconnected2(s);
+                markDisconnected(s);
                 throw new RuntimeException(e);
             }
         }
-
         startHourglass();
     }
 
