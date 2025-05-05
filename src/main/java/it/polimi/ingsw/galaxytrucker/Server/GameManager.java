@@ -49,15 +49,15 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException {
         Controller controller = getControllerCheck(gameId);
 
-        if(controller.getPlayerByNickname(nickname) != null){
+        if (controller.isGameStarted() && controller.getPlayerByNickname(nickname)==null)
+            throw new BusinessLogicException("Game already in progress");
+
+        if (controller.getPlayerByNickname(nickname)!=null) {
             cancelTimeout(gameId);
             controller.markReconnected(nickname, v);
-            controller.broadcastInform(nickname + "is reconnected");
+            controller.broadcastInform(nickname + " is reconnected");
         } else {
             controller.addPlayer(nickname, v);
-            if(controller.countConnectedPlayers() == controller.getMaxPlayers()){
-                beginGame(gameId);
-            }
         }
         saveGameState(gameId, controller);
         sendUpdate(gameId, nickname);
@@ -245,23 +245,23 @@ public class GameManager {
 
     private void setTimeout(int gameId) throws BusinessLogicException {
         cancelTimeout(gameId);
+
         Controller controller = getControllerCheck(gameId);
         int connected = controller.countConnectedPlayers();
 
-        long minutes = (connected == 1 ? 5 : connected == 0 ? 10 : -1);
-        if (minutes <= 0) return;
-        ScheduledFuture<?> task = scheduler.schedule(() -> {
-            try { onTimeout(gameId);
-            } catch (Exception ignored) {}
-        }, minutes, TimeUnit.MINUTES);
-        timeout.put(gameId, task);
+        if (connected == 1) {
+            ScheduledFuture<?> task = scheduler.schedule(() -> {
+                try {
+                    onTimeout(gameId);
+                } catch (Exception ignored) {}
+            }, 5, TimeUnit.MINUTES);
+            timeout.put(gameId, task);
+        }
     }
 
     private void cancelTimeout(int gameId) {
         ScheduledFuture<?> old = timeout.remove(gameId);
-        if (old != null) {
-            old.cancel(false);
-        }
+        if (old != null) old.cancel(false);
     }
 
     private void onTimeout(int gameId) throws BusinessLogicException {
@@ -269,13 +269,15 @@ public class GameManager {
         int connected = controller.countConnectedPlayers();
 
         if (connected == 1) {
-            Player player_winner = controller.getPlayersInGame().get(0);
-            String winner = controller.getNickname(player_winner);
+            String winner = controller.getAllNicknames().stream()
+                    .filter(n -> controller.getPlayerByNickname(n).isConnected())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Impossible: no connected player found"));
+
             try {
                 controller.getViewByNickname(winner).inform("You won the game!");
             } catch (Exception ignored) {}
         }
-        // se 0 o >1: nessun vincitore
         removeGame(gameId);
     }
 
@@ -286,23 +288,13 @@ public class GameManager {
             controller.updatePlayer(nickname);
             cancelTimeout(gameId);// se era partito un timeout per questo game, lo cancelliamo
         } catch (RemoteException e) {
-            controller.markDisconnected2(nickname);// client non risponde → lo marchiamo disconnesso
+            controller.markDisconnected(nickname);// client non risponde → lo marchiamo disconnesso
             controller.broadcastInform(nickname + "is disconnected");
 
             int connected = controller.countConnectedPlayers();
             if (connected <= 1) {
                 setTimeout(gameId);
             }
-        }
-    }
-
-    private void beginGame(int gameId) throws BusinessLogicException {
-        Controller controller = getControllerCheck(gameId);
-        controller.startGame();
-
-        for (Player p : controller.getPlayersInGame()) {
-            String nick = controller.getNickname(p);
-            sendUpdate(gameId, nick);
         }
     }
 }
