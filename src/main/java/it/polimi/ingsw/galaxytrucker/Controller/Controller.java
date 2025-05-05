@@ -15,7 +15,6 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -96,7 +95,7 @@ public class Controller implements Serializable {
         v.showUpdate(nickname, firePower, enginePower, credits, position, purpleAlien, brownAlien, humans, energyCells);
     }
 
-    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException {
+    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
 
@@ -205,21 +204,21 @@ public class Controller implements Serializable {
     //TODO: vedere discorso Exception vs IOException: catcharli entrambi ? come gestirli?
 
     public synchronized void startGame() {
-        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.BOARD_SETUP));
+        playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.BOARD_SETUP));
 
-        for (String s : viewsByNickname.keySet()) {
-            VirtualView v = viewsByNickname.get(s);
+        viewsByNickname.forEach((nick, v) -> {
             try {
-                v.updateMapPosition(playersByNickname.get(s).getPos()); //parlarne
-                //TODO: update qui(?)
+                v.updateMapPosition();//parlarne
                 v.inform("Game is starting!");
-                //TODO; gira clessidra no?
             } catch (Exception e) {
-                markDisconnected(s);
-                throw new RuntimeException(e);
+                markDisconnected(nick);
             }
+        });
+
+        if (!isDemo) {
+            hourglass.flip(); //chiedere a gabri se il metodo è giusto
+            broadcastInform("Hourglass started!");
         }
-        startHourglass();
     }
 
     //TODO: franci in tutti questi metodini, dove l'update (della fase e del model)?
