@@ -35,7 +35,7 @@ public class GameManager {
         schedulePeriodicSaves();
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException{
+    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException, Exception{
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
 
@@ -46,7 +46,7 @@ public class GameManager {
         return gameId;
     }
 
-    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException {
+    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
         if (controller.isGameStarted() && controller.getPlayerByNickname(nickname)==null)
@@ -58,6 +58,13 @@ public class GameManager {
             controller.broadcastInform(nickname + " is reconnected");
         } else {
             controller.addPlayer(nickname, v);
+            if (controller.countConnectedPlayers() == controller.getMaxPlayers()) {
+                controller.startGame();
+
+                for (String nick : controller.getAllNicknames()) {
+                    sendUpdate(gameId, nick);
+                }
+            }
         }
         saveGameState(gameId, controller);
         sendUpdate(gameId, nickname);
