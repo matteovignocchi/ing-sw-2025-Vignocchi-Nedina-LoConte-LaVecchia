@@ -71,28 +71,34 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli) sia qui nel gamemanager
 
-
-
-    public synchronized void updatePlayer(String nickname) throws RemoteException {
-        VirtualView v = getViewByNickname(nickname);
-        Player p = getPlayerByNickname(nickname);
-
-        double firePower = getFirePower(nickname);
-        int enginePower = getPowerEngine(nickname);
-        int credits = p.getCredit();
-        int position = fBoard.getPositionOfPlayer(p);
-        boolean purpleAlien = p.presencePurpleAlien();
-        boolean brownAlien = p.presenceBrownAlien();
-        int humans = p.getTotalHuman();
-        int energyCells = p.getTotalEnergy();
-
+    public synchronized void notifyView(String nickname) {
+        VirtualView v = viewsByNickname.get(nickname);
+        Player p      = playersByNickname.get(nickname);
         try {
             v.updateGameState(p.getGameFase());
-        } catch (Exception e) {
+            v.showUpdate(
+                    nickname,
+                    getFirePower(nickname),
+                    getPowerEngine(nickname),
+                    p.getCredit(),
+                    fBoard.getPositionOfPlayer(p),
+                    p.presencePurpleAlien(),
+                    p.presenceBrownAlien(),
+                    p.getTotalHuman(),
+                    p.getTotalEnergy()
+            );
+        } catch (RemoteException e) {
             markDisconnected(nickname);
+            broadcastInform(nickname + " is disconnected");
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        v.showUpdate(nickname, firePower, enginePower, credits, position, purpleAlien, brownAlien, humans, energyCells);
+    }
+
+    public synchronized void notifyAllViews() {
+        for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
+            notifyView(nickname);
+        }
     }
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
@@ -148,17 +154,17 @@ public class Controller implements Serializable {
         }
     }
 
-    public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException, RemoteException {
+    public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException {
         viewsByNickname.put(nickname, view);
-
         Player p = playersByNickname.get(nickname);
-        if (p == null) { throw new BusinessLogicException("Player not found: " + nickname); }
-
+        if (p == null) {
+            throw new BusinessLogicException("Player not found: " + nickname);
+        }
         if (!p.isConnected()) {
             p.setConnected(true);
             broadcastInform(nickname + " is reconnected");
         }
-        updatePlayer(nickname);
+        notifyView(nickname);
     }
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
@@ -214,11 +220,10 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             }
         });
-
         if (!isDemo) startHourglass();
+        notifyAllViews();
     }
 
-    //TODO: franci in tutti questi metodini, dove l'update (della fase e del model)?
     public synchronized Tile getCoveredTile(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -227,7 +232,7 @@ public class Controller implements Serializable {
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
         p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+        notifyView(nickname);
 
         return getTile(randomIdx);
     }
@@ -239,7 +244,7 @@ public class Controller implements Serializable {
 
         Player p = getPlayerCheck(nickname);
         p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+        notifyView(nickname);
         return getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
@@ -248,7 +253,7 @@ public class Controller implements Serializable {
 
         addToShownTile(tile);
         p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+        notifyView(nickname);
     }
 
     public synchronized void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
@@ -256,7 +261,7 @@ public class Controller implements Serializable {
 
         p.addTile(cord[0], cord[1], tile);
         p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+        notifyView(nickname);
     }
 
     public synchronized void setReady(String nickname) throws BusinessLogicException, RemoteException {
@@ -268,10 +273,12 @@ public class Controller implements Serializable {
             startFlight();
         } else{
             p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
-            sendUpdate(gameId, nickname); //TODO: franci vedi come va cambiato
+            notifyView(nickname);
         }
     }
 
+    //l'update non va gestito nel try-catch, metto notifyallviews alla fine prima di activateDrawPhase()
+    //vedere bene questo metodo
     public synchronized void startFlight() throws BusinessLogicException {
         if(!isDemo) mergeDecks();
         //metto in lista gli eventuali players disconnesi che non hanno chiamato il metodo setReady
@@ -294,7 +301,7 @@ public class Controller implements Serializable {
                 //v.updateGameState(GamePhase.CARD_EFFECT);
                 //TODO: franci gestire bene l'update
             } catch (RemoteException e) {
-                markDisconnected2(s);
+                markDisconnected(s);
                 throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -322,15 +329,14 @@ public class Controller implements Serializable {
 
             try {
                 v.inform("You're the leader! Draw a card");
-                //v.updateGameState(GamePhase.DRAW_PHASE);
-                //TODO: franci gestire bene l'update
                 return;
             } catch (Exception e) {
-                markDisconnected2(leaderNick);
+                markDisconnected(leaderNick);
                 leader.setGameFase(GamePhase.CARD_EFFECT);
                 throw new RuntimeException(e);
             }
         }
+        notifyAllViews();
     }
 
     public  synchronized void startHourglass(){
@@ -352,7 +358,7 @@ public class Controller implements Serializable {
                     try {
                         getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
-                        markDisconnected2(nickname);
+                        markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
                 }
@@ -362,7 +368,7 @@ public class Controller implements Serializable {
                     try {
                         getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
-                        markDisconnected2(nickname);
+                        markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
                 } else if (p.getGameFase() == GamePhase.WAITING_FOR_PLAYERS) {
@@ -373,7 +379,7 @@ public class Controller implements Serializable {
                         getViewByNickname(nickname).inform("You cannot flip the hourglass for the last time: " +
                                 "You are not ready");
                     } catch (Exception e) {
-                        markDisconnected2(nickname);
+                        markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
                 }
@@ -424,7 +430,7 @@ public class Controller implements Serializable {
             try {
                 v.printCard(card);
             } catch (Exception e) {
-                markDisconnected2(s);
+                markDisconnected(s);
                 throw new RuntimeException(e);
             }
         });
@@ -435,8 +441,10 @@ public class Controller implements Serializable {
             startAwardsPhase();
         } else {
             playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.CARD_EFFECT));
+            notifyAllViews();
             activateDrawPhase();
             //TODO: update per tutti (così facendo, il leader effettivo verrà updatato due volte, non penso sia un problema, capire)
+            //io metterei l'update qui, prima di activate....
         }
     }
 
@@ -444,7 +452,7 @@ public class Controller implements Serializable {
 
         playersByNickname.forEach( (s, p) -> {
             p.setGameFase(GamePhase.SCORING);
-            //TODO: update per ogni player
+            notifyAllViews();
         });
 
         int malusBrokenTile = fBoard.getBrokenMalus();
@@ -511,7 +519,7 @@ public class Controller implements Serializable {
                 v.inform("Game over. thank you for playing!");
                 //TODO: update view
             } catch (Exception e) {
-                markDisconnected2(nick);
+                markDisconnected(nick);
                 throw new RuntimeException(e);
             }
         }
@@ -536,7 +544,7 @@ public class Controller implements Serializable {
         try {
             return x.ask(condition);
         } catch (Exception e) {
-            markDisconnected2(id);
+            markDisconnected(id);
             throw new RuntimeException(e);
         }
     }
@@ -693,14 +701,14 @@ public class Controller implements Serializable {
                     try {
                         viewsByNickname.get(p).inform("selezionare cella ed eliminare rosso");
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
                         vari = viewsByNickname.get(p).askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
@@ -722,14 +730,14 @@ public class Controller implements Serializable {
                     try {
                         viewsByNickname.get(p).inform("selezionare cella ed eliminare giallo");
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
                         vari = viewsByNickname.get(p).askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
@@ -751,14 +759,14 @@ public class Controller implements Serializable {
                     try {
                         viewsByNickname.get(p).inform("selezionare cella ed eliminare verde");
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
                         vari = viewsByNickname.get(p).askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
@@ -780,14 +788,14 @@ public class Controller implements Serializable {
                     try {
                         viewsByNickname.get(p).inform("selezionare cella ed eliminare blu");
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
                         vari = viewsByNickname.get(p).askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
@@ -825,14 +833,14 @@ public class Controller implements Serializable {
                     try {
                         viewsByNickname.get(p).inform("selezionare cella ed eliminare una batteria");
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
                         vari = viewsByNickname.get(p).askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected2(p);
+                        markDisconnected(p);
                         throw new RuntimeException(e);
                     }
                     Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
@@ -869,21 +877,21 @@ public class Controller implements Serializable {
         try {
             if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         } catch (Exception e) {
-            markDisconnected2(player);
+            markDisconnected(player);
             throw new RuntimeException(e);
         }
         while (list.size() != 0 && flag == true) {
             try {
                 x.inform("seleziona una HOusing unit");
             } catch (Exception e) {
-                markDisconnected2(player);
+                markDisconnected(player);
                 throw new RuntimeException(e);
             }
             int[] vari = null;
             try {
                 vari = x.askCoordinate();
             } catch (Exception e) {
-                markDisconnected2(player);
+                markDisconnected(player);
                 throw new RuntimeException(e);
             }
             Tile t = playersByNickname.get(player).getTile(vari[0], vari[1]);
@@ -893,7 +901,7 @@ public class Controller implements Serializable {
                         try {
                             x.printListOfGoods(c.getListOfGoods());
                         } catch (Exception e) {
-                            markDisconnected2(player);
+                            markDisconnected(player);
                             throw new RuntimeException(e);
                         }
                         try {
@@ -905,7 +913,7 @@ public class Controller implements Serializable {
                         try {
                             tmpint = x.askIndex();
                         } catch (Exception e) {
-                            markDisconnected2(player);
+                            markDisconnected(player);
                             throw new RuntimeException(e);
                         }
                         Colour tmp = c.getListOfGoods().get(tmpint - 1);
@@ -915,14 +923,14 @@ public class Controller implements Serializable {
                     try {
                         x.inform("seleziona la merce da inserire");
                     } catch (Exception e) {
-                        markDisconnected2(player);
+                        markDisconnected(player);
                         throw new RuntimeException(e);
                     }
                     int tmpint = 0;
                     try {
                         tmpint = x.askIndex();
                     } catch (Exception e) {
-                        markDisconnected2(player);
+                        markDisconnected(player);
                         throw new RuntimeException(e);
                     }
                     c.addGood(list.get(tmpint-1));
@@ -931,7 +939,7 @@ public class Controller implements Serializable {
                     try {
                         x.inform("cella non valida");
                     } catch (Exception e) {
-                        markDisconnected2(player);
+                        markDisconnected(player);
                         throw new RuntimeException(e);
                     }
                 }
@@ -941,7 +949,7 @@ public class Controller implements Serializable {
             try {
                 if(!x.ask("Vuoi continurare")) flag = false;
             } catch (Exception e) {
-                markDisconnected2(player);
+                markDisconnected(player);
                 throw new RuntimeException(e);
             }
 
@@ -1207,7 +1215,7 @@ public class Controller implements Serializable {
         try {
             use = x.ask("Vuoi usare una batteria?");
         } catch (Exception e) {
-            markDisconnected2(player);
+            markDisconnected(player);
             throw new RuntimeException(e);
         }
         if (!use) {
@@ -1217,7 +1225,7 @@ public class Controller implements Serializable {
                 try {
                     coordinate = x.askCoordinate();
                 } catch (Exception e) {
-                    markDisconnected2(player);
+                    markDisconnected(player);
                     throw new RuntimeException(e);
                 }
                 Tile p = playersByNickname.get(player).getTile(coordinate[0], coordinate[1]);
@@ -1230,7 +1238,7 @@ public class Controller implements Serializable {
                                     return false;
                                 }
                             } catch (Exception e) {
-                                markDisconnected2(player);
+                                markDisconnected(player);
                                 throw new RuntimeException(e);
                             }
                         } else {
@@ -1245,7 +1253,7 @@ public class Controller implements Serializable {
                                 exits = true;
                             }
                         } catch (Exception e) {
-                            markDisconnected2(player);
+                            markDisconnected(player);
                             throw new RuntimeException(e);
                         }
                     }
@@ -1398,7 +1406,7 @@ public class Controller implements Serializable {
             viewsByNickname.get(nickname).inform("choose your starting hounsing unit");
             xy = viewsByNickname.get(nickname).askCoordinate();
         } catch (RemoteException e) {
-            markDisconnected2(nickname);
+            markDisconnected(nickname);
             throw new RuntimeException(e);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -1413,7 +1421,7 @@ public class Controller implements Serializable {
                         viewsByNickname.get(nickname).inform("Position non valid , choose another tile");
                         xy = viewsByNickname.get(nickname).askCoordinate();
                     } catch (RemoteException e) {
-                        markDisconnected2(nickname);
+                        markDisconnected(nickname);
                         throw new RuntimeException(e);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -1430,10 +1438,10 @@ public class Controller implements Serializable {
             updatePlayer(id);
             viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
         } catch (RemoteException e) {
-            markDisconnected2(id);
+            markDisconnected(id);
             throw new RuntimeException(e);
         } catch (Exception e) {
-            markDisconnected2(id);
+            markDisconnected(id);
             throw new RuntimeException(e);
         }
     }
