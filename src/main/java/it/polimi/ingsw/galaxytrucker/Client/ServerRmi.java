@@ -177,7 +177,8 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void drawCard() throws RemoteException {
+    public void drawCard(int gameId) throws RemoteException, BusinessLogicException {
+        gameManager.drawCard(gameId);
         throw new RemoteException("Method drawCard not yet implemented");
     }
 }

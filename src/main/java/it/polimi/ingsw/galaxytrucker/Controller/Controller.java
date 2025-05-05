@@ -384,6 +384,32 @@ public class Controller implements Serializable {
         }
     }
 
+    public synchronized void drawCardManagement() throws CardEffectException {
+  /*metodo per pescare una carta e attivarla:
+    1. pesco con il metodo draw (che rimuove dal deck)
+    2. con una inform su tutte le view informo della carta pescata (+ eventuale metodo printCard sulla view per stampare tutti gli attributi della carta)
+    3. chiamo activate card
+    3.1 activatecard chiama il metodo accept sulla carta che chiama il visit corretto sul visitor
+    3.2 logica della carta e per ricalcolare le nuove posizione ecc..
+    4. alla fine, check se deck vuoto (attivata ultima carta):
+     -si, si passa alla fase di premizione (cambio fase, inform..))
+     -no, rimodifico le fasi per una nuova drawcard (assegno la fase di drawCard al leader e agli altri quella di attesa..)
+    5. update per ogni player (?)
+     */
+        Card card = deck.draw();
+        broadcastInform("Card drawn!");
+        viewsByNickname.forEach( (s, v) -> {
+            try {
+                v.printCard(card);
+            } catch (Exception e) {
+                markDisconnected2(s);
+                throw new RuntimeException(e);
+            }
+        });
+
+        activateCard(card);
+    }
+
     public void startAwardsPhase(){
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -1418,14 +1444,6 @@ public class Controller implements Serializable {
     public List<Card> showDeck (int idxDeck){
         return new ArrayList<>(decks.get(idxDeck).getCards());
     }
-
-    /*metodo per pescare una carta e attivarla:
-    1. pesco con il metodo draw (che rimuove dal deck) (metodo a parte view, la riceve e chiama activate card)
-    2. chiamo activate card (gestione chiedere agli utenti, come?)
-    3. check se deck vuoto (attivata ultima carta):
-     si, si passa alla fase di premizione (cambio fase, inform e update (?))
-     no, rimodifico le fasi per una nuova drawcard
-     */
 
 }
 

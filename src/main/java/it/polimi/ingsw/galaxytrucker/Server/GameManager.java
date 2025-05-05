@@ -124,11 +124,9 @@ public class GameManager {
 
 
     //da finire
-    public synchronized void drawCard(int gameId, Card card) throws BusinessLogicException {
+    public synchronized void drawCard(int gameId) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.activateCard(card);
-        //gestire le fasi (ricalcolare il leader (sua fase DrawCard)), informare e updatare le views
-        //update(?)
+        controller.drawCardManagement();
     }
 
     //da finire
