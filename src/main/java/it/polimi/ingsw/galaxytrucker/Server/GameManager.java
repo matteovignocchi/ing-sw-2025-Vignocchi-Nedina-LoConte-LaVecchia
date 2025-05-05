@@ -133,8 +133,8 @@ public class GameManager {
 
     //da finire
     public void lookDashBoard(String nickname, int gameId) throws BusinessLogicException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.lookDashBoard(nickname, gameId);
+        Controller controller = getControllerCheck(gameId);
+        controller.lookDashBoard(nickname);
         sendUpdate(gameId, nickname);
     }
 
