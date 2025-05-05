@@ -215,10 +215,7 @@ public class Controller implements Serializable {
             }
         });
 
-        if (!isDemo) {
-            hourglass.flip(); //chiedere a gabri se il metodo è giusto
-            broadcastInform("Hourglass started!");
-        }
+        if (!isDemo) startHourglass();
     }
 
     //TODO: franci in tutti questi metodini, dove l'update (della fase e del model)?
@@ -279,17 +276,17 @@ public class Controller implements Serializable {
     public void startFlight() {
         if(!isDemo) mergeDecks();
         broadcastInform("Flight started!");
-        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.WAITING_FOR_TURN));
+        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.CARD_EFFECT));
 
         viewsByNickname.forEach((nick, v) -> {
             checkPlayerAssembly(nick , 2 , 3);
-            //TODO: controlli tiles e attivare l'effetto delle tessere (aggiungere umani, potenza di fuoco ecc..)
+            //TODO: controlli tiles e attivare l'effetto delle tessere (ex. aggiungere umani per celle ecc..)
             try {
                 //viewsByNickname.get(nick).updateMapPosition(playerPosition);
                 //updatePlayer(nick);
                 //non mi convince
                 //viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
-                //v.updateGameState(GamePhase.WAITING_FOR_TURN);
+                //v.updateGameState(GamePhase.CARD_EFFECT);
                 //TODO: franci gestire bene l'update
             } catch (RemoteException e) {
                 markDisconnected2(s);
@@ -383,19 +380,26 @@ public class Controller implements Serializable {
         }
     }
 
-    public synchronized void drawCardManagement() throws CardEffectException {
-  /*metodo per pescare una carta e attivarla:
-    1. pesco con il metodo draw (che rimuove dal deck)
-    2. con una inform su tutte le view informo della carta pescata (+ eventuale metodo printCard sulla view per stampare tutti gli attributi della carta)
-    3. chiamo activate card
-    3.1 activatecard chiama il metodo accept sulla carta che chiama il visit corretto sul visitor
-    3.2 logica della carta e per ricalcolare le nuove posizione ecc..
-    4. alla fine, check se deck vuoto (attivata ultima carta):
-     -si, si passa alla fase di premizione (cambio fase, inform..))
-     -no, rimodifico le fasi per una nuova drawcard (assegno la fase di drawCard al leader e agli altri quella di attesa..)
-    5. update per ogni player (?)
-     */
+    /*metodo per pescare una carta e attivarla:
+      1. pesco con il metodo draw (che rimuove dal deck)
+      2. inform + print card su tutte le view
+      3. chiamo activate card
+      3.1 activatecard chiama il metodo accept sulla carta che chiama il visit corretto sul visitor
+      3.2 logica della carta + ricalcolo nuove posizione ecc..
+      4. alla fine, check se deck vuoto:
+        -si, si passa alla fase di premizione (cambio fase, inform..))
+        -no, rimodifico le fasi per una nuova drawcard (assegno la fase di drawCard al leader e agli altri quella di attesa..)
+      5. update per ogni player
+   */
+    public synchronized void drawCardManagement(String nickname) throws BusinessLogicException, CardEffectException{
         Card card = deck.draw();
+        
+        Player drawer = getPlayerCheck(nickname);
+        drawer.setGameFase(GamePhase.CARD_EFFECT);
+        //TODO: update del drawer (nuova fase)
+        //      In questi casi, in cui si updata solo la fase, conviene chiamare tutto il metodo update?
+        //      Basterebbe updtare solo la fase
+
         broadcastInform("Card drawn!");
         viewsByNickname.forEach( (s, v) -> {
             try {
@@ -407,6 +411,20 @@ public class Controller implements Serializable {
         });
 
         activateCard(card);
+
+        if(deck.isEmpty()){
+            playersByNickname.forEach( (s, p) -> {
+                p.setGameFase(GamePhase.SCORING);
+                //TODO: update per ogni player
+            });
+            startAwardsPhase();
+        } else {
+            playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.CARD_EFFECT));
+            //DEVE ESSERE NO OFF, CAPIRE STA GESTIONE DEI DISCONNESSI
+            Player newFirstPlayer = fBoard.getOrderedPlayers().getFirst();
+            newFirstPlayer.setGameFase(GamePhase.DRAW_PHASE);
+            //TODO: update per tutti
+        }
     }
 
     public void startAwardsPhase(){
@@ -479,6 +497,15 @@ public class Controller implements Serializable {
         }
 
         onGameEnd.accept(this.gameId);
+    }
+
+    public synchronized List<Card> showDeck (int idxDeck){
+        return new ArrayList<>(decks.get(idxDeck).getCards());
+    }
+
+    public synchronized Tile[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+        return p.getDashMatrix();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1439,10 +1466,5 @@ public class Controller implements Serializable {
             //TODO: notificare la view
         }
     }
-
-    public List<Card> showDeck (int idxDeck){
-        return new ArrayList<>(decks.get(idxDeck).getCards());
-    }
-
 }
 

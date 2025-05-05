@@ -129,18 +129,14 @@ public class GameManager {
         return controller.showDeck(idxDeck);
     }
 
-
-    //da finire
-    public synchronized void drawCard(int gameId) throws BusinessLogicException {
+    public synchronized void drawCard(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.drawCardManagement();
+        controller.drawCardManagement(nickname);
     }
 
-    //da finire
-    public void lookDashBoard(String nickname, int gameId) throws BusinessLogicException {
+    public Tile[][] lookAtDashBoard(String nickname, int gameId) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.lookDashBoard(nickname);
-        sendUpdate(gameId, nickname);
+        return controller.lookAtDashBoard(nickname);
     }
 
     ////////////////////////////////////////////////GESTIONE SALVATAGGIO////////////////////////////////////////////////

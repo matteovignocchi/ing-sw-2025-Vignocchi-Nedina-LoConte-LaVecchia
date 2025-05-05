@@ -12,21 +12,26 @@ import java.util.List;
 
 public interface VirtualServer extends Remote {
 
-    public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
-    public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
-    public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException;
-    public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException;
-    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
-    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException;
-    public void dropTile (int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
-    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException;
-    public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException;
-    public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException;
-    public List<Card> showDeck(int gameId, int idxDeck) throws IOException, BusinessLogicException;
+    int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
+    void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException;
+    void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException;
+    void dropTile (int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException;
+    void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException;
+    void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    List<Card> showDeck(int gameId, int idxDeck) throws IOException, BusinessLogicException;
+    Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
 
     public String waitForResponse() throws RemoteException; //serve?
     public int[] requestGamesList() throws RemoteException; //serve?
     public String waitForGameStart() throws Exception; //serve?
     public void lookDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     public void drawCard() throws RemoteException;
+
+
+
 }
