@@ -25,9 +25,12 @@ public class CardEffectVisitor implements CardVisitor {
 
         if (controller == null) throw new NullPointerException("controller is null");
         FlightCardBoard f = controller.getFlightCardBoard();
-        List<Player> players = f.getOrderedPlayers();
+        //TODO: players solo i giocatori connessi: capire se così va bene e come continuare
+        List<Player> players = f.getOrderedPlayers().stream()
+                .filter(Player::isConnected)
+                .collect(Collectors.toList());
 
-        if (players == null || players.isEmpty()) throw new NullPointerException("players is null");
+        if (players.isEmpty()) throw new NullPointerException("players is null");
         for (Player p : players) if (p == null) throw new NullPointerException("player is null");
 
         this.controller = controller;
@@ -100,6 +103,8 @@ public class CardEffectVisitor implements CardVisitor {
                 int days = card.getDays();
                 String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
+                //TODO: isolare le chiamate a questi metodi che mettono in attesa un server, e incapsularle in un
+                // try-catch, per gestire la caduta della connessione. Qui e ovunque sono chiamate
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
                     p.addCredits(credits);

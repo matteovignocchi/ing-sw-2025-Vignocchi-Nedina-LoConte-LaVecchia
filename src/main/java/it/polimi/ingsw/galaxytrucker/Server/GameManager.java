@@ -35,32 +35,35 @@ public class GameManager {
         schedulePeriodicSaves();
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException{
+    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException, Exception{
         int gameId = idCounter.getAndIncrement();
-        Controller controller = new Controller(isDemo, maxPlayers);
+        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
 
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
-        saveGameState(gameId, controller);
-        sendUpdate(gameId, nickname);
+        controller.notifyAllViews();
+        safeSave(gameId, controller);
         return gameId;
     }
 
-    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException {
+    public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-        if(controller.getPlayerByNickname(nickname) != null){
+        if (controller.isGameStarted() && controller.getPlayerByNickname(nickname)==null)
+            throw new BusinessLogicException("Game already in progress");
+
+        if (controller.getPlayerByNickname(nickname)!=null) {
             cancelTimeout(gameId);
             controller.markReconnected(nickname, v);
-            controller.broadcastInform(nickname + "is reconnected");
+            controller.broadcastInform(nickname + " is reconnected");
         } else {
             controller.addPlayer(nickname, v);
-            if(controller.countConnectedPlayers() == controller.getMaxPlayers()){
-                beginGame(gameId);
+            if (controller.countConnectedPlayers() == controller.getMaxPlayers()) {
+                controller.startGame();
             }
         }
-        saveGameState(gameId, controller);
-        sendUpdate(gameId, nickname);
+        controller.notifyAllViews();
+        safeSave(gameId, controller);
     }
 
     public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException {
@@ -79,19 +82,10 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    //TODO: dire al fra/floris se spostare parte di questi metodi nel controller (creando gli appositi)
-
-    public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException {
+    public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        int size = controller.getPileOfTile().size();
-        if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
-
-        int randomIdx = ThreadLocalRandom.current().nextInt(size);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname);
-        return controller.getTile(randomIdx);
+        safeSave(gameId, controller);
+        return controller.getCoveredTile(nickname);
     }
 
     public synchronized List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
@@ -102,55 +96,34 @@ public class GameManager {
         return uncoveredTiles;
     }
 
-    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException {
+    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
-
-        List<Tile> uncoveredTiles = controller.getShownTiles();
-        Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
-        if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
-
-        Player p = getPlayerCheck(controller, nickname);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
-        sendUpdate(gameId, nickname);
-        return controller.getShownTile(uncoveredTiles.indexOf(opt.get()));
+        safeSave(gameId, controller);
+        return controller.chooseUncoveredTile(nickname, idTile);
     }
 
     public synchronized void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        controller.addToShownTile(tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname);
+        controller.dropTile(nickname, tile);
+        safeSave(gameId, controller);
     }
 
     public synchronized void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        p.addTile(cord[0], cord[1], tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
-        sendUpdate(gameId, nickname);
+        controller.placeTile(nickname, tile, cord);
+        safeSave(gameId, controller);
     }
 
     public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
-        Player p = getPlayerCheck(controller, nickname);
-
-        controller.setPlayerReady(p);
-
-        List<Player> playersInGame = controller.getPlayersInGame();
-        if(playersInGame.stream().allMatch( e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
-            controller.startFlight();
-        } else{
-            p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
-            sendUpdate(gameId, nickname);
-        }
+        controller.setReady(nickname);
+        safeSave(gameId, controller);
     }
 
     public synchronized void flipHourglass(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
         controller.flipHourglass(nickname);
+        safeSave(gameId, controller);
     }
 
     public List<Card> showDeck(int gameId, int idxDeck) throws BusinessLogicException {
@@ -158,20 +131,15 @@ public class GameManager {
         return controller.showDeck(idxDeck);
     }
 
-
-    //da finire
-    public synchronized void drawCard(int gameId, Card card) throws BusinessLogicException {
+    public synchronized void drawCard(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.activateCard(card);
-        //gestire le fasi (ricalcolare il leader (sua fase DrawCard)), informare e updatare le views
-        //update(?)
+        controller.drawCardManagement(nickname);
+        safeSave(gameId, controller);
     }
 
-    //da finire
-    public void lookDashBoard(String nickname, int gameId) throws BusinessLogicException {
-        Controller controller = findControllerByPlayer(nickname);
-        controller.lookDashBoard(nickname, gameId);
-        sendUpdate(gameId, nickname);
+    public Tile[][] lookAtDashBoard(String nickname, int gameId) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        return controller.lookAtDashBoard(nickname);
     }
 
     ////////////////////////////////////////////////GESTIONE SALVATAGGIO////////////////////////////////////////////////
@@ -252,18 +220,20 @@ public class GameManager {
         idCounter.set(maxId + 1);
     }
 
+    private void safeSave(int gameId, Controller ctrl) {
+        try {
+            saveGameState(gameId, ctrl);
+        } catch(IOException e) {
+            System.err.println("Save failed for game " + gameId + ": " + e.getMessage());
+        }
+    }
+
     ////////////////////////////////////////////////GESTIONE UTILITA'///////////////////////////////////////////////////
 
     private Controller getControllerCheck(int gameId) throws BusinessLogicException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new BusinessLogicException("Game not found");
         return controller;
-    }
-
-    private Player getPlayerCheck(Controller controller, String nickname) throws BusinessLogicException {
-        Player player = controller.getPlayerByNickname(nickname);
-        if (player == null) throw new BusinessLogicException("Player not found");
-        return player;
     }
 
     private VirtualView getViewCheck(Controller controller, String nickname) throws BusinessLogicException {
@@ -287,23 +257,23 @@ public class GameManager {
 
     private void setTimeout(int gameId) throws BusinessLogicException {
         cancelTimeout(gameId);
+
         Controller controller = getControllerCheck(gameId);
         int connected = controller.countConnectedPlayers();
 
-        long minutes = (connected == 1 ? 5 : connected == 0 ? 10 : -1);
-        if (minutes <= 0) return;
-        ScheduledFuture<?> task = scheduler.schedule(() -> {
-            try { onTimeout(gameId);
-            } catch (Exception ignored) {}
-        }, minutes, TimeUnit.MINUTES);
-        timeout.put(gameId, task);
+        if (connected == 1) {
+            ScheduledFuture<?> task = scheduler.schedule(() -> {
+                try {
+                    onTimeout(gameId);
+                } catch (Exception ignored) {}
+            }, 5, TimeUnit.MINUTES);
+            timeout.put(gameId, task);
+        }
     }
 
     private void cancelTimeout(int gameId) {
         ScheduledFuture<?> old = timeout.remove(gameId);
-        if (old != null) {
-            old.cancel(false);
-        }
+        if (old != null) old.cancel(false);
     }
 
     private void onTimeout(int gameId) throws BusinessLogicException {
@@ -311,40 +281,15 @@ public class GameManager {
         int connected = controller.countConnectedPlayers();
 
         if (connected == 1) {
-            Player player_winner = controller.getPlayersInGame().get(0);
-            String winner = controller.getNickname(player_winner);
+            String winner = controller.getAllNicknames().stream()
+                    .filter(n -> controller.getPlayerByNickname(n).isConnected())
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Impossible: no connected player found"));
+
             try {
                 controller.getViewByNickname(winner).inform("You won the game!");
             } catch (Exception ignored) {}
         }
-        // se 0 o >1: nessun vincitore
         removeGame(gameId);
-    }
-
-    //Manda l’aggiornamento allo user; se il client non risponde, gestisce la disconnessione
-    private void sendUpdate(int gameId, String nickname) throws BusinessLogicException {
-        Controller controller = getControllerCheck(gameId);
-        try {
-            controller.updatePlayer(nickname);
-            cancelTimeout(gameId);// se era partito un timeout per questo game, lo cancelliamo
-        } catch (RemoteException e) {
-            controller.markDisconnected2(nickname);// client non risponde → lo marchiamo disconnesso
-            controller.broadcastInform(nickname + "is disconnected");
-
-            int connected = controller.countConnectedPlayers();
-            if (connected <= 1) {
-                setTimeout(gameId);
-            }
-        }
-    }
-
-    private void beginGame(int gameId) throws BusinessLogicException {
-        Controller controller = getControllerCheck(gameId);
-        controller.startGame();
-
-        for (Player p : controller.getPlayersInGame()) {
-            String nick = controller.getNickname(p);
-            sendUpdate(gameId, nick);
-        }
     }
 }

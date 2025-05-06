@@ -167,18 +167,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void lookDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+    public Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
-        handleGameManagerCall("lookDashBoard", () -> {
-            gameManager.lookDashBoard(nickname, gameId);
-            return null;
-        });
+        return handleGameManagerCall("lookDashBoard", () -> gameManager.lookAtDashBoard(nickname, gameId));
     }
 
     @Override
-    public void drawCard() throws RemoteException {
-        throw new RemoteException("Method drawCard not yet implemented");
+    public void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+        gameManager.drawCard(gameId, nickname);
     }
 }
 
