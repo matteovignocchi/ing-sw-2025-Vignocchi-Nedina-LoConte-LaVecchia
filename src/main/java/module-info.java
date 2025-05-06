@@ -10,6 +10,7 @@ module it.polimi.ingsw.galaxytrucker {
     requires java.rmi;
     requires annotations;
     requires java.naming;
+    requires java.desktop;
 
     opens it.polimi.ingsw.galaxytrucker to javafx.fxml;
     exports it.polimi.ingsw.galaxytrucker;

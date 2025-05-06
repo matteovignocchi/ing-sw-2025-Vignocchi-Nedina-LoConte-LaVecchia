@@ -2,15 +2,12 @@ package it.polimi.ingsw.galaxytrucker.Controller;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard2;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.InvalidPlayerException;
-import it.polimi.ingsw.galaxytrucker.Model.Hourglass;
-import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import java.io.IOException;
 import java.io.Serializable;
@@ -36,6 +33,7 @@ public class Controller implements Serializable {
     private final boolean isDemo;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase; //inutile
+
 
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;

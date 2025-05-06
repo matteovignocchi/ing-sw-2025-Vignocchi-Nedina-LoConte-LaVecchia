@@ -32,9 +32,6 @@ public interface View {
     String sendAvailableChoices() throws Exception;
     void updateMap(Map<String, Integer> map);
     String choosePlayer();
-    //meetodo per richiedere
-
-
 }
 
 //public interface VirtualViewRmi extends VirtualView {

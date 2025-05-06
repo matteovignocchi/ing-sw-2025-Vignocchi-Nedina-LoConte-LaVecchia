@@ -4,10 +4,22 @@ import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import javafx.application.Platform;
 
 import java.util.List;
+import java.util.Map;
 
 public class GUIView implements View {
+    private Stage gameStage;
+
+    public GUIView(){
+        Platform.startup(()->{});
+    }
+
+
+
+
+
     @Override
     public void inform(String message) {
 
@@ -18,15 +30,14 @@ public class GUIView implements View {
         return false;
     }
 
-
     @Override
     public int[] askCordinate() {
-     return null;
+        return new int[0];
     }
 
     @Override
     public int askIndex() {
-return 0;
+        return 0;
     }
 
     @Override
@@ -40,27 +51,7 @@ return 0;
     }
 
     @Override
-    public void printFirePower(float power) {
-
-    }
-
-    @Override
-    public void printEnginePower(int power) {
-
-    }
-
-    @Override
-    public void printNumOfCredits(int credits) {
-
-    }
-
-    @Override
     public void printListOfGoods(List<Colour> Goods) {
-
-    }
-
-    @Override
-    public void printListOfTiles(List<Tile> Tiles) {
 
     }
 
@@ -75,32 +66,12 @@ return 0;
     }
 
     @Override
-    public void printBonusBrown(boolean bonusBrown) {
-
-    }
-
-    @Override
-    public void printBonusPurple(boolean bonusPurple) {
-
-    }
-
-    @Override
-    public void printList(String key, List<Object> list) {
-
-    }
-
-    @Override
     public void printNewFase(GamePhase gamePhase) {
 
     }
 
     @Override
     public void printDeck(List<Card> deck) {
-
-    }
-
-    @Override
-    public void printLap(int i) {
 
     }
 
@@ -141,6 +112,16 @@ return 0;
 
     @Override
     public String sendAvailableChoices() throws Exception {
+        return "";
+    }
+
+    @Override
+    public void updateMap(Map<String, Integer> map) {
+
+    }
+
+    @Override
+    public String choosePlayer() {
         return "";
     }
 }
