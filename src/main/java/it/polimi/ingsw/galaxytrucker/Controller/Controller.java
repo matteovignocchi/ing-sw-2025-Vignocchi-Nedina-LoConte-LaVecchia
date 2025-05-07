@@ -13,14 +13,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-//TODO: Franci, vedere come modificare il metodo sendUpdate che prima era in gamemanager, e ora in controller
-//TODO: Franci, discorso tipi di eccezioni da catchare nel try-catch delle inform-update
 
 //TODO: gestire fase del game (?) per riconnessioni dei players. (Oleg: ho un idea per questa cosa)
 //TODO: gestire e applicare i metodi che applicano gli effetti delle tiles (ex. addHuman per le celle)
@@ -46,6 +41,8 @@ public class Controller implements Serializable {
     private Deck deck;
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
+    private static final ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private transient ScheduledFuture<?> lastPlayerTask;
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd) throws CardEffectException, IOException {
         if(isDemo) {
@@ -152,19 +149,22 @@ public class Controller implements Serializable {
         if (p != null && p.isConnected()) {
             p.setConnected(false);
             broadcastInform(nickname + " is disconnected");
+            // se dopo questa disconnessione rimane un solo giocatore connesso...
+            setTimeout();
         }
     }
 
     public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException {
         viewsByNickname.put(nickname, view);
         Player p = playersByNickname.get(nickname);
-        if (p == null) {
+        if (p == null)
             throw new BusinessLogicException("Player not found: " + nickname);
-        }
+
         if (!p.isConnected()) {
             p.setConnected(true);
             broadcastInform(nickname + " is reconnected");
         }
+        cancelLastPlayerTimeout();
         notifyView(nickname);
     }
 
@@ -202,6 +202,33 @@ public class Controller implements Serializable {
     public Set<String> getAllNicknames() {
         return playersByNickname.keySet();
     }
+
+    private synchronized void cancelLastPlayerTimeout() {
+        if (lastPlayerTask != null) {
+            lastPlayerTask.cancel(false);
+            lastPlayerTask = null;
+        }
+    }
+
+    private synchronized void setTimeout() {
+        cancelLastPlayerTimeout();
+        if (countConnectedPlayers() == 1) {
+            lastPlayerTask = TIMEOUT_EXECUTOR.schedule(() -> {
+                String winner = playersByNickname.entrySet().stream()
+                        .filter(e -> e.getValue().isConnected())
+                        .map(Map.Entry::getKey)
+                        .findFirst().orElse(null);
+
+                if (winner != null) {
+                    try {
+                        viewsByNickname.get(winner).inform("You win by timeout!");
+                    } catch (Exception ignored) {}
+                }
+                onGameEnd.accept(gameId);
+            }, 1, TimeUnit.MINUTES);
+        }
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
