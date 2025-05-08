@@ -163,6 +163,7 @@ public class CardEffectVisitor implements CardVisitor {
             int res = p.throwDice() + p.throwDice();
             try {
                 controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

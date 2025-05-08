@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 //TODO: gestire e applicare i metodi che applicano gli effetti delle tiles (ex. addHuman per le celle)
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
 //TODO: rivedere bene le inform e inserirle dove mancano (Oleg:gestire bene anche le try-catch)
+//TODO: sistemare cardVisitor con le fasi e le chiamate ai metodi , verificare se meglio la mappa o il player (va gestita sta cosa gabri sa a cosa mi riferisco)
+
 public class Controller implements Serializable {
     //private List<Player> playersInGame = new ArrayList<>();
     private final int gameId;
@@ -36,7 +38,7 @@ public class Controller implements Serializable {
     private final boolean isDemo;
     private final Consumer<Integer> onGameEnd;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
-    private GamePhase principalGamePhase; //inutile
+    private GamePhase principalGamePhase;
 
 
     private transient Hourglass hourglass;
@@ -59,7 +61,13 @@ public class Controller implements Serializable {
         }
         this.gameId = gameId;
         this.onGameEnd = onGameEnd;
-        this.hourglass = new Hourglass(this::onHourglassStateChange);
+        this.hourglass = new Hourglass(h -> {
+            try {
+                onHourglassStateChange(h);
+            } catch (BusinessLogicException e) {
+                throw new RuntimeException(e);
+            }
+        });
         this.isDemo = isDemo;
         this.MaxPlayers = MaxPlayers;
         this.playerIdCounter = new AtomicInteger(1); //verificare che matcha con la logica
@@ -215,7 +223,8 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-                v.updateMapPosition();//parlarne
+                v.setFlagStart(); //ne hai parlato con oleg a lezione , così non cambiate
+                v.updateMapPosition(playerPosition);
                 v.inform("Game is starting!");
             } catch (Exception e) {
                 markDisconnected(nick);
@@ -301,9 +310,6 @@ public class Controller implements Serializable {
                 //viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
                 //v.updateGameState(GamePhase.CARD_EFFECT);
                 //TODO: franci gestire bene l'update
-            } catch (RemoteException e) {
-                markDisconnected(s);
-                throw new RuntimeException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1436,11 +1442,8 @@ public class Controller implements Serializable {
     private void checkPlayerAssembly(String id , int x , int y){
         playersByNickname.get(id).controlAssembly(x,y);
         try {
-            updatePlayer(id);
+            notifyView(id);
             viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
-        } catch (RemoteException e) {
-            markDisconnected(id);
-            throw new RuntimeException(e);
         } catch (Exception e) {
             markDisconnected(id);
             throw new RuntimeException(e);

@@ -5,6 +5,7 @@ import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import java.rmi.RemoteException;
@@ -18,11 +19,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private GamePhase gamePhase;
     private String nickname;
     private int gameId;
+    private Tile[][] Dash_Matrix;
+    boolean flag = true;
 
     public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
         super();
         this.server = server;
         this.view = view;
+        Dash_Matrix = new Tile[5][7];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Dash_Matrix[i][j] = new EmptySpace();
+            }
+        }
     }
     @Override
     public void setNickname(String nickname) throws RemoteException {
@@ -166,12 +175,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return server.waitForResponse();
     }
     @Override
+    public void setFlagStart(){
+        flag=false;
+    }
+    @Override
     public String waitForGameUpadate() throws RemoteException {
-        try {
-            return server.waitForGameStart();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        while(flag){}
+        return "start";
+
     }
 
 
@@ -219,10 +230,16 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         } catch (BusinessLogicException e) {
             throw new RuntimeException(e);
         }
+        Dash_Matrix[tmp[0]][tmp[1]] = tile;
+        view.printDashShip(Dash_Matrix);
     }
     @Override
     public void drawCard() throws RemoteException {
-        server.drawCard();
+        try {
+            server.drawCard(gameId,nickname);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
     @Override
     public void rotateGlass() throws RemoteException{
@@ -254,7 +271,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void lookDashBoard() throws RemoteException{
         String tmp = view.choosePlayer();
         try {
-            server.lookDashBoard(gameId,tmp);
+            server.lookAtDashBoard(gameId,tmp);
         } catch (BusinessLogicException e) {
             throw new RuntimeException(e);
         }

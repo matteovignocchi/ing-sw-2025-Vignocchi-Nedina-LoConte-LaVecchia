@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import java.io.Serializable;
 
 public class Message implements Serializable {
+
     public static final String TYPE_REQUEST = "REQUEST";
     public static final String TYPE_RESPONSE = "RESPONSE";
     public static final String TYPE_ERROR = "ERROR";
@@ -41,6 +42,7 @@ public class Message implements Serializable {
     public static final String OP_SET_VIEW = "SET_VIEW";
     public static final String OP_SET_GAMEID = "SET_GAMEID";
     public static final String OP_MAP_POSITION = "MAP_POSITION";
+    public static final String OP_SET_FLAG_START = "SET FLAG";
 
 
 
@@ -89,6 +91,7 @@ public class Message implements Serializable {
     public String getTimestamp() {
         return timestamp;
     }
+
     public boolean isType(String type) {
         return this.messageType.equals(type);
     }

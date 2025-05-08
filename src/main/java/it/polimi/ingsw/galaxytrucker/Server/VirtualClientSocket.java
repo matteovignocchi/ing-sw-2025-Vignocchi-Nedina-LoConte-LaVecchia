@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
@@ -23,6 +24,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private Object lastResponse;
     private int gameId;
     private String nickname;
+    private Tile[][] Dash_Matrix;
+    boolean flag = true;
+
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -32,6 +36,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.view = view;
         new Thread(this).start();
+        Dash_Matrix = new Tile[5][7];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Dash_Matrix[i][j] = new EmptySpace();
+            }
+        }
     }
     @Override
     public void run() {
@@ -68,6 +78,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                                         payload.getNumberOfEnergy()
                                 );
                             }
+                            case Message.OP_SET_FLAG_START -> this.setFlagStart();
                             default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
                         }
                     }
@@ -251,10 +262,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
     @Override
     public String waitForGameUpadate() throws InterruptedException {
-        while (lastResponse == null) wait();
-        String response = (String) lastResponse;
-        lastResponse = null;
-        return response;
+        while(flag){}
+        return "start";
     }
 
     /// METODI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
@@ -328,6 +337,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void updateMapPosition(Map<String, Integer> Position)  {
         view.updateMap(Position);
+    }
+
+    @Override
+    public void setFlagStart() throws Exception {
+        flag = false;
     }
 }
 

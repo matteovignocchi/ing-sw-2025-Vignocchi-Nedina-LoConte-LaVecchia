@@ -54,4 +54,5 @@ public interface VirtualView {
     void logOut() throws Exception;
     void setNickname(String nickname) throws Exception;
     void updateMapPosition(Map<String, Integer> Position) throws Exception;
+    void setFlagStart() throws Exception;
 }
