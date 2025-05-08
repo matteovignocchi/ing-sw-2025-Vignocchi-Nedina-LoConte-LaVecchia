@@ -385,6 +385,19 @@ public class Player implements Serializable {
 
     }
 
+    //metodo che serve per i test
+    public void modifyDASH(Tile[][] tile) {
+        this.Dash_Matrix = tile;
+        for(int i=0;i<5;i++){
+            for(int j=0;j<7;j++){
+                switch ((tile[i][j])){
+                    case EmptySpace e-> validStatus[i][j]=Status.FREE;
+                    default -> validStatus[i][j]=Status.USED;
+                }
+            }
+        }
+    }
+
     /**
      * the method return the tile in the position (x,y)
      * @param x row index
