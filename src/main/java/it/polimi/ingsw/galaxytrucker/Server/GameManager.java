@@ -26,7 +26,6 @@ public class GameManager {
     private final Map<Integer, Controller> games;
     private final AtomicInteger idCounter;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private final Map<Integer, ScheduledFuture<?>> timeout = new ConcurrentHashMap<>();
 
     public GameManager() {
         this.games = new ConcurrentHashMap<>();
@@ -53,7 +52,6 @@ public class GameManager {
             throw new BusinessLogicException("Game already in progress");
 
         if (controller.getPlayerByNickname(nickname)!=null) {
-            cancelTimeout(gameId);
             controller.markReconnected(nickname, v);
             controller.broadcastInform(nickname + " is reconnected");
         } else {
@@ -156,12 +154,11 @@ public class GameManager {
     private void schedulePeriodicSaves() {
         scheduler.scheduleAtFixedRate(() -> {
             for (var entry : games.entrySet()) {
-                int gameId = entry.getKey();
-                Controller controller = entry.getValue();
                 try {
-                    saveGameState(gameId, controller);
+                    saveGameState(entry.getKey(), entry.getValue());
                 } catch (IOException e) {
-                    System.err.println("Auto-save failed for game " + gameId + ": " + e.getMessage());
+                    System.err.println("Auto-save failed for game "
+                            + entry.getKey() + ": " + e.getMessage());
                 }
             }
         }, 1, 1, TimeUnit.MINUTES);
@@ -208,7 +205,13 @@ public class GameManager {
             for (File f : files) {
                 try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f))) {
                     Controller controller = (Controller) in.readObject();
-                    controller.reinitializeAfterLoad(controller::onHourglassStateChange);
+                    controller.reinitializeAfterLoad(h -> {
+                        try {
+                            controller.onHourglassStateChange(h);
+                        } catch (BusinessLogicException ex) {
+                            System.err.println("Error in the callback hourglass: " + ex.getMessage());
+                        }
+                    });
                     int id = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
                     games.put(id, controller);
                     maxId = Math.max(maxId, id);
@@ -253,43 +256,5 @@ public class GameManager {
 
     public Set<Integer> listActiveGames() {
         return games.keySet();
-    }
-
-    private void setTimeout(int gameId) throws BusinessLogicException {
-        cancelTimeout(gameId);
-
-        Controller controller = getControllerCheck(gameId);
-        int connected = controller.countConnectedPlayers();
-
-        if (connected == 1) {
-            ScheduledFuture<?> task = scheduler.schedule(() -> {
-                try {
-                    onTimeout(gameId);
-                } catch (Exception ignored) {}
-            }, 5, TimeUnit.MINUTES);
-            timeout.put(gameId, task);
-        }
-    }
-
-    private void cancelTimeout(int gameId) {
-        ScheduledFuture<?> old = timeout.remove(gameId);
-        if (old != null) old.cancel(false);
-    }
-
-    private void onTimeout(int gameId) throws BusinessLogicException {
-        Controller controller = getControllerCheck(gameId);
-        int connected = controller.countConnectedPlayers();
-
-        if (connected == 1) {
-            String winner = controller.getAllNicknames().stream()
-                    .filter(n -> controller.getPlayerByNickname(n).isConnected())
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Impossible: no connected player found"));
-
-            try {
-                controller.getViewByNickname(winner).inform("You won the game!");
-            } catch (Exception ignored) {}
-        }
-        removeGame(gameId);
     }
 }
