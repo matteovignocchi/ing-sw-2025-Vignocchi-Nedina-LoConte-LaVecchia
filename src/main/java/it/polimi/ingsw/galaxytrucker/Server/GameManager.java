@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 // 1)cambiare synchronized -> lock
 // 2)eliminare metodi di utility che non vengono utilizzati, ma solo dopo
 
+
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
