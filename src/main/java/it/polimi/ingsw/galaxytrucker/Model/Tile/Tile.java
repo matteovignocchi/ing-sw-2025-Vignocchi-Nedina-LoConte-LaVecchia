@@ -16,14 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public abstract class Tile {
-    private static final AtomicInteger ID_GENERATOR = new AtomicInteger(0);
     public int[] corners = new int[4];
-    private final int idTile;
+    public int idTile;
 
     //la super è chiamata implicitamente in tutte le istanza
-    protected Tile() {
-        this.idTile = ID_GENERATOR.getAndIncrement();
-    }
     public int getIdTile() {
         return idTile;
     }

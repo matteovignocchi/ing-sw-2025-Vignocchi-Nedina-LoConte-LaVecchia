@@ -19,7 +19,7 @@ public class Shield extends Tile {
      * @param c
      * @param d
      */
-    public Shield(int a, int b, int c, int d) {
+    public Shield(int a, int b, int c, int d, int id) {
         corners[0] = a;
         corners[1] = b;
         corners[2] = c;
@@ -28,6 +28,7 @@ public class Shield extends Tile {
         protectedCorners[1] = 8;
         protectedCorners[2] = 0;
         protectedCorners[3] = 0;
+        idTile = id;
     }
 
     /**

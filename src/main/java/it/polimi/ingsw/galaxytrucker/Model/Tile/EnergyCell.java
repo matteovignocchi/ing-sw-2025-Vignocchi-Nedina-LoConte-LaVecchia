@@ -16,12 +16,13 @@ public class EnergyCell extends Tile{
      * @param d
      * @param capacity
      */
-    public EnergyCell(int a, int b, int c, int d, int capacity) {
+    public EnergyCell(int a, int b, int c, int d, int capacity, int id) {
         corners[0] = a;
         corners[1] = b;
         corners[2] = c;
         corners[3] = d;
         this.capacity = capacity;
+        idTile = id;
     }
 
     /**

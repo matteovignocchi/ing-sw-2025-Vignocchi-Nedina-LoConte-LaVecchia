@@ -16,12 +16,13 @@ public class Cannon extends Tile {
      * @param d
      * @param isDouble
      */
-    public Cannon(int a, int b, int c, int d, boolean isDouble) {
+    public Cannon(int a, int b, int c, int d, boolean isDouble, int id) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
         this.isDouble = isDouble;
+        idTile = id;
     }
 
     /**

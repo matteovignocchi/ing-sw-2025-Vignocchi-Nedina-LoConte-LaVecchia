@@ -10,6 +10,7 @@ public class EmptySpace extends Tile {
         corners[3]=0;
         corners[2]=0;
         corners[1]=0;
+        idTile = 157;
 
     }
 }
