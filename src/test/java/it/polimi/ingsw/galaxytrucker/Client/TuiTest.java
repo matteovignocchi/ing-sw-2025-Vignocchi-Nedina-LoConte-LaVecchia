@@ -1,0 +1,127 @@
+package it.polimi.ingsw.galaxytrucker.Client;
+
+import it.polimi.ingsw.galaxytrucker.Model.Player;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.View.View;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+
+public class TuiTest {
+
+    private final PrintStream originalOut = System.out;
+    private final InputStream originalIn = System.in;
+    private ByteArrayOutputStream outContent;
+    private Tile[][] tmp = new Tile[5][7];
+    Player p = new Player(123456 , true);
+    private TileParserLoader pileMaker = new TileParserLoader();
+    List<Tile> pileOfTile = pileMaker.loadTiles();
+
+
+    @BeforeEach
+    public void setUpStreams() {
+        outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @AfterEach
+    public void restoreStreams() {
+        System.setOut(originalOut);
+        System.setIn(originalIn);
+    }
+
+    @Test
+    void testTUIViewAskString() {
+        String input = "TestString\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        TUIView tui = new TUIView();
+        String result = tui.askString();
+
+        assertEquals("TestString", result);
+    }
+
+    @Test
+    void testTUIViewAskIndex() {
+        String input = "2\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        TUIView tui = new TUIView();
+        int index = tui.askIndex();
+
+        assertEquals(1, index);
+    }
+
+    @Test
+    void testTUIViewAskCoordinate() {
+        String input = "5\n4\n";
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
+
+        TUIView tui = new TUIView();
+        int[] coords = tui.askCordinate();
+
+        assertArrayEquals(new int[]{0, 0}, coords);
+    }
+
+    @Test
+    void testViewStart(){
+        TUIView tui = new TUIView();
+        tui.start();
+        tui.inform("ciao");
+
+    }
+
+    @Test
+    void testPrintDashBoard(){
+        TUIView tui = new TUIView();
+        Tile[][] tmp = p.getDashMatrix();
+        tmp[1][3] = new Cannon(3,3,3,3,true);
+        tmp[1][4]= new StorageUnit(2,1,2,3,3,true);
+        switch (tmp[1][4]){
+            case StorageUnit s -> {
+                s.addGood(Colour.RED);
+                s.addGood(Colour.GREEN);
+                s.addGood(Colour.BLUE);
+            }
+            default -> {}
+        }
+        Tile tmp2 = new Shield(2,2,1,0);
+        tmp2.RotateRight();
+        tmp2.RotateRight();
+        tmp2.RotateRight();
+        tmp[1][2]=tmp2;
+        tmp[2][2] = new EnergyCell(0 , 1, 2, 3 , 2);
+
+
+        tui.printDashShip(tmp);
+        tui.printPileCovered();
+        tui.printPileShown(pileOfTile);
+//        tui.printListOfCommand();
+    }
+
+
+
+
+
+
+
+}

@@ -18,18 +18,29 @@ public class TUIView implements View {
     private boolean isDemo;
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
-    private static final String YELLOW = "\u001B[43m";
-    private static final String RED = "\u001B[41m";
-    private static final String GREEN = "\u001B[42m";
-    private static final String BLUE = "\u001B[44m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String RED = "\u001B[31m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String BLUE = "\u001B[34m";
     private static final String PURPLE = "\u001B[35m";
     private static final String BROWN = "\u001B[33m";
+    private static final String PEFOH = "\u001B[36m";
     private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
 
     //per ora lascio il server come int
     //alla fine di ogni comando scritto dagli altri una show update
     @Override
     public void start() {
+        System.out.println(
+                YELLOW+" _____       _                    _____               _             \n"+
+                        "|  __ \\     | |                  |_   _|             | |            \n"+
+                        "| |  \\/ __ _| | __ ___  ___   _    | |_ __ _   _  ___| | _____ _ __ \n"+
+                        "| | __ / _` | |/ _` \\ \\/ / | | |   | | '__| | | |/ __| |/ / _ \\ '__|\n"+
+                        "| |_\\ \\ (_| | | (_| |>  <| |_| |   | | |  | |_| | (__|   <  __/ |   \n"+
+                        " \\____/\\__,_|_|\\__,_/_/\\_\\\\__, |   \\_/_|   \\__,_|\\___|_|\\_\\___|_|   \n"+
+                        "                           __/ |                                    \n"+
+                        "                          |___/                                     \n"+RESET
+        );
         inform("Welcome to the Galaxy Trucker!");
         inform("This is the conversion table regarding our gameplay and display conventions.");
         inform("The tile is presented with four numbers, one for each direction, representing either the number of connectors or special parts of the tile, which we will explain later.");
@@ -153,13 +164,13 @@ public class TUIView implements View {
     public void printDashShip(Tile[][] dashboard) {
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
-            System.out.printf("   %2d    ", col + 4);
+            System.out.printf("    %2d    ", col + 4);
         }
         System.out.println();
         for (int row = 0; row < 5; row++) {
             StringBuilder border = new StringBuilder("    ");
-            StringBuilder top = new StringBuilder(String.format("%2d  ", row + 5));
-            StringBuilder mid = new StringBuilder("    ");
+            StringBuilder mid = new StringBuilder(String.format("%2d  ", row + 5));
+            StringBuilder top = new StringBuilder("    ");
             StringBuilder bot = new StringBuilder("    ");
 
             for (int col = 0; col < 7; col++) {
@@ -182,8 +193,8 @@ public class TUIView implements View {
             }
             border.append("+");
             System.out.println(border);
-            System.out.println(top.append("| ").append(row + 1));
-            System.out.println(mid.append("|"));
+            System.out.println(top.append("|"));
+            System.out.println(mid.append("|  ").append(row + 5));
             System.out.println(bot.append("|"));
         }
 
@@ -197,7 +208,7 @@ public class TUIView implements View {
 
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
-            System.out.printf("   %2d    ", col + 4);
+            System.out.printf("    %2d    ", col + 4);
         }
         System.out.println();
     }
@@ -339,7 +350,7 @@ public class TUIView implements View {
         for (int i = 0; i < size; i++) {
             topBorder.append("+---------+ ");
             mid1.append("|         | ");
-            mid2.append(String.format("|   %3d   | ", i + 1));
+            mid2.append(String.format("|  %3d    | ", i + 1));
             mid3.append("|         | ");
             printed++;
             if (printed == maxPerRow) {
@@ -417,18 +428,18 @@ public class TUIView implements View {
                 if(x.getType() == Human.HUMAN){
                     return "HU"+x.returnLenght();
                 }else if(x.getType() == Human.BROWN_ALIEN){
-                    return BROWN+"HU"+RESET+x.returnLenght();
+                    return BROWN+"HU"+RESET+x.returnLenght()+" ";
                 }else if(x.getType() == Human.PURPLE_ALIEN){
-                    return PURPLE+"HU"+RESET+x.returnLenght();
+                    return PURPLE+"HU"+RESET+x.returnLenght()+" ";
                 }
             }
             case MultiJoint x ->{return "MTJ";}
             case Shield x ->{return "SHL";}
             case StorageUnit x -> {
                 if(x.isAdvanced()){
-                    return RED+"SU"+RESET+x.getMax();
+                    return RED+"SU"+RESET+PEFOH+x.getMax()+RESET;
                 }
-                return "SU"+x.getMax();
+                return "SU"+PEFOH+x.getMax()+RESET;
             }
             default -> throw new IllegalStateException("Unexpected value: " + tile);
         }
@@ -452,47 +463,47 @@ public class TUIView implements View {
                 out[2] = String.format("         ");
             }
             case Engine x -> {
-                out[0] = String.format("    %d     ", a);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("    %d     ", c);
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
             }
             case Cannon x -> {
-                out[0] = String.format("    %d     ", a);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("    %d     ", c);
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
             }
             case EnergyCell x ->{
-                out[0] = String.format("    %d     ", a);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("    %d     ", c);
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s  %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
             }
             case MultiJoint x ->{
-                out[0] = String.format("    %d     ", a);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("    %d     ", c);
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
             }
             case HousingUnit x ->{
-                out[0] = String.format("    %d     ", a);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("    %d     ", c);
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
             }
             case Shield x ->{
                 if(x.getProtectedCorner(0)==8 && x.getProtectedCorner(1)==8){
-                    out[0] = String.format("    %s%d%s     ",GREEN, a, RESET);
-                    out[1] = String.format("%d %-5s %s%d%s",d,label,GREEN,b,RESET);
-                    out[2] = String.format("    %d     ", c);
+                    out[0] = String.format("    %s%d%s    ",GREEN, a, RESET);
+                    out[1] = String.format("%d  %-4s %s%d%s",d,label,GREEN,b,RESET);
+                    out[2] = String.format("    %d    ", c);
                 }else if(x.getProtectedCorner(1)==8 && x.getProtectedCorner(2)==8){
-                    out[0] = String.format("    %d     ", a);
-                    out[1] = String.format("%d %-5s %s%d%s",d,label,GREEN,b,RESET);
-                    out[2] = String.format("    %s%d%s     ", GREEN,c,RESET);
+                    out[0] = String.format("    %d    ", a);
+                    out[1] = String.format("%d  %-4s %s%d%s",d,label,GREEN,b,RESET);
+                    out[2] = String.format("    %s%d%s    ", GREEN,c,RESET);
                 }else if(x.getProtectedCorner(2)==8 && x.getProtectedCorner(3)==8){
-                    out[0] = String.format("    %d     ", a);
-                    out[1] = String.format("%s%d%s %-5s %d",GREEN,d,RESET,label,b);
-                    out[2] = String.format("    %s%d%s     ", GREEN,c,RESET);
-                }else if(x.getProtectedCorner(2)==8 && x.getProtectedCorner(0)==8){
-                    out[0] = String.format("    %s%d%s     ",GREEN, a, RESET);
-                    out[1] = String.format("%s%d%s %-5s %d",GREEN,d,RESET,label,b);
-                    out[2] = String.format("    %d     ", c);
+                    out[0] = String.format("    %d    ", a);
+                    out[1] = String.format("%s%d%s  %-4s %d",GREEN,d,RESET,label,b);
+                    out[2] = String.format("    %s%d%s    ", GREEN,c,RESET);
+                }else if(x.getProtectedCorner(3)==8 && x.getProtectedCorner(0)==8){
+                    out[0] = String.format("    %s%d%s    ",GREEN, a, RESET);
+                    out[1] = String.format("%s%d%s  %-4s %d",GREEN,d,RESET,label,b);
+                    out[2] = String.format("    %d    ", c);
                 }
             }
             case StorageUnit x ->{
@@ -509,9 +520,9 @@ public class TUIView implements View {
                         case BLUE -> blue++;
                     }
                 }
-                out[0] = String.format("%s%d%s  %d   %s%d%s",RED,red,RESET, a,YELLOW,yellow,RESET);
-                out[1] = String.format("%d %-5s %d",d,label,b);
-                out[2] = String.format("%s%d%s  %d   %s%d%s",BLUE,blue,RESET, c,GREEN,green,RESET);
+                out[0] = String.format("%s%d%s   %d   %s%d%s",RED,red,RESET, a,YELLOW,yellow,RESET);
+                out[1] = String.format("%d  %-4s  %d",d,label,b);
+                out[2] = String.format("%s%d%s   %d   %s%d%s",BLUE,blue,RESET, c,GREEN,green,RESET);
             }
             default ->{}
         }
