@@ -3,25 +3,29 @@
     "type": "AbandonedShipCard",
     "days" : 1,
     "credits": 6,
-    "num_crewmates" : 4
+    "num_crewmates" : 4,
+    "id_card": "2_0117"
   },
   {
     "type": "AbandonedShipCard",
     "days" : 2,
     "credits": 8,
-    "num_crewmates" : 5
+    "num_crewmates" : 5,
+    "id_card": "2_0118"
   },
   {
     "type": "AbandonedStationCard",
     "days" : 1,
     "num_crewmates" : 7,
-    "station_goods" : ["RED" , "YELLOW"]
+    "station_goods" : ["RED" , "YELLOW"],
+    "id_card": "2_0119"
   },
   {
     "type": "AbandonedStationCard",
     "days" : 2,
     "num_crewmates" : 8,
-    "station_goods" : ["YELLOW" , "YELLOW", "GREEN"]
+    "station_goods" : ["YELLOW" , "YELLOW", "GREEN"],
+    "id_card": "2_0120"
   },
   {
     "type": "PiratesCard",
@@ -29,51 +33,62 @@
     "days": 2,
     "credits": 7,
     "shots_directions": [0, 0, 0],
-    "shots_size": [true, false, true]
+    "shots_size": [true, false, true],
+    "id_card": "2_013"
   },
   {
     "type": "SlaversCard",
     "days": 2,
     "credits": 8,
     "num_crewmates" : 4,
-    "fire_power": 7
+    "fire_power": 7,
+    "id_card": "2_01"
   },
   {
     "type": "SmugglersCard",
     "days": 1,
     "fire_power": 8,
     "num_removed_goods": 3,
-    "reward_goods": ["RED", "YELLOW", "YELLOW"]
+    "reward_goods": ["RED", "YELLOW", "YELLOW"],
+    "id_card": "2_012"
   },
   {
-    "type": "StardustCard"
+    "type": "StardustCard",
+    "id_card": "2_014"
   },
   {
-    "type": "PlaugeCard"
+    "type": "PlaugeCard",
+    "id_card": "2_015"
   },
   {
-    "type": "OpenSpaceCard"
+    "type": "OpenSpaceCard",
+    "id_card": "2_016"
   },
   {
-    "type": "OpenSpaceCard"
+    "type": "OpenSpaceCard",
+    "id_card": "2_017"
   },
   {
-    "type": "OpenSpaceCard"
+    "type": "OpenSpaceCard",
+    "id_card": "2_018"
   },
   {
     "type": "MeteoritesRainCard",
     "directions": [0, 0, 2, 2],
-    "size": [true, true, false, false]
+    "size": [true, true, false, false],
+    "id_card": "2_0110"
   },
   {
     "type": "MeteoritesRainCard",
     "directions": [0, 0, 1, 1, 1],
-    "size": [false, false, true, false, false]
+    "size": [false, false, true, false, false],
+    "id_card": "2_0111"
   },
   {
     "type": "MeteoritesRainCard",
     "directions": [ 0, 0, 3, 3, 3],
-    "size": [false, false, true, false, false]
+    "size": [false, false, true, false, false],
+    "id_card": "2_019"
   },
   {
     "type": "PlanetsCard",
@@ -82,7 +97,8 @@
       ["RED", "RED", "RED", "YELLOW"],
       ["RED", "RED", "GREEN", "GREEN"],
       ["RED", "BLUE", "BLUE", "BLUE", "BLUE"]
-    ]
+    ],
+    "id_card": "2_0112"
   },
   {
     "type": "PlanetsCard",
@@ -90,7 +106,8 @@
     "reward_goods": [
       ["RED", "RED"],
       ["GREEN", "GREEN", "GREEN", "GREEN"]
-    ]
+    ],
+    "id_card": "2_0113"
   },
   {
     "type": "PlanetsCard",
@@ -100,7 +117,8 @@
       ["YELLOW", "GREEN", "BLUE"],
       ["GREEN", "GREEN"],
       ["YELLOW"]
-    ]
+    ],
+    "id_card": "2_0114"
   },
   {
     "type": "PlanetsCard",
@@ -109,13 +127,15 @@
       ["GREEN", "GREEN", "GREEN", "GREEN"],
       ["YELLOW", "YELLOW"],
       ["BLUE", "BLUE", "BLUE", "BLUE"]
-    ]
+    ],
+    "id_card": "2_0115"
   },
   {
     "type": "SecondWarzoneCard",
     "days": 4,
     "num_goods": 3,
     "shots_directions": [0, 3, 1, 2],
-    "shots_size": [false, false, false, true]
+    "shots_size": [false, false, false, true],
+    "id_card": "2_0116"
   }
 ]

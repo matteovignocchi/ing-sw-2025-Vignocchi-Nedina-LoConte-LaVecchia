@@ -8,6 +8,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 //TODO:
 // 1)cambiare synchronized -> lock
@@ -245,16 +247,13 @@ public class GameManager {
         return view;
     }
 
-    private Controller findControllerByPlayer(String nickname) throws BusinessLogicException {
-        for (Controller controller : games.values()) {
-            if (controller.getPlayerByNickname(nickname) != null) {
-                return controller;
-            }
-        }
-        throw new BusinessLogicException("Player not found in any game");
-    }
-
-    public Set<Integer> listActiveGames() {
-        return games.keySet();
+    public synchronized Map<Integer,int[]> listActiveGames() {
+        return games.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> {
+                    Controller controller = e.getValue();
+                    return new int[]{ controller.countConnectedPlayers(), controller.getMaxPlayers() };
+                }
+        ));
     }
 }
