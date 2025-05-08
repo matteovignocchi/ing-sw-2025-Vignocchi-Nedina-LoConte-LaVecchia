@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 public class SlaversCard implements Card{
+    private final String idCard;
     private final int days;
     private final int credits;
     private final int num_crewmates;
@@ -26,16 +27,19 @@ public class SlaversCard implements Card{
 
     @JsonCreator
     public SlaversCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("days") int days,
             @JsonProperty("credits") int credits,
             @JsonProperty("num_crewmates") int num_crewmates,
             @JsonProperty("fire_power") int fire_power
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(days <= 0) throw new IllegalArgumentException("days must be greater than 0");
         if(credits <= 0) throw new IllegalArgumentException("credits must be greater than 0");
         if(fire_power <= 0) throw new IllegalArgumentException("fire_power must be greater than 0");
         if(num_crewmates <= 0) throw new IllegalArgumentException("num_crewmates must be greater than 0");
 
+        this.idCard = idCard;
         this.days = days;
         this.credits = credits;
         this.num_crewmates = num_crewmates;
@@ -70,4 +74,5 @@ public class SlaversCard implements Card{
      */
 
     public int getFirePower(){ return fire_power; }
+    public String getIdCard(){ return idCard; }
 }

@@ -12,6 +12,7 @@ import java.util.List;
  */
 
 public class SecondWarzoneCard implements Card {
+    private final String idCard;
     private final int days;
     private final int num_goods;
     private final List<Integer> shots_directions;
@@ -27,17 +28,20 @@ public class SecondWarzoneCard implements Card {
 
     @JsonCreator
     public SecondWarzoneCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("days") int days,
             @JsonProperty("num_goods") int num_goods,
             @JsonProperty("shots_directions") List<Integer> shots_directions,
             @JsonProperty("shots_size") List<Boolean> shots_size
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(shots_directions == null || shots_directions.isEmpty()) throw new NullPointerException("List shots_directions is null or empty");
         if(shots_size == null || shots_size.isEmpty()) throw new NullPointerException("List shots_size is null or empty");
         if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("Different Lists' dimensions");
         if(days <= 0) throw new IllegalArgumentException("Days must be greater than 0");
         if(num_goods <= 0) throw new IllegalArgumentException("Number of goods must be greater than 0");
 
+        this.idCard=idCard;
         this.days = days;
         this.num_goods = num_goods;
         this.shots_directions = new ArrayList<>(shots_directions);
@@ -72,4 +76,5 @@ public class SecondWarzoneCard implements Card {
      */
 
     public List<Boolean> getShotsSize() {return new ArrayList<>(shots_size);}
+    public String getIdCard() {return idCard;}
 }
