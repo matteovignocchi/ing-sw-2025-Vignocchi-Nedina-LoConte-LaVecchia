@@ -1,23 +1,59 @@
-
-
 .button {
-    -fx-font-family: "Orgovan Brush";
-    -fx-font-size: 16px;
-    -fx-background-color: #FFD700;
-    -fx-text-fill: #000000;
-    -fx-border-color: #B8860B;
+    -fx-font-family: "Impact";
+    -fx-font-size: 15px;
+    -fx-text-fill: #444444;
+    -fx-background-color: linear-gradient(to bottom, #ffee04 0%, #ffd700 100%);
+    -fx-background-insets: 1;
+    -fx-border-color: #b8860b;
     -fx-border-width: 2px;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
+    -fx-border-insets: -1;
+    -fx-border-radius: 9px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 3);
 }
 
-.label {
-    -fx-font-family: "Orgovan Brush";
-    -fx-font-size: 18px;
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #ffff00 0%, #ffcc00 100%);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 4);
     -fx-text-fill: #333333;
 }
 
+.button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #ffcc00 0%, #ff9900 100%);
+    -fx-effect: innershadow(three-pass-box, rgba(0,0,0,0.7), 7, 0, 0, 2);
+    -fx-translate-y: 3px;
+    -fx-text-fill: #222222;
+}
+
+.button:disabled {
+    -fx-opacity: 0.6;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 1);
+}
+
+.label {
+    -fx-font-family: "Impact";
+    -fx-font-size: 17px;
+    -fx-text-fill: #444444;
+}
+
 .text-field {
-    -fx-font-family: "Orgovan Brush";
+    -fx-font-family: "Impact";
     -fx-font-size: 14px;
+    -fx-text-fill: #444444;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: #b8860b;
+    -fx-border-width: 1.5px;
+    -fx-padding: 3px 8px;
+}
+
+.text-field:focused {
+    -fx-border-width: 2px;
+    -fx-border-color: #daa520;
+}
+
+.anchor-pane, .vbox, .hbox, .grid-pane {
+    -fx-background-color: #f5f5f5;
 }
