@@ -277,7 +277,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(AbandonedShipCard card) throws CardEffectException{
+    public void visit(AbandonedShipCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for(Player p : players) {
@@ -311,7 +311,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(AbandonedStationCard card) throws CardEffectException {
+    public void visit(AbandonedStationCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for(Player p: players) {
@@ -421,7 +421,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(PlanetsCard card) throws CardEffectException {
+    public void visit(PlanetsCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         int z = 0;

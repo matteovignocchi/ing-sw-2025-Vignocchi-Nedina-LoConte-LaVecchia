@@ -582,12 +582,13 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public boolean askPlayerDecision(String condition, String id) {
-        VirtualView x = viewsByNickname.get(id);
+    public boolean askPlayerDecision(String condition, Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView x = viewsByNickname.get(nick);
         try {
             return x.ask(condition);
         } catch (Exception e) {
-            markDisconnected(id);
+            markDisconnected(nick);
             throw new RuntimeException(e);
         }
     }
@@ -1015,10 +1016,10 @@ public class Controller implements Serializable {
     }
 
     public void addHuman() throws Exception {
-        for (String p : playersByNickname.keySet()) {
+        for (Player p : playersByNickname.values()) {
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
-                    Tile t = playersByNickname.get(p).getTile(i, j);
+                    Tile t = p.getTile(i, j);
                     switch (t){
                         case HousingUnit h -> {
                             Human tmp = h.getType();

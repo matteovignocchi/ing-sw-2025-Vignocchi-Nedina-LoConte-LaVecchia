@@ -51,13 +51,13 @@ public interface CardVisitor {
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(AbandonedShipCard card) throws CardEffectException;
+    void visit(AbandonedShipCard card) throws BusinessLogicException;
     /**
      * Apply AbandonedStationCard effect
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(AbandonedStationCard card) throws CardEffectException;
+    void visit(AbandonedStationCard card) throws BusinessLogicException;
     /**
      * Apply MeteoritesRainCard effect
      * @param card: card object on which the method is activated.
@@ -75,7 +75,7 @@ public interface CardVisitor {
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(PlanetsCard card) throws CardEffectException;
+    void visit(PlanetsCard card) throws BusinessLogicException;
     /**
      * Apply PlaugeCard effect
      * @param card: card object on which the method is activated.
