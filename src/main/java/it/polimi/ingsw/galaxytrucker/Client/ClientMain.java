@@ -4,7 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-import it.polimi.ingsw.galaxytrucker.View.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.*;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import org.jetbrains.annotations.NotNull;
