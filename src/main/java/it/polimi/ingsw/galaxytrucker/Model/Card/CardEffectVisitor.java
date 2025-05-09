@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
@@ -48,7 +49,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(OpenSpaceCard card) throws CardEffectException{
+    public void visit(OpenSpaceCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (Player p : players) {
@@ -92,7 +93,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(SlaversCard card) throws CardEffectException {
+    public void visit(SlaversCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         double slavers_fire_power = card.getFirePower();
@@ -134,7 +135,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(FirstWarzoneCard card) throws CardEffectException{
+    public void visit(FirstWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         int idx_firepower = 0;
@@ -184,7 +185,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(SecondWarzoneCard card) throws CardEffectException{
+    public void visit(SecondWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         int idx_firepower = 0;
@@ -233,7 +234,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(SmugglersCard card) throws CardEffectException{
+    public void visit(SmugglersCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         double smugglers_fire_power = card.getFirePower();
@@ -374,7 +375,7 @@ public class CardEffectVisitor implements CardVisitor {
      */
 
     @Override
-    public void visit(PiratesCard card) throws CardEffectException {
+    public void visit(PiratesCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         List<Player> losers = new ArrayList<>();

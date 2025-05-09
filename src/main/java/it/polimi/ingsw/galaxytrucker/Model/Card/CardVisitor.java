@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+
 /**
  * This interface follows the Visitor design pattern, allowing new operations to be performed on
  * Card objects without changing their classes. Each concrete card type implements the "accept" method,
@@ -13,7 +15,7 @@ public interface CardVisitor {
      * @param card: card.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(OpenSpaceCard card) throws CardEffectException;
+    void visit(OpenSpaceCard card) throws BusinessLogicException;
     /**
      * Apply StardustCard effect
      * @param card: card.
@@ -25,25 +27,25 @@ public interface CardVisitor {
      * @param card: card.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(SmugglersCard card) throws CardEffectException;
+    void visit(SmugglersCard card) throws BusinessLogicException;
     /**
      * Apply SlaversCard effect
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(SlaversCard card) throws CardEffectException;
+    void visit(SlaversCard card) throws BusinessLogicException;
     /**
      * Apply SecondWarzoneCard effect
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(SecondWarzoneCard card) throws CardEffectException;
+    void visit(SecondWarzoneCard card) throws BusinessLogicException;
     /**
      * Apply FirstWarzoneCard effect
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(FirstWarzoneCard card) throws CardEffectException;
+    void visit(FirstWarzoneCard card) throws BusinessLogicException;
     /**
      * Apply AbandonedShipCard effect
      * @param card: card object on which the method is activated.
@@ -67,7 +69,7 @@ public interface CardVisitor {
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(PiratesCard card) throws CardEffectException;
+    void visit(PiratesCard card) throws BusinessLogicException;
     /**
      * Apply PlanetsCard effect
      * @param card: card object on which the method is activated.

@@ -87,8 +87,8 @@ public class Controller implements Serializable {
             v.updateGameState(p.getGameFase());
             v.showUpdate(
                     nickname,
-                    getFirePower(nickname),
-                    getPowerEngine(nickname),
+                    getFirePower(p),
+                    getPowerEngine(p),
                     p.getCredit(),
                     fBoard.getPositionOfPlayer(p),
                     p.presencePurpleAlien(),
@@ -639,17 +639,19 @@ public class Controller implements Serializable {
      *
      * @return the total amount of engine power
      */
-    public int getPowerEngine(String p) {
+    public int getPowerEngine(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                Tile y = playersByNickname.get(p).getTile(i, j);
+                Tile y = p.getTile(i, j);
                 Boolean var = false;
                 switch (y) {
                     case Engine c -> {
                         var = c.isDouble();
                         if (var) {
-                            boolean activate = manageEnergyCell(p);
+                            boolean activate = manageEnergyCell(nick);
                             if (activate) {
                                 tmp = tmp + 2;
                             }
@@ -661,24 +663,26 @@ public class Controller implements Serializable {
                 }
             }
         }
-        if (playersByNickname.get(p).presenceBrownAlien() && tmp != 0) {
+        if (p.presenceBrownAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
         }
     }
 
-    public double getFirePower(String p){
+    public double getFirePower(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = playersByNickname.get(p).getTile(i, j);
+                Tile y = p.getTile(i, j);
                 boolean var;
                 switch (y) {
                     case Engine c -> {
                         var = c.isDouble();
                         if (var) {
-                            boolean activate = manageEnergyCell(p);
+                            boolean activate = manageEnergyCell(nick);
                             if (activate) {
                                 if (c.controlCorners(0) != 5) tmp = tmp + 1;
                                 else tmp = tmp + 2;
@@ -693,7 +697,7 @@ public class Controller implements Serializable {
 
             }
         }
-        if (playersByNickname.get(p).presencePurpleAlien() && tmp != 0) {
+        if (p.presencePurpleAlien() && tmp != 0) {
             return tmp + 2;
         } else {
             return tmp;
@@ -708,11 +712,14 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
-    public void removeGoods(String p, int num)  {
-        int totalEnergy = getTotalEnergy(playersByNickname.get(p));
-        int totalGood = getTotalGood(playersByNickname.get(p));
+    public void removeGoods(Player p, int num) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView x = viewsByNickname.get(nick);
 
-        List<Colour> TotalGood = playersByNickname.get(p).getTotalListOfGood();
+        int totalEnergy = getTotalEnergy(p);
+        int totalGood = getTotalGood(p);
+
+        List<Colour> TotalGood = p.getTotalListOfGood();
         int r = 0;
         int g = 0;
         int b = 0;
@@ -728,7 +735,7 @@ public class Controller implements Serializable {
         if(num == totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                    Tile y = playersByNickname.get(p).getTile(i, j);
+                    Tile y = p.getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
                             for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -742,19 +749,19 @@ public class Controller implements Serializable {
             while(num != 0){
                 if(r != 0){
                     try {
-                        viewsByNickname.get(p).inform("selezionare cella ed eliminare rosso");
+                        x.inform("selezionare cella ed eliminare rosso");
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
-                        vari = viewsByNickname.get(p).askCoordinate();
+                        vari = x.askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
+                    Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -771,19 +778,19 @@ public class Controller implements Serializable {
                 }
                 if(r == 0 && num!=0 && g != 0){
                     try {
-                        viewsByNickname.get(p).inform("selezionare cella ed eliminare giallo");
+                        x.inform("selezionare cella ed eliminare giallo");
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
-                        vari = viewsByNickname.get(p).askCoordinate();
+                        vari = x.askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
+                    Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -800,19 +807,19 @@ public class Controller implements Serializable {
                 }
                 if(r == 0 && g == 0 && v != 0 && num!=0){
                     try {
-                        viewsByNickname.get(p).inform("selezionare cella ed eliminare verde");
+                        x.inform("selezionare cella ed eliminare verde");
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
-                        vari = viewsByNickname.get(p).askCoordinate();
+                        vari = x.askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
+                    Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -829,19 +836,19 @@ public class Controller implements Serializable {
                 }
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
                     try {
-                        viewsByNickname.get(p).inform("selezionare cella ed eliminare blu");
+                        x.inform("selezionare cella ed eliminare blu");
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
-                        vari = viewsByNickname.get(p).askCoordinate();
+                        vari = x.askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
+                    Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case StorageUnit c -> {
                             for(Colour co : c.getListOfGoods()) {
@@ -861,7 +868,7 @@ public class Controller implements Serializable {
         if(num > totalGood){
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
-                    Tile y = playersByNickname.get(p).getTile(i, j);
+                    Tile y = p.getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
                             for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
@@ -874,19 +881,19 @@ public class Controller implements Serializable {
             if(finish < totalEnergy){
                 while(finish > 0){
                     try {
-                        viewsByNickname.get(p).inform("selezionare cella ed eliminare una batteria");
+                        x.inform("selezionare cella ed eliminare una batteria");
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int[] vari = null;
                     try {
-                        vari = viewsByNickname.get(p).askCoordinate();
+                        vari = x.askCoordinate();
                     } catch (Exception e) {
-                        markDisconnected(p);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    Tile y = playersByNickname.get(p).getTile(vari[0], vari[1]);
+                    Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case EnergyCell c -> {
                             if(c.getCapacity() != 0) c.useBattery();
@@ -899,7 +906,7 @@ public class Controller implements Serializable {
             }else{
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 7; j++){
-                        Tile y = playersByNickname.get(p).getTile(i, j);
+                        Tile y = p.getTile(i, j);
                         switch (y){
                             case EnergyCell c -> {
                                 for(int bb = 0 ; bb < c.getCapacity() ; i++) c.useBattery();
@@ -914,37 +921,39 @@ public class Controller implements Serializable {
         }
     }
 
-    public void addGoods(String player, List<Colour> list) throws RemoteException {
+    public void addGoods(Player p, List<Colour> list) throws BusinessLogicException {
         boolean flag = true;
-        VirtualView x = viewsByNickname.get(player);
+        String nick = getNickByPlayer(p);
+        VirtualView x = viewsByNickname.get(nick);
+
         try {
             if(!x.ask("vuoi aggiungere un goods?")) flag=false;
         } catch (Exception e) {
-            markDisconnected(player);
+            markDisconnected(nick);
             throw new RuntimeException(e);
         }
         while (list.size() != 0 && flag == true) {
             try {
                 x.inform("seleziona una HOusing unit");
             } catch (Exception e) {
-                markDisconnected(player);
+                markDisconnected(nick);
                 throw new RuntimeException(e);
             }
             int[] vari = null;
             try {
                 vari = x.askCoordinate();
             } catch (Exception e) {
-                markDisconnected(player);
+                markDisconnected(nick);
                 throw new RuntimeException(e);
             }
-            Tile t = playersByNickname.get(player).getTile(vari[0], vari[1]);
+            Tile t = p.getTile(vari[0], vari[1]);
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
                         try {
                             x.printListOfGoods(c.getListOfGoods());
                         } catch (Exception e) {
-                            markDisconnected(player);
+                            markDisconnected(nick);
                             throw new RuntimeException(e);
                         }
                         try {
@@ -956,7 +965,7 @@ public class Controller implements Serializable {
                         try {
                             tmpint = x.askIndex();
                         } catch (Exception e) {
-                            markDisconnected(player);
+                            markDisconnected(nick);
                             throw new RuntimeException(e);
                         }
                         Colour tmp = c.getListOfGoods().get(tmpint - 1);
@@ -966,14 +975,14 @@ public class Controller implements Serializable {
                     try {
                         x.inform("seleziona la merce da inserire");
                     } catch (Exception e) {
-                        markDisconnected(player);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     int tmpint = 0;
                     try {
                         tmpint = x.askIndex();
                     } catch (Exception e) {
-                        markDisconnected(player);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                     c.addGood(list.get(tmpint-1));
@@ -982,7 +991,7 @@ public class Controller implements Serializable {
                     try {
                         x.inform("cella non valida");
                     } catch (Exception e) {
-                        markDisconnected(player);
+                        markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
                 }
@@ -992,7 +1001,7 @@ public class Controller implements Serializable {
             try {
                 if(!x.ask("Vuoi continurare")) flag = false;
             } catch (Exception e) {
-                markDisconnected(player);
+                markDisconnected(nick);
                 throw new RuntimeException(e);
             }
 
@@ -1047,22 +1056,24 @@ public class Controller implements Serializable {
         }
     }
 
-    public void removeCrewmate(String player, int num) throws Exception {
-        int totalCrew = getNumCrew(playersByNickname.get(player));
-        VirtualView x = viewsByNickname.get(player);
+    public void removeCrewmate(Player p, int num) throws Exception {
+        String nick = getNickByPlayer(p);
+        VirtualView x = viewsByNickname.get(nick);
+
+        int totalCrew = getNumCrew(p);
         if (num >= totalCrew) {
-            playersByNickname.get(player).setEliminated();
+            p.setEliminated();
         } else {
             while (num > 0) {
-                x.inform("seleziona un HOusing unit");
+                x.inform("seleziona un Housing unit");
                 int[] vari = x.askCoordinate();
-                Tile y = playersByNickname.get(player).getTile(vari[0], vari[1]);
+                Tile y = p.getTile(vari[0], vari[1]);
                 switch (y){
                     case HousingUnit h -> {
                         if(h.returnLenght()>0){
                             int tmp = h.removeHumans(1);
-                            if(tmp == 2) playersByNickname.get(player).setBrownAlien();
-                            if(tmp == 3) playersByNickname.get(player).setPurpleAlien();
+                            if(tmp == 2) p.setBrownAlien();
+                            if(tmp == 3) p.setPurpleAlien();
                             num--;
                         }else{
                             x.inform("seleziona una housing unit valida");
@@ -1084,20 +1095,24 @@ public class Controller implements Serializable {
         }
     }
 
-    public void startPlauge(String player) throws Exception {
-        int firstNumber = getNumCrew(playersByNickname.get(player));
+    //TODO: il metodo non deve lanciare la exception generica
+    public void startPlauge(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView v = viewsByNickname.get(nick);
+
+        int firstNumber = getNumCrew(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Tile y = playersByNickname.get(player).getTile(i, j);
+                Tile y = p.getTile(i, j);
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            viewsByNickname.get(player).askIndex();
+                            v.askIndex();
                             int x = c.removeHumans(1);
                             tmp++;
-                            if (x == 2) playersByNickname.get(player).setBrownAlien();
-                            if (x == 3) playersByNickname.get(player).setPurpleAlien();
+                            if (x == 2) p.setBrownAlien();
+                            if (x == 3) p.setPurpleAlien();
                         }
 
                     }
@@ -1106,31 +1121,32 @@ public class Controller implements Serializable {
                 }
             }
             if (tmp == firstNumber) {
-                playersByNickname.get(player).setEliminated();
+                p.setEliminated();
             }
         }
     }
 
     /**
      * method used for checking the protection of a ship side by shield,
-     * return true if it is protected and they want to use a battery
+     * return true if it is protected, and they want to use a battery
      *
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
-    public boolean isProtected(String p1, int d) throws Exception {
+    public boolean isProtected(String nick, int d) throws Exception {
         boolean flag = false;
-        VirtualView x = viewsByNickname.get(p1);
+        VirtualView x = viewsByNickname.get(nick);
+
         while (!flag) {
             if (x.ask("vuoi usare uno scudo?")) {
                 int[] coordinate = x.askCoordinate();
-                Tile y = playersByNickname.get(p1).getTile(coordinate[0], coordinate[1]);
+                Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
                 switch (y) {
                     case Shield shield -> {
                         if (!(shield.getProtectedCorner(d) == 8)) {
                             x.inform("seleziona un'altro scudo");
                         } else {
-                            return manageEnergyCell(p1);
+                            return manageEnergyCell(nick);
                         }
                     }
                     default -> x.inform("cella non valida");
@@ -1158,33 +1174,35 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon(int dir, boolean type, int dir2, String p) throws Exception {
+    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws Exception {
+        String nick = getNickByPlayer(p);
+
         if (dir == 0) {
             if (dir2 > 3 && dir2 < 11) {
-                if (type || (!isProtected(p, dir) && !type)) {
-                    playersByNickname.get(p).removeFrom0(dir2);
-                    askStartHousingForControl(p);
+                if (type || (!isProtected(nick, dir) && !type)) {
+                    p.removeFrom0(dir2);
+                    askStartHousingForControl(nick);
                 }
             }
         } else if (dir == 2) {
             if (dir2 > 3 && dir2 < 11) {
-                if (type || (!isProtected(p, dir) && !type)) {
-                    playersByNickname.get(p).removeFrom2(dir2);
-                    askStartHousingForControl(p);
+                if (type || (!isProtected(nick, dir) && !type)) {
+                    p.removeFrom2(dir2);
+                    askStartHousingForControl(nick);
                 }
             }
         } else if (dir == 1) {
             if (dir2 > 4 && dir2 < 10) {
-                if (type || (!isProtected(p, dir) && !type)) {
-                    playersByNickname.get(p).removeFrom1(dir2);
-                    askStartHousingForControl(p);
+                if (type || (!isProtected(nick, dir) && !type)) {
+                    p.removeFrom1(dir2);
+                    askStartHousingForControl(nick);
                 }
             }
         } else if (dir == 3) {
             if (dir2 > 4 && dir2 < 10) {
-                if (type || (!isProtected(p, dir) && !type)) {
-                    playersByNickname.get(p).removeFrom3(dir2);
-                    askStartHousingForControl(p);
+                if (type || (!isProtected(nick, dir) && !type)) {
+                    p.removeFrom3(dir2);
+                    askStartHousingForControl(nick);
                 }
             }
         }
@@ -1247,9 +1265,9 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String player)  {
+    private boolean manageEnergyCell(String nick)  {
+        VirtualView x = viewsByNickname.get(nick);
 
-        VirtualView x = viewsByNickname.get(player);
         int[] coordinate = new int[2];
         boolean exits = false;
 
@@ -1258,7 +1276,7 @@ public class Controller implements Serializable {
         try {
             use = x.ask("Vuoi usare una batteria?");
         } catch (Exception e) {
-            markDisconnected(player);
+            markDisconnected(nick);
             throw new RuntimeException(e);
         }
         if (!use) {
@@ -1268,10 +1286,10 @@ public class Controller implements Serializable {
                 try {
                     coordinate = x.askCoordinate();
                 } catch (Exception e) {
-                    markDisconnected(player);
+                    markDisconnected(nick);
                     throw new RuntimeException(e);
                 }
-                Tile p = playersByNickname.get(player).getTile(coordinate[0], coordinate[1]);
+                Tile p = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
                 switch (p) {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
@@ -1281,7 +1299,7 @@ public class Controller implements Serializable {
                                     return false;
                                 }
                             } catch (Exception e) {
-                                markDisconnected(player);
+                                markDisconnected(nick);
                                 throw new RuntimeException(e);
                             }
                         } else {
@@ -1296,7 +1314,7 @@ public class Controller implements Serializable {
                                 exits = true;
                             }
                         } catch (Exception e) {
-                            markDisconnected(player);
+                            markDisconnected(nick);
                             throw new RuntimeException(e);
                         }
                     }
@@ -1443,11 +1461,14 @@ public class Controller implements Serializable {
         return false;
     }
 
-    public void askStartHousingForControl(String nickname) {
+    public void askStartHousingForControl(String nickname) throws BusinessLogicException {
+        VirtualView v = getViewCheck(nickname);
+        Player p = getPlayerCheck(nickname);
+
         int[] xy;
         try {
-            viewsByNickname.get(nickname).inform("choose your starting hounsing unit");
-            xy = viewsByNickname.get(nickname).askCoordinate();
+            v.inform("choose your starting hounsing unit");
+            xy = v.askCoordinate();
         } catch (RemoteException e) {
             markDisconnected(nickname);
             throw new RuntimeException(e);
@@ -1456,13 +1477,13 @@ public class Controller implements Serializable {
         }
         boolean flag = true;
         while (flag) {
-            Tile tmp = playersByNickname.get(nickname).getTile(xy[0], xy[1]);
+            Tile tmp = p.getTile(xy[0], xy[1]);
             switch (tmp) {
                 case HousingUnit h -> flag = false;
                 default -> {
                     try {
-                        viewsByNickname.get(nickname).inform("Position non valid , choose another tile");
-                        xy = viewsByNickname.get(nickname).askCoordinate();
+                        v.inform("Position non valid , choose another tile");
+                        xy = v.askCoordinate();
                     } catch (RemoteException e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
