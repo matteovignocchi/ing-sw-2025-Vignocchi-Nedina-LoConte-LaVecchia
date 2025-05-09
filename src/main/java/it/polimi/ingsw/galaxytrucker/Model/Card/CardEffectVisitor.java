@@ -244,7 +244,11 @@ public class CardEffectVisitor implements CardVisitor {
                 String reward_goods_string = reward_goods.stream().map(Colour::name).collect(Collectors.joining(", "));
                 String string = String.format("Do you want to redeem %s goods and lose %d flight days?",
                         reward_goods_string, days);
-                if(controller.askPlayerDecision(string, p)){
+
+                boolean ans = false;
+                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+                if(ans){
                     f.moveRocket(-days, p);
                     try {
                         controller.addGoods(p, card.getRewardGoods());
@@ -280,7 +284,11 @@ public class CardEffectVisitor implements CardVisitor {
 
         for(Player p : players) {
             String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
-            if (controller.askPlayerDecision(string, p)) {
+
+            boolean ans = false;
+            if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+            if (ans) {
                 int days = card.getDays();
                 f.moveRocket(-days, p);
                 int credits = card.getCredits();
@@ -316,7 +324,11 @@ public class CardEffectVisitor implements CardVisitor {
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
-                if(controller.askPlayerDecision(string, p)){
+
+                boolean ans = false;
+                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+                if(ans){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
                     try {
@@ -346,13 +358,13 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
-            int res = players.getFirst().throwDice() + players.getFirst().throwDice();
-            for(Player p : players){
-                try {
-                    controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
+                    + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
+
+            try {
+                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -380,7 +392,11 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players) {
             if(controller.getFirePower(p) > card.getFirePower()){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
-                if(controller.askPlayerDecision(string, p)){
+
+                boolean ans = false;
+                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+                if(ans){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
                     int credits = card.getCredits();
@@ -391,7 +407,8 @@ public class CardEffectVisitor implements CardVisitor {
                 losers.add(p);
         }
         if(!losers.isEmpty()){
-            int res = losers.getFirst().throwDice() + losers.getFirst().throwDice();
+            int res = losers.stream().filter(Player::isConnected).toList().getFirst().throwDice()
+                    + losers.stream().filter(Player::isConnected).toList().getFirst().throwDice();
             for(Player p : losers){
                 for(int i = 0; i < card.getShots_directions().size(); i++){
                     try {
@@ -425,7 +442,11 @@ public class CardEffectVisitor implements CardVisitor {
         int z = 0;
         for(Player p : players){
             String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
-            if(controller.askPlayerDecision(string, p)){
+
+            boolean ans = false;
+            if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+            if(ans){
                 int days = card.getDays();
                 f.moveRocket(-days, p);
                 try {

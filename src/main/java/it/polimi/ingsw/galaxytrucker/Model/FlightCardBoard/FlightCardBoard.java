@@ -263,7 +263,10 @@ public class FlightCardBoard {
                     break;
                 }
             }
-            if(overlapped) iterator.remove();
+            if(overlapped){
+                iterator.remove();
+                p.setEliminated();
+            }
         }
     }
 

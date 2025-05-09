@@ -1229,6 +1229,10 @@ public class Controller implements Serializable {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
+
+        //TODO: player disconnesso risposta standard: non attivare gli scudi. Farlo nel metodo opportuno, non so di
+        // preciso quale sia. Non ricordo se gli scudi vanno attivati anche per le cannonate, nel caso gestrie anche
+        // quel caso
         for (String p : playersByNickname.keySet()) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
