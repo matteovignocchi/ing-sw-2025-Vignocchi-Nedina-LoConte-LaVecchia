@@ -46,7 +46,6 @@ public class Player implements Serializable {
         this.position = 0;
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
-        this.gamePhase = GamePhase.BOARD_SETUP;
         credit = 0;
         purpleAlien = false;
         brownAlien = false;

@@ -26,10 +26,7 @@ public class CardEffectVisitor implements CardVisitor {
 
         if (controller == null) throw new NullPointerException("controller is null");
         FlightCardBoard f = controller.getFlightCardBoard();
-        //TODO: players solo i giocatori connessi: capire se così va bene e come continuare
-        List<Player> players = f.getOrderedPlayers().stream()
-                .filter(Player::isConnected)
-                .collect(Collectors.toList());
+        List<Player> players = f.getOrderedPlayers();
 
         if (players.isEmpty()) throw new NullPointerException("players is null");
         for (Player p : players) if (p == null) throw new NullPointerException("player is null");
