@@ -17,9 +17,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-//corner case da discutere con Gabri: se un giocatore crasha nella fase di drawCard impostiamo delle risposte predefinite.
-//ma se crasha nella fase di building della nave in una partita demo? Cioè qui non abbiamo una clessidra.
-//Aspettiamo all'infinito che si riconnetta??????
 //TODO: gestire fase del game (?) per riconnessioni dei players. (Oleg: ho un idea per questa cosa)
 //TODO: gestire e applicare i metodi che applicano gli effetti delle tiles (ex. addHuman per le celle)
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
@@ -198,14 +195,6 @@ public class Controller implements Serializable {
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
         this.viewsByNickname = new ConcurrentHashMap<>();
         this.hourglass       = new Hourglass(hourglassListener);
-    }
-
-    public String getNickname(Player player) throws BusinessLogicException {
-        return playersByNickname.entrySet().stream()
-                .filter(e -> e.getValue().equals(player))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseThrow(() -> new BusinessLogicException("Player not found"));
     }
 
     //essendoci già condizione su if non penso servi
