@@ -372,13 +372,14 @@ public class Controller implements Serializable {
 
             try {
                 v.inform("You're the leader! Draw a card");
-                return;
+                break;
             } catch (Exception e) {
                 markDisconnected(leaderNick);
                 leader.setGameFase(GamePhase.CARD_EFFECT);
                 throw new RuntimeException(e);
             }
         }
+
         notifyAllViews();
     }
 
@@ -605,9 +606,11 @@ public class Controller implements Serializable {
     public List<Tile> getPileOfTile() {
         return pileOfTile;
     }
+
     public List<Tile> getShownTiles(){
         return shownTile;
     }
+
     public Tile getTile(int index) {
         Tile tmp = pileOfTile.get(index);
         pileOfTile.remove(index);
@@ -642,7 +645,6 @@ public class Controller implements Serializable {
      */
     public int getPowerEngine(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
-
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
