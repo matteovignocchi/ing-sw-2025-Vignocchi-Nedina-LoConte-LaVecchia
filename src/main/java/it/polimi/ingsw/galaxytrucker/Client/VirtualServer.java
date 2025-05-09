@@ -27,7 +27,4 @@ public interface VirtualServer extends Remote {
     Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException;
-
-    public String waitForResponse() throws RemoteException; //serve?
-    public String waitForGameStart() throws Exception; //serve?
 }

@@ -11,6 +11,7 @@ module it.polimi.ingsw.galaxytrucker {
     requires annotations;
     requires java.naming;
     requires java.desktop;
+    requires java.logging;
 
     opens it.polimi.ingsw.galaxytrucker to javafx.fxml;
     exports it.polimi.ingsw.galaxytrucker;

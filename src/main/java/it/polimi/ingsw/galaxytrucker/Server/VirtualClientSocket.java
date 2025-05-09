@@ -30,8 +30,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     /// METODI DI INIZIALIZZAZIONE ///
 
-    public VirtualClientSocket(String host, int port , View view) throws IOException {
-        this.socket = new Socket(host, port);
+    public VirtualClientSocket(Socket socket) throws IOException {
+        this.socket = socket;
         this.in = new ObjectInputStream(socket.getInputStream());
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.view = view;

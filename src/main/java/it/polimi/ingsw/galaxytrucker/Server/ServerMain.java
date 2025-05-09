@@ -6,24 +6,22 @@ import java.rmi.RemoteException;
 import java.rmi.registry.*;
 
 public class ServerMain {
-    public static void main (String[] args) throws RemoteException {
-        try{
-            GameManager gameManager = new GameManager();
-            String host = args.length > 0 ? args[0] : "localhost";
-            int socketPort = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
+    public static void main(String[] args) throws RemoteException {
+        GameManager gameManager = new GameManager();
+        int socketPort = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
 
-            Registry registry = LocateRegistry.createRegistry(1099);
-            ServerRmi rmiServer = new ServerRmi(gameManager);
-            registry.rebind("RmiServer", rmiServer);
-            System.out.println("Server Rmi ready on port 1099");
+        Registry registry = LocateRegistry.createRegistry(1099);
+        registry.rebind("RmiServer", new ServerRmi(gameManager));
 
-            Thread socketThread = new Thread(new ServerSocketMain(gameManager,socketPort), host);
-            socketThread.start();
-            System.out.println("Server Socket ready on port " + socketPort);
+        ServerSocketMain socketMain = new ServerSocketMain(gameManager, socketPort);
+        Thread socketThread = new Thread(socketMain, "Socket-Listener");
+        socketThread.start();
 
-        } catch (Exception e) {
-            System.out.println("Error in ServerMain initialization");
-            e.printStackTrace();
-        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            socketThread.interrupt();
+            try { socketThread.join();
+            } catch (InterruptedException ignored) {}
+        }));
     }
 }
+
