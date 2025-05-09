@@ -19,6 +19,7 @@ public class Player implements Serializable {
     private boolean connected = true;
     private int credit;
     //Ship building
+    private int idPhoto;
     private boolean isReady;
     private boolean isComplete;
     private Tile[][] Dash_Matrix;
@@ -40,7 +41,7 @@ public class Player implements Serializable {
      * @param id of the player
      * @param isDemo define the type of dashboard
      */
-    public Player(int id, boolean isDemo) {
+    public Player(int id, boolean isDemo ,int idPhoto) {
         this.id = id;
         this.lap = 0;
         this.position = 0;
@@ -51,6 +52,7 @@ public class Player implements Serializable {
         brownAlien = false;
         isComplete = false;
         isReady = false;
+        this.idPhoto = idPhoto;
         //initialize the matrix
         Dash_Matrix = new Tile[5][7];
         for (int i = 0; i < 5; i++) {
@@ -59,7 +61,7 @@ public class Player implements Serializable {
             }
         }
         //place the central unit
-        Dash_Matrix[2][3] = new HousingUnit(3,3,3,3, Human.HUMAN);
+        Dash_Matrix[2][3] = new HousingUnit(3,3,3,3, Human.HUMAN ,0);
 
         //initialized a matrix with the valid position of the ship
         validStatus = new Status[5][7];

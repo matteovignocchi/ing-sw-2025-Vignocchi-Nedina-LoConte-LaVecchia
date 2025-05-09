@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -12,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -242,9 +244,37 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendGameRequest(String message) throws IOException, InterruptedException {
-        Message gameRequest = Message.request(Message.OP_LOGIN, message);
-        sendRequest(gameRequest);
-        return ((int) waitForResponce());
+        if(message.equals(Message.OP_CREATE_GAME)){
+            boolean tmp = view.ask("would you like a demo version?");
+            int tmpInt= 5;
+            do{
+                view.inform("select max 4 players");
+                tmpInt = view.askIndex();
+            }while(tmpInt>4);
+            List<Object> tmp3 = new ArrayList<>();
+            tmp3.add(tmp);
+            tmp3.add(this);
+            tmp3.add(nickname);
+            tmp3.add(tmpInt);
+            Message createGame = Message.request(Message.OP_CREATE_GAME, tmp3);
+            sendRequest(createGame);
+        }
+        if(message.equals(Message.OP_JOIN_EXIST_GAME)) {
+            Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+            sendRequest(gameRequest);
+            view.inform("Available Games");
+            Map<Integer, int[]> availableGames;
+            availableGames = (Map<Integer, int[]>) waitForResponce();
+            for (Integer i : availableGames.keySet()) {
+                view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
+            }
+            Integer choice = askIndex();
+            Message gameChoice = Message.request(Message.OP_ENTER_GAME, choice);
+            sendRequest(gameChoice);
+            return ((int) waitForResponce());
+        }
+
+        return 0;
     }
 
     @Override
