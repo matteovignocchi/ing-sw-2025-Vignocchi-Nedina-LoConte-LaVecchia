@@ -123,12 +123,29 @@ public class Controller implements Serializable {
         broadcastInform(nickname + "joined");
     }
 
+    //TODO: discutere con fra per vedere se eliminabile (usare getPlayerCheck)
     public Player getPlayerByNickname(String nickname) {
         return playersByNickname.get(nickname);
     }
 
-    public VirtualView getViewByNickname(String nickname){
-        return viewsByNickname.get(nickname);
+    private Player getPlayerCheck(String nickname) throws BusinessLogicException {
+        Player player = playersByNickname.get(nickname);
+        if (player == null) throw new BusinessLogicException("Player not found");
+        return player;
+    }
+
+    private VirtualView getViewCheck(String nickname) throws BusinessLogicException {
+        VirtualView view = viewsByNickname.get(nickname);
+        if (view == null) throw new BusinessLogicException("Player not found");
+        return view;
+    }
+
+    private String getNickByPlayer(Player player) throws BusinessLogicException {
+        return playersByNickname.entrySet().stream()
+                .filter(e -> e.getValue().equals(player))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow(() -> new BusinessLogicException("Player Not Found"));
     }
 
 
@@ -202,16 +219,6 @@ public class Controller implements Serializable {
     }
 
     public int getMaxPlayers(){ return MaxPlayers; }
-
-    private Player getPlayerCheck(String nickname) throws BusinessLogicException {
-        Player player = getPlayerByNickname(nickname);
-        if (player == null) throw new BusinessLogicException("Player not found");
-        return player;
-    }
-
-    public Set<String> getAllNicknames() {
-        return playersByNickname.keySet();
-    }
 
     private synchronized void cancelLastPlayerTimeout() {
         if (lastPlayerTask != null) {
@@ -381,7 +388,7 @@ public class Controller implements Serializable {
     }
 
     public void flipHourglass (String nickname) throws RemoteException, BusinessLogicException {
-        Player p = getPlayerByNickname(nickname);
+        Player p = getPlayerCheck(nickname);
         int flips = hourglass.getFlips();
         HourglassState state = hourglass.getState();
 
@@ -392,7 +399,7 @@ public class Controller implements Serializable {
                     broadcastInform("Hourglass flipped a second time!");
                 } else {
                     try {
-                        getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
@@ -402,7 +409,7 @@ public class Controller implements Serializable {
             case 2:
                 if(state == HourglassState.EXPIRED){
                     try {
-                        getViewByNickname(nickname).inform("You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
@@ -412,7 +419,7 @@ public class Controller implements Serializable {
                     broadcastInform("Hourglass flipped the last time!");
                 } else {
                     try {
-                        getViewByNickname(nickname).inform("You cannot flip the hourglass for the last time: " +
+                        getViewCheck(nickname).inform("You cannot flip the hourglass for the last time: " +
                                 "You are not ready");
                     } catch (Exception e) {
                         markDisconnected(nickname);
@@ -1044,7 +1051,7 @@ public class Controller implements Serializable {
         int totalCrew = getNumCrew(playersByNickname.get(player));
         VirtualView x = viewsByNickname.get(player);
         if (num >= totalCrew) {
-            playersByNickname.get(player).isEliminated();
+            playersByNickname.get(player).setEliminated();
         } else {
             while (num > 0) {
                 x.inform("seleziona un HOusing unit");

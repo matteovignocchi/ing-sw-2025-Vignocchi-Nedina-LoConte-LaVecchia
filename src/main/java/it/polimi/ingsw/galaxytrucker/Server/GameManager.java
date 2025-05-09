@@ -242,12 +242,6 @@ public class GameManager {
         return controller;
     }
 
-    private VirtualView getViewCheck(Controller controller, String nickname) throws BusinessLogicException {
-        VirtualView view = controller.getViewByNickname(nickname);
-        if (view == null) throw new BusinessLogicException("Player not found");
-        return view;
-    }
-
     public synchronized Map<Integer,int[]> listActiveGames() {
         return games.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
