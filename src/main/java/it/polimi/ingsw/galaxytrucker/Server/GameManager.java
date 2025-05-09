@@ -51,7 +51,7 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-        if (controller.isGameStarted() && controller.getPlayerByNickname(nickname)==null)
+        if (controller.isGameStarted())
             throw new BusinessLogicException("Game already in progress");
 
         if (controller.getPlayerByNickname(nickname)!=null) {

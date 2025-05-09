@@ -156,19 +156,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         if(message.contains("login")){
             view.inform("Available Games");
-            int[] availableGames = null;
+            Map<Integer, int[]> availableGames;
             try {
                 availableGames = server.requestGamesList();
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }
-            for(int i = 0 ; i < availableGames.length; i++){
-                view.inform((i+1) + "." + availableGames[i]);
+            for(Integer i : availableGames.keySet()){
+                view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
             }
-            int choice = askIndex();
+            Integer choice = askIndex();
             try {
-                server.enterGame(availableGames[choice-1], this , nickname);
-                return availableGames[choice-1];
+                server.enterGame(choice, this , nickname);
+                return choice;
             } catch (BusinessLogicException e) {
                 throw new RuntimeException(e);
             }

@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
 //TODO: rivedere bene le inform e inserirle dove mancano (Oleg:gestire bene anche le try-catch)
 //TODO: sistemare cardVisitor con le fasi e le chiamate ai metodi , verificare se meglio la mappa o il player (va gestita sta cosa gabri sa a cosa mi riferisco)
+//TODO: inserire i timeout in tutti i metodi che mettono in attesa il server
 
 public class Controller implements Serializable {
     //private List<Player> playersInGame = new ArrayList<>();
@@ -34,6 +35,7 @@ public class Controller implements Serializable {
     private final Consumer<Integer> onGameEnd;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase;
+    private int numberOfEnter =0;
 
 
     private transient Hourglass hourglass;
@@ -108,10 +110,19 @@ public class Controller implements Serializable {
     }
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
+        numberOfEnter ++;
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
+        int tmp = 0;
+        switch (numberOfEnter) {
+            case 1 -> tmp = 33;
+            case 2-> tmp = 34;
+            case 3 -> tmp = 52;
+            case 4 -> tmp = 61;
+        }
 
-        Player p = new Player(playerIdCounter.getAndIncrement(), isDemo);
+
+        Player p = new Player(playerIdCounter.getAndIncrement(), isDemo , tmp);
         p.setConnected(true);
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
@@ -125,7 +136,7 @@ public class Controller implements Serializable {
         return playersByNickname.get(nickname);
     }
 
-    private Player getPlayerCheck(String nickname) throws BusinessLogicException {
+    public Player getPlayerCheck(String nickname) throws BusinessLogicException {
         Player player = playersByNickname.get(nickname);
         if (player == null) throw new BusinessLogicException("Player not found");
         return player;
@@ -361,13 +372,14 @@ public class Controller implements Serializable {
 
             try {
                 v.inform("You're the leader! Draw a card");
-                return;
+                break;
             } catch (Exception e) {
                 markDisconnected(leaderNick);
                 leader.setGameFase(GamePhase.CARD_EFFECT);
                 throw new RuntimeException(e);
             }
         }
+
         notifyAllViews();
     }
 
@@ -575,6 +587,7 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
         try {
+            //TODO: discorso timeout
             return x.ask(condition);
         } catch (Exception e) {
             markDisconnected(nick);
@@ -594,9 +607,11 @@ public class Controller implements Serializable {
     public List<Tile> getPileOfTile() {
         return pileOfTile;
     }
+
     public List<Tile> getShownTiles(){
         return shownTile;
     }
+
     public Tile getTile(int index) {
         Tile tmp = pileOfTile.get(index);
         pileOfTile.remove(index);
@@ -631,7 +646,6 @@ public class Controller implements Serializable {
      */
     public int getPowerEngine(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
-
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
@@ -702,6 +716,7 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
+    //TODO: casi predefiniti per players disconnessi
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1055,6 +1070,9 @@ public class Controller implements Serializable {
             p.setEliminated();
         } else {
             while (num > 0) {
+
+                //TODO: inserire risposta predefinita per giocatore disconnesso
+
                 x.inform("seleziona un Housing unit");
                 int[] vari = x.askCoordinate();
                 Tile y = p.getTile(vari[0], vari[1]);
@@ -1098,8 +1116,13 @@ public class Controller implements Serializable {
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            v.askIndex();
-                            int x = c.removeHumans(1);
+                            int index;
+                            try {
+                                 index = v.askIndex();
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                            int x = c.removeHumans(index);
                             tmp++;
                             if (x == 2) p.setBrownAlien();
                             if (x == 3) p.setPurpleAlien();
@@ -1206,6 +1229,10 @@ public class Controller implements Serializable {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
+
+        //TODO: player disconnesso risposta standard: non attivare gli scudi. Farlo nel metodo opportuno, non so di
+        // preciso quale sia. Non ricordo se gli scudi vanno attivati anche per le cannonate, nel caso gestrie anche
+        // quel caso
         for (String p : playersByNickname.keySet()) {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
@@ -1255,8 +1282,13 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String nick)  {
-        VirtualView x = viewsByNickname.get(nick);
+    //TODO: inserire il timeout
+    private boolean manageEnergyCell(String nick) throws BusinessLogicException {
+        VirtualView x = getViewCheck(nick);
+
+        //Caso disconnesso WorstCase scenario: non attivo i doppi motori
+        Player player = getPlayerCheck(nick);
+        if(!player.isConnected()) return false;
 
         int[] coordinate = new int[2];
         boolean exits = false;
@@ -1457,7 +1489,7 @@ public class Controller implements Serializable {
 
         int[] xy;
         try {
-            v.inform("choose your starting hounsing unit");
+            v.inform("choose your starting housing unit");
             xy = v.askCoordinate();
         } catch (RemoteException e) {
             markDisconnected(nickname);
