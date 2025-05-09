@@ -34,6 +34,7 @@ public class Controller implements Serializable {
     private final Consumer<Integer> onGameEnd;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase;
+    private int numberOfEnter =0;
 
 
     private transient Hourglass hourglass;
@@ -108,10 +109,19 @@ public class Controller implements Serializable {
     }
 
     public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
+        numberOfEnter ++;
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
+        int tmp = 0;
+        switch (numberOfEnter) {
+            case 1 -> tmp = 33;
+            case 2-> tmp = 34;
+            case 3 -> tmp = 52;
+            case 4 -> tmp = 61;
+        }
 
-        Player p = new Player(playerIdCounter.getAndIncrement(), isDemo);
+
+        Player p = new Player(playerIdCounter.getAndIncrement(), isDemo , tmp);
         p.setConnected(true);
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
@@ -1100,8 +1110,13 @@ public class Controller implements Serializable {
                 switch (y) {
                     case HousingUnit c -> {
                         if (c.isConnected()) {
-                            v.askIndex();
-                            int x = c.removeHumans(1);
+                            int index;
+                            try {
+                                 index = v.askIndex();
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                            int x = c.removeHumans(index);
                             tmp++;
                             if (x == 2) p.setBrownAlien();
                             if (x == 3) p.setPurpleAlien();
