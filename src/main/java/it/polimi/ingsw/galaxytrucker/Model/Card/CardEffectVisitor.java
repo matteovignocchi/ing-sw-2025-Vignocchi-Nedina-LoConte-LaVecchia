@@ -101,9 +101,11 @@ public class CardEffectVisitor implements CardVisitor {
                 int days = card.getDays();
                 String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
-                //TODO: isolare le chiamate a questi metodi che mettono in attesa un server, e incapsularle in un
-                // try-catch, per gestire la caduta della connessione. Qui e ovunque sono chiamate
-                if(controller.askPlayerDecision(string, p)){
+
+                boolean ans = false;
+                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+
+                if(ans){
                     f.moveRocket(-days, p);
                     p.addCredits(credits);
                 }
@@ -161,7 +163,6 @@ public class CardEffectVisitor implements CardVisitor {
             int res = p.throwDice() + p.throwDice();
             try {
                 controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

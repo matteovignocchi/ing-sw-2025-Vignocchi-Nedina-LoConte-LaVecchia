@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 // alla fine della fase di assemblaggio (sta parte rivederla) (oleg: se volete questa cosa la facciamo insiem dato che vi avevamo già pensato io e teo)
 //TODO: rivedere bene le inform e inserirle dove mancano (Oleg:gestire bene anche le try-catch)
 //TODO: sistemare cardVisitor con le fasi e le chiamate ai metodi , verificare se meglio la mappa o il player (va gestita sta cosa gabri sa a cosa mi riferisco)
+//TODO: inserire i timeout in tutti i metodi che mettono in attesa il server
 
 public class Controller implements Serializable {
     //private List<Player> playersInGame = new ArrayList<>();
@@ -125,7 +126,7 @@ public class Controller implements Serializable {
         return playersByNickname.get(nickname);
     }
 
-    private Player getPlayerCheck(String nickname) throws BusinessLogicException {
+    public Player getPlayerCheck(String nickname) throws BusinessLogicException {
         Player player = playersByNickname.get(nickname);
         if (player == null) throw new BusinessLogicException("Player not found");
         return player;
@@ -576,6 +577,7 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
         try {
+            //TODO: discorso timeout
             return x.ask(condition);
         } catch (Exception e) {
             markDisconnected(nick);
@@ -704,6 +706,7 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
+    //TODO: casi predefiniti per players disconnessi
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1057,6 +1060,9 @@ public class Controller implements Serializable {
             p.setEliminated();
         } else {
             while (num > 0) {
+
+                //TODO: inserire risposta predefinita per giocatore disconnesso
+
                 x.inform("seleziona un Housing unit");
                 int[] vari = x.askCoordinate();
                 Tile y = p.getTile(vari[0], vari[1]);
@@ -1257,8 +1263,13 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String nick)  {
-        VirtualView x = viewsByNickname.get(nick);
+    //TODO: inserire il timeout
+    private boolean manageEnergyCell(String nick) throws BusinessLogicException {
+        VirtualView x = getViewCheck(nick);
+
+        //Caso disconnesso WorstCase scenario: non attivo i doppi motori
+        Player player = getPlayerCheck(nick);
+        if(!player.isConnected()) return false;
 
         int[] coordinate = new int[2];
         boolean exits = false;
@@ -1459,7 +1470,7 @@ public class Controller implements Serializable {
 
         int[] xy;
         try {
-            v.inform("choose your starting hounsing unit");
+            v.inform("choose your starting housing unit");
             xy = v.askCoordinate();
         } catch (RemoteException e) {
             markDisconnected(nickname);
