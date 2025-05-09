@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public interface VirtualServer extends Remote {
 
@@ -25,8 +26,8 @@ public interface VirtualServer extends Remote {
     List<Card> showDeck(int gameId, int idxDeck) throws IOException, BusinessLogicException;
     Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
+    Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException;
 
     public String waitForResponse() throws RemoteException; //serve?
-    public int[] requestGamesList() throws RemoteException; //serve?
     public String waitForGameStart() throws Exception; //serve?
 }

@@ -12,6 +12,7 @@ import java.util.List;
  */
 
 public class MeteoritesRainCard implements Card{
+    private final String idCard;
     private final List<Integer> directions;
     private final List<Boolean> size;
 
@@ -23,12 +24,16 @@ public class MeteoritesRainCard implements Card{
 
     @JsonCreator
     public MeteoritesRainCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("directions") List<Integer> directions,
             @JsonProperty("size") List<Boolean> size
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(directions == null || directions.isEmpty()) throw new IllegalArgumentException("List directions cannot be empty or null");
         if(size == null || size.isEmpty()) throw new IllegalArgumentException("List size cannot be empty or null");
         if(directions.size() != size.size()) throw new IllegalArgumentException("List directions size does not match size size");
+
+        this.idCard = idCard;
         this.directions = new ArrayList<>(directions);
         this.size = new ArrayList<>(size);
     }
@@ -49,4 +54,5 @@ public class MeteoritesRainCard implements Card{
      */
 
     public List<Boolean> getMeteorites_size(){ return new ArrayList<>(size); }
+    public String getIdCard(){ return idCard; }
 }

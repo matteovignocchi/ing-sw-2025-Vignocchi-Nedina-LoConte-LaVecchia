@@ -4,45 +4,53 @@
     "days": 1,
     "fire_power": 4,
     "num_removed_goods": 2,
-    "reward_goods": ["YELLOW", "GREEN", "BLUE"]
+    "reward_goods": ["YELLOW", "GREEN", "BLUE"],
+    "id_card": "1_012"
   },
   {
-    "type": "StardustCard"
+    "type": "StardustCard",
+    "id_card": "1_014"
   },
   {
-    "type": "OpenSpaceCard"
+    "type": "OpenSpaceCard",
+    "id_card": "1_015"
   },
   {
     "type": "MeteoritesRainCard",
     "directions": [0, 3, 1],
-    "size": [true, false, false]
+    "size": [true, false, false],
+    "id_card": "1_019"
   },
   {
-  "type": "PlanetsCard",
-  "days": 2,
-  "reward_goods": [
-    ["RED", "RED"],
-    ["RED", "BLUE", "BLUE"],
-    ["YELLOW"]
-  ]
+    "type": "PlanetsCard",
+    "days": 2,
+    "reward_goods": [
+      ["RED", "RED"],
+      ["RED", "BLUE", "BLUE"],
+      ["YELLOW"]
+    ],
+    "id_card": "1_0113"
   },
   {
     "type": "FirstWarzoneCard",
     "days": 3,
     "num_crewmates": 2,
     "shots_directions": [2, 2],
-    "shots_size": [false, true]
+    "shots_size": [false, true],
+    "id_card": "1_0116"
   },
   {
-  "type": "AbandonedShipCard",
-  "days" : 1,
-  "credits": 4,
-  "num_crewmates" : 3
+    "type": "AbandonedShipCard",
+    "days" : 1,
+    "credits": 4,
+    "num_crewmates" : 3,
+    "id_card": "1_0118"
   },
   {
-  "type": "AbandonedStationCard",
-  "days" : 1,
-  "num_crewmates" : 5,
-  "station_goods" : ["YELLOW" , "GREEN"]
+    "type": "AbandonedStationCard",
+    "days" : 1,
+    "num_crewmates" : 5,
+    "station_goods" : ["YELLOW" , "GREEN"],
+    "id_card": "1_0119"
   }
 ]

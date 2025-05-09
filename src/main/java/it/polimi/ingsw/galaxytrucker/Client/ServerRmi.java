@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.Map;
 
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
@@ -152,8 +153,8 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public int[] requestGamesList() throws RemoteException {
-        return new int[0];
+    public Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException {
+        return handleGameManagerCall("requestGamesList", gameManager::listActiveGames);
     }
 
     @Override

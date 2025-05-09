@@ -13,6 +13,7 @@ import java.util.List;
  */
 
 public class PlanetsCard implements Card {
+    private final String idCard;
     private final List<List<Colour>> reward_goods;
     private final int days;
 
@@ -24,9 +25,11 @@ public class PlanetsCard implements Card {
 
     @JsonCreator
     public PlanetsCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("reward_goods") List<List<Colour>> reward_goods,
             @JsonProperty("days") int days
     ) {
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(reward_goods == null || reward_goods.isEmpty()) throw new IllegalArgumentException("reward_goods is null");
         if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
 
@@ -35,6 +38,8 @@ public class PlanetsCard implements Card {
             if(innerList.isEmpty()) throw new IllegalArgumentException("Null innerList in reward_goods");
             else temp.add(innerList);
         }
+
+        this.idCard = idCard;
         this.reward_goods = temp;
         this.days = days;
     }
@@ -62,13 +67,5 @@ public class PlanetsCard implements Card {
         return copy;
     }
 
+    public String getIdCard() {return idCard;}
 }
-
-
-/**
- * The method activates the card's effect: it scrolls through the players' list, in order starting from the leader.
- * He can decide whether he wants to go down to the first planet and take the goods (losing the indicated flight days)
- * or not. If he decides to go down, the planet is occupied, and you move on to the next one, otherwise it remains free.
- * Once he has made his decision, you move on to the next player who in turn must choose.
- * If all the planets on the card are occupied by players, the method ends.
- */

@@ -13,6 +13,7 @@ import java.util.List;
 
 
 public class SmugglersCard implements Card{
+    private final String idCard;
     private final int days;
     private final int fire_power;
     private final int num_removed_goods;
@@ -28,16 +29,19 @@ public class SmugglersCard implements Card{
 
     @JsonCreator
     public SmugglersCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("days") int days,
             @JsonProperty("fire_power") int fire_power,
             @JsonProperty("num_removed_goods") int num_removed_goods,
             @JsonProperty("reward_goods") List<Colour> reward_goods
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(days <= 0) throw new IllegalArgumentException("days must be greater than 0");
         if(fire_power <= 0) throw new IllegalArgumentException("fire_power must be greater than 0");
         if(num_removed_goods <= 0) throw new IllegalArgumentException("num_removed_goods must be greater than 0");
         if(reward_goods == null || reward_goods.isEmpty()) throw new IllegalArgumentException("reward_goods list is null or empty");
 
+        this.idCard = idCard;
         this.days = days;
         this.fire_power = fire_power;
         this.num_removed_goods = num_removed_goods;
@@ -72,4 +76,5 @@ public class SmugglersCard implements Card{
      */
 
     public List<Colour> getRewardGoods() { return new ArrayList<>(reward_goods); }
+    public String getIdCard() { return idCard; }
 }

@@ -1,9 +1,10 @@
-package it.polimi.ingsw.galaxytrucker.View;
+package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Platform;
 
 import java.util.List;

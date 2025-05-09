@@ -22,12 +22,13 @@ public class HousingUnit extends Tile{
      * @param d
      * @param isAlien is the type of housing unit
      */
-    public HousingUnit(int a,int b,int c,int d, Human isAlien) {
+    public HousingUnit(int a,int b,int c,int d, Human isAlien, int id) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
         this.isAlien=isAlien;
+        idTile = id;
     }
 
     /**

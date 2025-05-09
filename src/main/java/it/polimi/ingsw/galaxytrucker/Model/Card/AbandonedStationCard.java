@@ -13,6 +13,7 @@ import java.util.List;
  */
 
 public class AbandonedStationCard implements Card {
+    private final String idCard;
     private final int num_crewmates;
     private final int days;
     private final List<Colour> station_goods;
@@ -26,15 +27,18 @@ public class AbandonedStationCard implements Card {
 
     @JsonCreator
     public AbandonedStationCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("num_crewmates") int num_crewmates,
             @JsonProperty("days") int days,
             @JsonProperty("station_goods") List<Colour> station_goods
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(station_goods == null) throw new IllegalArgumentException("reward_goods cannot be null");
         if(station_goods.isEmpty()) throw new IllegalArgumentException("reward_goods cannot be empty");
         if(num_crewmates <= 0) throw new IllegalArgumentException("num_crewmates cannot be negative");
         if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
 
+        this.idCard = idCard;
         this.num_crewmates = num_crewmates;
         this.days = days;
         this.station_goods = new ArrayList<>(station_goods);
@@ -62,4 +66,5 @@ public class AbandonedStationCard implements Card {
      */
 
     public List<Colour> getStationGoods(){ return new ArrayList<>(station_goods); }
+    public String getIdCard(){ return idCard; }
 }

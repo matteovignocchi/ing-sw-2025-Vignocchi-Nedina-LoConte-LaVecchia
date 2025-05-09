@@ -28,7 +28,8 @@ public class TileParserLoader {
                                 obj.get("a").asInt(),
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
-                                obj.get("d").asInt()
+                                obj.get("d").asInt(),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -39,7 +40,8 @@ public class TileParserLoader {
                                 obj.get("c").asInt(),
                                 obj.get("d").asInt(),
                                 obj.get("max").asInt(),
-                                obj.get("advance").asBoolean()
+                                obj.get("advance").asBoolean(),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -49,7 +51,8 @@ public class TileParserLoader {
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
                                 obj.get("d").asInt(),
-                                obj.get("idDouble").asBoolean()
+                                obj.get("idDouble").asBoolean(),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -59,7 +62,8 @@ public class TileParserLoader {
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
                                 obj.get("d").asInt(),
-                                obj.get("idDouble").asBoolean()
+                                obj.get("idDouble").asBoolean(),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -69,7 +73,8 @@ public class TileParserLoader {
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
                                 obj.get("d").asInt(),
-                                Human.valueOf(obj.get("human").asText())
+                                Human.valueOf(obj.get("human").asText()),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -78,7 +83,8 @@ public class TileParserLoader {
                                 obj.get("a").asInt(),
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
-                                obj.get("d").asInt()
+                                obj.get("d").asInt(),
+                                obj.get("id").asInt()
                         );
                         break;
 
@@ -88,7 +94,8 @@ public class TileParserLoader {
                                 obj.get("b").asInt(),
                                 obj.get("c").asInt(),
                                 obj.get("d").asInt(),
-                                obj.get("max").asInt()
+                                obj.get("max").asInt(),
+                                obj.get("id").asInt()
                         );
                         break;
 

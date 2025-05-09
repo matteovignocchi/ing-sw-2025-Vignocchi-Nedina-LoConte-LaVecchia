@@ -26,13 +26,14 @@ public class StorageUnit extends Tile {
      * @param max
      * @param advanced
      */
-    public StorageUnit(int a, int b, int c, int d, int max, boolean advanced) {
+    public StorageUnit(int a, int b, int c, int d, int max, boolean advanced, int id) {
         corners[0] = a;
         corners[1] = b;
         corners[2] = c;
         corners[3] = d;
         this.max = max;
         this.advanced = advanced;
+        idTile = id;
     }
 
     /**

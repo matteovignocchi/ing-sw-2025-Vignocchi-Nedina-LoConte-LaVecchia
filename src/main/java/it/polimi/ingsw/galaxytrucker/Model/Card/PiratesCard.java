@@ -13,6 +13,7 @@ import java.util.List;
  */
 
 public class PiratesCard implements Card {
+    private final String idCard;
     private final int fire_power;
     private final int days;
     private final int credits;
@@ -30,12 +31,14 @@ public class PiratesCard implements Card {
 
     @JsonCreator
     public PiratesCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("fire_power") int fire_power,
             @JsonProperty("days") int days,
             @JsonProperty("credits") int credits,
             @JsonProperty("shots_directions") List<Integer> shots_directions,
             @JsonProperty("shots_size") List<Boolean> shots_size
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(shots_directions == null || shots_directions.isEmpty()) throw new IllegalArgumentException("List shots_directions cannot be null or empty");
         if(shots_size == null || shots_size.isEmpty()) throw new IllegalArgumentException("List shots_size cannot be null or empty");
         if(shots_directions.size() != shots_size.size()) throw new IllegalArgumentException("List shots_directions and shots_size must be the same size");
@@ -43,6 +46,7 @@ public class PiratesCard implements Card {
         if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
         if(credits <= 0) throw new IllegalArgumentException("credits cannot be negative");
 
+        this.idCard = idCard;
         this.fire_power = fire_power;
         this.days = days;
         this.credits = credits;
@@ -84,15 +88,5 @@ public class PiratesCard implements Card {
      */
 
     public List<Boolean> getShots_size(){return new ArrayList<>(shots_size);}
+    public String getIdCard(){return idCard;}
 }
-
-
-
-/**
- * The method activates the card's effect: It scrolls down the list of players starting from the leader, checks if
- * the player has a higher firepower than the pirates and, if so, if the player decides to redeem the reward
- * he receives "credits" credits and loses "days" days of flight. If the player has a lower firepower than the pirates,
- * he is added to the list of the defeated. Once the pirates are defeated (or the list of players is finished),
- * the first defeated player rolls the dice and determines the row and/or column that will be attacked by the cannons.
- * This column and/or row is valid for each defeated player.
- */

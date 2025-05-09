@@ -94,8 +94,8 @@ public class TuiTest {
     void testPrintDashBoard(){
         TUIView tui = new TUIView();
         Tile[][] tmp = p.getDashMatrix();
-        tmp[1][3] = new Cannon(4,3,3,3,false);
-        tmp[1][4]= new StorageUnit(2,1,2,3,3,true);
+        tmp[1][3] = new Cannon(4,3,3,3,false,0);
+        tmp[1][4]= new StorageUnit(2,1,2,3,3,true,0);
         switch (tmp[1][4]){
             case StorageUnit s -> {
                 s.addGood(Colour.RED);
@@ -104,26 +104,26 @@ public class TuiTest {
             }
             default -> {}
         }
-        Tile tmp2 = new Shield(2,2,1,0);
+        Tile tmp2 = new Shield(2,2,1,0,0);
         tmp2.RotateRight();
         tmp2.RotateRight();
         tmp2.RotateRight();
         tmp[1][2]=tmp2;
-        tmp[2][2] = new EnergyCell(0 , 1, 2, 3 , 2);
-        tmp[2][4] = new MultiJoint(3,3,3,3);
-        tmp[2][5] = new HousingUnit(1,2,1,2,Human.HUMAN);
-        tmp[3][2] = new MultiJoint(3,3,3,3);
-        tmp[4][2] = new Engine(2,3,6,1,false);
-        tmp[3][1] = new Engine(3,3,6,1,false);
-        tmp[4][1] = new MultiJoint(3,3,3,3);
-        tmp[2][1] = new Cannon(4,3,3,3,false);
-        tmp[1][1] = new MultiJoint(3,3,3,3);
-        tmp[3][5] = new EnergyCell(0,1,0,3, 2);
-        tmp[4][5] = new Shield(1,1,2,1);
-        tmp[3][4] = new MultiJoint(3,3,1,1);
-        tmp[4][4] = new EnergyCell(0,1,1,3, 2);
-        tmp[0][1] = new MultiJoint(1,1,1,1);
-        tmp[0][2] = new MultiJoint(3,3,3,3);
+        tmp[2][2] = new EnergyCell(0 , 1, 2, 3 , 2,0);
+        tmp[2][4] = new MultiJoint(3,3,3,3,0);
+        tmp[2][5] = new HousingUnit(1,2,1,2,Human.HUMAN,0);
+        tmp[3][2] = new MultiJoint(3,3,3,3,0);
+        tmp[4][2] = new Engine(2,3,6,1,false,0);
+        tmp[3][1] = new Engine(3,3,6,1,false,0);
+        tmp[4][1] = new MultiJoint(3,3,3,3,0);
+        tmp[2][1] = new Cannon(4,3,3,3,false,0);
+        tmp[1][1] = new MultiJoint(3,3,3,3,0);
+        tmp[3][5] = new EnergyCell(0,1,0,3, 2,0);
+        tmp[4][5] = new Shield(1,1,2,1,0);
+//        tmp[3][4] = new MultiJoint(3,3,1,1);
+//        tmp[4][4] = new EnergyCell(0,1,1,3, 2);
+//        tmp[0][1] = new MultiJoint(1,1,1,1);
+//        tmp[0][2] = new MultiJoint(3,3,3,3);
         tui.printDashShip(tmp);
         p.modifyDASH(tmp);
         p.setGameFase(GamePhase.CARD_EFFECT);

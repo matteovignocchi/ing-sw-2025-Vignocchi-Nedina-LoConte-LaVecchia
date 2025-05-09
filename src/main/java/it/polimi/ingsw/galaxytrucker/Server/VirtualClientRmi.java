@@ -156,7 +156,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         if(message.contains("login")){
             view.inform("Available Games");
-            int[] availableGames = server.requestGamesList();
+            int[] availableGames = null;
+            try {
+                availableGames = server.requestGamesList();
+            } catch (BusinessLogicException e) {
+                throw new RuntimeException(e);
+            }
             for(int i = 0 ; i < availableGames.length; i++){
                 view.inform((i+1) + "." + availableGames[i]);
             }

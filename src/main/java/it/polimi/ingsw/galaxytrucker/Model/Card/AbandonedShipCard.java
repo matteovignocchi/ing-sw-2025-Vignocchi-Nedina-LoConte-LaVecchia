@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AbandonedShipCard implements Card{
 
+    private final String idCard;
     private final int days;
     private final int credits;
     private final int num_crewmates;
@@ -25,14 +26,17 @@ public class AbandonedShipCard implements Card{
 
     @JsonCreator
     public AbandonedShipCard(
+            @JsonProperty("id_card") String idCard,
             @JsonProperty("days") int days,
             @JsonProperty("credits") int credits,
             @JsonProperty("num_crewmates") int num_crewmates
     ){
+        if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
         if(num_crewmates <= 0) throw new IllegalArgumentException("num_crewmates cannot be negative");
         if(days <= 0) throw new IllegalArgumentException("days cannot be negative");
         if(credits <= 0) throw new IllegalArgumentException("credits cannot be negative");
 
+        this.idCard = idCard;
         this.days = days;
         this.credits = credits;
         this.num_crewmates = num_crewmates;
@@ -60,4 +64,6 @@ public class AbandonedShipCard implements Card{
      */
 
     public int getNumCrewmates(){ return num_crewmates; }
+
+    public String getIdCard(){ return idCard; }
 }

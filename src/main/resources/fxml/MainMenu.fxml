@@ -7,7 +7,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController">
    <children>
       <ImageView fitHeight="401.0" fitWidth="515.0" layoutX="41.0" preserveRatio="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
@@ -41,7 +41,7 @@
                   <Insets top="27.0" />
                </GridPane.margin>
             </Button>
-            <Button layoutX="211.0" layoutY="193.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="106.0" styleClass="button" text="Logout" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+            <Button layoutX="211.0" layoutY="193.0" mnemonicParsing="false" onMouseClicked="#logout" prefHeight="36.0" prefWidth="106.0" styleClass="button" text="Logout" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
                <GridPane.margin>
                   <Insets top="27.0" />
                </GridPane.margin>

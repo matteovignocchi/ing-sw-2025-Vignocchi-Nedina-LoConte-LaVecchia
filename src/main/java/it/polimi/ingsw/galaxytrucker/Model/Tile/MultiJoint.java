@@ -11,11 +11,12 @@ public class MultiJoint extends Tile {
      * @param c
      * @param d
      */
-    public MultiJoint(int a,int b,int c,int d) {
+    public MultiJoint(int a,int b,int c,int d, int id) {
         corners[0]=a;
         corners[1]=b;
         corners[2]=c;
         corners[3]=d;
+        idTile = id;
     }
 
 }
