@@ -132,7 +132,9 @@ public class TuiTest {
         tui.printDashShip(tmp);
         tui.printPileCovered();
         tui.printPileShown(pileOfTile);
-//        tui.printListOfCommand();
+        tui.updateState(GamePhase.BOARD_SETUP);
+        tui.updateView("paperino" , 3 , 2 , 5 , 14 , true , false , 11 , 2);
+
     }
 
 

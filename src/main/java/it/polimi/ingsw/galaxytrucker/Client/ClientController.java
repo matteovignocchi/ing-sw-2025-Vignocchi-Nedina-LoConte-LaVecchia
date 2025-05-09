@@ -1,0 +1,177 @@
+package it.polimi.ingsw.galaxytrucker.Client;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualClientRmi;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
+import it.polimi.ingsw.galaxytrucker.View.View;
+import org.jetbrains.annotations.NotNull;
+import java.io.*;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Scanner;
+import static it.polimi.ingsw.galaxytrucker.GamePhase.*;
+import static java.lang.String.valueOf;
+
+
+//trasporto il client da un'altra parte per una questione di scalabilità e correttezza :
+//non dovendo lavorare con static diventa più testabile e se plice
+
+public class ClientController {
+    private final View view;
+    private final VirtualView virtualClient;
+    private Tile tmpTile;
+    private boolean isConnected = false;
+    private int idCurrentGame;
+
+    public ClientController(View view, VirtualView virtualClient) {
+        this.view = view;
+        this.virtualClient = virtualClient;
+    }
+
+    public void start() throws Exception {
+        view.start();
+        isConnected = true;
+        view.inform("Connected with success");
+
+        loginLoop();
+        mainMenuLoop();
+    }
+
+    private void loginLoop() throws Exception {
+        while (isConnected) {
+            view.inform("Insert your username :");
+            String username = virtualClient.askString();
+            if (virtualClient.sendLogin(username)) {
+                view.inform("Login successful");
+                virtualClient.setNickname(username);
+                break;
+            } else {
+                view.reportError("Credential not valid");
+            }
+        }
+    }
+
+    private void mainMenuLoop() throws Exception {
+        while (isConnected) {
+            view.inform("-----MENU-----");
+            view.inform("1. Create new game");
+            view.inform("2. Enter in a game");
+            view.inform("3. Logout");
+            int choice = virtualClient.askIndex();
+
+            switch (choice) {
+                case 1 -> createNewGame();
+                case 2 -> joinExistingGame();
+                case 3 -> {
+                    virtualClient.logOut();
+                    System.exit(0);
+                }
+                default -> view.inform("Choice not valid");
+            }
+        }
+    }
+
+    private void createNewGame() throws Exception {
+        view.inform("Creating New Game");
+        int response = virtualClient.sendGameRequest("CREATE");
+        if (response != 0) {
+            view.inform("Game created successfully");
+            virtualClient.setGameId(response);
+            waitForPlayers();
+        } else {
+            view.inform("Game creation failed");
+        }
+    }
+
+    private void joinExistingGame() throws Exception {
+        int response = virtualClient.sendGameRequest("JOIN_");
+        if (response != 0) {
+            view.inform("Joining existing game");
+            virtualClient.setGameId(response);
+            waitForGameStart();
+        } else {
+            view.inform("Game not entered");
+        }
+    }
+
+    private void waitForPlayers() throws Exception {
+        view.inform("Waiting for players in lobby");
+        while (true) {
+            String status = virtualClient.waitForGameUpadate();
+            if (status.contains("Start")) {
+                startGame();
+                break;
+            }
+            view.inform(status);
+        }
+    }
+
+    private void waitForGameStart() throws Exception {
+        view.inform("Waiting for game start");
+        while (true) {
+            String status = virtualClient.waitForGameUpadate();
+            if (status.contains("start")) {
+                startGame();
+                break;
+            }
+            view.inform(status);
+        }
+    }
+
+    private void startGame() throws Exception {
+        GamePhase gameState;
+        do {
+            choosePossibleActions();
+            gameState = virtualClient.getGameFase();
+        } while (!gameState.equals(GamePhase.EXIT));
+    }
+
+    private void choosePossibleActions() throws Exception {
+        String key = view.sendAvailableChoices();
+        switch (key) {
+            case "getblankettile" -> tmpTile = virtualClient.getTileServer();
+            case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
+            case "returntile" -> virtualClient.getBackTile(tmpTile);
+            case "placetile" -> virtualClient.positionTile(tmpTile);
+            case "drawcard" -> virtualClient.drawCard();
+            case "spinthehourglass" -> virtualClient.rotateGlass();
+            case "declareready" -> virtualClient.setReady();
+            case "watchadeck" -> virtualClient.lookDeck();
+            case "watchaship" -> virtualClient.lookDashBoard();
+            case "rightrotatetile" -> rotateRight();
+            case "leftrotatetile" -> rotateLeft();
+            case " logout" -> {
+                virtualClient.logOut();
+                idCurrentGame = 0;
+            }
+            default -> view.inform("Action not recognized");
+        }
+    }
+
+    private void rotateRight() throws Exception {
+        if (tmpTile != null) {
+            tmpTile.RotateRight();
+            view.inform("Rotated tile");
+            view.printTile(tmpTile);
+        } else {
+            view.reportError("No tile selected to rotate");
+        }
+    }
+
+    private void rotateLeft() throws Exception {
+        if (tmpTile != null) {
+            tmpTile.RotateLeft();
+            view.inform("Rotated tile");
+            view.printTile(tmpTile);
+        } else {
+            view.reportError("No tile selected to rotate");
+        }
+    }
+}
+
+
