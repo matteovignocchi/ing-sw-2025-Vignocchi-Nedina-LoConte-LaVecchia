@@ -120,10 +120,10 @@ public class TuiTest {
         tmp[1][1] = new MultiJoint(3,3,3,3);
         tmp[3][5] = new EnergyCell(0,1,0,3, 2);
         tmp[4][5] = new Shield(1,1,2,1);
-//        tmp[3][4] = new MultiJoint(3,3,1,1);
-//        tmp[4][4] = new EnergyCell(0,1,1,3, 2);
-//        tmp[0][1] = new MultiJoint(1,1,1,1);
-//        tmp[0][2] = new MultiJoint(3,3,3,3);
+        tmp[3][4] = new MultiJoint(3,3,1,1);
+        tmp[4][4] = new EnergyCell(0,1,1,3, 2);
+        tmp[0][1] = new MultiJoint(1,1,1,1);
+        tmp[0][2] = new MultiJoint(3,3,3,3);
         tui.printDashShip(tmp);
         p.modifyDASH(tmp);
         p.setGameFase(GamePhase.CARD_EFFECT);
@@ -132,7 +132,9 @@ public class TuiTest {
         tui.printDashShip(tmp);
         tui.printPileCovered();
         tui.printPileShown(pileOfTile);
-//        tui.printListOfCommand();
+        tui.updateState(GamePhase.BOARD_SETUP);
+        tui.updateView("paperino" , 3 , 2 , 5 , 14 , true , false , 11 , 2);
+
     }
 
 
