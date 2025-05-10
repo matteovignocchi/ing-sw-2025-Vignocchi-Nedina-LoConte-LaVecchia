@@ -32,7 +32,7 @@ public class TuiTest {
     private final InputStream originalIn = System.in;
     private ByteArrayOutputStream outContent;
     private Tile[][] tmp = new Tile[5][7];
-    Player p = new Player(123456 , true);
+    Player p = new Player(123456 , true , 0);
     private TileParserLoader pileMaker = new TileParserLoader();
     List<Tile> pileOfTile = pileMaker.loadTiles();
 
