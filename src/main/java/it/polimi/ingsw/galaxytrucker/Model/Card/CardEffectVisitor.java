@@ -50,7 +50,7 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (Player p : players) {
-            int x = controller.getPowerEngine(p);
+            int x = controller.getPowerEngineForCard(p);
             f.moveRocket(x, p);
         }
     }
@@ -95,7 +95,7 @@ public class CardEffectVisitor implements CardVisitor {
 
         double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
-            double player_fire_power = controller.getFirePower(p);
+            double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > slavers_fire_power) {
                 int credits = card.getCredits();
                 int days = card.getDays();
@@ -144,9 +144,9 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i=1; i < players.size(); i++) {
             if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
                 idx_crew = i;
-            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(idx_firepower)))
+            if(controller.getFirePowerForCard(players.get(i)) < controller.getFirePowerForCard(players.get(idx_firepower)))
                 idx_firepower = i;
-            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(idx_engine)))
+            if(controller.getPowerEngineForCard(players.get(i)) < controller.getPowerEngineForCard(players.get(idx_engine)))
                 idx_engine = i;
         }
 
@@ -193,9 +193,9 @@ public class CardEffectVisitor implements CardVisitor {
         for (int i=1; i < players.size(); i++) {
             if(controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
                 idx_crew = i;
-            if(controller.getFirePower(players.get(i)) < controller.getFirePower(players.get(idx_firepower)))
+            if(controller.getFirePowerForCard(players.get(i)) < controller.getFirePowerForCard(players.get(idx_firepower)))
                 idx_firepower = i;
-            if(controller.getPowerEngine(players.get(i)) < controller.getPowerEngine(players.get(idx_engine)))
+            if(controller.getPowerEngineForCard(players.get(i)) < controller.getPowerEngineForCard(players.get(idx_engine)))
                 idx_engine = i;
         }
         f.moveRocket(-card.getDays(), players.get(idx_firepower));
@@ -237,7 +237,7 @@ public class CardEffectVisitor implements CardVisitor {
 
         double smugglers_fire_power = card.getFirePower();
         for(Player p : players) {
-            double player_fire_power = controller.getFirePower(p);
+            double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > smugglers_fire_power){
                 int days = card.getDays();
                 List<Colour> reward_goods = card.getRewardGoods();
@@ -390,7 +390,7 @@ public class CardEffectVisitor implements CardVisitor {
 
         List<Player> losers = new ArrayList<>();
         for(Player p : players) {
-            if(controller.getFirePower(p) > card.getFirePower()){
+            if(controller.getFirePowerForCard(p) > card.getFirePower()){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
                 boolean ans = false;
@@ -403,7 +403,7 @@ public class CardEffectVisitor implements CardVisitor {
                     p.addCredits(credits);
                 }
                 break;
-            } else if (controller.getFirePower(p) < card.getFirePower())
+            } else if (controller.getFirePowerForCard(p) < card.getFirePower())
                 losers.add(p);
         }
         if(!losers.isEmpty()){

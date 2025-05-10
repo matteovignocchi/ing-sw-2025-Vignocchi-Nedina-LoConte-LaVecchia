@@ -586,12 +586,16 @@ public class Controller implements Serializable {
     public boolean askPlayerDecision(String condition, Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
-        try {
-            //TODO: discorso timeout
-            return x.ask(condition);
-        } catch (Exception e) {
-            markDisconnected(nick);
-            throw new RuntimeException(e);
+        if(p.isConnected()){
+            try {
+                //TODO: discorso timeout
+                return x.ask(condition);
+            } catch (Exception e) {
+                markDisconnected(nick);
+                throw new RuntimeException(e);
+            }
+        }else{
+            return false;
         }
     }
 
@@ -644,7 +648,7 @@ public class Controller implements Serializable {
      *
      * @return the total amount of engine power
      */
-    public int getPowerEngine(Player p) throws BusinessLogicException {
+    public int getPowerEngineForCard(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
@@ -674,7 +678,36 @@ public class Controller implements Serializable {
         }
     }
 
-    public double getFirePower(Player p) throws BusinessLogicException {
+    public int getPowerEngine(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        int tmp = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                Tile y = p.getTile(i, j);
+                Boolean var = false;
+                switch (y) {
+                    case Engine c -> {
+                        var = c.isDouble();
+                        if (var) {
+                            tmp = tmp + 2;
+
+                        } else {
+                            tmp = tmp + 1;
+                        }
+                    }
+                    default -> tmp = tmp;
+                }
+            }
+        }
+        if (p.presenceBrownAlien() && tmp != 0) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
+    }
+
+
+    public double getFirePowerForCard(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
 
         double tmp = 0;
@@ -707,6 +740,37 @@ public class Controller implements Serializable {
             return tmp;
         }
     }
+
+    public double getFirePower(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        double tmp = 0;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = p.getTile(i, j);
+                boolean var;
+                switch (y) {
+                    case Engine c -> {
+                        var = c.isDouble();
+                        if (var) {
+                            if (c.controlCorners(0) != 5) tmp = tmp + 1;
+                            else tmp = tmp + 2;
+                        } else {
+                            if (c.controlCorners(0) != 4) tmp = tmp + 0.5;
+                            else tmp = tmp + 1;
+                        }
+                    }
+                    default -> tmp = tmp;
+                }
+
+            }
+        }
+        if (p.presencePurpleAlien() && tmp != 0) {
+            return tmp + 2;
+        } else {
+            return tmp;
+        }
+    }
+
 
     public int getTotalEnergy(Player p) {
         return p.getTotalEnergy();
@@ -753,119 +817,203 @@ public class Controller implements Serializable {
         if(num < totalGood){
             while(num != 0){
                 if(r != 0){
-                    try {
-                        x.inform("selezionare cella ed eliminare rosso");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    int[] vari = null;
-                    try {
-                        vari = x.askCoordinate();
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    Tile y = p.getTile(vari[0], vari[1]);
-                    switch (y){
-                        case StorageUnit c -> {
-                            for(Colour co : c.getListOfGoods()) {
-                                if (co == Colour.RED) {
-                                    r--;
-                                    num--;
-                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                    if(p.isConnected()){
+                        try {
+                            x.inform("selezionare cella ed eliminare rosso");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        int[] vari = null;
+                        try {
+                            vari = x.askCoordinate();
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        Tile y = p.getTile(vari[0], vari[1]);
+                        switch (y){
+                            case StorageUnit c -> {
+                                for(Colour co : c.getListOfGoods()) {
+                                    if (co == Colour.RED) {
+                                        r--;
+                                        num--;
+                                        c.removeGood(c.getListOfGoods().indexOf(co));
+                                    }
+                                }
+                            }
+                            default -> {}
+                        }
+
+                    }else{
+                        for(int index =0 ; index <5 ; index++){
+                            for(int index2 =0 ; index2 <7 ; index2++){
+                                Tile tmpTile = p.getTile(index, index2);
+                                switch (tmpTile){
+                                    case StorageUnit c -> {
+                                        for(Colour co : c.getListOfGoods()) {
+                                            if (co == Colour.RED) {
+                                                r--;
+                                                num--;
+                                                c.removeGood(c.getListOfGoods().indexOf(co));
+                                            }
+                                        }
+                                    }
+                                    default -> {}
                                 }
                             }
                         }
-                        default -> {}
                     }
 
                 }
                 if(r == 0 && num!=0 && g != 0){
-                    try {
-                        x.inform("selezionare cella ed eliminare giallo");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    int[] vari = null;
-                    try {
-                        vari = x.askCoordinate();
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    Tile y = p.getTile(vari[0], vari[1]);
-                    switch (y){
-                        case StorageUnit c -> {
-                            for(Colour co : c.getListOfGoods()) {
-                                if (co == Colour.YELLOW) {
-                                    g--;
-                                    num--;
-                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                    if(p.isConnected()){
+                        try {
+                            x.inform("selezionare cella ed eliminare giallo");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        int[] vari = null;
+                        try {
+                            vari = x.askCoordinate();
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        Tile y = p.getTile(vari[0], vari[1]);
+                        switch (y){
+                            case StorageUnit c -> {
+                                for(Colour co : c.getListOfGoods()) {
+                                    if (co == Colour.YELLOW) {
+                                        g--;
+                                        num--;
+                                        c.removeGood(c.getListOfGoods().indexOf(co));
+                                    }
+                                }
+                            }
+                            default -> {}
+                        }
+                    }else{
+                        for(int index =0 ; index <5 ; index++){
+                            for(int index2 =0 ; index2 <7 ; index2++){
+                                Tile tmpTile = p.getTile(index, index2);
+                                switch (tmpTile){
+                                    case StorageUnit c -> {
+                                        for(Colour co : c.getListOfGoods()) {
+                                            if (co == Colour.YELLOW) {
+                                                r--;
+                                                num--;
+                                                c.removeGood(c.getListOfGoods().indexOf(co));
+                                            }
+                                        }
+                                    }
+                                    default -> {}
                                 }
                             }
                         }
-                        default -> {}
-                    }
 
+                    }
                 }
                 if(r == 0 && g == 0 && v != 0 && num!=0){
-                    try {
-                        x.inform("selezionare cella ed eliminare verde");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    int[] vari = null;
-                    try {
-                        vari = x.askCoordinate();
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    Tile y = p.getTile(vari[0], vari[1]);
-                    switch (y){
-                        case StorageUnit c -> {
-                            for(Colour co : c.getListOfGoods()) {
-                                if (co == Colour.GREEN) {
-                                    v--;
-                                    num--;
-                                    c.removeGood(c.getListOfGoods().indexOf(co));
+                    if(p.isConnected()){
+                        try {
+                            x.inform("selezionare cella ed eliminare verde");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        int[] vari = null;
+                        try {
+                            vari = x.askCoordinate();
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        Tile y = p.getTile(vari[0], vari[1]);
+                        switch (y){
+                            case StorageUnit c -> {
+                                for(Colour co : c.getListOfGoods()) {
+                                    if (co == Colour.GREEN) {
+                                        v--;
+                                        num--;
+                                        c.removeGood(c.getListOfGoods().indexOf(co));
+                                    }
+                                }
+                            }
+                            default -> {}
+                        }
+                    }else{
+                        for(int index =0 ; index <5 ; index++){
+                            for(int index2 =0 ; index2 <7 ; index2++){
+                                Tile tmpTile = p.getTile(index, index2);
+                                switch (tmpTile){
+                                    case StorageUnit c -> {
+                                        for(Colour co : c.getListOfGoods()) {
+                                            if (co == Colour.GREEN) {
+                                                r--;
+                                                num--;
+                                                c.removeGood(c.getListOfGoods().indexOf(co));
+                                            }
+                                        }
+                                    }
+                                    default -> {}
                                 }
                             }
                         }
-                        default -> {}
+
                     }
+
 
                 }
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
-                    try {
-                        x.inform("selezionare cella ed eliminare blu");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    int[] vari = null;
-                    try {
-                        vari = x.askCoordinate();
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    Tile y = p.getTile(vari[0], vari[1]);
-                    switch (y){
-                        case StorageUnit c -> {
-                            for(Colour co : c.getListOfGoods()) {
-                                if (co == Colour.BLUE) {
-                                    b--;
-                                    num--;
-                                    c.removeGood(c.getListOfGoods().indexOf(co));
-                                }
-                            }
-                        }
-                        default -> {}
-                    }
+                  if(p.isConnected()){
+                      try {
+                          x.inform("selezionare cella ed eliminare blu");
+                      } catch (Exception e) {
+                          markDisconnected(nick);
+                          throw new RuntimeException(e);
+                      }
+                      int[] vari = null;
+                      try {
+                          vari = x.askCoordinate();
+                      } catch (Exception e) {
+                          markDisconnected(nick);
+                          throw new RuntimeException(e);
+                      }
+                      Tile y = p.getTile(vari[0], vari[1]);
+                      switch (y){
+                          case StorageUnit c -> {
+                              for(Colour co : c.getListOfGoods()) {
+                                  if (co == Colour.BLUE) {
+                                      b--;
+                                      num--;
+                                      c.removeGood(c.getListOfGoods().indexOf(co));
+                                  }
+                              }
+                          }
+                          default -> {}
+                      }
+                  }else{
+                      for(int index =0 ; index <5 ; index++){
+                          for(int index2 =0 ; index2 <7 ; index2++){
+                              Tile tmpTile = p.getTile(index, index2);
+                              switch (tmpTile){
+                                  case StorageUnit c -> {
+                                      for(Colour co : c.getListOfGoods()) {
+                                          if (co == Colour.BLUE) {
+                                              r--;
+                                              num--;
+                                              c.removeGood(c.getListOfGoods().indexOf(co));
+                                          }
+                                      }
+                                  }
+                                  default -> {}
+                              }
+                          }
+                      }
+
+                  }
 
                 }
             }
@@ -885,29 +1033,45 @@ public class Controller implements Serializable {
             int finish = num-totalGood;
             if(finish < totalEnergy){
                 while(finish > 0){
-                    try {
-                        x.inform("selezionare cella ed eliminare una batteria");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    int[] vari = null;
-                    try {
-                        vari = x.askCoordinate();
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                        throw new RuntimeException(e);
-                    }
-                    Tile y = p.getTile(vari[0], vari[1]);
-                    switch (y){
-                        case EnergyCell c -> {
-                            if(c.getCapacity() != 0) c.useBattery();
+                    if(p.isConnected()){
+                        try {
+                            x.inform("selezionare cella ed eliminare una batteria");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
                         }
-                        default -> {}
+                        int[] vari = null;
+                        try {
+                            vari = x.askCoordinate();
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        Tile y = p.getTile(vari[0], vari[1]);
+                        switch (y){
+                            case EnergyCell c -> {
+                                if(c.getCapacity() != 0) c.useBattery();
+                                finish--;
+                            }
+                            default -> {}
+
+                        }
+                    }else{
+                        for(int index =0 ; index <5 ; index++){
+                            for(int index2 =0 ; index2 <7 ; index2++){
+                                Tile tmpTile = p.getTile(index, index2);
+                                switch (tmpTile){
+                                    case EnergyCell c -> {
+                                        if(c.getCapacity() != 0) c.useBattery();
+                                        finish--;
+                                    }
+                                    default -> {}
+                                }
+                            }
+                        }
 
                     }
                 }
-
             }else{
                 for (int i = 0; i < 5; i++) {
                     for (int j = 0; j < 7; j++){
@@ -1070,35 +1234,41 @@ public class Controller implements Serializable {
             p.setEliminated();
         } else {
             while (num > 0) {
-
-                //TODO: inserire risposta predefinita per giocatore disconnesso
-
-                x.inform("seleziona un Housing unit");
-                int[] vari = x.askCoordinate();
-                Tile y = p.getTile(vari[0], vari[1]);
-                switch (y){
-                    case HousingUnit h -> {
-                        if(h.returnLenght()>0){
-                            int tmp = h.removeHumans(1);
-                            if(tmp == 2) p.setBrownAlien();
-                            if(tmp == 3) p.setPurpleAlien();
-                            num--;
-                        }else{
-                            x.inform("seleziona una housing unit valida");
+                if(p.isConnected()){
+                    x.inform("seleziona un Housing unit");
+                    int[] vari = x.askCoordinate();
+                    Tile y = p.getTile(vari[0], vari[1]);
+                    switch (y){
+                        case HousingUnit h -> {
+                            if(h.returnLenght()>0){
+                                int tmp = h.removeHumans(1);
+                                if(tmp == 2) p.setBrownAlien();
+                                if(tmp == 3) p.setPurpleAlien();
+                                num--;
+                            }else{
+                                x.inform("seleziona una housing unit valida");
+                            }
+                        }
+                        default -> x.inform("seleziona una abitazione valida");
+                    }
+                }else{
+                    Tile[][] tmpDash = p.getDashMatrix();
+                    for(int i = 0 ; i<5; i++){
+                        for(int j = 0 ; j<7; j++){
+                            switch (tmpDash[i][j]){
+                                case HousingUnit h -> {
+                                    if(h.returnLenght()>0){
+                                        int tmp = h.removeHumans(1);
+                                        if(tmp == 2) p.setBrownAlien();
+                                        if(tmp == 3) p.setPurpleAlien();
+                                        num--;
+                                    }
+                                }
+                                default ->{}
+                            }
                         }
                     }
-                    default -> {
-                        x.inform("seleziona una abitazione valida");
-                    }
                 }
-
-                //select HousinUnit t = p.selectHousingUnit
-                //se contiene almeno 1 persona
-                //dentro un if
-                //t.removeHuman
-                //tmp = t.removeHuman
-                //in base al valore di tmp, 1 non faccio nulla, 2 setto brown alien, 3 purple
-                //num--;
             }
         }
     }
@@ -1118,7 +1288,11 @@ public class Controller implements Serializable {
                         if (c.isConnected()) {
                             int index;
                             try {
-                                 index = v.askIndex();
+                                if(p.isConnected()){
+                                    index = v.askIndex();
+                                }else{
+                                    index = 0;
+                                }
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
@@ -1486,36 +1660,41 @@ public class Controller implements Serializable {
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
         VirtualView v = getViewCheck(nickname);
         Player p = getPlayerCheck(nickname);
-
-        int[] xy;
-        try {
-            v.inform("choose your starting housing unit");
-            xy = v.askCoordinate();
-        } catch (RemoteException e) {
-            markDisconnected(nickname);
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        boolean flag = true;
-        while (flag) {
-            Tile tmp = p.getTile(xy[0], xy[1]);
-            switch (tmp) {
-                case HousingUnit h -> flag = false;
-                default -> {
-                    try {
-                        v.inform("Position non valid , choose another tile");
-                        xy = v.askCoordinate();
-                    } catch (RemoteException e) {
-                        markDisconnected(nickname);
-                        throw new RuntimeException(e);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+        if(p.isConnected()){
+            int[] xy;
+            try {
+                v.inform("choose your starting housing unit");
+                xy = v.askCoordinate();
+            } catch (RemoteException e) {
+                markDisconnected(nickname);
+                throw new RuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            boolean flag = true;
+            while (flag) {
+                Tile tmp = p.getTile(xy[0], xy[1]);
+                switch (tmp) {
+                    case HousingUnit h -> flag = false;
+                    default -> {
+                        try {
+                            v.inform("Position non valid , choose another tile");
+                            xy = v.askCoordinate();
+                        } catch (RemoteException e) {
+                            markDisconnected(nickname);
+                            throw new RuntimeException(e);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
+            checkPlayerAssembly(nickname,  xy[0], xy[1]);
+        }else{
+            checkPlayerAssembly(nickname,  2,3);
         }
-        checkPlayerAssembly(nickname,  xy[0], xy[1]);
+
+
     }
 
     private void checkPlayerAssembly(String id , int x , int y){
