@@ -309,7 +309,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public Tile getTileServer() throws IOException, InterruptedException {
-        Message request = Message.request(Message.OP_GET_TILE, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_GET_TILE, payloadGame);
         sendRequest(request);
         Object response =  responseHandler.waitForResponse();
         return (Tile) response;
@@ -317,7 +320,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public Tile getUncoveredTile() throws Exception {
-        Message request = Message.request(Message.OP_GET_UNCOVERED, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message listRequest = Message.request(Message.OP_GET_UNCOVERED_LIST, payloadGame);
+        sendRequest(listRequest);
+        List<Tile> listTile = (List<Tile>) responseHandler.waitForResponse();
+        view.printPileShown(listTile);
+        int index = askIndex();
+        Tile tile = listTile.get(index);
+        Message request = Message.request(Message.OP_GET_UNCOVERED, tile);
         sendRequest(request);
         Object response =  responseHandler.waitForResponse();
         return (Tile) response;
