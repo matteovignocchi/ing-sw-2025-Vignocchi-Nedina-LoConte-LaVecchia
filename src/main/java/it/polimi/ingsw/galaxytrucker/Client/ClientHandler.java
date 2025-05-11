@@ -1,15 +1,13 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Server.Message;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualClientSocket;
-
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
@@ -22,141 +20,67 @@ public class ClientHandler implements Runnable {
     public ClientHandler(Socket socket, GameManager gameManager) throws IOException {
         this.socket      = socket;
         this.gameManager = gameManager;
-        // 1) apro lo stream di output PRIMA di quello di input
+
+        // APRI PRIMA L'OUTPUT, POI L'INPUT per evitare deadlock
         this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.out.flush();
         this.in  = new ObjectInputStream(socket.getInputStream());
-        // 2) creo la view lato server usando lo stesso out
+
+        // CREO LA VIEW lato server: useremo solo out per inviare UPDATE/NOTIFY
         this.view = new VirtualClientSocket(this.out);
     }
 
     @Override
     public void run() {
         try {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
+                // 1) LEGGO la richiesta dal client
                 Message request = (Message) in.readObject();
+                // 2) DISPATCH al GameManager, ottenendo una response
                 Message response = dispatch(request);
+                // 3) SCRIVO la response indietro al client
                 out.writeObject(response);
                 out.flush();
             }
         } catch (EOFException eof) {
-            System.out.println("Client disconnesso: " + socket.getRemoteSocketAddress());
+            // Client chiude la connessione volontariamente
+            System.out.println("Client disconnected: " + socket.getRemoteSocketAddress());
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Errore socket con " + socket.getRemoteSocketAddress() + ": " + e.getMessage());
+            System.err.println("Errore socket con "
+                    + socket.getRemoteSocketAddress() + ": " + e.getMessage());
         } finally {
-            try { socket.close(); }
-            catch (IOException ignored) {}
+            // Assicuro la chiusura della socket
+            try { socket.close(); } catch (IOException ignored) {}
+            // Se vogliamo, qui possiamo interrompere il thread:
+            Thread.currentThread().interrupt();
         }
     }
 
     private Message dispatch(Message req) {
-        String op = req.getOperation();
-        Object p  = req.getPayload();
-
         try {
-            switch (op) {
-                case Message.OP_LOGIN: {
+            String op = req.getOperation();
+            Object p  = req.getPayload();
 
+            switch (op) {
+                case Message.OP_LOGOUT: {
+                    String nick = (String) p;
+                    int newGameId = gameManager.createGame(false, view, nick, 4);
+                    return Message.response(newGameId);
                 }
                 case Message.OP_LIST_GAMES: {
                     Map<Integer,int[]> map = gameManager.listActiveGames();
                     return Message.response(map);
                 }
                 case Message.OP_ENTER_GAME: {
-                    // payload = Object[]{ Integer gameId, String nickname }
-                    Object[] arr = (Object[]) p;
-                    int    gid  = (Integer) arr[0];
-                    String nick2= (String)  arr[1];
-                    gameManager.joinGame(gid, view, nick2);
-                    gameManager.notifyAllViews();
+                    Object[] args = (Object[]) p;
+                    int    gameId = (Integer) args[0];
+                    String nick2  = (String)  args[1];
+                    gameManager.joinGame(gameId, view, nick2);
                     return Message.response("OK");
                 }
-                case Message.OP_GET_TILE: {
-                    int    gid      = view.getGameId();
-                    String nickname = view.getNickname();
-                    Tile t = gameManager.getCoveredTile(gid, nickname);
-                    return Message.response(t);
-                }
-                case Message.OP_GET_UNCOVERED: {
-                    int gid        = view.getGameId();
-                    String nickn   = view.getNickname();
-                    List<Tile> lst = gameManager.getUncoveredTilesList(gid, nickn);
-                    return Message.response(lst);
-                }
-                case Message.OP_PRINT_SHOWN: {
-                    // alias di LOOK_SHOWN?
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    List<Tile> lst = gameManager.getUncoveredTilesList(gid, nickn);
-                    return Message.response(lst);
-                }
-                case Message.OP_CHOOSE_TILE: { // custom op
-                    Object[] arr = (Object[]) p;
-                    int idTile   = (Integer) arr[0];
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    Tile chosen = gameManager.chooseUncoveredTile(gid, nickn, idTile);
-                    return Message.response(chosen);
-                }
-                case Message.OP_DROP_TILE: {
-                    Object[] arr = (Object[]) p;
-                    Tile tile    = (Tile) arr[0];
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.dropTile(gid, nickn, tile);
-                    return Message.response("OK");
-                }
-                case Message.OP_PLACE_TILE: {
-                    Object[] arr = (Object[]) p;
-                    Tile tile    = (Tile) arr[0];
-                    int[] cord   = (int[])  arr[1];
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.placeTile(gid, nickn, tile, cord);
-                    return Message.response("OK");
-                }
-                case Message.OP_SET_READY: {
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.setReady(gid, nickn);
-                    return Message.response("OK");
-                }
-                case Message.OP_ROTATE_GLASS: {
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.flipHourglass(gid, nickn);
-                    return Message.response("OK");
-                }
-                case Message.OP_SHOW_DECK: {
-                    // payload = Integer idxDeck
-                    int idxDeck  = (Integer) p;
-                    int gid      = view.getGameId();
-                    List<Card> deck = gameManager.showDeck(gid, idxDeck);
-                    return Message.response(deck);
-                }
-                case Message.OP_LOOK_SHIP: {
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    Tile[][] board = gameManager.lookAtDashBoard(gid, nickn);
-                    return Message.response(board);
-                }
-                case Message.OP_DRAW_CARD: {
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.drawCard(gid, nickn);
-                    return Message.response("OK");
-                }
-                case Message.OP_LIST_GAMES: {
-                    // già gestito
-                    return Message.response(gameManager.listActiveGames());
-                }
-                case Message.OP_LOGOUT: {
-                    int gid      = view.getGameId();
-                    String nickn = view.getNickname();
-                    gameManager.quitGame(gid, nickn);
-                    return Message.response("OK");
-                }
+                // … gestisci qui tutti gli altri OP_* …
                 default:
-                    return Message.error("Not valid operation: " + op);
+                    return Message.error("unknown operation: " + op);
             }
 
         } catch (BusinessLogicException e) {
