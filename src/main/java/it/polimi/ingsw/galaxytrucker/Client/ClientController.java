@@ -28,6 +28,7 @@ public class ClientController {
     private boolean isConnected = false;
     private int idCurrentGame;
 
+
     public ClientController(View view, VirtualView virtualClient) {
         this.view = view;
         this.virtualClient = virtualClient;
@@ -102,7 +103,7 @@ public class ClientController {
     private void waitForPlayers() throws Exception {
         view.inform("Waiting for players in lobby");
         while (true) {
-            String status = virtualClient.waitForGameUpadate();
+            String status = virtualClient.askInformationAboutStart();
             if (status.contains("Start")) {
                 startGame();
                 break;
@@ -114,7 +115,7 @@ public class ClientController {
     private void waitForGameStart() throws Exception {
         view.inform("Waiting for game start");
         while (true) {
-            String status = virtualClient.waitForGameUpadate();
+            String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {
                 startGame();
                 break;

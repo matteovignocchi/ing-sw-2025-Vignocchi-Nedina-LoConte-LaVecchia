@@ -260,8 +260,9 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-                v.setFlagStart(); //ne hai parlato con oleg a lezione , così non cambiate
+//                v.setFlagStart(); //ne hai parlato con oleg a lezione , così non cambiate
                 v.updateMapPosition(playerPosition);
+                v.setStart(); // nuovo setFlagStart , serve per modificare lato client senza che lui continui e rompere per sapere la risposta
                 v.inform("Game is starting!");
             } catch (Exception e) {
                 markDisconnected(nick);

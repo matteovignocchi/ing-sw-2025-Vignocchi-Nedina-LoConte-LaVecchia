@@ -21,6 +21,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private int gameId;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
+    private String start = "false";
 
     public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
         super();
@@ -284,5 +285,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
         view.updateMap(Position);
+    }
+
+    @Override
+    public void setStart() throws RemoteException{
+        start = "Start";
+    }
+
+    @Override
+    public String askInformationAboutStart() throws RemoteException {
+        return start;
     }
 }

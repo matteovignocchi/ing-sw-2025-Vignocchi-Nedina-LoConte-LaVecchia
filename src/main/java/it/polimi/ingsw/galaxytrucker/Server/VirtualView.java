@@ -86,4 +86,8 @@ public interface VirtualView {
     void updateMapPosition(Map<String, Integer> Position) throws Exception;
 
     void setFlagStart() throws Exception;
+
+    void setStart() throws Exception;
+
+    String askInformationAboutStart() throws Exception;
 }

@@ -28,6 +28,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private Tile[][] Dash_Matrix;
     boolean flag = true;
     private boolean active = true;
+    private String start = "false";
 
 
     /// METODI DI INIZIALIZZAZIONE ///
@@ -123,6 +124,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_START_GAME -> this.setStart();
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -410,6 +412,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void setFlagStart() throws Exception {
         flag = false;
+    }
+
+    @Override
+    public void setStart(){
+        start = "Start";
+    }
+
+    @Override
+    public String askInformationAboutStart() throws Exception {
+        return start;
     }
 }
 
