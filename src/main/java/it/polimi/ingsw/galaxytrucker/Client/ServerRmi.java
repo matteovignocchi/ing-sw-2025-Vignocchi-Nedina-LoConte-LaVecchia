@@ -158,16 +158,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public String waitForResponse() throws RemoteException {
-        return "";
-    }
-
-    @Override
-    public String waitForGameStart() throws Exception {
-        return "";
-    }
-
-    @Override
     public Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 

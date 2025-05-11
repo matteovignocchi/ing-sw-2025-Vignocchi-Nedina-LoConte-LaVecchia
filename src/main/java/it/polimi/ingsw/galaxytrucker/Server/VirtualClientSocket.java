@@ -28,6 +28,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private Tile[][] Dash_Matrix;
     boolean flag = true;
     private boolean active = true;
+    private String start = "false";
 
 
     /// METODI DI INIZIALIZZAZIONE ///
@@ -103,7 +104,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
             }
     } catch (IOException e) {
-            this.reportError("Errore nell'invio della risposta: " + e.getMessage());
+            this.reportError(": " + e.getMessage());
         }
     }
 
@@ -123,6 +124,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_START_GAME -> this.setStart();
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -325,62 +327,102 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void getBackTile(Tile tile) throws Exception {
-        Message request =  Message.request(Message.OP_RETURN_TILE , tile);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        payloadGame.add(tile);
+        Message request =  Message.request(Message.OP_RETURN_TILE , payloadGame);
         sendRequest(request);
     }
     @Override
     public void positionTile(Tile tile) throws Exception {
-        Message request = Message.request(Message.OP_POSITION_TILE , tile);
+        view.inform("choose coordinate");
+        int[] tmp = view.askCordinate();
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        payloadGame.add(tile);
+        payloadGame.add(tmp);
+        Message request = Message.request(Message.OP_POSITION_TILE , payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void drawCard() throws Exception {
-        Message request = Message.request(Message.OP_GET_CARD, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_GET_CARD, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void rotateGlass() throws Exception {
-        Message request = Message.request(Message.OP_ROTATE_GLASS , null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_ROTATE_GLASS , payloadGame);
         sendRequest(request);
     }
     @Override
     public void setReady() throws Exception {
-        Message request = Message.request(Message.OP_SET_READY, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_SET_READY, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void lookDeck() throws Exception {
-        Message request = Message.request(Message.OP_LOOK_DECK, null);
+        view.inform("choose deck : 1 / 2 / 3");
+        int index = askIndex();
+        Message request = Message.request(Message.OP_LOOK_DECK, index);
         sendRequest(request);
     }
 
     @Override
     public void lookDashBoard() throws Exception {
-        Message request = Message.request(Message.OP_LOOK_SHIP, null);
+        String player = view.choosePlayer();
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(player);
+        Message request = Message.request(Message.OP_LOOK_SHIP, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void logOut() throws Exception {
-        Message request = Message.request(Message.OP_LOGOUT, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_LOGOUT, payloadGame);
         sendRequest(request);
     }
+
     @Override
-    public void setNickname(String nickname) {
+    public void setNickname(String nickname) { //va eliminato?
         this.nickname = nickname;
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position)  {
+    public void updateMapPosition(Map<String, Integer> Position)  { //va eliminato
         view.updateMap(Position);
     }
 
     @Override
-    public void setFlagStart() throws Exception {
+    public void setFlagStart() throws Exception { // ci serve?
         flag = false;
+    }
+
+    @Override
+    public void setStart(){
+        start = "Start";
+    }
+
+    @Override
+    public String askInformationAboutStart() throws Exception {
+        return start;
     }
 }
 
