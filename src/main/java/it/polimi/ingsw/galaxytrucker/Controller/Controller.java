@@ -1496,7 +1496,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    //TODO: inserire il timeout
+    //TODO: applicare tale pattern a tutti i metodi che fanno chiamate che mettono il server in attesa
     private boolean manageEnergyCell(String nick) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
 
