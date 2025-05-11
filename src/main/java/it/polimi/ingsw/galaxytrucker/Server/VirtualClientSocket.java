@@ -103,7 +103,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
             }
     } catch (IOException e) {
-            this.reportError("Errore nell'invio della risposta: " + e.getMessage());
+            this.reportError(": " + e.getMessage());
         }
     }
 
@@ -325,47 +325,76 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void getBackTile(Tile tile) throws Exception {
-        Message request =  Message.request(Message.OP_RETURN_TILE , tile);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        payloadGame.add(tile);
+        Message request =  Message.request(Message.OP_RETURN_TILE , payloadGame);
         sendRequest(request);
     }
     @Override
     public void positionTile(Tile tile) throws Exception {
-        Message request = Message.request(Message.OP_POSITION_TILE , tile);
+        view.inform("choose coordinate");
+        int[] tmp = view.askCordinate();
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        payloadGame.add(tile);
+        payloadGame.add(tmp);
+        Message request = Message.request(Message.OP_POSITION_TILE , payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void drawCard() throws Exception {
-        Message request = Message.request(Message.OP_GET_CARD, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_GET_CARD, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void rotateGlass() throws Exception {
-        Message request = Message.request(Message.OP_ROTATE_GLASS , null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_ROTATE_GLASS , payloadGame);
         sendRequest(request);
     }
     @Override
     public void setReady() throws Exception {
-        Message request = Message.request(Message.OP_SET_READY, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_SET_READY, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void lookDeck() throws Exception {
-        Message request = Message.request(Message.OP_LOOK_DECK, null);
+        view.inform("choose deck : 1 / 2 / 3");
+        int index = askIndex();
+        Message request = Message.request(Message.OP_LOOK_DECK, index);
         sendRequest(request);
     }
 
     @Override
     public void lookDashBoard() throws Exception {
-        Message request = Message.request(Message.OP_LOOK_SHIP, null);
+        String player = view.choosePlayer();
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(player);
+        Message request = Message.request(Message.OP_LOOK_SHIP, payloadGame);
         sendRequest(request);
     }
 
     @Override
     public void logOut() throws Exception {
-        Message request = Message.request(Message.OP_LOGOUT, null);
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        Message request = Message.request(Message.OP_LOGOUT, payloadGame);
         sendRequest(request);
     }
     @Override
