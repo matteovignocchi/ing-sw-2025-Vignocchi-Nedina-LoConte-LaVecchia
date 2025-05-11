@@ -80,7 +80,7 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //TODO: sostituire gli inform multipli con broadcastInform (oppure eliminarlo e dove è usato mettere serie di inform singoli) sia qui nel gamemanager
 
-    public synchronized void notifyView(String nickname) {
+    public void notifyView(String nickname) {
         VirtualView v = viewsByNickname.get(nickname);
         Player p      = playersByNickname.get(nickname);
         try {
@@ -104,13 +104,13 @@ public class Controller implements Serializable {
         }
     }
 
-    public synchronized void notifyAllViews() {
+    public void notifyAllViews() {
         for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
             notifyView(nickname);
         }
     }
 
-    public synchronized void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
+    public void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
         numberOfEnter ++;
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
         if (playersByNickname.size() >= MaxPlayers) throw new BusinessLogicException("Game is full");
@@ -181,7 +181,7 @@ public class Controller implements Serializable {
         return principalGamePhase;
     }
 
-    public synchronized void markDisconnected(String nickname) {
+    public void markDisconnected(String nickname) {
         Player p = playersByNickname.get(nickname);
         if (p != null && p.isConnected()) {
             p.setConnected(false);
@@ -190,7 +190,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public synchronized void markReconnected(String nickname, VirtualView view) throws BusinessLogicException {
+    public void markReconnected(String nickname, VirtualView view) throws BusinessLogicException {
         viewsByNickname.put(nickname, view);
         Player p = playersByNickname.get(nickname);
         if (p == null)
@@ -221,14 +221,14 @@ public class Controller implements Serializable {
 
     public int getMaxPlayers(){ return MaxPlayers; }
 
-    private synchronized void cancelLastPlayerTimeout() {
+    private void cancelLastPlayerTimeout() {
         if (lastPlayerTask != null) {
             lastPlayerTask.cancel(false);
             lastPlayerTask = null;
         }
     }
 
-    private synchronized void setTimeout() {
+    private void setTimeout() {
         cancelLastPlayerTimeout();
         if (countConnectedPlayers() == 1) {
             lastPlayerTask = TIMEOUT_EXECUTOR.schedule(() -> {
@@ -255,7 +255,7 @@ public class Controller implements Serializable {
     //TODO: discutere di sto updateMapPosition
     //TODO: vedere discorso Exception vs IOException: catcharli entrambi ? come gestirli?
 
-    public synchronized void startGame() {
+    public void startGame() {
         playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.BOARD_SETUP));
 
         viewsByNickname.forEach((nick, v) -> {
@@ -272,7 +272,7 @@ public class Controller implements Serializable {
         notifyAllViews();
     }
 
-    public synchronized Tile getCoveredTile(String nickname) throws BusinessLogicException {
+    public Tile getCoveredTile(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         int size = getPileOfTile().size();
@@ -285,7 +285,7 @@ public class Controller implements Serializable {
         return getTile(randomIdx);
     }
 
-    public synchronized Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
+    public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
@@ -296,7 +296,7 @@ public class Controller implements Serializable {
         return getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
 
-    public synchronized void dropTile (String nickname, Tile tile) throws BusinessLogicException {
+    public void dropTile (String nickname, Tile tile) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         addToShownTile(tile);
@@ -304,7 +304,7 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
-    public synchronized void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+    public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         p.addTile(cord[0], cord[1], tile);
@@ -312,7 +312,7 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
-    public synchronized void setReady(String nickname) throws BusinessLogicException, RemoteException {
+    public void setReady(String nickname) throws BusinessLogicException, RemoteException {
         Player p = getPlayerCheck(nickname);
 
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
@@ -327,7 +327,7 @@ public class Controller implements Serializable {
 
     //l'update non va gestito nel try-catch, metto notifyallviews alla fine prima di activateDrawPhase()
     //vedere bene questo metodo
-    public synchronized void startFlight() throws BusinessLogicException {
+    public void startFlight() throws BusinessLogicException {
         if(!isDemo) mergeDecks();
         //metto in lista gli eventuali players disconnesi che non hanno chiamato il metodo setReady
         List<Player> playersInFlight = fBoard.getOrderedPlayers();
@@ -357,7 +357,7 @@ public class Controller implements Serializable {
         activateDrawPhase();
     }
 
-    public synchronized void activateDrawPhase() throws BusinessLogicException {
+    public void activateDrawPhase() throws BusinessLogicException {
         List<Player> candidates = fBoard.getOrderedPlayers().stream()
                 .filter(Player::isConnected)
                 .toList();
@@ -386,7 +386,7 @@ public class Controller implements Serializable {
         notifyAllViews();
     }
 
-    public  synchronized void startHourglass(){
+    public void startHourglass(){
         hourglass.flip();
         broadcastInform("Hourglass started!");
     }
@@ -463,7 +463,7 @@ public class Controller implements Serializable {
         -no, rimodifico le fasi per una nuova drawcard (assegno la fase di drawCard al leader e agli altri quella di attesa..)
       5. update per ogni player
    */
-    public synchronized void drawCardManagement(String nickname) throws BusinessLogicException, CardEffectException{
+    public void drawCardManagement(String nickname) throws BusinessLogicException, CardEffectException{
         Card card = deck.draw();
         
         Player drawer = getPlayerCheck(nickname);
@@ -574,11 +574,11 @@ public class Controller implements Serializable {
         onGameEnd.accept(this.gameId);
     }
 
-    public synchronized List<Card> showDeck (int idxDeck){
+    public List<Card> showDeck (int idxDeck){
         return new ArrayList<>(decks.get(idxDeck).getCards());
     }
 
-    public synchronized Tile[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
+    public Tile[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
         return p.getDashMatrix();
     }
@@ -1532,7 +1532,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    //TODO: inserire il timeout
+    //TODO: applicare tale pattern a tutti i metodi che fanno chiamate che mettono il server in attesa
     private boolean manageEnergyCell(String nick) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori

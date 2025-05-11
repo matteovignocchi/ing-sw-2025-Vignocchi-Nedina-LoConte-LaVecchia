@@ -30,6 +30,7 @@ public class Message implements Serializable {
     public static final String OP_PRINT_TILE = "PRINT_TILE";
     public static final String OP_GET_TILE = "GET_TILE";
     public static final String OP_GET_UNCOVERED = "GET_UNCOVERED";
+    public static final String OP_GET_UNCOVERED_LIST = "GET_UNCOVERED_LIST";
     public static final String OP_GET_CARD = "GET_CARD";
     public static final String OP_INDEX = "INDEX";
     public static final String OP_COORDINATE = "COORDINATE";
