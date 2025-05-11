@@ -27,6 +27,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private String nickname;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
+    private boolean active = true;
 
 
     /// METODI DI INIZIALIZZAZIONE ///
@@ -45,95 +46,112 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             }
         }
     }
+
     @Override
     public void run() {
-        try {
-            while (true) {
+        while (active) {
+            try {
                 Message msg = (Message) in.readObject();
 
                 switch (msg.getMessageType()) {
-                    case Message.TYPE_UPDATE -> {
-                        switch (msg.getOperation()) {
-                            case Message.OP_GAME_PHASE -> this.updateGameState((GamePhase)  msg.getPayload());
-                            case Message.OP_PRINT_CARD -> this.printCard((Card) msg.getPayload());
-                            case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
-                            case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
-                            case Message.OP_PRINT_GOODS -> this.printListOfGoods((List<Colour>) msg.getPayload());
-                            case Message.OP_PRINT_DASHBOARD -> this.printPlayerDashboard((Tile[][]) msg.getPayload());
-                            case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
-                            case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
-                            case Message.OP_SET_NICKNAME -> this.setNickname((String)msg.getPayload());
-                            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
-                            case Message.OP_SET_GAMEID -> this.setGameId((int)msg.getPayload());
-                            case Message.OP_MAP_POSITION -> this.updateMapPosition((Map) msg.getPayload());
-                            case Message.OP_UPDATE_VIEW -> {
-                                UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
-                                this.showUpdate(
-                                        payload.getNickname(),
-                                        payload.getFirePower(),
-                                        payload.getPowerEngine(),
-                                        payload.getCredits(),
-                                        payload.getPosition(),
-                                        payload.hasPurpleAlien(),
-                                        payload.hasBrownAlien(),
-                                        payload.getNumberOfHuman(),
-                                        payload.getNumberOfEnergy()
-                                );
-                            }
-                            case Message.OP_SET_FLAG_START -> this.setFlagStart();
-                            default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
-                        }
-                    }
-                    case Message.TYPE_RESPONSE -> {
-                        synchronized (this) {
-                            lastResponse = msg.getPayload() != null ? msg.getPayload().toString() : null;
-                            notifyAll();
-                        }
-                    }
-                    case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
                     case Message.TYPE_NOTIFICATION -> this.inform((String) msg.getPayload());
-                    case Message.TYPE_REQUEST -> {
-                        switch (msg.getOperation()) {
-                            case Message.OP_INDEX -> {
-                                this.inform((String) msg.getPayload());
-                                this.askIndex();
-                                Message response = new Message(Message.TYPE_RESPONSE, null, msg.getPayload());
-                                sendRequest(response);
-                            }
-                            case Message.OP_COORDINATE -> {
-                                this.inform((String) msg.getPayload());
-                                int[] x = this.askCoordinate();
-                                Message response = new Message(Message.TYPE_RESPONSE, null, x);
-                                sendRequest(response);
-                            }
-                            case Message.OP_STRING-> {
-                                this.inform((String) msg.getPayload());
-                                String s = this.askString();
-                                Message response = new Message(Message.TYPE_RESPONSE, null,s);
-                                sendRequest(response);
-                            }
-                            case Message.OP_ASK -> {
-                                boolean x = this.ask((String)msg.getPayload());
-                                Message response = new Message(Message.TYPE_RESPONSE, null, x);
-                                sendRequest(response);
-                            }
-                        }
-                    }
-                    default -> {
-                        this.reportError("Unknown message type: " + msg.getMessageType());
-                    }
+                    case Message.TYPE_REQUEST -> handleRequest(msg);
+                    //case Message.TYPE_RESPONSE -> handleResponse(msg);
+                    case Message.TYPE_UPDATE -> handleUpdate(msg);
+                    case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
+                    default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
                 }
+
+            } catch (IOException | ClassNotFoundException e) {
+                try {
+                    view.reportError("Connection error: " + e.getMessage());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch (IOException | ClassNotFoundException e) {
-            try {
-                view.reportError("Connection error: " + e.getMessage());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
+
+    public void handleRequest(Message msg){
+        String operation = msg.getOperation();
+        try{
+            switch (operation) {
+                case Message.OP_INDEX -> {
+                    this.inform((String) msg.getPayload());
+                    this.askIndex();
+                    Message response = new Message(Message.TYPE_RESPONSE, null, msg.getPayload());
+                    sendRequest(response);
+                }
+                case Message.OP_COORDINATE -> {
+                    this.inform((String) msg.getPayload());
+                    int[] x = this.askCoordinate();
+                    Message response = new Message(Message.TYPE_RESPONSE, null, x);
+                    sendRequest(response);
+                }
+                case Message.OP_STRING-> {
+                    this.inform((String) msg.getPayload());
+                    String s = this.askString();
+                    Message response = new Message(Message.TYPE_RESPONSE, null,s);
+                    sendRequest(response);
+                }
+                case Message.OP_ASK -> {
+                    boolean x = this.ask((String)msg.getPayload());
+                    Message response = new Message(Message.TYPE_RESPONSE, null, x);
+                    sendRequest(response);
+                }
+            }
+    } catch (IOException e) {
+            this.reportError("Errore nell'invio della risposta: " + e.getMessage());
+        }
+    }
+
+
+
+    private void handleUpdate(Message msg) {
+        switch (msg.getOperation()) {
+            case Message.OP_GAME_PHASE -> this.updateGameState((GamePhase) msg.getPayload());
+            case Message.OP_PRINT_CARD -> this.printCard((Card) msg.getPayload());
+            case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
+            case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
+            case Message.OP_PRINT_GOODS -> this.printListOfGoods((List<Colour>) msg.getPayload());
+            case Message.OP_PRINT_DASHBOARD -> this.printPlayerDashboard((Tile[][]) msg.getPayload());
+            case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
+            case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
+            case Message.OP_SET_NICKNAME -> this.setNickname((String) msg.getPayload());
+            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
+            case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
+            case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_UPDATE_VIEW -> {
+                UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
+                try {
+                    this.showUpdate(
+                            payload.getNickname(),
+                            payload.getFirePower(),
+                            payload.getPowerEngine(),
+                            payload.getCredits(),
+                            payload.getPosition(),
+                            payload.hasPurpleAlien(),
+                            payload.hasBrownAlien(),
+                            payload.getNumberOfHuman(),
+                            payload.getNumberOfEnergy()
+                    );
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            case Message.OP_SET_FLAG_START -> {
+                try {
+                    this.setFlagStart();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
+        }
+    }
+
 
     private void sendRequest(Message message) throws IOException {
         out.writeObject(message);
@@ -276,6 +294,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
         return 0;
     }
+
 
     @Override
     public boolean sendLogin(String username) throws IOException, InterruptedException {
