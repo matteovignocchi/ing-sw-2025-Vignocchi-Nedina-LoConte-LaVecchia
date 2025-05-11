@@ -397,18 +397,19 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message request = Message.request(Message.OP_LOGOUT, payloadGame);
         sendRequest(request);
     }
+
     @Override
-    public void setNickname(String nickname) {
+    public void setNickname(String nickname) { //va eliminato?
         this.nickname = nickname;
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position)  {
+    public void updateMapPosition(Map<String, Integer> Position)  { //va eliminato
         view.updateMap(Position);
     }
 
     @Override
-    public void setFlagStart() throws Exception {
+    public void setFlagStart() throws Exception { // ci serve?
         flag = false;
     }
 }
