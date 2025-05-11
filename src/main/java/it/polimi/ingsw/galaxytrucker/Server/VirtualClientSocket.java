@@ -283,18 +283,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         sendRequest(loginRequest);
         return Boolean.parseBoolean((String) waitForResponce());
     }
-    @Override
-    public  synchronized Object waitForResponce() throws InterruptedException {
-        while (lastResponse == null) wait();
-        Object response = lastResponse;
-        lastResponse = null;
-        return response;
-    }
-    @Override
-    public String waitForGameUpadate() throws InterruptedException {
-        while(flag){}
-        return "start";
-    }
+
+
 
     /// METODI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
 

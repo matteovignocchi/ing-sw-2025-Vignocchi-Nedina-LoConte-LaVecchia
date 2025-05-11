@@ -175,20 +175,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         return 0;
     }
-    @Override
-    public Object waitForResponce() throws RemoteException {
-        return server.waitForResponse();
-    }
+
     @Override
     public void setFlagStart(){
         flag=false;
     }
-    @Override
-    public String waitForGameUpadate() throws RemoteException {
-        while(flag){}
-        return "start";
 
-    }
 
 
     /// COMANDI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///

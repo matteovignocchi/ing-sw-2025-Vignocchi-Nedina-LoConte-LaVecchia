@@ -56,10 +56,6 @@ public interface VirtualView {
 
     int sendGameRequest(String message) throws Exception;
 
-    Object waitForResponce() throws Exception;
-
-    String waitForGameUpadate() throws Exception;
-
     GamePhase getCurrentGameState() throws Exception;
 
     GamePhase getGameFase() throws Exception;
