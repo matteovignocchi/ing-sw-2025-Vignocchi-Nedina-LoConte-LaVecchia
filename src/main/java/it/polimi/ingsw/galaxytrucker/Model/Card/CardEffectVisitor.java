@@ -102,10 +102,10 @@ public class CardEffectVisitor implements CardVisitor {
                 String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
 
-                boolean ans = false;
-                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+                //boolean ans = false;
+                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
-                if(ans){
+                if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
                     p.addCredits(credits);
                 }
@@ -245,10 +245,10 @@ public class CardEffectVisitor implements CardVisitor {
                 String string = String.format("Do you want to redeem %s goods and lose %d flight days?",
                         reward_goods_string, days);
 
-                boolean ans = false;
-                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+                //boolean ans = false;
+                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
-                if(ans){
+                if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
                     try {
                         controller.addGoods(p, card.getRewardGoods());
@@ -285,10 +285,10 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players) {
             String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
-            boolean ans = false;
-            if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+            //boolean ans = false;
+            //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
-            if (ans) {
+            if (controller.askPlayerDecision(string, p)) {
                 int days = card.getDays();
                 f.moveRocket(-days, p);
                 int credits = card.getCredits();
@@ -325,10 +325,10 @@ public class CardEffectVisitor implements CardVisitor {
             if(controller.getNumCrew(p)>=num_crewmates){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
-                boolean ans = false;
-                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+                //boolean ans = false;
+                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
-                if(ans){
+                if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
                     try {
@@ -358,6 +358,7 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
+            //superfluo ? capire se abbinare il lancio del dado al playe effettivamente, oppure semplice generazione di randomici
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
 
@@ -443,10 +444,10 @@ public class CardEffectVisitor implements CardVisitor {
         for(Player p : players){
             String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
 
-            boolean ans = false;
-            if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
+            //boolean ans = false;
+            //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
-            if(ans){
+            if(controller.askPlayerDecision(string, p)){
                 int days = card.getDays();
                 f.moveRocket(-days, p);
                 try {

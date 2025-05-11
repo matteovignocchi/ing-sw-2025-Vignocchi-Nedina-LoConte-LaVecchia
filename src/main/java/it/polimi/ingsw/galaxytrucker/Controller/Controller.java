@@ -36,6 +36,7 @@ public class Controller implements Serializable {
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase;
     private int numberOfEnter =0;
+    private final int TIME_OUT = 30;
 
 
     private transient Hourglass hourglass;
@@ -583,19 +584,58 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public boolean askPlayerDecision(String condition, Player p) throws BusinessLogicException {
+    public boolean askPlayerDecision(String question, Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
-        VirtualView x = viewsByNickname.get(nick);
-        if(p.isConnected()){
-            try {
-                //TODO: discorso timeout
-                return x.ask(condition);
-            } catch (Exception e) {
-                markDisconnected(nick);
-                throw new RuntimeException(e);
-            }
-        }else{
+        VirtualView v = viewsByNickname.get(nick);
+
+        if (!p.isConnected()) return false;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Boolean> future = executor.submit(() -> v.ask(question));
+
+        try {
+            return future.get(TIME_OUT, TimeUnit.SECONDS);
+
+        } catch (TimeoutException te) {
+            future.cancel(true);
             return false;
+        //TODO: eccezione generica ok?
+        } catch (Exception e) {
+            future.cancel(true);
+            markDisconnected(nick);
+            return false;
+
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    public int[] askPlayerCoordinates (Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView v = viewsByNickname.get(nick);
+
+        if(!p.isConnected()) return null;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<int[]> future = executor.submit(v::askCoordinate);
+
+        try{
+            int[] coords = future.get(TIME_OUT, TimeUnit.SECONDS);
+            if(coords == null) throw new BusinessLogicException("Coordinates null");
+            if(coords.length != 2) throw new BusinessLogicException("Coordinates length should be 2");
+            return coords;
+
+        } catch (TimeoutException te){
+            future.cancel(true);
+            return null;
+
+        } catch (Exception e) {
+            future.cancel(true);
+            markDisconnected(nick);
+            return null;
+
+        } finally {
+            executor.shutdownNow();
         }
     }
 
@@ -780,7 +820,6 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
-    //TODO: casi predefiniti per players disconnessi
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1464,10 +1503,10 @@ public class Controller implements Serializable {
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
 
-        int[] coordinate = new int[2];
+        int[] coordinates = new int[2];
         boolean exits = false;
 
-        //ricordarsi di mettere la catch per gestione null;
+        /*
         boolean use = false;
         try {
             use = x.ask("Vuoi usare una batteria?");
@@ -1475,21 +1514,29 @@ public class Controller implements Serializable {
             markDisconnected(nick);
             throw new RuntimeException(e);
         }
-        if (!use) {
+         */
+
+        if (!askPlayerDecision("Do you want to use a battery?", player)) {
             return false;
         } else {
             while (!exits) {
+                /*
                 try {
                     coordinate = x.askCoordinate();
                 } catch (Exception e) {
                     markDisconnected(nick);
                     throw new RuntimeException(e);
                 }
-                Tile p = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
+                 */
+                coordinates = askPlayerCoordinates(player);
+                if(coordinates == null) return false;
+
+                Tile p = playersByNickname.get(nick).getTile(coordinates[0], coordinates[1]);
                 switch (p) {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
                         if (capacity == 0) {
+                            /*
                             try {
                                 if (!x.ask("Vuoi selezionare un'altra cella?")) {
                                     return false;
@@ -1498,6 +1545,9 @@ public class Controller implements Serializable {
                                 markDisconnected(nick);
                                 throw new RuntimeException(e);
                             }
+                             */
+                            if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
+                                return false;
                         } else {
                             c.useBattery();
                             return true;
@@ -1505,6 +1555,7 @@ public class Controller implements Serializable {
                     }
                     default -> {
                         System.out.println("cella non valida");
+                        /*
                         try {
                             if (!x.ask("vuoi selezionare un'altra cella?")) {
                                 exits = true;
@@ -1513,6 +1564,9 @@ public class Controller implements Serializable {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
                         }
+                        */
+                        if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
+                            exits = true;
                     }
                 }
             }
