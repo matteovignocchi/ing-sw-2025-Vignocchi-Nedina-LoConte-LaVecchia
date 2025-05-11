@@ -335,10 +335,11 @@ public class Controller implements Serializable {
 
         broadcastInform("Flight started!");
         playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.CARD_EFFECT));
-
+        //metodo per mettere gli umani giusti in ogni cella e tile
+        addHuman();
         viewsByNickname.forEach((nick, v) -> {
+            //metodo per gestire il control assembly del giocatore , va fatta indipendentemente se coonnesso o meno
             checkPlayerAssembly(nick , 2 , 3);
-            //TODO: controlli tiles e attivare l'effetto delle tessere (ex. aggiungere umani per celle ecc..)
             //TODO: questa chiamata va fatta per le view dei giocatori connessi. Non checkare prima se il giocatore
             // connesso o meno, e lasciare partire l'eccezione? (che lo mette disconnesso anche se già lo è)
             try {
@@ -640,6 +641,33 @@ public class Controller implements Serializable {
         }
     }
 
+    public int askPlayerIndex (Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView v = viewsByNickname.get(nick);
+
+        if(!p.isConnected()) return 0;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Integer> future = executor.submit(() -> v.askIndex());
+
+        try{
+            return future.get(TIME_OUT, TimeUnit.SECONDS);
+
+        } catch (TimeoutException te){
+            future.cancel(true);
+            return 0;
+
+        } catch (Exception e) {
+            future.cancel(true);
+            markDisconnected(nick);
+            return 0;
+
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+
     public void addToShownTile(Tile tile) {
         shownTile.add(tile);
     }
@@ -866,7 +894,7 @@ public class Controller implements Serializable {
                         }
                         int[] vari = null;
                         try {
-                            vari = x.askCoordinate();
+                            vari = askPlayerCoordinates(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -916,7 +944,7 @@ public class Controller implements Serializable {
                         }
                         int[] vari = null;
                         try {
-                            vari = x.askCoordinate();
+                            vari = askPlayerCoordinates(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -965,7 +993,7 @@ public class Controller implements Serializable {
                         }
                         int[] vari = null;
                         try {
-                            vari = x.askCoordinate();
+                            vari = askPlayerCoordinates(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1016,7 +1044,7 @@ public class Controller implements Serializable {
                       }
                       int[] vari = null;
                       try {
-                          vari = x.askCoordinate();
+                          vari = askPlayerCoordinates(p);
                       } catch (Exception e) {
                           markDisconnected(nick);
                           throw new RuntimeException(e);
@@ -1082,7 +1110,7 @@ public class Controller implements Serializable {
                         }
                         int[] vari = null;
                         try {
-                            vari = x.askCoordinate();
+                            vari = askPlayerCoordinates(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1150,7 +1178,7 @@ public class Controller implements Serializable {
             }
             int[] vari = null;
             try {
-                vari = x.askCoordinate();
+                vari = askPlayerCoordinates(p);
             } catch (Exception e) {
                 markDisconnected(nick);
                 throw new RuntimeException(e);
@@ -1172,7 +1200,7 @@ public class Controller implements Serializable {
                         }
                         int tmpint = 0;
                         try {
-                            tmpint = x.askIndex();
+                            tmpint = askPlayerIndex(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1189,7 +1217,7 @@ public class Controller implements Serializable {
                     }
                     int tmpint = 0;
                     try {
-                        tmpint = x.askIndex();
+                        tmpint = askPlayerIndex(p);
                     } catch (Exception e) {
                         markDisconnected(nick);
                         throw new RuntimeException(e);
@@ -1223,7 +1251,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void addHuman() throws Exception {
+    public void addHuman()  {
         for (Player p : playersByNickname.values()) {
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -1236,22 +1264,30 @@ public class Controller implements Serializable {
                                     Human tmp2 = Human.HUMAN;
                                     for(int z = 0; z<2 ; z++) h.addHuman(tmp2);}
                                 case PURPLE_ALIEN -> {
-                                    if(askPlayerDecision("alien",p)){
-                                        Human tmp2 = Human.PURPLE_ALIEN;
-                                        h.addHuman(tmp2);
-                                    }else{
-                                        Human tmp2 = Human.HUMAN;
-                                        for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                    try {
+                                        if(askPlayerDecision("alien",p)){
+                                            Human tmp2 = Human.PURPLE_ALIEN;
+                                            h.addHuman(tmp2);
+                                        }else{
+                                            Human tmp2 = Human.HUMAN;
+                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                        }
+                                    } catch (BusinessLogicException e) {
+                                        throw new RuntimeException(e);
                                     }
 
                                 }
                                 case BROWN_ALIEN -> {
-                                    if(askPlayerDecision("alien",p)){
-                                        Human tmp2 = Human.BROWN_ALIEN;
-                                        h.addHuman(tmp2);
-                                    }else{
-                                        Human tmp2 = Human.HUMAN;
-                                        for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                    try {
+                                        if(askPlayerDecision("alien",p)){
+                                            Human tmp2 = Human.BROWN_ALIEN;
+                                            h.addHuman(tmp2);
+                                        }else{
+                                            Human tmp2 = Human.HUMAN;
+                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                        }
+                                    } catch (BusinessLogicException e) {
+                                        throw new RuntimeException(e);
                                     }
                                 }
                             }
@@ -1276,7 +1312,7 @@ public class Controller implements Serializable {
             while (num > 0) {
                 if(p.isConnected()){
                     x.inform("seleziona un Housing unit");
-                    int[] vari = x.askCoordinate();
+                    int[] vari = askPlayerCoordinates(p);
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case HousingUnit h -> {
@@ -1329,7 +1365,7 @@ public class Controller implements Serializable {
                             int index;
                             try {
                                 if(p.isConnected()){
-                                    index = v.askIndex();
+                                    index = askPlayerIndex(p);
                                 }else{
                                     index = 0;
                                 }
@@ -1366,7 +1402,7 @@ public class Controller implements Serializable {
 
         while (!flag) {
             if (x.ask("vuoi usare uno scudo?")) {
-                int[] coordinate = x.askCoordinate();
+                int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
                 Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
                 switch (y) {
                     case Shield shield -> {
@@ -1499,24 +1535,19 @@ public class Controller implements Serializable {
     //TODO: inserire il timeout
     private boolean manageEnergyCell(String nick) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
-
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
-
         int[] coordinates = new int[2];
         boolean exits = false;
 
-        /*
-        boolean use = false;
-        try {
-            use = x.ask("Vuoi usare una batteria?");
-        } catch (Exception e) {
-            markDisconnected(nick);
-            throw new RuntimeException(e);
-        }
-         */
-
+//        boolean use = false;
+//        try {
+//            use = askPlayerDecision("vuoi usare una batteria?",player);
+//        } catch (Exception e) {
+//            markDisconnected(nick);
+//            throw new RuntimeException(e);
+//        }
         if (!askPlayerDecision("Do you want to use a battery?", player)) {
             return false;
         } else {
@@ -1719,7 +1750,7 @@ public class Controller implements Serializable {
             int[] xy;
             try {
                 v.inform("choose your starting housing unit");
-                xy = v.askCoordinate();
+                xy = askPlayerCoordinates(p);
             } catch (RemoteException e) {
                 markDisconnected(nickname);
                 throw new RuntimeException(e);
@@ -1734,7 +1765,7 @@ public class Controller implements Serializable {
                     default -> {
                         try {
                             v.inform("Position non valid , choose another tile");
-                            xy = v.askCoordinate();
+                            xy = askPlayerCoordinates(p);
                         } catch (RemoteException e) {
                             markDisconnected(nickname);
                             throw new RuntimeException(e);
