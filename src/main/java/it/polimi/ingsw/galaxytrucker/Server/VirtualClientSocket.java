@@ -22,14 +22,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectOutputStream out;
     private  View view;
     private GamePhase gamePhase;
-    private Object lastResponse;
     private int gameId;
     private String nickname;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
     private boolean active = true;
     private String start = "false";
-
+    private final ResponseHandler responseHandler = new ResponseHandler();
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -57,7 +56,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_NOTIFICATION -> this.inform((String) msg.getPayload());
                     case Message.TYPE_REQUEST -> handleRequest(msg);
-                    //case Message.TYPE_RESPONSE -> handleResponse(msg);
+                    case Message.TYPE_RESPONSE -> responseHandler.handleResponse(msg);
                     case Message.TYPE_UPDATE -> handleUpdate(msg);
                     case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
                     default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
@@ -124,7 +123,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
-            case Message.OP_START_GAME -> this.setStart();
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -252,7 +250,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public GamePhase getCurrentGameState() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GAME_PHASE,null);
         sendRequest(request);
-        Object response = waitForResponce();
+        Object response =  responseHandler.waitForResponse();
         return (GamePhase) response;
     }
     @Override
@@ -264,7 +262,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendGameRequest(String message) throws IOException, InterruptedException {
-        if(message.equals(Message.OP_CREATE_GAME)){
+        if(message.equals("CREATE")){
             boolean demo = view.ask("would you like a demo version?");
             int numberOfPlayer;
             do{
@@ -279,19 +277,19 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
             sendRequest(createGame);
         }
-        if(message.equals(Message.OP_JOIN_EXIST_GAME)) {
+        if(message.equals("JOIN")) {
             Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
             sendRequest(gameRequest);
             view.inform("Available Games");
             Map<Integer, int[]> availableGames;
-            availableGames = (Map<Integer, int[]>) waitForResponce();
+            availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
             for (Integer i : availableGames.keySet()) {
                 view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
             }
             Integer choice = askIndex();
             Message gameChoice = Message.request(Message.OP_ENTER_GAME, choice);
             sendRequest(gameChoice);
-            return ((int) waitForResponce());
+            return ((int)  responseHandler.waitForResponse());
         }
 
         return 0;
@@ -302,7 +300,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public boolean sendLogin(String username) throws IOException, InterruptedException {
         Message loginRequest = Message.request(Message.OP_LOGIN, username);
         sendRequest(loginRequest);
-        return Boolean.parseBoolean((String) waitForResponce());
+        return Boolean.parseBoolean((String)  responseHandler.waitForResponse());
     }
 
 
@@ -313,7 +311,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public Tile getTileServer() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GET_TILE, null);
         sendRequest(request);
-        Object response = waitForResponce();
+        Object response =  responseHandler.waitForResponse();
         return (Tile) response;
     }
 
@@ -321,7 +319,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public Tile getUncoveredTile() throws Exception {
         Message request = Message.request(Message.OP_GET_UNCOVERED, null);
         sendRequest(request);
-        Object response = waitForResponce();
+        Object response =  responseHandler.waitForResponse();
         return (Tile) response;
     }
 
@@ -401,17 +399,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void setNickname(String nickname) { //va eliminato?
+    public void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position)  { //va eliminato
+    public void updateMapPosition(Map<String, Integer> Position)  {
         view.updateMap(Position);
     }
 
     @Override
-    public void setFlagStart() throws Exception { // ci serve?
+    public void setFlagStart(){
         flag = false;
     }
 
@@ -421,7 +419,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public String askInformationAboutStart() throws Exception {
+    public String askInformationAboutStart() {
         return start;
     }
 }

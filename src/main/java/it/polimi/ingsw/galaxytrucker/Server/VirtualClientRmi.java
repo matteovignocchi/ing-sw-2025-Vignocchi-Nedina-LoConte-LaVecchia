@@ -142,7 +142,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {
-        if(message.contains("create")){
+        if(message.contains("CREATE")){
             boolean tmp = view.ask("would you like a demo version?");
             int tmpInt= 5;
             do{
@@ -155,7 +155,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 throw new RuntimeException(e);
             }
         }
-        if(message.contains("login")){
+        if(message.contains("JOIN")){
             view.inform("Available Games");
             Map<Integer, int[]> availableGames;
             try {
