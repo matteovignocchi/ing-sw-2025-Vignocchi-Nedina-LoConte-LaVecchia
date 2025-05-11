@@ -22,12 +22,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectOutputStream out;
     private  View view;
     private GamePhase gamePhase;
+    private Object lastResponse;
     private int gameId;
     private String nickname;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
     private boolean active = true;
-    private final ResponseHandler responseHandler = new ResponseHandler();
+
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -55,7 +56,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 switch (msg.getMessageType()) {
                     case Message.TYPE_NOTIFICATION -> this.inform((String) msg.getPayload());
                     case Message.TYPE_REQUEST -> handleRequest(msg);
-                    case Message.TYPE_RESPONSE -> responseHandler.handleResponse(msg);
+                    //case Message.TYPE_RESPONSE -> handleResponse(msg);
                     case Message.TYPE_UPDATE -> handleUpdate(msg);
                     case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
                     default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
@@ -249,7 +250,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public GamePhase getCurrentGameState() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GAME_PHASE,null);
         sendRequest(request);
-        Object response = responseHandler.waitForResponse();
+        Object response = waitForResponce();
         return (GamePhase) response;
     }
     @Override
@@ -261,7 +262,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendGameRequest(String message) throws IOException, InterruptedException {
-        if(message.equals("CREATE")){
+        if(message.equals(Message.OP_CREATE_GAME)){
             boolean demo = view.ask("would you like a demo version?");
             int numberOfPlayer;
             do{
@@ -276,19 +277,19 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
             sendRequest(createGame);
         }
-        if(message.equals("JOIN")) {
+        if(message.equals(Message.OP_JOIN_EXIST_GAME)) {
             Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
             sendRequest(gameRequest);
             view.inform("Available Games");
             Map<Integer, int[]> availableGames;
-            availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
+            availableGames = (Map<Integer, int[]>) waitForResponce();
             for (Integer i : availableGames.keySet()) {
                 view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
             }
             Integer choice = askIndex();
             Message gameChoice = Message.request(Message.OP_ENTER_GAME, choice);
             sendRequest(gameChoice);
-            return ((int) responseHandler.waitForResponse());
+            return ((int) waitForResponce());
         }
 
         return 0;
@@ -299,7 +300,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public boolean sendLogin(String username) throws IOException, InterruptedException {
         Message loginRequest = Message.request(Message.OP_LOGIN, username);
         sendRequest(loginRequest);
-        return Boolean.parseBoolean((String) responseHandler.waitForResponse());
+        return Boolean.parseBoolean((String) waitForResponce());
     }
 
 
@@ -310,7 +311,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public Tile getTileServer() throws IOException, InterruptedException {
         Message request = Message.request(Message.OP_GET_TILE, null);
         sendRequest(request);
-        Object response = responseHandler.waitForResponse();
+        Object response = waitForResponce();
         return (Tile) response;
     }
 
@@ -318,7 +319,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public Tile getUncoveredTile() throws Exception {
         Message request = Message.request(Message.OP_GET_UNCOVERED, null);
         sendRequest(request);
-        Object response = responseHandler.waitForResponse();
+        Object response = waitForResponce();
         return (Tile) response;
     }
 

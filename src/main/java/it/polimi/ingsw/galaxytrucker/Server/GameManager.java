@@ -19,20 +19,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 //TODO:
-// 1)cambiare synchronized -> lock
-// 2)eliminare metodi di utility che non vengono utilizzati, ma solo dopo
+// 1)eliminare metodi di utility che non vengono utilizzati, ma solo dopo
 
 
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
-    private final Map<Integer, Controller> games;
-    private final AtomicInteger idCounter;
+    private final Map<Integer, Controller> games = new ConcurrentHashMap<>();;
+    private final AtomicInteger idCounter = new AtomicInteger(1);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public GameManager() {
-        this.games = new ConcurrentHashMap<>();
-        this.idCounter = new AtomicInteger(1);
         loadSavedGames();// Caricamento automatico all'avvio
         schedulePeriodicSaves();
     }
@@ -83,64 +80,85 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    public synchronized Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
+    public Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
-        safeSave(gameId, controller);
-        return controller.getCoveredTile(nickname);
+        synchronized (controller) {
+            Tile t = controller.getCoveredTile(nickname);
+            safeSave(gameId, controller);
+            return t;
+        }
     }
 
-    public synchronized List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
+    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-
-        List<Tile> uncoveredTiles = controller.getShownTiles();
-        if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
-        return uncoveredTiles;
+        synchronized (controller) {
+            List<Tile> uncoveredTiles = controller.getShownTiles();
+            if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
+            return uncoveredTiles;
+        }
     }
 
-    public synchronized Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
+    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
-        safeSave(gameId, controller);
-        return controller.chooseUncoveredTile(nickname, idTile);
+        synchronized (controller) {
+            Tile t = controller.chooseUncoveredTile(nickname, idTile);
+            safeSave(gameId, controller);
+            return t;
+        }
     }
 
-    public synchronized void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
+    public void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.dropTile(nickname, tile);
-        safeSave(gameId, controller);
+        synchronized (controller) {
+            controller.dropTile(nickname, tile);
+            safeSave(gameId, controller);
+        }
     }
 
-    public synchronized void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.placeTile(nickname, tile, cord);
-        safeSave(gameId, controller);
+        synchronized (controller) {
+            controller.placeTile(nickname, tile, cord);
+            safeSave(gameId, controller);
+        }
     }
 
-    public synchronized void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
+    public void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
-        controller.setReady(nickname);
-        safeSave(gameId, controller);
+        synchronized (controller) {
+            controller.setReady(nickname);
+            safeSave(gameId, controller);
+        }
     }
 
-    public synchronized void flipHourglass(int gameId, String nickname) throws BusinessLogicException, RemoteException {
+    public void flipHourglass(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
-        controller.flipHourglass(nickname);
-        safeSave(gameId, controller);
+        synchronized (controller) {
+            controller.flipHourglass(nickname);
+            safeSave(gameId, controller);
+        }
     }
 
     public List<Card> showDeck(int gameId, int idxDeck) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        return controller.showDeck(idxDeck);
+        synchronized (controller) {
+            return controller.showDeck(idxDeck);
+        }
     }
 
-    public synchronized void drawCard(int gameId, String nickname) throws BusinessLogicException {
+    public void drawCard(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.drawCardManagement(nickname);
-        safeSave(gameId, controller);
+        synchronized (controller) {
+            controller.drawCardManagement(nickname);
+            safeSave(gameId, controller);
+        }
     }
 
     public Tile[][] lookAtDashBoard(String nickname, int gameId) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        return controller.lookAtDashBoard(nickname);
+        synchronized (controller) {
+            return controller.lookAtDashBoard(nickname);
+        }
     }
 
     ////////////////////////////////////////////////GESTIONE SALVATAGGIO////////////////////////////////////////////////
