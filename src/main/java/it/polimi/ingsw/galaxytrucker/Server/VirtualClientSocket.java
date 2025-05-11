@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -34,8 +33,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     public VirtualClientSocket(String host, int port , View view) throws IOException {
         this.socket = new Socket(host, port);
-        this.in = new ObjectInputStream(socket.getInputStream());
         this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.out.flush();
+        this.in = new ObjectInputStream(socket.getInputStream());
         this.view = view;
         new Thread(this).start();
         Dash_Matrix = new Tile[5][7];
@@ -245,18 +245,18 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public int sendGameRequest(String message) throws IOException, InterruptedException {
         if(message.equals(Message.OP_CREATE_GAME)){
-            boolean tmp = view.ask("would you like a demo version?");
-            int tmpInt= 5;
+            boolean demo = view.ask("would you like a demo version?");
+            int numberOfPlayer;
             do{
                 view.inform("select max 4 players");
-                tmpInt = view.askIndex();
-            }while(tmpInt>4);
-            List<Object> tmp3 = new ArrayList<>();
-            tmp3.add(tmp);
-            tmp3.add(this);
-            tmp3.add(nickname);
-            tmp3.add(tmpInt);
-            Message createGame = Message.request(Message.OP_CREATE_GAME, tmp3);
+                numberOfPlayer = view.askIndex();
+            }while(numberOfPlayer>4);
+            List<Object> payloadGame = new ArrayList<>();
+            payloadGame.add(demo);
+            payloadGame.add(this);
+            payloadGame.add(nickname);
+            payloadGame.add(numberOfPlayer);
+            Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
             sendRequest(createGame);
         }
         if(message.equals(Message.OP_JOIN_EXIST_GAME)) {
