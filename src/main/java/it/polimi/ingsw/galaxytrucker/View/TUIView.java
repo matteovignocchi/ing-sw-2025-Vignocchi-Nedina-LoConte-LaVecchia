@@ -16,7 +16,7 @@ public class TUIView implements View {
     private int server;
     private GamePhase game;
     private boolean isDemo;
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
@@ -99,19 +99,21 @@ public class TUIView implements View {
     public boolean ask(String message) {
         boolean flag = true;
         boolean decision = false;
-        inform(message+ "(Yes/No)");
-        String response = scanner.nextLine().trim().toLowerCase();
+
         while(flag) {
-            if (response.equals("yes")) {
+            inform(message+ "(Yes/No)");
+            String response = scanner.nextLine().trim().toLowerCase();
+            if (response.contains("yes")) {
                 flag = false;
                 decision = true;
-            } else if (response.equals("no")) {
+            } else if (response.contains("no")) {
                 flag = false;
             }
             else {
                 reportError("The response entered is invalid. Try again: ");
             }
         }
+
         return decision;
     }
 

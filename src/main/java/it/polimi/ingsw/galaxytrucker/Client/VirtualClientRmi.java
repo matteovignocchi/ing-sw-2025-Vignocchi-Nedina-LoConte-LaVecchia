@@ -154,14 +154,16 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         if(message.contains("CREATE")){
             boolean tmp = view.ask("would you like a demo version?");
             int tmpInt= 5;
+
             do{
                 view.inform("select max 4 players");
                 tmpInt = view.askIndex();
             }while(tmpInt>4);
+
             try {
                 return server.createNewGame(tmp , this , nickname ,tmpInt );
             } catch (BusinessLogicException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Error creating new game: ", e);
             }
         }
         if(message.contains("JOIN")){
