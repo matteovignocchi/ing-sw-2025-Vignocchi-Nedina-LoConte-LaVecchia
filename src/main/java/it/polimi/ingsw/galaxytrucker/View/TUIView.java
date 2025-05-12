@@ -120,6 +120,7 @@ public class TUIView implements View {
         int[] coordinate = new int[2];
         inform("Insert the row:");
         coordinate[0] = scanner.nextInt();
+        scanner.nextLine();
         inform("Insert the column:");
         coordinate[1] = scanner.nextInt();
         coordinate[0] = coordinate[0] - 5;
@@ -132,6 +133,7 @@ public class TUIView implements View {
         int index;
         inform("Insert index:");
         index = scanner.nextInt();
+        scanner.nextLine();
         return index - 1;
     }
 

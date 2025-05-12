@@ -6,11 +6,12 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 
-public interface VirtualView {
+public interface VirtualView extends Remote {
 
     /// METODI PER FARE LE PRINT A SCHERMO ///
     void inform(String message) throws Exception;
