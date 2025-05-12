@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
 
 /**
@@ -44,7 +45,11 @@ public class AbandonedShipCard implements Card{
 
     @Override
     public void accept(CardVisitor visitor) throws CardEffectException {
-        visitor.visit(this);
+        try {
+            visitor.visit(this);
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
