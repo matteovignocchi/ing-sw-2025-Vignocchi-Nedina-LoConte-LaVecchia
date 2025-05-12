@@ -99,9 +99,9 @@ public class TUIView implements View {
     public boolean ask(String message) {
         boolean flag = true;
         boolean decision = false;
-        inform(message+ "(Yes/No)");
-        String response = scanner.nextLine().trim().toLowerCase();
         while(flag) {
+            inform(message+ "(Yes/No)");
+            String response = scanner.nextLine().trim().toLowerCase();
             if (response.equals("yes")) {
                 flag = false;
                 decision = true;
@@ -120,6 +120,7 @@ public class TUIView implements View {
         int[] coordinate = new int[2];
         inform("Insert the row:");
         coordinate[0] = scanner.nextInt();
+        scanner.nextLine();
         inform("Insert the column:");
         coordinate[1] = scanner.nextInt();
         coordinate[0] = coordinate[0] - 5;
@@ -132,6 +133,7 @@ public class TUIView implements View {
         int index;
         inform("Insert index:");
         index = scanner.nextInt();
+        scanner.nextLine();
         return index - 1;
     }
 
@@ -223,13 +225,14 @@ public class TUIView implements View {
     }
     /// position diventa una mappa stringa intero
     @Override
-    public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
+            case WAITING_IN_LOBBY -> inform("Nickame : " + nickname);
             case BOARD_SETUP -> inform(" -Nickname: "+nickname+" -Position : Too early to know where you'll finish!"+" -Credits : too rich!"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
             case TILE_MANAGEMENT, DRAW_PHASE -> {}
-            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+" -Position : "+position+" -Credits : Silvio Berlusconi"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
-            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+" -Position : "+position+" -Credits : "+credits+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
-            case SCORING -> inform(" -Nickname: "+nickname+" -Position : "+position);
+            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */" -Credits : Silvio Berlusconi"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+ /*" -Position : "+position+*/" -Credits : "+credits+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
             case EXIT -> inform("Goodbye!");
         }
         printListOfCommand();
@@ -537,6 +540,8 @@ public class TUIView implements View {
     private List<String> commandConstructor(){
         List<String> listOfOptions = new ArrayList<>();
         switch (game) {
+            case WAITING_IN_LOBBY ->  listOfOptions.add("LogOut");
+
             case BOARD_SETUP -> {
                 listOfOptions.add("Get a covered tile");
                 listOfOptions.add("Get a shown tile");

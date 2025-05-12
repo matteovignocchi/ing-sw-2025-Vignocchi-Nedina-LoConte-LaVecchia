@@ -132,7 +132,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             payload.getFirePower(),
                             payload.getPowerEngine(),
                             payload.getCredits(),
-                            payload.getPosition(),
                             payload.hasPurpleAlien(),
                             payload.hasBrownAlien(),
                             payload.getNumberOfHuman(),
@@ -168,8 +167,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        view.updateView(nickname , firePower , powerEngine , credits , position , purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+        view.updateView(nickname , firePower , powerEngine , credits , /*position ,*/ purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
     }
 
     @Override

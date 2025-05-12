@@ -4,8 +4,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -16,14 +14,9 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.View.View;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 public class TuiTest {
@@ -126,14 +119,14 @@ public class TuiTest {
 //        tmp[0][2] = new MultiJoint(3,3,3,3);
         tui.printDashShip(tmp);
         p.modifyDASH(tmp);
-        p.setGameFase(GamePhase.CARD_EFFECT);
+        p.setGamePhase(GamePhase.CARD_EFFECT);
         p.controlAssembly(2,3);
         tmp =p.getDashMatrix();
         tui.printDashShip(tmp);
         tui.printPileCovered();
         tui.printPileShown(pileOfTile);
         tui.updateState(GamePhase.BOARD_SETUP);
-        tui.updateView("paperino" , 3 , 2 , 5 , 14 , true , false , 11 , 2);
+        tui.updateView("paperino" , 3 , 2 , 5 , true , false , 11 , 2);
 
     }
 

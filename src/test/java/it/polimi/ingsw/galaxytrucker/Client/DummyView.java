@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static javafx.scene.paint.Color.PURPLE;
-
 public class DummyView implements View {
 
     private boolean isDemo;
@@ -85,7 +83,7 @@ public class DummyView implements View {
     }
 
     @Override
-    public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
 
     }
 

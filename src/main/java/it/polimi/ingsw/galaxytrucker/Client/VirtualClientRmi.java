@@ -55,8 +55,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER PRINTARE A CLIENT ///
 
     @Override
-    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+        view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
     @Override
     public void inform(String message) throws RemoteException {
@@ -152,36 +152,47 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public int sendGameRequest(String message) throws RemoteException {
         if(message.contains("CREATE")){
-            boolean tmp = view.ask("would you like a demo version?");
-            int tmpInt= 5;
-            do{
-                view.inform("select max 4 players");
-                tmpInt = view.askIndex();
-            }while(tmpInt>4);
-            try {
-                return server.createNewGame(tmp , this , nickname ,tmpInt );
-            } catch (BusinessLogicException e) {
-                throw new RuntimeException(e);
+            while (true){
+                boolean tmp = view.ask("would you like a demo version?");
+                int tmpInt;
+                do{
+                    view.inform("select max 4 players");
+                    tmpInt = view.askIndex()+1;
+                }while(tmpInt>4);
+                try {
+                    return server.createNewGame(tmp , this , nickname ,tmpInt );
+                } catch (BusinessLogicException e) {
+                    view.inform("you miss +" + e.getMessage() );
+                }
             }
+
         }
         if(message.contains("JOIN")){
-            view.inform("Available Games");
-            Map<Integer, int[]> availableGames;
-            try {
-                availableGames = server.requestGamesList();
-            } catch (BusinessLogicException e) {
-                throw new RuntimeException(e);
+            while (true){
+                view.inform("Available Games");
+                Map<Integer, int[]> availableGames = Map.of();
+                try {
+                    availableGames = server.requestGamesList();
+                } catch (BusinessLogicException e) {
+                    view.inform("you miss " + e.getMessage() );
+                }
+                for(Integer i : availableGames.keySet()){
+                    view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
+                }
+                int choice;
+               while(true){
+                    choice = askIndex();
+                   if(choice > 0 && choice < availableGames.keySet().size())break;
+                   view.inform("index not valid");
+               }
+                try {
+                    server.enterGame(choice, this , nickname);
+                    return choice;
+                } catch (BusinessLogicException e) {
+                    view.inform("you miss " + e.getMessage() );
+                }
             }
-            for(Integer i : availableGames.keySet()){
-                view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
-            }
-            Integer choice = askIndex();
-            try {
-                server.enterGame(choice, this , nickname);
-                return choice;
-            } catch (BusinessLogicException e) {
-                throw new RuntimeException(e);
-            }
+
         }
         return 0;
     }
@@ -197,90 +208,122 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public Tile getTileServer() throws RemoteException {
-        try {
-            return server.getCoveredTile(gameId, nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            try {
+                return server.getCoveredTile(gameId, nickname);
+            } catch (BusinessLogicException e) {
+                view.inform("you miss " + e.getMessage() );
+            }
         }
     }
     @Override
     public Tile getUncoveredTile() throws RemoteException{
-        List<Tile> tmp = null;
-        try {
-            tmp = server.getUncoveredTilesList(gameId, nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        List<Tile> tmp;
+        while(true){
+            try {
+                tmp = server.getUncoveredTilesList(gameId, nickname);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("problem with server");
+            }
         }
         view.printPileShown(tmp);
-        int index = askIndex();
-        Tile tmpTile =tmp.get(index);
-        try {
-            return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            int index = askIndex();
+            Tile tmpTile =tmp.get(index);
+            try {
+                return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
+            } catch (BusinessLogicException e) {
+                view.inform("you miss " + e.getMessage() + "select new index" );
+            }
         }
     }
     @Override
     public void getBackTile(Tile tile) throws RemoteException{
-        try {
-            server.dropTile(gameId,nickname,tile);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            try {
+                server.dropTile(gameId,nickname,tile);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("problem with server");
+            }
         }
     }
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         view.inform("choose coordinate");
-        int[] tmp = view.askCordinate();
-        try {
-            server.placeTile(gameId, nickname, tile, tmp);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        int[] tmp;
+        while(true){
+            tmp = view.askCordinate();
+            try {
+                server.placeTile(gameId, nickname, tile, tmp);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("not valid coordinate" );
+            }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;
         view.printDashShip(Dash_Matrix);
     }
     @Override
     public void drawCard() throws RemoteException {
-        try {
-            server.drawCard(gameId,nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            try {
+                server.drawCard(gameId,nickname);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("problem with server");
+            }
         }
+
     }
     @Override
     public void rotateGlass() throws RemoteException{
-        try {
-            server.rotateGlass(gameId,nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            try {
+                server.rotateGlass(gameId,nickname);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("problem with server");
+            }
         }
     }
     @Override
     public void setReady() throws RemoteException{
-        try {
-            server.setReady(gameId,nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            try {
+                server.setReady(gameId,nickname);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("problem with server");
+            }
         }
+
     }
     @Override
     public void lookDeck() throws RemoteException{
         view.inform("choose deck : 1 / 2 / 3");
-        int index = askIndex();
-        try {
-            server.showDeck(gameId, index);
-        } catch (BusinessLogicException | IOException e) {
-            throw new RuntimeException(e);
+        int index;
+        while(true){
+            index = askIndex();
+            try {
+                server.showDeck(gameId, index);
+                break;
+            } catch (BusinessLogicException | IOException e) {
+                view.inform("index not valid");
+            }
         }
     }
     @Override
     public void lookDashBoard() throws RemoteException{
-        String tmp = view.choosePlayer();
-        try {
-            server.lookAtDashBoard(gameId,tmp);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        while(true){
+            String tmp = view.choosePlayer();
+            try {
+                server.lookAtDashBoard(gameId,tmp);
+                break;
+            } catch (BusinessLogicException e) {
+                view.inform("player not valid");
+            }
         }
     }
     @Override
@@ -289,14 +332,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.LeaveGame(gameId, nickname);
             } catch (BusinessLogicException e) {
-                throw new RuntimeException(e);
+                view.inform("problem with server");
             }
-
         }else{
                 try {
                     server.logOut(nickname);
                 } catch (BusinessLogicException | RemoteException e) {
-                    throw new RuntimeException(e);
+                    view.inform("problem with server");
                 }
         }
     }

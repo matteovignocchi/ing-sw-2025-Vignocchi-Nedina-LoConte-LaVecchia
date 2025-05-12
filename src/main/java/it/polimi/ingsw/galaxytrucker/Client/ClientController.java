@@ -54,8 +54,12 @@ public class ClientController {
             view.inform("1. Create new game");
             view.inform("2. Enter in a game");
             view.inform("3. Logout");
-            int choice = virtualClient.askIndex();
-
+            int choice;
+            while(true){
+                choice = virtualClient.askIndex() + 1;
+                if(choice > 0 && choice<4) break;
+                view.inform("Invalid choice");
+            }
             switch (choice) {
                 case 1 -> createNewGame();
                 case 2 -> joinExistingGame();
@@ -77,6 +81,7 @@ public class ClientController {
             waitForPlayers();
         } else {
             view.inform("Game creation failed");
+
         }
     }
 

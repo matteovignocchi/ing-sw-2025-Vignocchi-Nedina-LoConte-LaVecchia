@@ -10,7 +10,7 @@ import java.util.Map;
 
 public abstract class VirtualViewAdapter implements VirtualView{
     @Override public void inform(String message) throws Exception {}
-    @Override public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {}
+    @Override public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {}
     @Override public void reportError(String error) throws Exception {}
     @Override public boolean ask(String message) throws Exception { return false; }
     @Override public void printCard(Card card) throws Exception {}
