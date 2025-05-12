@@ -6,10 +6,11 @@ import java.rmi.registry.*;
 public class ServerMain {
     public static void main(String[] args) throws RemoteException {
         GameManager gameManager = new GameManager();
-        int socketPort = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
-
+        //int socketPort = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
+        int socketPort = 30001;
         Registry registry = LocateRegistry.createRegistry(1099);
         registry.rebind("RmiServer", new ServerRmi(gameManager));
+        System.out.println("Server-Rmi ready on port 1099");
 
         ServerSocketMain socketMain = new ServerSocketMain(gameManager, socketPort);
         Thread socketThread = new Thread(socketMain, "Socket-Listener");

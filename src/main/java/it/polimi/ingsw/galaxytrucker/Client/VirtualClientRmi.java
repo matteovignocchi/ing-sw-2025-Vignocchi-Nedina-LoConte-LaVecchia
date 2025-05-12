@@ -7,15 +7,19 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.Map;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
-    private final ServerRmi server;
+    //private final ServerRmi server;
+    private final VirtualServer server;
     private View view;
     private GamePhase gamePhase;
     private String nickname;
@@ -24,7 +28,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     boolean flag = true;
     private String start = "false";
 
-    public VirtualClientRmi(ServerRmi server, View view) throws RemoteException {
+    public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
         super();
         this.server = server;
         this.view = view;
@@ -266,7 +270,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         int index = askIndex();
         try {
             server.showDeck(gameId, index);
-        } catch (BusinessLogicException e) {
+        } catch (BusinessLogicException | IOException e) {
             throw new RuntimeException(e);
         }
     }

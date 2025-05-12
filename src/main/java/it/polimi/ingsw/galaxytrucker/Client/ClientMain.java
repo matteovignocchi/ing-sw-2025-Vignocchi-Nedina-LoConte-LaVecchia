@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.*;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
@@ -32,8 +33,11 @@ public class ClientMain {
         //codice di inizializzazione del client
 
 
-        String host = args.length>0 ? args[0] : "local";
-        int port = args.length>1 ? Integer.parseInt(args[1]) : 9999;
+        //String host = args.length>0 ? args[0] : "local";
+        //int port = args.length>1 ? Integer.parseInt(args[1]) : 9999;
+        //String host = "Socket-Listener";
+        String host = "localhost";
+        int port = 30001;
 
         Scanner input = new Scanner(System.in);
         System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
@@ -47,12 +51,16 @@ public class ClientMain {
             VirtualView virtualClient;
             if (protocolChoice == 1) {
                 Registry registry = LocateRegistry.getRegistry(host, 1099);
-                ServerRmi server = (ServerRmi) registry.lookup("GameServer");
+                //ServerRmi server = (ServerRmi) registry.lookup("RmiServer");
+                VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
                 virtualClient = new VirtualClientRmi(server, view);
             } else {
                 virtualClient = new VirtualClientSocket(host, port, view);
             }
             ClientController controller = new ClientController(view, virtualClient);
+
+            view.start();
+
         }catch (Exception e){
         System.err.println("error:"+e.getMessage());
         e.printStackTrace();}
