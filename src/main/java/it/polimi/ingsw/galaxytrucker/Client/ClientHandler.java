@@ -259,7 +259,6 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             double firePower,
             int powerEngine,
             int credits,
-            int position,
             boolean purpleAlien,
             boolean brownAlien,
             int numberOfHuman,
@@ -270,7 +269,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
                 firePower,
                 powerEngine,
                 credits,
-                position,
+                /*position,*/
                 purpleAlien,
                 brownAlien,
                 numberOfHuman,

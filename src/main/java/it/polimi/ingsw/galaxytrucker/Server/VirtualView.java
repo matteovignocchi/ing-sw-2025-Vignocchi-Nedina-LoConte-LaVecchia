@@ -16,7 +16,7 @@ public interface VirtualView extends Remote {
     /// METODI PER FARE LE PRINT A SCHERMO ///
     void inform(String message) throws Exception;
 
-    void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
+    void showUpdate(String nickname, double firePower, int powerEngine, int credits, /*int position,*/ boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException; //sicuramente ci andrà un type di update che voglio, forse faccio direttamente showDashboard show fligh ecc
 
     void reportError(String error) throws Exception;
 
