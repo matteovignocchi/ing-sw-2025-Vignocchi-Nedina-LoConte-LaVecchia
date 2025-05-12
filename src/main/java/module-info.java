@@ -7,7 +7,11 @@ module it.polimi.ingsw.galaxytrucker {
     requires jdk.xml.dom;
     requires java.smartcardio;
     requires com.fasterxml.jackson.databind;
+
     requires java.rmi;
+    exports it.polimi.ingsw.galaxytrucker.Server;
+    opens it.polimi.ingsw.galaxytrucker.Server to java.rmi;
+
     requires annotations;
     requires java.naming;
     requires java.desktop;

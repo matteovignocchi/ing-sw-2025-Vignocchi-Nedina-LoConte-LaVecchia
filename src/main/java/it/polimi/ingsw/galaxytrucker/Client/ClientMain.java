@@ -59,7 +59,7 @@ public class ClientMain {
             }
             ClientController controller = new ClientController(view, virtualClient);
 
-            view.start();
+            controller.start();
 
         }catch (Exception e){
         System.err.println("error:"+e.getMessage());
