@@ -62,7 +62,6 @@ public class GameManager {
 
         controller.broadcastInform("A player has abandoned: the game ends.");
         removeGame(gameId);
-        logout(nickname);
     }
 
     public synchronized void login(String nickname) throws BusinessLogicException {
