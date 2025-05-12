@@ -55,8 +55,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER PRINTARE A CLIENT ///
 
     @Override
-    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+        view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
     @Override
     public void inform(String message) throws RemoteException {
