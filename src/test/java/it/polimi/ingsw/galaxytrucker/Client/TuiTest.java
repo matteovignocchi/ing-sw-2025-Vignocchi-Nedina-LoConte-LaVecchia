@@ -105,9 +105,9 @@ public class TuiTest {
             default -> {}
         }
         Tile tmp2 = new Shield(2,2,1,0,0);
-        tmp2.RotateRight();
-        tmp2.RotateRight();
-        tmp2.RotateRight();
+        tmp2.rotateRight();
+        tmp2.rotateRight();
+        tmp2.rotateRight();
         tmp[1][2]=tmp2;
         tmp[2][2] = new EnergyCell(0 , 1, 2, 3 , 2,0);
         tmp[2][4] = new MultiJoint(3,3,3,3,0);
