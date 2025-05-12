@@ -226,7 +226,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
     @Override
     public int[] askCoordinate() {
-        return view.askCordinate();
+        return view.askCoordinate();
     }
     @Override
     public String askString(){
@@ -347,7 +347,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void positionTile(Tile tile) throws Exception {
         view.inform("choose coordinate");
-        int[] tmp = view.askCordinate();
+        int[] tmp = view.askCoordinate();
         List<Object> payloadGame = new ArrayList<>();
         payloadGame.add(gameId);
         payloadGame.add(nickname);

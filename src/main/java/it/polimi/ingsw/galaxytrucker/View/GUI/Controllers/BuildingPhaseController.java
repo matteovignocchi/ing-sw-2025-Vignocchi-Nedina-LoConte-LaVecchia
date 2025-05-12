@@ -1,12 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -16,7 +14,6 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
-import java.util.List;
 
 public class BuildingPhaseController extends GUIController{
 
@@ -57,8 +54,31 @@ public class BuildingPhaseController extends GUIController{
 
     public void setCurrentTile(Tile tile) {
         this.currentTile = tile;
+        this.rotationAngle = 0;
+
+
+        if (gameGrid.getColumnConstraints().isEmpty()) {
+            setupSingleGridPane();
+        }
+
+
         createDraggableTileView();
-        setupSingleGridPane();
+
+        // Aggiorna lo stato dei pulsanti di rotazione
+        updateRotationButtons();
+    }
+
+    private void updateRotationButtons() {
+        boolean tileSelected = (currentTile != null);
+
+        rotateLeftBtn.setVisible(tileSelected);
+        rotateRightBtn.setVisible(tileSelected);
+        rotateLeftBtn.setDisable(!tileSelected);
+        rotateRightBtn.setDisable(!tileSelected);
+
+        if (tileSelected) {
+            rotateLeftBtn.requestFocus();
+        }
     }
 
     private void setupSingleGridPane() {
@@ -79,9 +99,7 @@ public class BuildingPhaseController extends GUIController{
         }
     }
 
-    public void setModel(Player model) {
-        this.model = model;
-    }
+
 
     public void setClient(VirtualView client) {
         this.client = client;
@@ -116,7 +134,7 @@ public class BuildingPhaseController extends GUIController{
         draggedTileView.setY(event.getSceneY() - draggedTileView.getFitHeight() / 2);
         event.consume();
     }
-    private void onTileReleased(MouseEvent event) {
+    private void onTileReleased(MouseEvent event) throws Exception {
         draggedTileView.setMouseTransparent(false);
         draggedTileView.setOpacity(1.0);
 
@@ -142,7 +160,7 @@ public class BuildingPhaseController extends GUIController{
         event.consume();
     }
 
-    private void placeTileOnGrid(GridPane gridPane, int row, int column) {
+    private void placeTileOnGrid(GridPane gridPane, int row, int column) throws Exception {
 
         // Crea una nuova ImageView per la tile posizionata
         ImageView tileView = new ImageView(Tile.loadImageById(currentTile.getIdTile()));
@@ -152,10 +170,7 @@ public class BuildingPhaseController extends GUIController{
 
         gridPane.add(tileView, column, row);
 
-        // Notifica al model il posizionamento
-        if (model != null) {
-                model.addTile(row,column,currentTile);
-        }
+        client.getBackTile(currentTile);
         resetTileSelection();
     }
 
@@ -167,6 +182,7 @@ public class BuildingPhaseController extends GUIController{
         }
         currentTile = null;
         rotationAngle = 0;
+        updateRotationButtons();
     }
 
 

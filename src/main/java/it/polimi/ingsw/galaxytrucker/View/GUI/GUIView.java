@@ -42,7 +42,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public int[] askCordinate() {
+    public int[] askCoordinate() {
         return new int[0];
     }
 

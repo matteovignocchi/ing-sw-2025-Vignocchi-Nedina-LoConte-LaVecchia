@@ -70,7 +70,7 @@ public class TuiTest {
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         TUIView tui = new TUIView();
-        int[] coords = tui.askCordinate();
+        int[] coords = tui.askCoordinate();
 
         assertArrayEquals(new int[]{0, 0}, coords);
     }

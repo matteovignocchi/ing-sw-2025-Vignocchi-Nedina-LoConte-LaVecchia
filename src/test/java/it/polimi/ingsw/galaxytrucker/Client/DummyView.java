@@ -30,7 +30,7 @@ public class DummyView implements View {
     }
 
     @Override
-    public int[] askCordinate() {
+    public int[] askCoordinate() {
         return new int[0];
     }
 
