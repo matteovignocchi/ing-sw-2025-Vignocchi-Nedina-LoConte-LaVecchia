@@ -19,7 +19,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private View view;
     private GamePhase gamePhase;
     private String nickname;
-    private int gameId;
+    private int gameId = 0;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
     private String start = "false";
@@ -138,7 +138,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public boolean sendLogin(String username) throws RemoteException {
-//        return server.authenticate(username);
+        try {
+            server.logIn(username);
+        } catch (BusinessLogicException e) {
+            return false;
+        }
         return true;
     }
     @Override
@@ -277,12 +281,22 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void logOut() throws RemoteException{
-        try {
-            server.LeaveGame(gameId,nickname);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
+        if(gameId != 0) {
+            try {
+                server.LeaveGame(gameId, nickname);
+            } catch (BusinessLogicException e) {
+                throw new RuntimeException(e);
+            }
+
+        }else{
+                try {
+                    server.logOut(nickname);
+                } catch (BusinessLogicException | RemoteException e) {
+                    throw new RuntimeException(e);
+                }
         }
     }
+
     @Override
     public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
         view.updateMap(Position);

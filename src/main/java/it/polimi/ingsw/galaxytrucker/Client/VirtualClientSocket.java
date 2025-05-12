@@ -23,7 +23,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final ObjectOutputStream out;
     private  View view;
     private GamePhase gamePhase;
-    private int gameId;
+    private int gameId = 0;
     private String nickname;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
@@ -404,11 +404,19 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void logOut() throws Exception {
-        List<Object> payloadGame = new ArrayList<>();
-        payloadGame.add(gameId);
-        payloadGame.add(nickname);
-        Message request = Message.request(Message.OP_LOGOUT, payloadGame);
-        sendRequest(request);
+        if(gameId != 0) {
+            List<Object> payloadGame = new ArrayList<>();
+            payloadGame.add(gameId);
+            payloadGame.add(nickname);
+            Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
+            sendRequest(request);
+        }else{
+            List<Object> payloadGame = new ArrayList<>();
+            payloadGame.add(nickname);
+            Message request = Message.request(Message.OP_LOGOUT, payloadGame);
+            sendRequest(request);
+        }
+
     }
 
     @Override
