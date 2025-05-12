@@ -99,9 +99,9 @@ public class TUIView implements View {
     public boolean ask(String message) {
         boolean flag = true;
         boolean decision = false;
-        inform(message+ "(Yes/No)");
-        String response = scanner.nextLine().trim().toLowerCase();
         while(flag) {
+            inform(message+ "(Yes/No)");
+            String response = scanner.nextLine().trim().toLowerCase();
             if (response.equals("yes")) {
                 flag = false;
                 decision = true;
