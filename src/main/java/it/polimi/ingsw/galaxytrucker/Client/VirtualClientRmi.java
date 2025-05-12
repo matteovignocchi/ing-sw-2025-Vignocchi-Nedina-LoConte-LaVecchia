@@ -161,6 +161,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }while(tmpInt>4);
 
             try {
+                UnicastRemoteObject.exportObject(this, 0);
                 return server.createNewGame(tmp , this , nickname ,tmpInt );
             } catch (BusinessLogicException e) {
                 throw new RuntimeException("Error creating new game: ", e);
