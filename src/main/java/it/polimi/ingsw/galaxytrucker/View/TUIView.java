@@ -227,6 +227,7 @@ public class TUIView implements View {
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
+            case WAITING_IN_LOBBY -> inform("Nickame : " + nickname);
             case BOARD_SETUP -> inform(" -Nickname: "+nickname+" -Position : Too early to know where you'll finish!"+" -Credits : too rich!"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
             case TILE_MANAGEMENT, DRAW_PHASE -> {}
             case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+" -Position : "+position+" -Credits : Silvio Berlusconi"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
@@ -539,6 +540,8 @@ public class TUIView implements View {
     private List<String> commandConstructor(){
         List<String> listOfOptions = new ArrayList<>();
         switch (game) {
+            case WAITING_IN_LOBBY ->  listOfOptions.add("LogOut");
+
             case BOARD_SETUP -> {
                 listOfOptions.add("Get a covered tile");
                 listOfOptions.add("Get a shown tile");
