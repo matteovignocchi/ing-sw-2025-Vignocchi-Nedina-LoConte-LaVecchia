@@ -1,26 +1,18 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-//TODO:
-// 1)eliminare metodi di utility che non vengono utilizzati, ma solo dopo
-
 
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
@@ -28,13 +20,14 @@ public class GameManager {
     private final Map<Integer, Controller> games = new ConcurrentHashMap<>();;
     private final AtomicInteger idCounter = new AtomicInteger(1);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final Set<String> loggedInUsers = ConcurrentHashMap.newKeySet();
 
     public GameManager() {
         loadSavedGames();// Caricamento automatico all'avvio
         schedulePeriodicSaves();
     }
 
-    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws BusinessLogicException, IOException, Exception{
+    public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws Exception {
         int gameId = idCounter.getAndIncrement();
         Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
 
@@ -69,6 +62,17 @@ public class GameManager {
 
         controller.broadcastInform("A player has abandoned: the game ends.");
         removeGame(gameId);
+        logout(nickname);
+    }
+
+    public synchronized void login(String nickname) throws BusinessLogicException {
+        if (!loggedInUsers.add(nickname)) {
+            throw new BusinessLogicException("Nickname already in use: " + nickname);
+        }
+    }
+
+    public synchronized void logout(String nickname) {
+        loggedInUsers.remove(nickname);
     }
 
     public synchronized void removeGame(int gameId) {
@@ -175,11 +179,13 @@ public class GameManager {
     private void schedulePeriodicSaves() {
         scheduler.scheduleAtFixedRate(() -> {
             for (var entry : games.entrySet()) {
-                try {
-                    saveGameState(entry.getKey(), entry.getValue());
-                } catch (IOException e) {
-                    System.err.println("Auto-save failed for game "
-                            + entry.getKey() + ": " + e.getMessage());
+                Controller controller = entry.getValue();
+                synchronized (controller) {
+                    try {
+                        saveGameState(entry.getKey(), controller);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }, 1, 1, TimeUnit.MINUTES);

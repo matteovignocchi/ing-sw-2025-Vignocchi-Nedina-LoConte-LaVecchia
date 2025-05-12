@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ public class Message implements Serializable {
     public static final String TYPE_ERROR = "ERROR";
     public static final String TYPE_UPDATE = "UPDATE";
     public static final String TYPE_NOTIFICATION = "NOTIFICATION";
-    public static final String OP_LOGIN = "LOGIN";//secondo me inutile (Francesco)
+    public static final String OP_LOGIN = "LOGIN";
     public static final String OP_LOGOUT = "LOGOUT";
     public static final String OP_REGISTER = "REGISTER";
     public static final String OP_UPDATE_VIEW = "UPDATE_VIEW";

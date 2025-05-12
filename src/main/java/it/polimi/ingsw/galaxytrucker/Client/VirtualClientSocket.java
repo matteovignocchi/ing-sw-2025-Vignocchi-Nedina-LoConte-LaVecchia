@@ -1,10 +1,11 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.IOException;
@@ -271,7 +272,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             }while(numberOfPlayer>4);
             List<Object> payloadGame = new ArrayList<>();
             payloadGame.add(demo);
-            payloadGame.add(this);
             payloadGame.add(nickname);
             payloadGame.add(numberOfPlayer);
             Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
@@ -287,7 +287,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
             }
             Integer choice = askIndex();
-            Message gameChoice = Message.request(Message.OP_ENTER_GAME, choice);
+            List<Object> payloadJoin = List.of(choice, nickname);
+            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
             sendRequest(gameChoice);
             return ((int)  responseHandler.waitForResponse());
         }

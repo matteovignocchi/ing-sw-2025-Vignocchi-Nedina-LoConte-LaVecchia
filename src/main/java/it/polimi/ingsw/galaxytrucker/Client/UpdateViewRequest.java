@@ -1,9 +1,9 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 import java.io.Serializable;
 
 public class UpdateViewRequest implements Serializable {
     private final String nickname;
-    private final Float firePower;
+    private final double firePower;
     private final int powerEngine;
     private final int credits;
     private final int position;
@@ -12,7 +12,7 @@ public class UpdateViewRequest implements Serializable {
     private final int numberOfHuman;
     private final int numberOfEnergy;
 
-    public UpdateViewRequest(String nickname, Float firePower, int powerEngine, int credits, int position,
+    public UpdateViewRequest(String nickname, double firePower, int powerEngine, int credits, int position,
                              boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         this.nickname = nickname;
         this.firePower = firePower;
@@ -30,7 +30,7 @@ public class UpdateViewRequest implements Serializable {
         return nickname;
     }
 
-    public Float getFirePower() {
+    public double getFirePower() {
         return firePower;
     }
 

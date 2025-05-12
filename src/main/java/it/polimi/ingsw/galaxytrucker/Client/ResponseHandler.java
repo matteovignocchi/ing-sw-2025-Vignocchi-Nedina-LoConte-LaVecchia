@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

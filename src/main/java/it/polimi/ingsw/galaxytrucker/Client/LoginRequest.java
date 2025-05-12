@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import java.io.Serializable;
 

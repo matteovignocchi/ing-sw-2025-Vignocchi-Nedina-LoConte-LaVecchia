@@ -1,9 +1,8 @@
-package it.polimi.ingsw.galaxytrucker.Client;
+package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.GameManager;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -72,11 +71,12 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void logOut(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+    public void LeaveGame(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
 
         handleGameManagerCall("logOut", () -> {
             gameManager.quitGame(gameId, nickname);
+            gameManager.logout(nickname);
             return null;
         });
     }
@@ -166,7 +166,29 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     @Override
     public void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
-        gameManager.drawCard(gameId, nickname);
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
+
+        handleGameManagerCall("drawCard", () -> { gameManager.drawCard(gameId, nickname); return null; });
+    }
+
+    @Override
+    public void logOut(String nickname) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
+
+        handleGameManagerCall("logout", () -> {
+            gameManager.logout(nickname);
+            return null;
+        });
+    }
+
+    @Override
+    public void logIn(String nickname) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
+
+        handleGameManagerCall("login", () -> {
+            gameManager.login(nickname);
+            return null;
+        });
     }
 }
 

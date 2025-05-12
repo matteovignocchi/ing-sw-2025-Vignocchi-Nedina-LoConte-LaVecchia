@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
-import it.polimi.ingsw.galaxytrucker.Client.ServerSocketMain;
 import java.rmi.RemoteException;
 import java.rmi.registry.*;
 

@@ -1,12 +1,13 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.Client.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -277,7 +278,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void logOut() throws RemoteException{
         try {
-            server.logOut(gameId,nickname);
+            server.LeaveGame(gameId,nickname);
         } catch (BusinessLogicException e) {
             throw new RuntimeException(e);
         }
