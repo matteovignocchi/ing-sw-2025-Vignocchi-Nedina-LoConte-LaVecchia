@@ -84,13 +84,13 @@ public class Controller implements Serializable {
         VirtualView v = viewsByNickname.get(nickname);
         Player p      = playersByNickname.get(nickname);
         try {
-            v.updateGameState(p.getGameFase());
+            v.updateGameState(p.getGamePhase());
             v.showUpdate(
                     nickname,
                     getFirePower(p),
                     getPowerEngine(p),
                     p.getCredit(),
-                    fBoard.getPositionOfPlayer(p),
+                    //fBoard.getPositionOfPlayer(p),
                     p.presencePurpleAlien(),
                     p.presenceBrownAlien(),
                     p.getTotalHuman(),
@@ -125,6 +125,9 @@ public class Controller implements Serializable {
 
         Player p = new Player(playerIdCounter.getAndIncrement(), isDemo , tmp);
         p.setConnected(true);
+
+        p.setGamePhase(GamePhase.WAITING_FOR_START_GAME);
+
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
 
@@ -216,7 +219,7 @@ public class Controller implements Serializable {
 
     public boolean isGameStarted() {
         return playersByNickname.values().stream()
-                .anyMatch(p -> p.getGameFase() != GamePhase.WAITING_FOR_PLAYERS);
+                .anyMatch(p -> p.getGamePhase() != GamePhase.WAITING_FOR_PLAYERS);
     }
 
     public int getMaxPlayers(){ return MaxPlayers; }
@@ -256,7 +259,7 @@ public class Controller implements Serializable {
     //TODO: vedere discorso Exception vs IOException: catcharli entrambi ? come gestirli?
 
     public void startGame() {
-        playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.BOARD_SETUP));
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.BOARD_SETUP));
 
         viewsByNickname.forEach((nick, v) -> {
             try {
@@ -279,7 +282,7 @@ public class Controller implements Serializable {
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
         int randomIdx = ThreadLocalRandom.current().nextInt(size);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
+        p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
         return getTile(randomIdx);
@@ -291,7 +294,7 @@ public class Controller implements Serializable {
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
 
         Player p = getPlayerCheck(nickname);
-        p.setGameFase(GamePhase.TILE_MANAGEMENT);
+        p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
         return getShownTile(uncoveredTiles.indexOf(opt.get()));
     }
@@ -300,7 +303,7 @@ public class Controller implements Serializable {
         Player p = getPlayerCheck(nickname);
 
         addToShownTile(tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
+        p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
 
@@ -308,7 +311,7 @@ public class Controller implements Serializable {
         Player p = getPlayerCheck(nickname);
 
         p.addTile(cord[0], cord[1], tile);
-        p.setGameFase(GamePhase.BOARD_SETUP);
+        p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
 
@@ -317,10 +320,10 @@ public class Controller implements Serializable {
 
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
         ;
-        if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGameFase() == GamePhase.WAITING_FOR_PLAYERS)) {
+        if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
         } else{
-            p.setGameFase(GamePhase.WAITING_FOR_PLAYERS);
+            p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
             notifyView(nickname);
         }
     }
@@ -334,7 +337,7 @@ public class Controller implements Serializable {
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
         broadcastInform("Flight started!");
-        playersByNickname.forEach( (s, p) -> p.setGameFase(GamePhase.CARD_EFFECT));
+        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.CARD_EFFECT));
         //metodo per mettere gli umani giusti in ogni cella e tile
         addHuman();
         viewsByNickname.forEach((nick, v) -> {
@@ -371,14 +374,14 @@ public class Controller implements Serializable {
                     .findFirst()
                     .orElseThrow(() -> new BusinessLogicException("Impossible to find first player's nickname"));
             VirtualView v = viewsByNickname.get(leaderNick);
-            leader.setGameFase(GamePhase.DRAW_PHASE);
+            leader.setGamePhase(GamePhase.DRAW_PHASE);
 
             try {
                 v.inform("You're the leader! Draw a card");
                 break;
             } catch (Exception e) {
                 markDisconnected(leaderNick);
-                leader.setGameFase(GamePhase.CARD_EFFECT);
+                leader.setGamePhase(GamePhase.CARD_EFFECT);
                 throw new RuntimeException(e);
             }
         }
@@ -418,7 +421,7 @@ public class Controller implements Serializable {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
-                } else if (p.getGameFase() == GamePhase.WAITING_FOR_PLAYERS) {
+                } else if (p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
                     broadcastInform("Hourglass flipped the last time!");
                 } else {
@@ -467,7 +470,7 @@ public class Controller implements Serializable {
         Card card = deck.draw();
         
         Player drawer = getPlayerCheck(nickname);
-        drawer.setGameFase(GamePhase.CARD_EFFECT);
+        drawer.setGamePhase(GamePhase.CARD_EFFECT);
         //TODO: update del drawer (nuova fase)
         //      In questi casi, in cui si updata solo la fase, conviene chiamare tutto il metodo update?
         //      Basterebbe updtare solo la fase
@@ -487,7 +490,7 @@ public class Controller implements Serializable {
         if(deck.isEmpty()){
             startAwardsPhase();
         } else {
-            playersByNickname.values().forEach(p -> p.setGameFase(GamePhase.CARD_EFFECT));
+            playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.CARD_EFFECT));
             notifyAllViews();
             activateDrawPhase();
             //TODO: update per tutti (così facendo, il leader effettivo verrà updatato due volte, non penso sia un problema, capire)
@@ -498,7 +501,7 @@ public class Controller implements Serializable {
     public void startAwardsPhase(){
 
         playersByNickname.forEach( (s, p) -> {
-            p.setGameFase(GamePhase.SCORING);
+            p.setGamePhase(GamePhase.SCORING);
             notifyAllViews();
         });
 
@@ -557,7 +560,7 @@ public class Controller implements Serializable {
                     .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
             VirtualView v = viewsByNickname.get(nick);
             int totalCredits = p.getCredit();
-            p.setGameFase(GamePhase.EXIT);
+            p.setGamePhase(GamePhase.EXIT);
             //TODO: anche qui, se una view è disconnessa, provo lo stesso ad updatarle -> finirò nel catch e
             // lo rimetterò disconnesso anche se già lo è
             try{

@@ -256,11 +256,11 @@ public class Player implements Serializable {
      */
     public boolean presenceBrownAlien() { return this.brownAlien; }
 
-    public void setGameFase(GamePhase gamePhase) {
+    public void setGamePhase(GamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
 
-    public GamePhase getGameFase() {
+    public GamePhase getGamePhase() {
         return gamePhase;
     }
 
