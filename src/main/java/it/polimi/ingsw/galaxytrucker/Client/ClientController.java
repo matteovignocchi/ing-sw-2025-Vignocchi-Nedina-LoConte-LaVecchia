@@ -52,7 +52,7 @@ public class ClientController {
             view.inform("1. Create new game");
             view.inform("2. Enter in a game");
             view.inform("3. Logout");
-            int choice = virtualClient.askIndex();
+            int choice = virtualClient.askIndex() + 1;
 
             switch (choice) {
                 case 1 -> createNewGame();
