@@ -352,7 +352,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setStart() throws RemoteException{
-        start = "Start";
+        start = "start";
     }
 
     @Override
