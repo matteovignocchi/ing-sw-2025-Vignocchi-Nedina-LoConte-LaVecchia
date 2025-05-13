@@ -1,5 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import javafx.scene.image.Image;
+
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 /**
  * abstract class for the general structure of the tile and
@@ -19,7 +22,31 @@ public abstract class Tile {
     public int[] corners = new int[4];
     public int idTile;
 
-    //la super è chiamata implicitamente in tutte le istanza
+
+    public static Image loadImageById(int tileId) {
+        try {
+            String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
+            InputStream is = Tile.class.getResourceAsStream(imagePath);
+
+            if (is == null) {
+                imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web157";
+                is = Tile.class.getResourceAsStream(imagePath);
+
+                if (is == null) {
+                    throw new RuntimeException("Default tile image not found");
+                }
+            }
+
+            return new Image(is);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load tile image for ID: " + tileId, e);
+        }
+    }
+
+    public Image getImage() {
+        return loadImageById(this.idTile);
+    }
+
     public int getIdTile() {
         return idTile;
     }
@@ -27,7 +54,7 @@ public abstract class Tile {
      * method to shift right the vector of corners by one position
      * works directly with the array corners of the class
      */
-    public void RotateRight(){
+    public void rotateRight(){
         int tmp ;
         tmp = corners[3];
         corners[3] = corners[2];
@@ -40,7 +67,7 @@ public abstract class Tile {
      * method to shift left the vector of corners by one position
      * works directly with the array corners of the class
      */
-    public void RotateLeft(){
+    public void rotateLeft(){
         int tmp ;
         tmp = corners[0];
         corners[0] = corners[1];

@@ -13,7 +13,7 @@ public interface View {
 
     void inform(String message);
     boolean ask(String message);
-    int[] askCordinate();
+    int[] askCoordinate();
     int askIndex();
     void setInt();
     void start();

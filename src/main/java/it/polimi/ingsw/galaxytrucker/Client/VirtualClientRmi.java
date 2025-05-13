@@ -6,7 +6,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -55,8 +54,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER PRINTARE A CLIENT ///
 
     @Override
-    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, int position, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        view.updateView(nickname,firePower,powerEngine,credits,position,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+    public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
+        view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
     @Override
     public void inform(String message) throws RemoteException {
@@ -108,7 +107,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public int[] askCoordinate() throws RemoteException {
-        return view.askCordinate();
+        return view.askCoordinate();
 
     }
     @Override
@@ -154,15 +153,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         if(message.contains("CREATE")){
             while (true){
                 boolean tmp = view.ask("would you like a demo version?");
-                int tmpInt;
-                do{
-                    view.inform("select max 4 players");
-                    tmpInt = view.askIndex()+1;
-                }while(tmpInt>4);
+
+                view.inform("select max 4 players");
+                int tmpInt = view.askIndex()+1;
+
                 try {
                     return server.createNewGame(tmp , this , nickname ,tmpInt );
-                } catch (BusinessLogicException e) {
-                    view.inform("you miss +" + e.getMessage() );
+                } catch (Exception e) {
+                    view.reportError("you miss +" + e.getMessage() );
                 }
             }
 
@@ -174,7 +172,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 try {
                     availableGames = server.requestGamesList();
                 } catch (BusinessLogicException e) {
-                    view.inform("you miss " + e.getMessage() );
+                    view.reportError("you miss " + e.getMessage() );
                 }
                 for(Integer i : availableGames.keySet()){
                     view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
@@ -189,7 +187,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     server.enterGame(choice, this , nickname);
                     return choice;
                 } catch (BusinessLogicException e) {
-                    view.inform("you miss " + e.getMessage() );
+                    view.reportError("you miss " + e.getMessage() );
                 }
             }
 
@@ -212,7 +210,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 return server.getCoveredTile(gameId, nickname);
             } catch (BusinessLogicException e) {
-                view.inform("you miss " + e.getMessage() );
+                view.reportError("you miss " + e.getMessage() );
             }
         }
     }
@@ -224,17 +222,21 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 tmp = server.getUncoveredTilesList(gameId, nickname);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("problem with server");
             }
         }
         view.printPileShown(tmp);
+        int index;
         while(true){
-            int index = askIndex();
-            Tile tmpTile =tmp.get(index);
+            while (true) {
+                index = askIndex();
+                if (index >= 0 && index < tmp.size()) break;
+                view.inform("Invalid index. Try again.");
+            }
             try {
-                return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
+                return server.chooseUncoveredTile(gameId, nickname,tmp.get(index).getIdTile());
             } catch (BusinessLogicException e) {
-                view.inform("you miss " + e.getMessage() + "select new index" );
+                view.reportError("you miss " + e.getMessage() + "select new index" );
             }
         }
     }
@@ -245,7 +247,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.dropTile(gameId,nickname,tile);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("Problem with server");
             }
         }
     }
@@ -254,12 +256,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.inform("choose coordinate");
         int[] tmp;
         while(true){
-            tmp = view.askCordinate();
+            tmp = view.askCoordinate();
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("not valid coordinate" );
+                view.reportError("not valid coordinate" );
             }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;
@@ -272,7 +274,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.drawCard(gameId,nickname);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("problem with server");
             }
         }
 
@@ -284,7 +286,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.rotateGlass(gameId,nickname);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("problem with server");
             }
         }
     }
@@ -295,7 +297,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.setReady(gameId,nickname);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("problem with server");
             }
         }
 
@@ -310,7 +312,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.showDeck(gameId, index);
                 break;
             } catch (BusinessLogicException | IOException e) {
-                view.inform("index not valid");
+                view.reportError("index not valid");
             }
         }
     }
@@ -322,7 +324,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.lookAtDashBoard(gameId,tmp);
                 break;
             } catch (BusinessLogicException e) {
-                view.inform("player not valid");
+                view.reportError("player not valid");
             }
         }
     }
@@ -332,13 +334,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.LeaveGame(gameId, nickname);
             } catch (BusinessLogicException e) {
-                view.inform("problem with server");
+                view.reportError("problem with server");
             }
         }else{
                 try {
                     server.logOut(nickname);
                 } catch (BusinessLogicException | RemoteException e) {
-                    view.inform("problem with server");
+                    view.reportError("problem with server");
                 }
         }
     }

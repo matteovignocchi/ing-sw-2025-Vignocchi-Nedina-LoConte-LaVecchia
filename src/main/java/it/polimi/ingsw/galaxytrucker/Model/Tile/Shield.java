@@ -38,7 +38,7 @@ public class Shield extends Tile {
      * @author Oleg Nedina & Matteo Vignocchi
      */
     @Override
-    public void RotateRight() {
+    public void rotateRight() {
         int tmp, tmp2;
         tmp = corners[3];
         corners[3] = corners[2];
@@ -59,7 +59,7 @@ public class Shield extends Tile {
      * @author Oleg Nedina & Matteo Vignocchi
      */
     @Override
-    public void RotateLeft() {
+    public void rotateLeft() {
         int tmp, tmp2;
         tmp = corners[0];
         corners[0] = corners[1];
