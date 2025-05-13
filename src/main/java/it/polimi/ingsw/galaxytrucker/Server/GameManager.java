@@ -29,7 +29,7 @@ public class GameManager {
 
     public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws Exception {
         int gameId = idCounter.getAndIncrement();
-        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
+        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame, loggedInUsers);
 
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
@@ -41,8 +41,8 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-        if (controller.isGameStarted())
-            throw new BusinessLogicException("Game already in progress");
+//        if (controller.isGameStarted())
+//            throw new BusinessLogicException("Game already in progress");
 
         if (controller.getPlayerByNickname(nickname)!=null) {
             controller.markReconnected(nickname, v);

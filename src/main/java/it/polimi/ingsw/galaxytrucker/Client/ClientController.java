@@ -78,6 +78,7 @@ public class ClientController {
         if (response != 0) {
             view.inform("Game created successfully");
             virtualClient.setGameId(response);
+            view.inform("Waiting for players in lobby");
             waitForPlayers();
         } else {
             view.inform("Game creation failed");
@@ -90,6 +91,7 @@ public class ClientController {
         if (response != 0) {
             view.inform("Joining existing game");
             virtualClient.setGameId(response);
+            view.inform("Waiting for game start");
             waitForGameStart();
         } else {
             view.inform("Game not entered");
@@ -97,7 +99,6 @@ public class ClientController {
     }
 
     private void waitForPlayers() throws Exception {
-        view.inform("Waiting for players in lobby");
         while (true) {
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("Start")) {
@@ -109,7 +110,6 @@ public class ClientController {
     }
 
     private void waitForGameStart() throws Exception {
-        view.inform("Waiting for game start");
         while (true) {
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {

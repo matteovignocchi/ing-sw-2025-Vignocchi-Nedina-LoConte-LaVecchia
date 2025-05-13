@@ -25,10 +25,12 @@ import java.util.function.Consumer;
 //TODO: inserire i timeout in tutti i metodi che mettono in attesa il server
 
 public class Controller implements Serializable {
-    //private List<Player> playersInGame = new ArrayList<>();
     private final int gameId;
     private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
+
+    private final Set<String> loggedInUsers;
+
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
@@ -49,7 +51,7 @@ public class Controller implements Serializable {
     private static final ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
 
-    public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
         if(isDemo) {
             fBoard = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
@@ -73,6 +75,8 @@ public class Controller implements Serializable {
         this.playerIdCounter = new AtomicInteger(1); //verificare che matcha con la logica
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
+
+        this.loggedInUsers = loggedInUsers;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,6 +195,8 @@ public class Controller implements Serializable {
             p.setConnected(false);
             broadcastInform(nickname + " is disconnected");
             setTimeout();
+
+            loggedInUsers.remove(nickname);
         }
     }
 
