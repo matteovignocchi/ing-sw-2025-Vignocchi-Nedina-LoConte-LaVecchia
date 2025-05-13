@@ -282,8 +282,8 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             }
         });
+
         if (!isDemo) startHourglass();
-        notifyAllViews();
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
@@ -1857,6 +1857,9 @@ public class Controller implements Serializable {
         }
     }
 
+
+    //metodi da inserire nel card visitor per gestione tui
+
     public void changePhaseFromCard(Player p, GamePhase tmp) throws BusinessLogicException {
        String nick =  getNickByPlayer(p);
         try {
@@ -1869,6 +1872,23 @@ public class Controller implements Serializable {
     public void changeUpdateByPlayer(Player p) throws BusinessLogicException {
         String nick =  getNickByPlayer(p);
         notifyView(nick);
+    }
+
+    public void changeMapPosition(){
+        for(String nick : playerPosition.keySet()){
+            Player p = getPlayerByNickname(nick);
+            playerPosition.put(nick,p.getPos());
+        }
+    }
+
+    public void updatePositionForEveryBody(){
+        for(String nick : playerPosition.keySet()){
+            try {
+                viewsByNickname.get(nick).updateMapPosition(playerPosition);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 
