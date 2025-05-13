@@ -275,6 +275,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             payloadGame.add(numberOfPlayer);
             Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
             sendRequest(createGame);
+            return ((int)  responseHandler.waitForResponse());
         }
         if(message.equals("JOIN")) {
             Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
@@ -289,7 +290,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             List<Object> payloadJoin = List.of(choice, nickname);
             Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
             sendRequest(gameChoice);
-            return ((int)  responseHandler.waitForResponse());
+            return choice;
         }
 
         return 0;
