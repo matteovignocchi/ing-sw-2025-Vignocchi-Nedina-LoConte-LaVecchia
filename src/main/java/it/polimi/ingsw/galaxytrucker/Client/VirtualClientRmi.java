@@ -179,8 +179,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 }
                 int choice;
                while(true){
-                    choice = askIndex();
-                   if(choice > 0 && choice < availableGames.keySet().size())break;
+                    choice = askIndex()+1;
+                   if(choice > 0 && choice <= availableGames.keySet().size())break;
                    view.inform("index not valid");
                }
                 try {
