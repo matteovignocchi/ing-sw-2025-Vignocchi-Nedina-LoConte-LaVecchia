@@ -123,32 +123,49 @@ public class ClientController {
     private void startGame() throws Exception {
         GamePhase gameState;
         do {
-            choosePossibleActions();
-            gameState = virtualClient.getGameFase();
+            String key = view.sendAvailableChoices();
+            switch (key) {
+                case "getblankettile" -> tmpTile = virtualClient.getTileServer();
+                case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
+                case "returntile" -> virtualClient.getBackTile(tmpTile);
+                case "placetile" -> virtualClient.positionTile(tmpTile);
+                case "drawcard" -> virtualClient.drawCard();
+                case "spinthehourglass" -> virtualClient.rotateGlass();
+                case "declareready" -> virtualClient.setReady();
+                case "watchadeck" -> virtualClient.lookDeck();
+                case "watchaship" -> virtualClient.lookDashBoard();
+                case "rightrotatetile" -> rotateRight();
+                case "leftrotatetile" -> rotateLeft();
+                case "logout" -> {
+                    virtualClient.logOut();
+                    idCurrentGame = 0;
+                }
+                default -> view.inform("Action not recognized");
+            }            gameState = virtualClient.getGameFase();
         } while (!gameState.equals(GamePhase.EXIT));
     }
 
-    private void choosePossibleActions() throws Exception {
-        String key = view.sendAvailableChoices();
-        switch (key) {
-            case "getblankettile" -> tmpTile = virtualClient.getTileServer();
-            case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
-            case "returntile" -> virtualClient.getBackTile(tmpTile);
-            case "placetile" -> virtualClient.positionTile(tmpTile);
-            case "drawcard" -> virtualClient.drawCard();
-            case "spinthehourglass" -> virtualClient.rotateGlass();
-            case "declareready" -> virtualClient.setReady();
-            case "watchadeck" -> virtualClient.lookDeck();
-            case "watchaship" -> virtualClient.lookDashBoard();
-            case "rightrotatetile" -> rotateRight();
-            case "leftrotatetile" -> rotateLeft();
-            case "logout" -> {
-                virtualClient.logOut();
-                idCurrentGame = 0;
-            }
-            default -> view.inform("Action not recognized");
-        }
-    }
+//    private void choosePossibleActions() throws Exception {
+//        String key = view.sendAvailableChoices();
+//        switch (key) {
+//            case "getblankettile" -> tmpTile = virtualClient.getTileServer();
+//            case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
+//            case "returntile" -> virtualClient.getBackTile(tmpTile);
+//            case "placetile" -> virtualClient.positionTile(tmpTile);
+//            case "drawcard" -> virtualClient.drawCard();
+//            case "spinthehourglass" -> virtualClient.rotateGlass();
+//            case "declareready" -> virtualClient.setReady();
+//            case "watchadeck" -> virtualClient.lookDeck();
+//            case "watchaship" -> virtualClient.lookDashBoard();
+//            case "rightrotatetile" -> rotateRight();
+//            case "leftrotatetile" -> rotateLeft();
+//            case "logout" -> {
+//                virtualClient.logOut();
+//                idCurrentGame = 0;
+//            }
+//            default -> view.inform("Action not recognized");
+//        }
+//    }
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {
