@@ -36,8 +36,8 @@ public class ClientMain {
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
         String host = "192.168.179.16";
         int port = 30001;
-
         System.setProperty("java.rmi.server.hostname", host);
+
         Scanner input = new Scanner(System.in);
         System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
         int protocolChoice = input.nextInt();

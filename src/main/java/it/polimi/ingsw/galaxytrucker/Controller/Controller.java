@@ -29,6 +29,7 @@ public class Controller implements Serializable {
     private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
 
+    //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
 
     private final AtomicInteger playerIdCounter;
@@ -196,6 +197,7 @@ public class Controller implements Serializable {
             broadcastInform(nickname + " is disconnected");
             setTimeout();
 
+            //Capire se tenere e come gestire
             loggedInUsers.remove(nickname);
         }
     }
