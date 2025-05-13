@@ -8,7 +8,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane prefHeight="400.0" prefWidth="397.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.CreateGameMenuController">
    <children>
       <ImageView fitHeight="400.0" fitWidth="600.0" preserveRatio="true">
@@ -16,11 +15,21 @@
             <Image url="@../LobbyImage2.png" />
          </image>
       </ImageView>
-      <Button layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#back" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
-      <Button layoutX="145.0" layoutY="105.0" mnemonicParsing="false" text="2 Players" AnchorPane.bottomAnchor="230.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
-      <Button layoutX="144.0" layoutY="214.0" mnemonicParsing="false" text="3 Players" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
-      <Button layoutX="144.0" layoutY="158.0" mnemonicParsing="false" text="4 Players" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
-      <Text fill="#444444" layoutX="137.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" text="How many players?" textAlignment="CENTER" AnchorPane.bottomAnchor="290.625" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="135.890625" AnchorPane.topAnchor="89.859375">
+
+      <Text fx:id="demoQuestionText" fill="#444444" layoutX="159.0" layoutY="106.859375" strokeType="OUTSIDE" strokeWidth="0.0" text="Demo flight?" textAlignment="CENTER" AnchorPane.leftAnchor="159.0" AnchorPane.rightAnchor="157.296875" AnchorPane.topAnchor="89.859375">
+         <font>
+            <Font name="Impact" size="16.0" />
+         </font>
+      </Text>
+      <Button fx:id="demoButton" layoutX="126.0" layoutY="150.0" mnemonicParsing="false" text="Yes" AnchorPane.leftAnchor="126.0" />
+      <Button fx:id="level2Button" layoutX="225.0" layoutY="150.0" mnemonicParsing="false" text="No" AnchorPane.rightAnchor="126.0" />
+      <Button fx:id="exitButton" layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#exit" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
+
+      <Button fx:id="backButton" layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#back" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
+      <Button layoutX="145.0" layoutY="105.0" mnemonicParsing="false" text="2 Players" visible="false" AnchorPane.bottomAnchor="230.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button layoutX="144.0" layoutY="214.0" mnemonicParsing="false" text="3 Players" visible="false" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button layoutX="144.0" layoutY="158.0" mnemonicParsing="false" text="4 Players" visible="false" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Text fx:id="playersQuestionText" fill="#444444" layoutX="137.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" text="How many players?" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="290.625" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="135.890625" AnchorPane.topAnchor="89.859375">
          <font>
             <Font name="Impact" size="16.0" />
          </font>

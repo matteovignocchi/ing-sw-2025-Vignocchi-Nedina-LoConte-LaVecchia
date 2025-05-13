@@ -29,10 +29,10 @@ public class BuildingPhaseController extends GUIController{
     @FXML
     private Button rotateRightBtn;
 
-    private Tile currentTile;
+
     private ImageView draggedTileView;
-    private GUIView guiView;
-    private Tile[][] dashBoard;
+
+
 
     @FXML
     public void initialize() {
@@ -49,10 +49,7 @@ public class BuildingPhaseController extends GUIController{
         dashBoard = new Tile[5][7];
     }
 
-    public void setDashBoard(Tile[][] dashBoard) {
-        this.dashBoard = dashBoard;
-    }
-
+    //TODO come ruotare l'
     @FXML
     private void rotateRight() {
         if (currentTile != null) {
@@ -69,9 +66,7 @@ public class BuildingPhaseController extends GUIController{
         }
     }
 
-    public void setGuiView(GUIView guiView) {
-        this.guiView = guiView;
-    }
+
 
 
 

@@ -25,12 +25,32 @@ public class GUIView extends Application implements View {
     private Stage mainStage;
     private GUIController controller;
     private CompletableFuture<int[]> coordinateFuture;
-    private Tile currentTile;
+    public Tile currentTile;
+    public Tile[][] dashBoard;
 
     public GUIView(){
         Platform.startup(()->{});
+
     }
 
+    public void loadScene(SceneEnum scene) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(scene.value()));
+            Parent root = loader.load();
+
+            GUIController guiController = loader.getController();
+            this.controller = guiController;
+
+            guiController.setGuiView(this);
+            guiController.setDashBoard(dashBoard);
+
+            mainStage.setScene(new Scene(root));
+            mainStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void start(javafx.stage.Stage stage) throws Exception {
@@ -58,10 +78,10 @@ public class GUIView extends Application implements View {
         });
 
         try {
-            return coordinateFuture.get(); // blocca solo il thread secondario, non l'interfaccia
+            return coordinateFuture.get();
         } catch (Exception e) {
             e.printStackTrace();
-            return new int[]{-1, -1}; // valore d'errore
+            return new int[]{-1, -1};
         }
     }
 
@@ -87,7 +107,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(Tile[][] ship) {
-
+        controller.setDashBoard(ship);
 
     }
 

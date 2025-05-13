@@ -31,12 +31,12 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" prefHeight="36.0" prefWidth="106.0" styleClass="button" text="Enter Game" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <Button fx:id="joinButton" mnemonicParsing="false" prefHeight="36.0" prefWidth="106.0" styleClass="button" text="Join Game" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                <GridPane.margin>
                   <Insets top="27.0" />
                </GridPane.margin>
             </Button>
-            <Button layoutX="211.0" layoutY="193.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="106.0" styleClass="button" text="Join Game" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+            <Button fx:id="createButton" layoutX="211.0" layoutY="193.0" maxWidth="120.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="110.0" styleClass="button" text="Create Game" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                <GridPane.margin>
                   <Insets top="27.0" />
                </GridPane.margin>
