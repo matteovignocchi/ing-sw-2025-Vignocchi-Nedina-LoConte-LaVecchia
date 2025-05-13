@@ -268,7 +268,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             do{
                 view.inform("select max 4 players");
                 numberOfPlayer = view.askIndex();
-            }while(numberOfPlayer>4);
+            }while(numberOfPlayer>4 || numberOfPlayer<2);
             List<Object> payloadGame = new ArrayList<>();
             payloadGame.add(demo);
             payloadGame.add(nickname);

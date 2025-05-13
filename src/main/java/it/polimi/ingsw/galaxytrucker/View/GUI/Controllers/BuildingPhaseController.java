@@ -32,7 +32,26 @@ public class BuildingPhaseController extends GUIController{
     private Tile currentTile;
     private ImageView draggedTileView;
     private GUIView guiView;
+    private Tile[][] dashBoard;
 
+    @FXML
+    public void initialize() {
+
+        setupGridStructure();
+
+
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+        rotateLeftBtn.setDisable(true);
+        rotateRightBtn.setDisable(true);
+
+
+        dashBoard = new Tile[5][7];
+    }
+
+    public void setDashBoard(Tile[][] dashBoard) {
+        this.dashBoard = dashBoard;
+    }
 
     @FXML
     private void rotateRight() {
