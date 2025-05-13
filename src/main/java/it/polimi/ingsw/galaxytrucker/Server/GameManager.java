@@ -29,7 +29,7 @@ public class GameManager {
 
     public synchronized int createGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws Exception {
         int gameId = idCounter.getAndIncrement();
-        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame);
+        Controller controller = new Controller(isDemo, gameId, maxPlayers, this::removeGame, loggedInUsers);
 
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
