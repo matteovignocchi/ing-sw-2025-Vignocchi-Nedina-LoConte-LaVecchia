@@ -24,11 +24,14 @@ import java.util.function.Consumer;
 //TODO: sistemare cardVisitor con le fasi e le chiamate ai metodi , verificare se meglio la mappa o il player (va gestita sta cosa gabri sa a cosa mi riferisco)
 //TODO: inserire i timeout in tutti i metodi che mettono in attesa il server
 
+//TODO: parser per non passare oggetti del model
+
 public class Controller implements Serializable {
     private final int gameId;
     private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
 
+    //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
 
     private final AtomicInteger playerIdCounter;
@@ -196,6 +199,7 @@ public class Controller implements Serializable {
             broadcastInform(nickname + " is disconnected");
             setTimeout();
 
+            //Capire se tenere e come gestire
             loggedInUsers.remove(nickname);
         }
     }
@@ -278,8 +282,8 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             }
         });
+
         if (!isDemo) startHourglass();
-        notifyAllViews();
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
@@ -1853,6 +1857,9 @@ public class Controller implements Serializable {
         }
     }
 
+
+    //metodi da inserire nel card visitor per gestione tui
+
     public void changePhaseFromCard(Player p, GamePhase tmp) throws BusinessLogicException {
        String nick =  getNickByPlayer(p);
         try {
@@ -1865,6 +1872,23 @@ public class Controller implements Serializable {
     public void changeUpdateByPlayer(Player p) throws BusinessLogicException {
         String nick =  getNickByPlayer(p);
         notifyView(nick);
+    }
+
+    public void changeMapPosition(){
+        for(String nick : playerPosition.keySet()){
+            Player p = getPlayerByNickname(nick);
+            playerPosition.put(nick,p.getPos());
+        }
+    }
+
+    public void updatePositionForEveryBody(){
+        for(String nick : playerPosition.keySet()){
+            try {
+                viewsByNickname.get(nick).updateMapPosition(playerPosition);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 

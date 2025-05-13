@@ -589,7 +589,7 @@ public class TUIView implements View {
         List<String> listOfOptions = commandConstructor();
         inform("Insert the command number");
         int tmp = askIndex();
-        return listOfOptions.get(tmp).trim().toLowerCase();
+        return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
     private void printListOfCommand(){
         List<String> listOfOptions = commandConstructor();

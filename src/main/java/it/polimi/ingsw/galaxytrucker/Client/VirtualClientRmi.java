@@ -186,7 +186,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 try {
                     server.enterGame(choice, this , nickname);
                     return choice;
-                } catch (BusinessLogicException e) {
+                } catch (Exception e) {
                     view.reportError("you miss " + e.getMessage() );
                 }
             }
@@ -208,8 +208,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public Tile getTileServer() throws RemoteException {
         while(true){
             try {
-                return server.getCoveredTile(gameId, nickname);
-            } catch (BusinessLogicException e) {
+                Tile tmp = server.getCoveredTile(gameId, nickname);
+                view.printTile(tmp);
+                return tmp;
+            } catch (Exception e) {
                 view.reportError("you miss " + e.getMessage() );
             }
         }
@@ -221,7 +223,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 tmp = server.getUncoveredTilesList(gameId, nickname);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("problem with server");
             }
         }
@@ -246,13 +248,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.dropTile(gameId,nickname,tile);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("Problem with server");
             }
         }
     }
     @Override
     public void positionTile(Tile tile) throws RemoteException{
+        view.printDashShip(Dash_Matrix);
         view.inform("choose coordinate");
         int[] tmp;
         while(true){
@@ -260,7 +263,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("not valid coordinate" );
             }
         }
@@ -273,7 +276,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.drawCard(gameId,nickname);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("problem with server");
             }
         }
@@ -296,7 +299,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.setReady(gameId,nickname);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("problem with server");
             }
         }
@@ -311,7 +314,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.showDeck(gameId, index);
                 break;
-            } catch (BusinessLogicException | IOException e) {
+            } catch (Exception e) {
                 view.reportError("index not valid");
             }
         }
@@ -323,7 +326,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.lookAtDashBoard(gameId,tmp);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("player not valid");
             }
         }
@@ -333,13 +336,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         if(gameId != 0) {
             try {
                 server.LeaveGame(gameId, nickname);
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError("problem with server");
             }
         }else{
                 try {
                     server.logOut(nickname);
-                } catch (BusinessLogicException | RemoteException e) {
+                } catch (Exception  e) {
                     view.reportError("problem with server");
                 }
         }
@@ -352,7 +355,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setStart() throws RemoteException{
-        start = "Start";
+        start = "start";
     }
 
     @Override
