@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="fxml.css.CreateGameMenu"
-            prefHeight="400.0" prefWidth="600.0">
 
+<AnchorPane prefHeight="400.0" prefWidth="397.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.CreateGameMenuController">
+   <children>
+      <ImageView fitHeight="400.0" fitWidth="600.0" preserveRatio="true">
+         <image>
+            <Image url="@../LobbyImage2.png" />
+         </image>
+      </ImageView>
+      <Button layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#back" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
+      <Button layoutX="145.0" layoutY="105.0" mnemonicParsing="false" text="2 Players" AnchorPane.bottomAnchor="230.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button layoutX="144.0" layoutY="214.0" mnemonicParsing="false" text="3 Players" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button layoutX="144.0" layoutY="158.0" mnemonicParsing="false" text="4 Players" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Text fill="#444444" layoutX="137.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" text="How many players?" textAlignment="CENTER" AnchorPane.bottomAnchor="290.625" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="135.890625" AnchorPane.topAnchor="89.859375">
+         <font>
+            <Font name="Impact" size="16.0" />
+         </font>
+      </Text>
+   </children>
 </AnchorPane>

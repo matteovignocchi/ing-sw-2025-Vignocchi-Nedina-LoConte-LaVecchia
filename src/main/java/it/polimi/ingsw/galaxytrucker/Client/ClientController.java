@@ -17,6 +17,9 @@ public class ClientController {
     private boolean isConnected = false;
     private int idCurrentGame;
 
+    private static ClientController instance;
+
+
     public ClientController(View view, VirtualView virtualClient) {
         this.view = view;
         this.virtualClient = virtualClient;
@@ -149,7 +152,7 @@ public class ClientController {
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {
-            tmpTile.RotateRight();
+            tmpTile.rotateRight();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
         } else {
@@ -159,13 +162,27 @@ public class ClientController {
 
     private void rotateLeft() throws Exception {
         if (tmpTile != null) {
-            tmpTile.RotateLeft();
+            tmpTile.rotateLeft();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
         } else {
             view.reportError("No tile selected to rotate");
         }
     }
+
+
+    ////metodi che mi servono per la gui///
+
+    public static ClientController getInstance() {
+        return instance;
+    }
+
+    public VirtualView getViewInterface() {
+        return virtualClient;
+    }
+
+
+
 }
 
 

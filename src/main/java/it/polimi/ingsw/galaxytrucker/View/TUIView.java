@@ -116,7 +116,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public int[] askCordinate() {
+    public int[] askCoordinate() {
         int[] coordinate = new int[2];
         inform("Insert the row:");
         coordinate[0] = scanner.nextInt();
