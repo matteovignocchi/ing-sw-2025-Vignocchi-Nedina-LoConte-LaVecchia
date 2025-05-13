@@ -79,7 +79,7 @@ public class ClientController {
             view.inform("Game created successfully");
             virtualClient.setGameId(response);
             view.inform("Waiting for players in lobby");
-            waitForPlayers();
+            waitForGameStart();
         } else {
             view.inform("Game creation failed");
 
@@ -98,16 +98,16 @@ public class ClientController {
         }
     }
 
-    private void waitForPlayers() throws Exception {
-        while (true) {
-            String status = virtualClient.askInformationAboutStart();
-            if (status.contains("Start")) {
-                startGame();
-                break;
-            }
-//            view.inform(status);
-        }
-    }
+//    private void waitForPlayers() throws Exception {
+//        while (true) {
+//            String status = virtualClient.askInformationAboutStart();
+//            if (status.contains("start")) {
+//                startGame();
+//                break;
+//            }
+////            view.inform(status);
+//        }
+//    }
 
     private void waitForGameStart() throws Exception {
         while (true) {
