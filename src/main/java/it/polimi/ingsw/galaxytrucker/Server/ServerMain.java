@@ -8,7 +8,7 @@ public class ServerMain {
 
         //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        System.setProperty("java.rmi.server.hostname", "192.168.179.16");
+        System.setProperty("java.rmi.server.hostname", "172.20.10.3");
 
         GameManager gameManager = new GameManager();
         int socketPort = 30001;
