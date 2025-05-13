@@ -5,8 +5,12 @@ import java.rmi.registry.*;
 
 public class ServerMain {
     public static void main(String[] args) throws RemoteException {
+
+        //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
+        //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
+        System.setProperty("java.rmi.server.hostname", "192.168.179.16");
+
         GameManager gameManager = new GameManager();
-        //int socketPort = args.length > 1 ? Integer.parseInt(args[1]) : 9999;
         int socketPort = 30001;
         Registry registry = LocateRegistry.createRegistry(1099);
         registry.rebind("RmiServer", new ServerRmi(gameManager));

@@ -32,11 +32,9 @@ public class ClientMain {
 
         //codice di inizializzazione del client
 
-
-        //String host = args.length>0 ? args[0] : "local";
-        //int port = args.length>1 ? Integer.parseInt(args[1]) : 9999;
-        //String host = "Socket-Listener";
-        String host = "localhost";
+        //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
+        //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
+        String host = "192.168.179.16";
         int port = 30001;
 
         Scanner input = new Scanner(System.in);
