@@ -125,17 +125,17 @@ public class ClientController {
         do {
             String key = view.sendAvailableChoices();
             switch (key) {
-                case "getblankettile" -> tmpTile = virtualClient.getTileServer();
-                case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
-                case "returntile" -> virtualClient.getBackTile(tmpTile);
-                case "placetile" -> virtualClient.positionTile(tmpTile);
-                case "drawcard" -> virtualClient.drawCard();
+                case "getacoveredtile" -> tmpTile = virtualClient.getTileServer();
+                case "getashowntile" -> tmpTile = virtualClient.getUncoveredTile();
+                case "returnthetile" -> virtualClient.getBackTile(tmpTile);
+                case "placethetile" -> virtualClient.positionTile(tmpTile);
+                case "drawacard" -> virtualClient.drawCard();
                 case "spinthehourglass" -> virtualClient.rotateGlass();
                 case "declareready" -> virtualClient.setReady();
                 case "watchadeck" -> virtualClient.lookDeck();
-                case "watchaship" -> virtualClient.lookDashBoard();
-                case "rightrotatetile" -> rotateRight();
-                case "leftrotatetile" -> rotateLeft();
+                case "watchaplayersship" -> virtualClient.lookDashBoard();
+                case "rightrotatethetile" -> rotateRight();
+                case "leftrotatethetile" -> rotateLeft();
                 case "logout" -> {
                     virtualClient.logOut();
                     idCurrentGame = 0;
