@@ -88,6 +88,7 @@ public class GUIView extends Application implements View {
     @Override
     public void printDashShip(Tile[][] ship) {
 
+
     }
 
     @Override
