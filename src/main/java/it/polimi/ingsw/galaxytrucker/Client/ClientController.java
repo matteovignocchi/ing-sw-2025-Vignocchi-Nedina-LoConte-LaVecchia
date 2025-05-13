@@ -101,7 +101,7 @@ public class ClientController {
     private void waitForPlayers() throws Exception {
         while (true) {
             String status = virtualClient.askInformationAboutStart();
-            if (status.contains("Start")) {
+            if (status.contains("start")) {
                 startGame();
                 break;
             }
