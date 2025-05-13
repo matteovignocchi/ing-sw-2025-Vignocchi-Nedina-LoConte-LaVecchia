@@ -284,6 +284,8 @@ public class Controller implements Serializable {
         });
 
         if (!isDemo) startHourglass();
+        notifyAllViews();
+
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
