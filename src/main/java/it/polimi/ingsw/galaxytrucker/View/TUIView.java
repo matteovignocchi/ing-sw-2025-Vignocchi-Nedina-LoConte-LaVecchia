@@ -328,7 +328,7 @@ public class TUIView implements View {
         StringBuilder mid = new StringBuilder();
         StringBuilder bot = new StringBuilder();
         StringBuilder border = new StringBuilder();
-        String[] rendered = new String[3];
+        String[] rendered = renderTile(tile);
         border.append("+---------+ ");
         top.append("|").append(rendered[0]).append("| ");
         mid.append("|").append(rendered[1]).append("| ");
