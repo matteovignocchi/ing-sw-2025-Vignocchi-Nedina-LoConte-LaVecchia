@@ -104,7 +104,7 @@ public class ClientController {
                 startGame();
                 break;
             }
-            view.inform(status);
+//            view.inform(status);
         }
     }
 
@@ -116,8 +116,8 @@ public class ClientController {
                 startGame();
                 break;
             }
-            view.inform(status);
         }
+        view.inform("game started");
     }
 
     private void startGame() throws Exception {
@@ -142,7 +142,7 @@ public class ClientController {
             case "watchaship" -> virtualClient.lookDashBoard();
             case "rightrotatetile" -> rotateRight();
             case "leftrotatetile" -> rotateLeft();
-            case " logout" -> {
+            case "logout" -> {
                 virtualClient.logOut();
                 idCurrentGame = 0;
             }

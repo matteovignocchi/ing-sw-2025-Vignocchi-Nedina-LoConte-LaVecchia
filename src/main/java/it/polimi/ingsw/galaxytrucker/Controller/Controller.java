@@ -126,13 +126,14 @@ public class Controller implements Serializable {
         Player p = new Player(playerIdCounter.getAndIncrement(), isDemo , tmp);
         p.setConnected(true);
 
-        p.setGamePhase(GamePhase.WAITING_FOR_START_GAME);
+        p.setGamePhase(GamePhase.WAITING_IN_LOBBY);
+        view.updateGameState(GamePhase.WAITING_IN_LOBBY);
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
 
         view.inform("Player " + nickname + " added to game");
-        broadcastInform(nickname + "joined");
+        broadcastInform(nickname + "  joined");
     }
 
     //TODO: discutere con fra per vedere se eliminabile (usare getPlayerCheck)
@@ -263,10 +264,10 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-//                v.setFlagStart(); //ne hai parlato con oleg a lezione , così non cambiate
                 v.updateMapPosition(playerPosition);
-                v.setStart(); // nuovo setFlagStart , serve per modificare lato client senza che lui continui e rompere per sapere la risposta
                 v.inform("Game is starting!");
+                v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
+                v.setStart();
             } catch (Exception e) {
                 markDisconnected(nick);
             }
@@ -1844,6 +1845,20 @@ public class Controller implements Serializable {
             System.err.println("Error during decks' merging: " + e.getMessage());
             //TODO: notificare la view
         }
+    }
+
+    public void changePhaseFromCard(Player p, GamePhase tmp) throws BusinessLogicException {
+       String nick =  getNickByPlayer(p);
+        try {
+            viewsByNickname.get(nick).updateGameState(tmp);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void changeUpdateByPlayer(Player p) throws BusinessLogicException {
+        String nick =  getNickByPlayer(p);
+        notifyView(nick);
     }
 }
 

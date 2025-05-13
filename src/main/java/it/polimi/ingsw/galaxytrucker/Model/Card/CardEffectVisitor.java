@@ -472,8 +472,8 @@ public class CardEffectVisitor implements CardVisitor {
 
     @Override
     public void visit(PlaugeCard card) throws CardEffectException {
-
         for(Player p : players){
+
             try {
                 controller.startPlauge(p);
             } catch (Exception e) {

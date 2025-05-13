@@ -114,11 +114,11 @@ public class BuildingPhaseController extends GUIController{
         draggedTileView.setFitHeight(50);
         draggedTileView.setLayoutX(rootPane.getWidth() / 2);
         draggedTileView.setLayoutY(rootPane.getHeight() / 2);
-
-        // Imposta il comportamento di trascinamento
-        draggedTileView.setOnMousePressed(this::onTilePressed);
-        draggedTileView.setOnMouseDragged(this::onTileDragged);
-        draggedTileView.setOnMouseReleased(this::onTileReleased);
+//
+//        // Imposta il comportamento di trascinamento
+//        draggedTileView.setOnMousePressed(this::onTilePressed);
+//        draggedTileView.setOnMouseDragged(this::onTileDragged);
+//        draggedTileView.setOnMouseReleased(this::onTileReleased);
 
         // Aggiungi al root pane
         rootPane.getChildren().add(draggedTileView);

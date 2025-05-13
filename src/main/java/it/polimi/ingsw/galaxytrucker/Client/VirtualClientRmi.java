@@ -153,14 +153,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         if(message.contains("CREATE")){
             while (true){
                 boolean tmp = view.ask("would you like a demo version?");
-                int tmpInt;
-                do{
-                    view.inform("select max 4 players");
-                    tmpInt = view.askIndex()+1;
-                }while(tmpInt>4);
+
+                view.inform("select max 4 players");
+                int tmpInt = view.askIndex()+1;
+
                 try {
                     return server.createNewGame(tmp , this , nickname ,tmpInt );
-                } catch (BusinessLogicException e) {
+                } catch (Exception e) {
                     view.reportError("you miss +" + e.getMessage() );
                 }
             }
@@ -227,11 +226,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }
         }
         view.printPileShown(tmp);
+        int index;
         while(true){
-            int index = askIndex();
-            Tile tmpTile =tmp.get(index);
+            while (true) {
+                index = askIndex();
+                if (index >= 0 && index < tmp.size()) break;
+                view.inform("Invalid index. Try again.");
+            }
             try {
-                return server.chooseUncoveredTile(gameId, nickname,tmpTile.getIdTile());
+                return server.chooseUncoveredTile(gameId, nickname,tmp.get(index).getIdTile());
             } catch (BusinessLogicException e) {
                 view.reportError("you miss " + e.getMessage() + "select new index" );
             }
