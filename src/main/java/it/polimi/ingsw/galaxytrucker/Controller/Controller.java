@@ -277,14 +277,22 @@ public class Controller implements Serializable {
                 v.updateMapPosition(playerPosition);
                 v.inform("Game is starting!");
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
-                v.setStart();
+                v.updateGameState(GamePhase.BOARD_SETUP);
             } catch (Exception e) {
                 markDisconnected(nick);
             }
         });
 
+        viewsByNickname.forEach((nick, v) -> {
+            try {
+                v.setStart();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         if (!isDemo) startHourglass();
-        notifyAllViews();
+//        notifyAllViews();
 
     }
 

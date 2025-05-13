@@ -25,6 +25,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private int gameId = 0;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
+    private final Object startLock = new Object();
     private String start = "false";
 
     public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
@@ -355,11 +356,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setStart() throws RemoteException{
-        start = "start";
-    }
+        synchronized (startLock) {
+            start = "start";
+        }    }
 
     @Override
     public String askInformationAboutStart() throws RemoteException {
-        return start;
+        synchronized (startLock) {
+            return start;
+        }
     }
+
 }
