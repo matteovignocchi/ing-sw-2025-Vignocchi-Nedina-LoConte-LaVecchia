@@ -301,7 +301,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public boolean sendLogin(String username) throws IOException, InterruptedException {
         Message loginRequest = Message.request(Message.OP_LOGIN, username);
         sendRequest(loginRequest);
-        return Boolean.parseBoolean((String)  responseHandler.waitForResponse());
+        String answer = (String) responseHandler.waitForResponse();
+        return "OK".equals(answer);
     }
 
 
