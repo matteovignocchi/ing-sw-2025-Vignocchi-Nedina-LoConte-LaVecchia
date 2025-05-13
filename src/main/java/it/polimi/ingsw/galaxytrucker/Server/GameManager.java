@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 ////////////////////////////////////////////////GESTIONE GAME///////////////////////////////////////////////////////////
 
 public class GameManager {
-    private final Map<Integer, Controller> games = new ConcurrentHashMap<>();;
+    private final Map<Integer, Controller> games = new ConcurrentHashMap<>();
+    private final Map<String,Integer> nicknameToGameId = new ConcurrentHashMap<>();
     private final AtomicInteger idCounter = new AtomicInteger(1);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Set<String> loggedInUsers = ConcurrentHashMap.newKeySet();
@@ -33,6 +34,7 @@ public class GameManager {
 
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
+        nicknameToGameId.put(nickname, gameId);
         controller.notifyAllViews();
         safeSave(gameId, controller);
         return gameId;
@@ -41,17 +43,14 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-//        if (controller.isGameStarted())
-//            throw new BusinessLogicException("Game already in progress");
-
-        if (controller.getPlayerByNickname(nickname)!=null) {
+        if (controller.getPlayerByNickname(nickname) == null) {
+            controller.addPlayer(nickname, v);
+            nicknameToGameId.put(nickname, gameId);
+            if (controller.countConnectedPlayers() == controller.getMaxPlayers())
+                controller.startGame();
+        } else {
             controller.markReconnected(nickname, v);
             controller.broadcastInform(nickname + " is reconnected");
-        } else {
-            controller.addPlayer(nickname, v);
-            if (controller.countConnectedPlayers() == controller.getMaxPlayers()) {
-                controller.startGame();
-            }
         }
         controller.notifyAllViews();
         safeSave(gameId, controller);
@@ -60,18 +59,35 @@ public class GameManager {
     public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
 
-        controller.broadcastInform("A player has abandoned: the game ends.");
+        controller.broadcastInform(nickname + " has abandoned: the game ends.");
         removeGame(gameId);
     }
 
-    public synchronized void login(String nickname) throws BusinessLogicException {
-        if (!loggedInUsers.add(nickname)) {
-            throw new BusinessLogicException("Nickname already in use: " + nickname);
+    //deve mandare businesslogicException, ma inform e setGameId mandano exception generica
+    public synchronized void login(String nickname, VirtualView v) throws Exception {
+        // caso nuovo utente
+        if (loggedInUsers.add(nickname)) {
+            return;
         }
+        // caso reconnect
+        Integer gameId = nicknameToGameId.get(nickname);
+        if (gameId != null && games.containsKey(gameId)) {
+            Controller controller = getControllerCheck(gameId);
+            controller.markReconnected(nickname, v);
+            controller.broadcastInform(nickname + " is reconnected");
+            controller.notifyAllViews();
+            // comunico al client a schermo:
+            v.inform("Reconnect to the game #" + gameId);
+            v.setGameId(gameId);
+            return;
+        }
+        // nick in uso ma non in partita: rifiuto
+        throw new BusinessLogicException("Nickname already used: " + nickname);
     }
 
     public synchronized void logout(String nickname) {
         loggedInUsers.remove(nickname);
+        nicknameToGameId.remove(nickname);
     }
 
     public synchronized void removeGame(int gameId) {
