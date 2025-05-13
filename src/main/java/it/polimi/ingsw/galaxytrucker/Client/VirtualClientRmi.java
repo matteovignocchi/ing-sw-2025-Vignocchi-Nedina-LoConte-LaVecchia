@@ -261,9 +261,9 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         view.printDashShip(Dash_Matrix);
-        view.inform("choose coordinate");
         int[] tmp;
         while(true){
+            view.inform("choose coordinate");
             tmp = view.askCoordinate();
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
