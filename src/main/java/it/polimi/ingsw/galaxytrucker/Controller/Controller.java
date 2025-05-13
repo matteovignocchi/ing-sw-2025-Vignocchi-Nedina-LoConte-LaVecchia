@@ -276,7 +276,9 @@ public class Controller implements Serializable {
             try {
                 v.updateMapPosition(playerPosition);
                 v.inform("Game is starting!");
+                v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
+
                 v.updateGameState(GamePhase.BOARD_SETUP);
             } catch (Exception e) {
                 markDisconnected(nick);
@@ -302,11 +304,10 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
-        int randomIdx = ThreadLocalRandom.current().nextInt(size);
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
-        return getTile(randomIdx);
+        return getTile(1);
     }
 
     public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {

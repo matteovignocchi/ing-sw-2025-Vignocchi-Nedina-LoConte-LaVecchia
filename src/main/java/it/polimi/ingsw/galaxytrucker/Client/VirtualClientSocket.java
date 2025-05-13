@@ -444,5 +444,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public String askInformationAboutStart() {
         return start;
     }
+
+    @Override
+    public void setCentralTile(Tile tile) throws Exception {
+
+    }
 }
 
