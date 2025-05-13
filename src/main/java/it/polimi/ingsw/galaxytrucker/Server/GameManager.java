@@ -58,8 +58,8 @@ public class GameManager {
 
     public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-
         controller.broadcastInform(nickname + " has abandoned: the game ends.");
+        controller.setExit();
         removeGame(gameId);
     }
 

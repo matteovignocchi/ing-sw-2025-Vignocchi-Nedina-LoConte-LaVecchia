@@ -76,7 +76,8 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
         handleGameManagerCall("logOut", () -> {
             gameManager.quitGame(gameId, nickname);
-            gameManager.logout(nickname);
+ //         gameManager.logout(nickname);  qua sono uscito solo dalla partita , mi metti in exits ma se voglio posso crearne altre con lo stesso nick
+ //         quindi non penso serva questa Logout che ho visto che mi elimina proprio da ovuenqu , questa ho il metodo apposta
             return null;
         });
     }

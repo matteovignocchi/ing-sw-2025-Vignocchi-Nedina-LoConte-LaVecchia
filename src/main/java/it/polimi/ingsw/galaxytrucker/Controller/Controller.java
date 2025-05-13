@@ -1877,14 +1877,14 @@ public class Controller implements Serializable {
        String nick =  getNickByPlayer(p);
         try {
             viewsByNickname.get(nick).updateGameState(tmp);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            notifyView(nick);
+        }  catch (Exception e) {
+            markDisconnected(nick);
         }
-    }
-
-    public void changeUpdateByPlayer(Player p) throws BusinessLogicException {
-        String nick =  getNickByPlayer(p);
-        notifyView(nick);
+//            throw new RuntimeException(e);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void changeMapPosition(){
@@ -1898,8 +1898,22 @@ public class Controller implements Serializable {
         for(String nick : playerPosition.keySet()){
             try {
                 viewsByNickname.get(nick).updateMapPosition(playerPosition);
+
+            }  catch (Exception e) {
+                markDisconnected(nick);
+            }
+        }
+        notifyAllViews();
+    }
+
+    public void setExit(){
+        for(String nick : playerPosition.keySet()){
+            try{
+                viewsByNickname.get(nick).updateGameState(GamePhase.EXIT);
+                viewsByNickname.get(nick).notify();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                markDisconnected(nick);
+//                throw new RuntimeException(e);
             }
         }
     }

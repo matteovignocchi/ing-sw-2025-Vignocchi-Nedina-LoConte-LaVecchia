@@ -13,6 +13,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -147,7 +148,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public boolean sendLogin(String username) throws RemoteException {
         try {
-            server.logIn(username);
+            server.logIn(username , this);
         } catch (BusinessLogicException e) {
             return false;
         }
@@ -185,7 +186,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 int choice;
                while(true){
                     choice = askIndex()+1;
-                   if(choice > 0 && choice <= availableGames.keySet().size())break;
+                    if(availableGames.containsKey(choice)) break;
                    view.inform("index not valid");
                }
                 try {
@@ -326,15 +327,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void lookDashBoard() throws RemoteException{
+        Tile[][] dashPlayer;
+        String tmp;
         while(true){
-            String tmp = view.choosePlayer();
+             tmp = view.choosePlayer();
             try {
-                server.lookAtDashBoard(gameId,tmp);
+                dashPlayer = server.lookAtDashBoard(gameId,tmp);
                 break;
             } catch (Exception e) {
                 view.reportError("player not valid");
             }
         }
+        view.inform("Space Ship of :" + tmp);
+        view.printDashShip(dashPlayer);
     }
     @Override
     public void logOut() throws RemoteException{
