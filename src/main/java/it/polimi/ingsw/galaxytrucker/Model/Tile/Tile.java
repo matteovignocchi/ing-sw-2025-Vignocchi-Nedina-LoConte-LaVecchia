@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Tile;
 import javafx.scene.image.Image;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 /**
  * abstract class for the general structure of the tile and
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 
-public abstract class Tile {
+public abstract class Tile implements Serializable {
     public int[] corners = new int[4];
     public int idTile;
 

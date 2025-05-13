@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
@@ -50,8 +51,17 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (Player p : players) {
+
+            //setto fase effetto carta
+            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+
             int x = controller.getPowerEngineForCard(p);
             f.moveRocket(x, p);
+
+            //modifico posizione e stampo quelle nuove
+            controller.changeMapPosition();
+            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
+            controller.updatePositionForEveryBody();
         }
     }
 
@@ -69,6 +79,9 @@ public class CardEffectVisitor implements CardVisitor {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (int i = players.size() - 1; i >= 0; i--) {
+            //setto fase effetto carta
+//            controller.changePhaseFromCard(players.get(i), GamePhase.CARD_EFFECT);
+
             Player p = players.get(i);
             int x = p.countExposedConnectors();
             f.moveRocket(-x, p);
