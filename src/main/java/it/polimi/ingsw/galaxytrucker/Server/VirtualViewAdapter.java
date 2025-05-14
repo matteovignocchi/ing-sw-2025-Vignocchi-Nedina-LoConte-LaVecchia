@@ -22,6 +22,7 @@ public abstract class VirtualViewAdapter implements VirtualView{
     @Override public void printDeck(List<Card> deck) throws Exception {}
     @Override public void setView(View view) throws Exception {}
     @Override public void setGameId(int gameId) throws RemoteException {}
+    @Override public void setCentralTile(Tile tile) throws Exception {}
 
     @Override public int askIndex() throws Exception { return 0; }
     @Override public String askString() throws Exception { return null; }

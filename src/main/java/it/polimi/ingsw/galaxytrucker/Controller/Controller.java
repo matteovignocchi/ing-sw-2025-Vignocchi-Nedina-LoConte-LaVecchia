@@ -1907,15 +1907,8 @@ public class Controller implements Serializable {
     }
 
     public void setExit(){
-        for(String nick : playerPosition.keySet()){
-            try{
-                viewsByNickname.get(nick).updateGameState(GamePhase.EXIT);
-                viewsByNickname.get(nick).notify();
-            } catch (Exception e) {
-                markDisconnected(nick);
-//                throw new RuntimeException(e);
-            }
-        }
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+        notifyAllViews();
     }
 }
 

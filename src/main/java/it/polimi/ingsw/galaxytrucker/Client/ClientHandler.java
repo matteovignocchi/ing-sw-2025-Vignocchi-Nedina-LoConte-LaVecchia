@@ -361,9 +361,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void setCentralTile(Tile tile) throws Exception {
-
+    public void setCentralTile(Tile tile) throws IOException {
+        out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
+        out.flush();
     }
-
 }
 
