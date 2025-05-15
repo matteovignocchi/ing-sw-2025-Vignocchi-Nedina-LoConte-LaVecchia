@@ -63,6 +63,7 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
             decks = deckCreator.CreateSecondLevelDeck();
+            deck = new Deck();
         }
         this.gameId = gameId;
         this.onGameEnd = onGameEnd;
@@ -364,14 +365,29 @@ public class Controller implements Serializable {
 
         broadcastInform("Flight started!");
         playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.CARD_EFFECT));
+
+        /**/ System.out.println("Dopo che setto la fase a tutti");
+
         //metodo per mettere gli umani giusti in ogni cella e tile
         addHuman();
+
+        /**/ System.out.println("Dopo che chiamo addHuman");
+
         viewsByNickname.forEach((nick, v) -> {
+
+            /**/ System.out.println("Prima di checkPlayerAssembly");
+
             //metodo per gestire il control assembly del giocatore , va fatta indipendentemente se coonnesso o meno
             checkPlayerAssembly(nick , 2 , 3);
+
+            /**/ System.out.println("Dopo di checkPlayerAssembly");
+
             //TODO: questa chiamata va fatta per le view dei giocatori connessi. Non checkare prima se il giocatore
             // connesso o meno, e lasciare partire l'eccezione? (che lo mette disconnesso anche se già lo è)
             try {
+
+                /**/ System.out.println("Nel try dove manca l'update");
+
                 //viewsByNickname.get(nick).updateMapPosition(playerPosition);
                 //updatePlayer(nick);
                 //non mi convince
@@ -383,7 +399,11 @@ public class Controller implements Serializable {
             }
         });
 
+        /**/ System.out.println("Prima di activateDrawPhase");
+
         activateDrawPhase();
+
+        /**/ System.out.println("Dopo di activateDrawPhase");
     }
 
     public void activateDrawPhase() throws BusinessLogicException {
@@ -440,14 +460,14 @@ public class Controller implements Serializable {
                 }
                 break;
             case 2:
-                if(state == HourglassState.EXPIRED){
+                if(state == HourglassState.ONGOING){
                     try {
                         getViewCheck(nickname).inform("You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
-                } else if (p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
+                } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
                     broadcastInform("Hourglass flipped the last time!");
                 } else {
@@ -1854,6 +1874,8 @@ public class Controller implements Serializable {
         } catch (InvalidPlayerException e){
             System.err.println("Error: " + e.getMessage());
             // TODO: notificare la view con view.showerror?
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -1862,6 +1884,7 @@ public class Controller implements Serializable {
      */
     public void mergeDecks (){
         try{
+
             for(Deck d : decks){
                 deck.addAll(d.getCards());
             }
@@ -1909,15 +1932,8 @@ public class Controller implements Serializable {
     }
 
     public void setExit(){
-        for(String nick : playerPosition.keySet()){
-            try{
-                viewsByNickname.get(nick).updateGameState(GamePhase.EXIT);
-                viewsByNickname.get(nick).notify();
-            } catch (Exception e) {
-                markDisconnected(nick);
-//                throw new RuntimeException(e);
-            }
-        }
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+        notifyAllViews();
     }
 }
 

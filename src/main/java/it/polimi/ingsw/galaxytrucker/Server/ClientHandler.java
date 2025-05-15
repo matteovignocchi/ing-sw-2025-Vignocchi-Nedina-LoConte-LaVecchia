@@ -1,11 +1,11 @@
-package it.polimi.ingsw.galaxytrucker.Client;
+package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Client.Message;
+import it.polimi.ingsw.galaxytrucker.Client.UpdateViewRequest;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualViewAdapter;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -361,9 +361,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void setCentralTile(Tile tile) throws Exception {
-
+    public void setCentralTile(Tile tile) throws IOException {
+        out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
+        out.flush();
     }
-
 }
 

@@ -34,7 +34,7 @@ public class ClientMain {
 
         //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        String host = "192.168.179.16";
+        String host = "100.78.18.120";
         int port = 30001;
 
         Scanner input = new Scanner(System.in);
@@ -56,7 +56,10 @@ public class ClientMain {
                 virtualClient = new VirtualClientSocket(host, port, view);
             }
             ClientController controller = new ClientController(view, virtualClient);
-
+            switch (view) {
+                case GUIView v -> v.setClientController(controller);
+                default -> {}
+            }
             controller.start();
 
         }catch (Exception e){

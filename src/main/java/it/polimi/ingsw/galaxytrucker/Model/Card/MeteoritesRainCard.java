@@ -2,6 +2,8 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +13,7 @@ import java.util.List;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class MeteoritesRainCard implements Card{
+public class MeteoritesRainCard implements Card, Serializable {
     private final String idCard;
     private final List<Integer> directions;
     private final List<Boolean> size;

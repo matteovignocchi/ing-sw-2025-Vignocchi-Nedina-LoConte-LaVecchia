@@ -2,12 +2,15 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+
+import java.io.Serializable;
 
 /**
  * This class handles the PlaugeCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
  */
-public class PlaugeCard implements Card {
+public class PlaugeCard implements Card, Serializable {
 
     private final String idCard;
 
@@ -21,7 +24,7 @@ public class PlaugeCard implements Card {
     }
 
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
         visitor.visit(this);
     }
 

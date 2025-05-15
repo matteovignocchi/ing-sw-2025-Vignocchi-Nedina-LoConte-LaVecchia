@@ -1,10 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
+import it.polimi.ingsw.galaxytrucker.Client.ClientController;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -16,51 +17,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javafx.application.Application;
 import javafx.scene.control.Alert;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.Scene;
 
 public class GUIView extends Application implements View {
     private Stage mainStage;
     private GUIController controller;
     private CompletableFuture<int[]> coordinateFuture;
+    private CompletableFuture<String> nicknameFuture;
+    private ClientController clientController;
     public Tile currentTile;
     public Tile[][] dashBoard;
-
+    public List<Object> dataForGame;
+    private SceneEnum sceneEnum;
     public GUIView(){
         Platform.startup(()->{});
 
     }
 
-    public void loadScene(SceneEnum scene) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(scene.value()));
-            Parent root = loader.load();
 
-            GUIController guiController = loader.getController();
-            this.controller = guiController;
-
-            guiController.setGuiView(this);
-            guiController.setDashBoard(dashBoard);
-
-            mainStage.setScene(new Scene(root));
-            mainStage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public void start(javafx.stage.Stage stage) throws Exception {
         this.mainStage = stage;
+
     }
 
 
     @Override
     public void inform(String message) {
-
+        if( sceneEnum == SceneEnum.WAITING_QUEUE){
+            //TODO fare metodo che mette messaggi sullo schermo di chi si è connesso
+        }
     }
 
     @Override
@@ -138,7 +127,16 @@ public class GUIView extends Application implements View {
 
     @Override
     public String askString() {
-        return "";
+        nicknameFuture = new CompletableFuture<>();
+
+        Platform.runLater(this::showNicknameDialog);
+
+        try {
+            return nicknameFuture.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     @Override
@@ -188,26 +186,61 @@ public class GUIView extends Application implements View {
         return "";
     }
 
-    @Override
-    public void printListOfCommand() {
-
+    public void setClientController(ClientController clientController) {
+        this.clientController = clientController;
     }
-
-    @Override
-    public void setIsDemo(Boolean demo) {
-
+    public ClientController getClientController() {
+        return clientController;
     }
-
-    public VirtualView setMainScene(SceneEnum sceneName) throws IOException {
+    private void setSceneEnum(SceneEnum sceneEnum) {
+        this.sceneEnum = sceneEnum;
+    }
+    public void setMainScene(SceneEnum sceneName) throws IOException {
+        setSceneEnum(sceneName);
         FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName.value()));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         this.mainStage.setScene(scene);
-        return loader.getController();
+        loader.getController();
     }
     public void resolveCoordinates(int row, int col) {
         if (coordinateFuture != null && !coordinateFuture.isDone()) {
             coordinateFuture.complete(new int[] {row, col});
         }
     }
+
+    private void showNicknameDialog() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/nicknameDialog.fxml"));
+            Parent root = loader.load();
+
+            NicknameDialogController dialogController = loader.getController();
+            dialogController.setGuiView(this);
+
+            Stage dialogStage = new Stage();
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.setTitle("Insert your nickname");
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+            dialogStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void resolveNickname(String nickname) {
+        if (nicknameFuture != null && !nicknameFuture.isDone()) {
+            nicknameFuture.complete(nickname);
+        }
+    }
+
+    public void resolveDataGame(List<Object> dataGame) {
+        this.dataForGame = dataGame;
+    }
+
+    public List<Object> getDataForGame() {
+        return dataForGame;
+    }
+
 }

@@ -3,6 +3,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
  */
 
 
-public class SmugglersCard implements Card{
+public class SmugglersCard implements Card, Serializable {
     private final String idCard;
     private final int days;
     private final int fire_power;

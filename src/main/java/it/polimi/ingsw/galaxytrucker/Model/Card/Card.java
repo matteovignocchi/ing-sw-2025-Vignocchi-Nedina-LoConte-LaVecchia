@@ -2,6 +2,9 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+
+import java.io.Serializable;
 
 /**
  * Card interface that represents a generic adventure card in the game.
@@ -30,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = StardustCard.class, name = "StardustCard"),
         @JsonSubTypes.Type(value = AbandonedStationCard.class, name = "AbandonedStationCard")
 })
-public interface Card {
+public interface Card{
 
     /**
      *This method allows the Visitor pattern to be used by allowing an external "CardVisitor" to perform operations
@@ -40,5 +43,5 @@ public interface Card {
      * @throws CardEffectException: custom exception that handles an error while executing the card effect.
      */
 
-    void accept (CardVisitor visitor) throws CardEffectException;
+    void accept (CardVisitor visitor) throws BusinessLogicException;
 }

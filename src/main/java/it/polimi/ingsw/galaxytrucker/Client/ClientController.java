@@ -3,6 +3,9 @@ import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 import static java.lang.String.valueOf;
@@ -55,40 +58,58 @@ public class ClientController {
             view.inform("1. Create new game");
             view.inform("2. Enter in a game");
             view.inform("3. Logout");
-            int choice;
-            while(true){
-                choice = virtualClient.askIndex() + 1;
-                if(choice > 0 && choice<4) break;
-                view.inform("Invalid choice");
-            }
-            switch (choice) {
-                case 1 -> createNewGame();
-                case 2 -> joinExistingGame();
-                case 3 -> {
-                    virtualClient.logOut();
-                    view.inform("Logout successful");
-                    System.exit(0);
+            int choice = 0;
+            while (true) {
+                switch (view) {
+                    case TUIView v -> {
+                        choice = virtualClient.askIndex() + 1;
+                        if (choice > 0 && choice < 4) break;
+                        view.inform("Invalid choice");
+                    }
+                    case GUIView v -> {}
+                    default -> {}
                 }
-                default -> view.inform("Choice not valid");
+
+                switch (choice) {
+                    case 1 -> createNewGame();
+                    case 2 -> joinExistingGame();
+                    case 3 -> {
+                        virtualClient.logOut();
+                        System.exit(0);
+                    }
+                    default -> view.inform("Choice not valid");
+                }
             }
         }
     }
 
-    private void createNewGame() throws Exception {
-        view.inform("Creating New Game");
-        int response = virtualClient.sendGameRequest("CREATE");
-        if (response != 0) {
-            view.inform("Game created successfully");
-            virtualClient.setGameId(response);
-            view.inform("Waiting for players in lobby");
-            waitForGameStart();
-        } else {
-            view.inform("Game creation failed");
-
+    public void createNewGame() throws Exception {
+        switch (view) {
+            case TUIView v -> {
+                v.inform("Creating New Game");
+                int response = virtualClient.sendGameRequest("CREATE");
+                if (response != 0) {
+                    v.inform("Game created successfully");
+                    virtualClient.setGameId(response);
+                    v.inform("Waiting for players in lobby");
+                    waitForGameStart();
+                } else {
+                    v.reportError("Game creation failed");
+                }
+            }
+            case GUIView v -> {
+                int response = virtualClient.sendGameRequest("CREATE");
+                if (response != 0) {
+                    virtualClient.setGameId(response);
+                    waitForGameStart();
+                }else{
+                    v.reportError("Game creation failed");
+                }
+            }
+            default -> {}
         }
     }
-
-    private void joinExistingGame() throws Exception {
+    public void joinExistingGame() throws Exception {
         int response = virtualClient.sendGameRequest("JOIN");
         if (response != 0) {
             view.inform("Joining existing game");
@@ -113,6 +134,10 @@ public class ClientController {
 
     private void waitForGameStart() throws Exception {
         while (true) {
+            switch (view){
+                case GUIView v -> v.setMainScene(SceneEnum.WAITING_QUEUE);
+                default -> {}
+            }
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {
                 startGame();
@@ -240,6 +265,10 @@ public class ClientController {
 
     public VirtualView getViewInterface() {
         return virtualClient;
+    }
+
+    public void logOutGUI() throws Exception {
+        virtualClient.logOut();
     }
 
 

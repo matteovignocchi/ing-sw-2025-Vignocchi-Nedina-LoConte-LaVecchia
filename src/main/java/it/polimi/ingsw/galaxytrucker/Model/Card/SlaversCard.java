@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
+import java.io.Serializable;
+
 
 /**
  * This class handles the SlaversCard, which is deserialized via Jackson.
@@ -11,7 +13,7 @@ import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class SlaversCard implements Card{
+public class SlaversCard implements Card, Serializable {
     private final String idCard;
     private final int days;
     private final int credits;

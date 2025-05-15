@@ -28,6 +28,7 @@ public class Message implements Serializable {
     public static final String OP_GAME_PHASE = "GAME_PHASE";
     public static final String OP_PRINT_DECK = "PRINT_DECK";
     public static final String OP_PRINT_TILE = "PRINT_TILE";
+    public static final String OP_SET_CENTRAL_TILE = "SET_CENTRAL_TILE";
     public static final String OP_GET_TILE = "GET_TILE";
     public static final String OP_GET_UNCOVERED = "GET_UNCOVERED";
     public static final String OP_GET_UNCOVERED_LIST = "GET_UNCOVERED_LIST";

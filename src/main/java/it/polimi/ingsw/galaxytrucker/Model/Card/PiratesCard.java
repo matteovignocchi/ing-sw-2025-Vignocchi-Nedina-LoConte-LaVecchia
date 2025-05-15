@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class PiratesCard implements Card {
+public class PiratesCard implements Card, Serializable {
     private final String idCard;
     private final int fire_power;
     private final int days;
