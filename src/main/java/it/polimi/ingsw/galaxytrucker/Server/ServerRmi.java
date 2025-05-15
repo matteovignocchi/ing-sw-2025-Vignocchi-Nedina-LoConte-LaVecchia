@@ -76,7 +76,6 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
         handleGameManagerCall("logOut", () -> {
             gameManager.quitGame(gameId, nickname);
-            gameManager.logout(nickname);
             return null;
         });
     }
@@ -182,11 +181,11 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void logIn(String nickname) throws RemoteException, BusinessLogicException {
+    public void logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
         handleGameManagerCall("login", () -> {
-            gameManager.login(nickname);
+            gameManager.login(nickname, v);
             return null;
         });
     }

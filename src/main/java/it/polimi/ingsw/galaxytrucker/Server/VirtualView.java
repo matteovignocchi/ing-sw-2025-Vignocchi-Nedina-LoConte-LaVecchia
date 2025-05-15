@@ -90,4 +90,6 @@ public interface VirtualView extends Remote {
     void setStart() throws Exception;
 
     String askInformationAboutStart() throws Exception;
+
+    void setCentralTile(Tile tile) throws Exception;
 }

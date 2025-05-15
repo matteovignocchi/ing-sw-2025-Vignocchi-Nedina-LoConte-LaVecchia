@@ -276,15 +276,26 @@ public class Controller implements Serializable {
             try {
                 v.updateMapPosition(playerPosition);
                 v.inform("Game is starting!");
+                v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
-                v.setStart();
+
+                v.updateGameState(GamePhase.BOARD_SETUP);
             } catch (Exception e) {
                 markDisconnected(nick);
             }
         });
 
+        viewsByNickname.forEach((nick, v) -> {
+            try {
+                v.setStart();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         if (!isDemo) startHourglass();
-        notifyAllViews();
+//        notifyAllViews();
+
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
@@ -293,11 +304,10 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
-        int randomIdx = ThreadLocalRandom.current().nextInt(size);
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
-        return getTile(randomIdx);
+        return getTile(1);
     }
 
     public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
@@ -331,12 +341,14 @@ public class Controller implements Serializable {
         Player p = getPlayerCheck(nickname);
 
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
+
+        p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
+        notifyView(nickname);
+
+
         ;
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
-        } else{
-            p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
-            notifyView(nickname);
         }
     }
 
@@ -1865,14 +1877,14 @@ public class Controller implements Serializable {
        String nick =  getNickByPlayer(p);
         try {
             viewsByNickname.get(nick).updateGameState(tmp);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            notifyView(nick);
+        }  catch (Exception e) {
+            markDisconnected(nick);
         }
-    }
-
-    public void changeUpdateByPlayer(Player p) throws BusinessLogicException {
-        String nick =  getNickByPlayer(p);
-        notifyView(nick);
+//            throw new RuntimeException(e);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void changeMapPosition(){
@@ -1886,10 +1898,17 @@ public class Controller implements Serializable {
         for(String nick : playerPosition.keySet()){
             try {
                 viewsByNickname.get(nick).updateMapPosition(playerPosition);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+
+            }  catch (Exception e) {
+                markDisconnected(nick);
             }
         }
+        notifyAllViews();
+    }
+
+    public void setExit(){
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+        notifyAllViews();
     }
 }
 

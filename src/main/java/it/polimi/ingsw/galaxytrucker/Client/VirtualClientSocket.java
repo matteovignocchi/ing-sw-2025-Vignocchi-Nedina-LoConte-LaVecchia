@@ -110,7 +110,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
 
-    private void handleUpdate(Message msg) {
+    private void handleUpdate(Message msg) throws Exception {
         switch (msg.getOperation()) {
             case Message.OP_GAME_PHASE -> this.updateGameState((GamePhase) msg.getPayload());
             case Message.OP_PRINT_CARD -> this.printCard((Card) msg.getPayload());
@@ -124,6 +124,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_SET_CENTRAL_TILE -> this.setCentralTile((Tile) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -443,6 +444,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public String askInformationAboutStart() {
         return start;
+    }
+
+    @Override
+    public void setCentralTile(Tile tile) throws Exception {
+        Dash_Matrix[2][3] = tile;
     }
 }
 

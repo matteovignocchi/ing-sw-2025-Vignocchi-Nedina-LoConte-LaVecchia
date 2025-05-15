@@ -90,10 +90,14 @@ public class TUIView implements View {
             System.out.println(s + ": " + mapPosition.get(s));
         }
         System.out.println();
-        inform("Selecet che index of the player");
-        int i = askIndex();
-        List<String> keys = new ArrayList<>(mapPosition.keySet());
-        return keys.get(i);
+        String nickname;
+        while(true){
+            inform("Selecet che index of the player");
+            nickname = askString();
+            if(mapPosition.keySet().contains(nickname)) break;
+            inform("Please enter a nickname of some player in game for god");
+        }
+        return nickname;
     }
     @Override
     public boolean ask(String message) {
@@ -235,7 +239,13 @@ public class TUIView implements View {
             case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
             case EXIT -> inform("Goodbye!");
         }
+        for(String s : mapPosition.keySet()){
+            System.out.println(s + ": " + mapPosition.get(s));
+        }
+        System.out.println();
+
         printListOfCommand();
+
     }
 
     //metodo che riceve una lista, in cui prendi
@@ -328,7 +338,7 @@ public class TUIView implements View {
         StringBuilder mid = new StringBuilder();
         StringBuilder bot = new StringBuilder();
         StringBuilder border = new StringBuilder();
-        String[] rendered = new String[3];
+        String[] rendered = renderTile(tile);
         border.append("+---------+ ");
         top.append("|").append(rendered[0]).append("| ");
         mid.append("|").append(rendered[1]).append("| ");

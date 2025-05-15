@@ -96,9 +96,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         }
     }
 
-    private Message handleLogin(Object p) throws BusinessLogicException {
+    private Message handleLogin(Object p) throws Exception{
         String nickname = (String) p;
-        gameManager.login(nickname);
+        gameManager.login(nickname, this);
+        // se arriva qui, o è nuovo login (void) o è già riconnesso
         return Message.response("OK");
     }
 
@@ -359,5 +360,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.flush();
     }
 
+    @Override
+    public void setCentralTile(Tile tile) throws IOException {
+        out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
+        out.flush();
+    }
 }
 

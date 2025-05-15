@@ -13,6 +13,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private int gameId = 0;
     private Tile[][] Dash_Matrix;
     boolean flag = true;
+    private final Object startLock = new Object();
     private String start = "false";
 
     public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
@@ -56,6 +58,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
         view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+    }
+
+    public void setCentralTile(Tile tmp){
+        Dash_Matrix[2][3] = tmp;
     }
     @Override
     public void inform(String message) throws RemoteException {
@@ -142,7 +148,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public boolean sendLogin(String username) throws RemoteException {
         try {
-            server.logIn(username);
+            server.logIn(username , this);
         } catch (BusinessLogicException e) {
             return false;
         }
@@ -180,7 +186,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 int choice;
                while(true){
                     choice = askIndex()+1;
-                   if(choice > 0 && choice <= availableGames.keySet().size())break;
+                    if(availableGames.containsKey(choice)) break;
                    view.inform("index not valid");
                }
                 try {
@@ -256,9 +262,9 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         view.printDashShip(Dash_Matrix);
-        view.inform("choose coordinate");
         int[] tmp;
         while(true){
+            view.inform("choose coordinate");
             tmp = view.askCoordinate();
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
@@ -321,15 +327,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void lookDashBoard() throws RemoteException{
+        Tile[][] dashPlayer;
+        String tmp;
         while(true){
-            String tmp = view.choosePlayer();
+             tmp = view.choosePlayer();
             try {
-                server.lookAtDashBoard(gameId,tmp);
+                dashPlayer = server.lookAtDashBoard(gameId,tmp);
                 break;
             } catch (Exception e) {
                 view.reportError("player not valid");
             }
         }
+        view.inform("Space Ship of :" + tmp);
+        view.printDashShip(dashPlayer);
     }
     @Override
     public void logOut() throws RemoteException{
@@ -355,11 +365,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setStart() throws RemoteException{
-        start = "start";
-    }
+        synchronized (startLock) {
+            start = "start";
+        }    }
 
     @Override
     public String askInformationAboutStart() throws RemoteException {
-        return start;
+        synchronized (startLock) {
+            return start;
+        }
     }
+
 }
