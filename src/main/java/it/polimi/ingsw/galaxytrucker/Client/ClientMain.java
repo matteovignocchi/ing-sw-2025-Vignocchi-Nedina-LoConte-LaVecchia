@@ -34,7 +34,7 @@ public class ClientMain {
 
         //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        String host = "192.168.179.16";
+        String host = "192.168.1.51";
         int port = 30001;
 
         Scanner input = new Scanner(System.in);

@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import it.polimi.ingsw.galaxytrucker.Client.ClientHandler;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

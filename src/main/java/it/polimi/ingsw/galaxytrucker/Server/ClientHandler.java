@@ -1,11 +1,11 @@
-package it.polimi.ingsw.galaxytrucker.Client;
+package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Client.Message;
+import it.polimi.ingsw.galaxytrucker.Client.UpdateViewRequest;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Server.GameManager;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualViewAdapter;
 
 import java.io.EOFException;
 import java.io.IOException;

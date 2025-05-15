@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
 /**
  * Card interface that represents a generic adventure card in the game.
@@ -40,5 +41,5 @@ public interface Card {
      * @throws CardEffectException: custom exception that handles an error while executing the card effect.
      */
 
-    void accept (CardVisitor visitor) throws CardEffectException;
+    void accept (CardVisitor visitor) throws BusinessLogicException;
 }
