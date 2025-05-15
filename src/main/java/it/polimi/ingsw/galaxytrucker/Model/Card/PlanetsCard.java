@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class PlanetsCard implements Card {
+public class PlanetsCard implements Card, Serializable {
     private final String idCard;
     private final List<List<Colour>> reward_goods;
     private final int days;

@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
+import java.io.Serializable;
+
 /**
  * This class handles the StardustCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
  */
-public class StardustCard implements Card {
+public class StardustCard implements Card, Serializable {
 
     private final String idCard;
 

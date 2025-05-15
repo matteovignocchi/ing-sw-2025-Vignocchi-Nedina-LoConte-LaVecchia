@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
+import java.io.Serializable;
+
 /**
  * This class handles the OpenSpaceCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
  */
 
-public class OpenSpaceCard implements Card {
+public class OpenSpaceCard implements Card, Serializable {
 
     private final String idCard;
 

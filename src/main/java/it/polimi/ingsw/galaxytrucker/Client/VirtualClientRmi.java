@@ -331,13 +331,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         while(true){
             index = askIndex();
             try {
-                server.showDeck(gameId, index);
+                List<Card> deck = server.showDeck(gameId, index);
+                view.printDeck(deck);
                 break;
             } catch (Exception e) {
                 view.reportError("index not valid");
             }
         }
     }
+
     @Override
     public void lookDashBoard() throws RemoteException{
         Tile[][] dashPlayer;
