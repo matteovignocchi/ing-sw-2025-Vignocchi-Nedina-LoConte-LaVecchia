@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
 /**
  * This class handles the StardustCard, which is deserialized via Jackson.
@@ -21,7 +22,7 @@ public class StardustCard implements Card {
     }
 
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
         visitor.visit(this);
     }
 

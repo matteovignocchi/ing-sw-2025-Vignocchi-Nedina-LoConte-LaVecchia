@@ -1852,6 +1852,8 @@ public class Controller implements Serializable {
         } catch (InvalidPlayerException e){
             System.err.println("Error: " + e.getMessage());
             // TODO: notificare la view con view.showerror?
+        } catch (BusinessLogicException e) {
+            throw new RuntimeException(e);
         }
     }
 
