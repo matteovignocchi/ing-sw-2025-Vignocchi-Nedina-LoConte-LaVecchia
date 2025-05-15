@@ -6,6 +6,8 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.IOException;
@@ -264,34 +266,56 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public int sendGameRequest(String message) throws IOException, InterruptedException {
         if(message.equals("CREATE")){
-            boolean demo = view.ask("would you like a demo version?");
-            int numberOfPlayer;
-            do{
-                view.inform("select max 4 players");
-                numberOfPlayer = view.askIndex();
-            }while(numberOfPlayer>4 || numberOfPlayer<2);
-            List<Object> payloadGame = new ArrayList<>();
-            payloadGame.add(demo);
-            payloadGame.add(nickname);
-            payloadGame.add(numberOfPlayer);
-            Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
-            sendRequest(createGame);
-            return ((int)  responseHandler.waitForResponse());
+            while (true) {
+                switch (view){
+                    case TUIView v ->{
+                        boolean demo = v.ask("would you like a demo version?");
+                        int numberOfPlayer;
+                        do {
+                            v.inform("select max 4 players");
+                            numberOfPlayer = v.askIndex();
+                        } while (numberOfPlayer > 4 || numberOfPlayer < 2);
+                        List<Object> payloadGame = new ArrayList<>();
+                        payloadGame.add(demo);
+                        payloadGame.add(nickname);
+                        payloadGame.add(numberOfPlayer);
+                        Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
+                        sendRequest(createGame);
+                        return ((int) responseHandler.waitForResponse());
+                    }
+                    case GUIView v ->{
+                        List<Object> data = v.getDataForGame();
+                        boolean demo = (boolean) data.get(0);
+                        int numberOfPlayer = (int) data.get(1);
+                        List<Object> payloadGame = new ArrayList<>();
+                        payloadGame.add(demo);
+                        payloadGame.add(nickname);
+                        payloadGame.add(numberOfPlayer);
+                        Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
+                        sendRequest(createGame);
+                        return ((int) responseHandler.waitForResponse());
+                    }
+                    default -> {}
+                }
+            }
         }
         if(message.equals("JOIN")) {
-            Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
-            sendRequest(gameRequest);
-            view.inform("Available Games");
-            Map<Integer, int[]> availableGames;
-            availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
-            for (Integer i : availableGames.keySet()) {
-                view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
+            while (true) {
+                Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+                sendRequest(gameRequest);
+                view.inform("Available Games");
+                Map<Integer, int[]> availableGames;
+                availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
+                for (Integer i : availableGames.keySet()) {
+                    view.inform(i + ". Players in game : " + availableGames.get(i)[0] + "/" + availableGames.get(i)[1]);
+                }
+                Integer choice = askIndex();
+                List<Object> payloadJoin = List.of(choice, nickname);
+                Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                sendRequest(gameChoice);
+                return choice;
             }
-            Integer choice = askIndex();
-            List<Object> payloadJoin = List.of(choice, nickname);
-            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-            sendRequest(gameChoice);
-            return choice;
+
         }
 
         return 0;

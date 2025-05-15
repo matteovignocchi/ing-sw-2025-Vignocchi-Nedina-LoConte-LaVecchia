@@ -7,6 +7,7 @@ public abstract class GUIController {
     protected Tile currentTile;
     protected Tile[][] dashBoard;
     protected GUIView guiView;
+
     public void setGuiView(GUIView guiView) {
         this.guiView = guiView;
     }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="150" prefWidth="300" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController">
+    <children>
+        <Label layoutX="30" layoutY="30" text="Insert your nickname:" />
+        <TextField fx:id="nicknameField" layoutX="30" layoutY="60" prefWidth="240" />
+        <Button alignment="CENTER" layoutX="125.0" layoutY="100.0" onAction="#confirmNickname" prefHeight="27.0" prefWidth="50.0" text="Send" AnchorPane.leftAnchor="125.0" AnchorPane.rightAnchor="125.0" />
+    </children>
+</AnchorPane>

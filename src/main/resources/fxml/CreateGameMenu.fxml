@@ -26,9 +26,9 @@
       <Button fx:id="exitButton" layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#exit" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
 
       <Button fx:id="backButton" layoutX="156.0" layoutY="279.0" mnemonicParsing="false" onMouseClicked="#back" text="Back" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="160.0" AnchorPane.rightAnchor="160.0" />
-      <Button layoutX="145.0" layoutY="105.0" mnemonicParsing="false" text="2 Players" visible="false" AnchorPane.bottomAnchor="230.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
-      <Button layoutX="144.0" layoutY="214.0" mnemonicParsing="false" text="3 Players" visible="false" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
-      <Button layoutX="144.0" layoutY="158.0" mnemonicParsing="false" text="4 Players" visible="false" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button fx:id="twoPlayerButton" layoutX="145.0" layoutY="105.0" mnemonicParsing="false" text="2 Players" visible="false" AnchorPane.bottomAnchor="230.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button fx:id="threePlayerButton" layoutX="144.0" layoutY="214.0" mnemonicParsing="false" text="3 Players" visible="false" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
+      <Button fx:id="fourPlayerButton" layoutX="144.0" layoutY="158.0" mnemonicParsing="false" text="4 Players" visible="false" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="150.0" AnchorPane.rightAnchor="150.0" />
       <Text fx:id="playersQuestionText" fill="#444444" layoutX="137.0" layoutY="106.0" strokeType="OUTSIDE" strokeWidth="0.0" text="How many players?" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="290.625" AnchorPane.leftAnchor="137.0" AnchorPane.rightAnchor="135.890625" AnchorPane.topAnchor="89.859375">
          <font>
             <Font name="Impact" size="16.0" />
