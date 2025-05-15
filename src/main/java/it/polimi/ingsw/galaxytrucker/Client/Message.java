@@ -40,6 +40,7 @@ public class Message implements Serializable {
     public static final String OP_POSITION_TILE = "POSITION_TILE";
     public static final String OP_ROTATE_GLASS = "ROTATE_GLASS";
     public static final String OP_SET_READY = "SET_READY";
+    public static final String OP_SET_IS_DEMO = "SET_IS_DEMO";
     public static final String OP_LOOK_DECK = "LOOK_DECK";
     public static final String OP_LOOK_SHIP = "LOOK_SHIP";
     public static final String OP_SET_NICKNAME = "OP_NICKNAME";

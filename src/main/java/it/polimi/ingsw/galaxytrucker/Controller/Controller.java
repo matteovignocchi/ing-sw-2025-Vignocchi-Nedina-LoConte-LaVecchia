@@ -275,8 +275,9 @@ public class Controller implements Serializable {
         viewsByNickname.forEach((nick, v) -> {
             try {
                 v.updateMapPosition(playerPosition);
-                v.inform("Game is starting!");
+                v.setIsDemo(isDemo);
                 v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
+                v.inform("Game is starting!");
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
 
                 v.updateGameState(GamePhase.BOARD_SETUP);
@@ -314,6 +315,7 @@ public class Controller implements Serializable {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
+        if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("No tiles found");
 
         Player p = getPlayerCheck(nickname);
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);

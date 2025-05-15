@@ -188,6 +188,16 @@ public class GUIView extends Application implements View {
         return "";
     }
 
+    @Override
+    public void printListOfCommand() {
+
+    }
+
+    @Override
+    public void setIsDemo(Boolean demo) {
+
+    }
+
     public VirtualView setMainScene(SceneEnum sceneName) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName.value()));
         Parent root = loader.load();

@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
@@ -65,6 +66,7 @@ public class ClientController {
                 case 2 -> joinExistingGame();
                 case 3 -> {
                     virtualClient.logOut();
+                    view.inform("Logout successful");
                     System.exit(0);
                 }
                 default -> view.inform("Choice not valid");
@@ -125,13 +127,52 @@ public class ClientController {
         do {
             String key = view.sendAvailableChoices();
             switch (key) {
-                case "getacoveredtile" -> tmpTile = virtualClient.getTileServer();
-                case "getashowntile" -> tmpTile = virtualClient.getUncoveredTile();
-                case "returnthetile" -> virtualClient.getBackTile(tmpTile);
+                case "getacoveredtile" -> {
+                    try {
+                        tmpTile = virtualClient.getTileServer();
+                        view.printTile(tmpTile);
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
+                case "getashowntile" ->{
+                    try {
+                        tmpTile = virtualClient.getUncoveredTile();
+                        view.printTile(tmpTile);
+                        view.printListOfCommand();
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
+                case "returnthetile" ->{
+                    try {
+                        virtualClient.getBackTile(tmpTile);
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
                 case "placethetile" -> virtualClient.positionTile(tmpTile);
-                case "drawacard" -> virtualClient.drawCard();
-                case "spinthehourglass" -> virtualClient.rotateGlass();
-                case "declareready" -> virtualClient.setReady();
+                case "drawacard" -> {
+                    try {
+                        virtualClient.drawCard();
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
+                case "spinthehourglass" -> {
+                    try {
+                        virtualClient.rotateGlass();
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
+                case "declareready" -> {
+                    try {
+                        virtualClient.setReady();
+                    }catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
+                }
                 case "watchadeck" -> virtualClient.lookDeck();
                 case "watchaplayersship" -> virtualClient.lookDashBoard();
                 case "rightrotatethetile" -> rotateRight();
@@ -141,7 +182,8 @@ public class ClientController {
                     idCurrentGame = 0;
                 }
                 default -> view.inform("Action not recognized");
-            }            gameState = virtualClient.getGameFase();
+            }
+            gameState = virtualClient.getGameFase();
         } while (!gameState.equals(GamePhase.EXIT));
     }
 
@@ -172,6 +214,7 @@ public class ClientController {
             tmpTile.rotateRight();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
+            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }
@@ -182,6 +225,7 @@ public class ClientController {
             tmpTile.rotateLeft();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
+            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }

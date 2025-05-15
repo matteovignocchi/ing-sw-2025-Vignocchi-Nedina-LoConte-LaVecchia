@@ -5,15 +5,10 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TUIView implements View {
-    private int idPlayer;
-    private int server;
     private GamePhase game;
     private boolean isDemo;
     private Scanner scanner = new Scanner(System.in);
@@ -92,25 +87,27 @@ public class TUIView implements View {
         System.out.println();
         String nickname;
         while(true){
-            inform("Selecet che index of the player");
+            inform("Selecet nickname of the player");
             nickname = askString();
-            if(mapPosition.keySet().contains(nickname)) break;
+            for (String key : mapPosition.keySet()) {
+                if (key.equalsIgnoreCase(nickname)) {
+                    return key;
+                }
+            }
             inform("Please enter a nickname of some player in game for god");
         }
-        return nickname;
     }
     @Override
     public boolean ask(String message) {
-        boolean flag = true;
         boolean decision = false;
-        while(flag) {
+        while(true) {
             inform(message+ "(Yes/No)");
             String response = scanner.nextLine().trim().toLowerCase();
             if (response.equals("yes")) {
-                flag = false;
                 decision = true;
+                break;
             } else if (response.equals("no")) {
-                flag = false;
+                break;
             }
             else {
                 reportError("The response entered is invalid. Try again: ");
@@ -121,23 +118,50 @@ public class TUIView implements View {
 
     @Override
     public int[] askCoordinate() {
-        int[] coordinate = new int[2];
-        inform("Insert the row:");
-        coordinate[0] = scanner.nextInt();
-        scanner.nextLine();
-        inform("Insert the column:");
-        coordinate[1] = scanner.nextInt();
-        coordinate[0] = coordinate[0] - 5;
-        coordinate[1] = coordinate[1] - 4;
-        return coordinate;
-    }
+            int[] coordinate = new int[2];
+
+            while (true) {
+                inform("Insert the row:");
+                try {
+                    coordinate[0] = scanner.nextInt();
+                    scanner.nextLine(); // consuma il newline
+                    break;
+                } catch (InputMismatchException e) {
+                    inform("Invalid input. Please enter a number for the row.");
+                    scanner.nextLine(); // consuma l'input errato
+                }
+            }
+            while (true) {
+                inform("Insert the column:");
+                try {
+                    coordinate[1] = scanner.nextInt();
+                    scanner.nextLine(); // consuma il newline
+                    break;
+                } catch (InputMismatchException e) {
+                    inform("Invalid input. Please enter a number for the column.");
+                    scanner.nextLine(); // consuma l'input errato
+                }
+            }
+            coordinate[0] = coordinate[0] - 5;
+            coordinate[1] = coordinate[1] - 4;
+
+            return coordinate;
+        }
 
     @Override
     public int askIndex() {
         int index;
-        inform("Insert index:");
-        index = scanner.nextInt();
-        scanner.nextLine();
+        while (true) {
+            inform("Insert index:");
+            try {
+                index = scanner.nextInt();
+                scanner.nextLine();
+                break;
+            } catch (InputMismatchException e) {
+                inform("Invalid input. Please enter a number.");
+                scanner.nextLine();
+            }
+        }
         return index - 1;
     }
 
@@ -601,12 +625,18 @@ public class TUIView implements View {
         int tmp = askIndex();
         return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
-    private void printListOfCommand(){
+    @Override
+    public void printListOfCommand(){
         List<String> listOfOptions = commandConstructor();
         inform("Possible actions:");
         for(int i = 0 ; i < listOfOptions.size(); i++) {
             inform((i + 1) + ":" + listOfOptions.get(i));
         }
+    }
+
+    @Override
+    public void setIsDemo(Boolean demo) {
+        this.isDemo = demo;
     }
 }
 

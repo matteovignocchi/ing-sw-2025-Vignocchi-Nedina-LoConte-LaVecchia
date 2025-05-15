@@ -26,7 +26,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private int gameId = 0;
     private String nickname;
     private Tile[][] Dash_Matrix;
-    boolean flag = true;
     private boolean active = true;
     private String start = "false";
     private final ResponseHandler responseHandler = new ResponseHandler();
@@ -124,6 +123,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_SET_IS_DEMO -> this.setIsDemo((Boolean) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -143,7 +143,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             }
             case Message.OP_SET_FLAG_START -> {
                 try {
-                    this.setFlagStart();
+                    this.setStart();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -431,11 +431,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void setFlagStart(){
-        flag = false;
-    }
-
-    @Override
     public void setStart(){
         start = "Start";
     }
@@ -448,6 +443,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void setCentralTile(Tile tile) throws Exception {
 
+    }
+
+    @Override
+    public void setIsDemo(Boolean demo) {
+        view.setIsDemo(demo);
     }
 }
 

@@ -85,11 +85,11 @@ public interface VirtualView extends Remote {
 
     void updateMapPosition(Map<String, Integer> Position) throws Exception;
 
-    void setFlagStart() throws Exception;
-
     void setStart() throws Exception;
 
     String askInformationAboutStart() throws Exception;
 
     void setCentralTile(Tile tile) throws Exception;
+
+    void setIsDemo(Boolean demo) throws Exception;
 }
