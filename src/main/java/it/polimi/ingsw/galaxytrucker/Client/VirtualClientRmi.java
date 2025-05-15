@@ -8,12 +8,12 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -158,15 +158,28 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public int sendGameRequest(String message) throws RemoteException {
         if(message.contains("CREATE")){
             while (true){
-                boolean tmp = view.ask("would you like a demo version?");
-
-                view.inform("select max 4 players");
-                int tmpInt = view.askIndex()+1;
-
-                try {
-                    return server.createNewGame(tmp , this , nickname ,tmpInt );
-                } catch (Exception e) {
-                    view.reportError("you miss +" + e.getMessage() );
+                switch (view){
+                    case TUIView v ->{
+                        boolean demo = v.ask("would you like a demo version?");
+                        v.inform("select max 4 players");
+                        int numberOfPlayer = v.askIndex()+1;
+                        try {
+                            return server.createNewGame(demo , this , nickname , numberOfPlayer);
+                        } catch (Exception e) {
+                            v.reportError("you miss +" + e.getMessage() );
+                        }
+                    }
+                    case GUIView v -> {
+                        try {
+                            List<Object> data = v.getDataForGame();
+                            boolean demo = (boolean) data.get(0);
+                            int numberOfPlayer = (int) data.get(1);
+                            return server.createNewGame(demo, this, nickname, numberOfPlayer);
+                        } catch (Exception e) {
+                            v.reportError("you miss +" + e.getMessage());
+                        }
+                    }
+                    default -> {}
                 }
             }
 

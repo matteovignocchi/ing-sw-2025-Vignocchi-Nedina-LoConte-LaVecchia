@@ -56,7 +56,10 @@ public class ClientMain {
                 virtualClient = new VirtualClientSocket(host, port, view);
             }
             ClientController controller = new ClientController(view, virtualClient);
-
+            switch (view) {
+                case GUIView v -> v.setClientController(controller);
+                default -> {}
+            }
             controller.start();
 
         }catch (Exception e){

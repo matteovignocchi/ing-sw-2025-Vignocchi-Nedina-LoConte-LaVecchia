@@ -8,6 +8,8 @@ import javafx.scene.control.Button;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateGameMenuController extends GUIController {
     @FXML
@@ -30,9 +32,14 @@ public class CreateGameMenuController extends GUIController {
     private Text playersQuestionText;
 
     private boolean isDemo;
+    private int player;
 
+    @FXML
     public void initialize() {
+        showDemoQuestion();
+    }
 
+    private void showDemoQuestion() {
         demoQuestionText.setVisible(true);
         level2Button.setVisible(true);
         demoButton.setVisible(true);
@@ -43,10 +50,7 @@ public class CreateGameMenuController extends GUIController {
         threePlayerButton.setVisible(false);
         fourPlayerButton.setVisible(false);
         playersQuestionText.setVisible(false);
-        backButton.setVisible(false);
 
-
-        // Imposta gli handler per i bottoni del demo flight
         demoButton.setOnAction(e -> {
             isDemo = true;
             showPlayerSelection();
@@ -59,46 +63,36 @@ public class CreateGameMenuController extends GUIController {
     }
 
     private void showPlayerSelection() {
-        // Nascondi elementi demo choice
         demoQuestionText.setVisible(false);
         level2Button.setVisible(false);
         demoButton.setVisible(false);
         exitButton.setVisible(false);
 
-        // Mostra elementi player selection
         backButton.setVisible(true);
         twoPlayerButton.setVisible(true);
         threePlayerButton.setVisible(true);
         fourPlayerButton.setVisible(true);
         playersQuestionText.setVisible(true);
-        backButton.setVisible(true);
 
-        // Personalizza il testo in base alla modalità
-        playersQuestionText.setVisible(true);
-        demoButton.setVisible(false);
-
-
+        twoPlayerButton.setOnAction(e -> player = 2);
+        threePlayerButton.setOnAction(e -> player = 3);
+        fourPlayerButton.setOnAction(e -> player = 4);
+        List<Object> dataForGame = new ArrayList<>();
+        dataForGame.add(isDemo);
+        dataForGame.add(player);
+        guiView.resolveDataGame(dataForGame);
     }
+
 
     @FXML
     private void back() {
-        // Nascondi player selection
-        backButton.setVisible(false);
-        twoPlayerButton.setVisible(false);
-        threePlayerButton.setVisible(false);
-        fourPlayerButton.setVisible(false);
-        playersQuestionText.setVisible(false);
-        backButton.setVisible(false);
-
-        // Mostra demo choice
-        demoQuestionText.setVisible(true);
-        demoButton.setVisible(true);
-        level2Button.setVisible(true);
-        exitButton.setVisible(true);
+        showDemoQuestion();
     }
+
+
     @FXML
     public void exit() throws IOException {
-        ((GUIView) ClientController.getInstance().getViewInterface()).setMainScene(SceneEnum.MAIN_MENU);
+        guiView.setMainScene(SceneEnum.MAIN_MENU);
     }
 
 }
