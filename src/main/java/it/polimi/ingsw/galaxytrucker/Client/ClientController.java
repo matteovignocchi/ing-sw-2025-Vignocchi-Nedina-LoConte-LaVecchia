@@ -46,7 +46,7 @@ public class ClientController {
             String username = virtualClient.askString();
             ans  = virtualClient.sendLogin(username);
             if (ans == -1) {
-                view.reportError("Credential not valid");
+                view.reportError("Credential not valid, enter a new username:  ");
             } else if (ans == -2) {
                 view.inform("Login successful");
                 virtualClient.setNickname(username);

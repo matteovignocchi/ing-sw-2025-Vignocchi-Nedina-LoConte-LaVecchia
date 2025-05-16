@@ -141,7 +141,6 @@ public class Controller implements Serializable {
         viewsByNickname.put(nickname, view);
         playerPosition.put(nickname, p.getId());
 
-        view.inform("SERVER: " + "Player " + nickname + " added to game");
         broadcastInform("SERVER: " + nickname + "  joined");
     }
 
