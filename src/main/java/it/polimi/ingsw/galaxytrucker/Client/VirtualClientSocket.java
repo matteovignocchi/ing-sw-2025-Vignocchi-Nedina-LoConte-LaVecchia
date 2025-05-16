@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -327,12 +328,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendLogin(String username) throws IOException, InterruptedException {
-        Message loginRequest = Message.request(Message.OP_LOGIN, username);
+        List<Object> payload = new ArrayList<>();
+        payload.add(username);
+        payload.add(this);
+        Message loginRequest = Message.request(Message.OP_LOGIN, payload);
         sendRequest(loginRequest);
-        String answer = (String) responseHandler.waitForResponse();
-        //TODO: sistemare questo
-        //return "OK".equals(answer);
-        return 0;
+        return (int) responseHandler.waitForResponse();
+
     }
 
 
