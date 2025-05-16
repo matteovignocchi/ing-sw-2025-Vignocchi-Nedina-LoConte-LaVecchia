@@ -194,11 +194,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 } catch (BusinessLogicException e) {
                     view.reportError("you miss " + e.getMessage() );
                 }
-                for (Integer i : availableGames.keySet()) {
-                    int[] info = availableGames.get(i);
-                    boolean isDemo = info[2] == 1;
-                    String suffix = isDemo ? " DEMO" : "";
-                    view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                if(availableGames.isEmpty()){
+                    view.inform("No available games");
+                } else {
+                    for (Integer i : availableGames.keySet()) {
+                        int[] info = availableGames.get(i);
+                        boolean isDemo = info[2] == 1;
+                        String suffix = isDemo ? " DEMO" : "";
+                        view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                    }
                 }
                 int choice;
                while(true){

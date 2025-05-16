@@ -307,12 +307,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 view.inform("Available Games");
                 Map<Integer, int[]> availableGames;
                 availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
-                for (Integer i : availableGames.keySet()) {
-                    if(availableGames.get(i)[2] == 1){
-                        view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1] + " DEMO");
+                if(availableGames.isEmpty()){
+                    view.inform("No available games");
+                }else{
+                    for (Integer i : availableGames.keySet()) {
+                        if(availableGames.get(i)[2] == 1){
+                            view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1] + " DEMO");
+                        }
+                        view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
                     }
-                    view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
                 }
+
                 Integer choice = askIndex();
                 List<Object> payloadJoin = List.of(choice, nickname);
                 Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
