@@ -106,7 +106,7 @@ public class Controller implements Serializable {
             );
         } catch (RemoteException e) {
             markDisconnected(nickname);
-            broadcastInform(nickname + " is disconnected");
+            broadcastInform("SERVER: " + nickname + " is disconnected");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -141,8 +141,8 @@ public class Controller implements Serializable {
         viewsByNickname.put(nickname, view);
         playerPosition.put(nickname, p.getId());
 
-        view.inform("Player " + nickname + " added to game");
-        broadcastInform(nickname + "  joined");
+        view.inform("SERVER: " + "Player " + nickname + " added to game");
+        broadcastInform("SERVER: " + nickname + "  joined");
     }
 
     //TODO: discutere con fra per vedere se eliminabile (usare getPlayerCheck)
@@ -198,7 +198,7 @@ public class Controller implements Serializable {
         Player p = playersByNickname.get(nickname);
         if (p != null && p.isConnected()) {
             p.setConnected(false);
-            broadcastInform(nickname + " is disconnected");
+            broadcastInform("SERVER: " + nickname + " is disconnected");
             setTimeout();
 
             //Capire se tenere e come gestire
@@ -214,7 +214,7 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) {
             p.setConnected(true);
-            broadcastInform(nickname + " is reconnected");
+            broadcastInform("SERVER: " + nickname + " is reconnected");
         }
         cancelLastPlayerTimeout();
         notifyView(nickname);
@@ -255,7 +255,7 @@ public class Controller implements Serializable {
 
                 if (winner != null) {
                     try {
-                        viewsByNickname.get(winner).inform("You win by timeout!");
+                        viewsByNickname.get(winner).inform("SERVER: " + "You win by timeout!");
                     } catch (Exception ignored) {}
                 }
                 onGameEnd.accept(gameId);
@@ -280,7 +280,7 @@ public class Controller implements Serializable {
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
                 v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
-                v.inform("Game is starting!");
+                v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
             } catch (Exception e) {
                 markDisconnected(nick);
@@ -363,7 +363,7 @@ public class Controller implements Serializable {
         List<Player> playersInFlight = fBoard.getOrderedPlayers();
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
-        broadcastInform("Flight started!");
+        broadcastInform("SERVER: " + "Flight started!");
         playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.CARD_EFFECT));
 
         /**/ System.out.println("Dopo che setto la fase a tutti");
@@ -423,7 +423,7 @@ public class Controller implements Serializable {
             leader.setGamePhase(GamePhase.DRAW_PHASE);
 
             try {
-                v.inform("You're the leader! Draw a card");
+                v.inform("SERVER: " + "You're the leader! Draw a card");
                 break;
             } catch (Exception e) {
                 markDisconnected(leaderNick);
@@ -437,7 +437,7 @@ public class Controller implements Serializable {
 
     public void startHourglass(){
         hourglass.flip();
-        broadcastInform("Hourglass started!");
+        broadcastInform("SERVER: " + "Hourglass started!");
     }
 
     public void flipHourglass (String nickname) throws RemoteException, BusinessLogicException {
@@ -449,10 +449,10 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("Hourglass flipped a second time!");
+                    broadcastInform("SERVER: " + "Hourglass flipped a second time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
@@ -462,17 +462,17 @@ public class Controller implements Serializable {
             case 2:
                 if(state == HourglassState.ONGOING){
                     try {
-                        getViewCheck(nickname).inform("You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (Exception e) {
                         markDisconnected(nickname);
                         throw new RuntimeException(e);
                     }
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("Hourglass flipped the last time!");
+                    broadcastInform("SERVER: " + "Hourglass flipped the last time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("You cannot flip the hourglass for the last time: " +
+                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass for the last time: " +
                                 "You are not ready");
                     } catch (Exception e) {
                         markDisconnected(nickname);
@@ -489,13 +489,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("First Hourglass expired");
+                broadcastInform("SERVER: " + "First Hourglass expired");
                 break;
             case 2:
-                broadcastInform("Second Hourglass expired");
+                broadcastInform("SERVER: " + "Second Hourglass expired");
                 break;
             case 3:
-                broadcastInform("Time’s up! Building phase ended.");
+                broadcastInform("SERVER: " + "Time’s up! Building phase ended.");
                 startFlight();
                 break;
         }
@@ -521,7 +521,7 @@ public class Controller implements Serializable {
         //      In questi casi, in cui si updata solo la fase, conviene chiamare tutto il metodo update?
         //      Basterebbe updtare solo la fase
 
-        broadcastInform("Card drawn!");
+        broadcastInform("SERVER: " + "Card drawn!");
         viewsByNickname.forEach( (s, v) -> {
             try {
                 v.printCard(card);
@@ -610,9 +610,9 @@ public class Controller implements Serializable {
             //TODO: anche qui, se una view è disconnessa, provo lo stesso ad updatarle -> finirò nel catch e
             // lo rimetterò disconnesso anche se già lo è
             try{
-                if(totalCredits>0) v.inform("Your total credits are: " + totalCredits + " You won!");
-                else v.inform("Your total credits are: " + totalCredits + " You lost!");
-                v.inform("Game over. thank you for playing!");
+                if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
+                else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
+                v.inform("SERVER: " + "Game over. Thank you for playing!");
                 //TODO: update view
             } catch (Exception e) {
                 markDisconnected(nick);
@@ -936,7 +936,7 @@ public class Controller implements Serializable {
                 if(r != 0){
                     if(p.isConnected()){
                         try {
-                            x.inform("selezionare cella ed eliminare rosso");
+                            x.inform("SERVER: " + "selezionare cella ed eliminare rosso");
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -986,7 +986,7 @@ public class Controller implements Serializable {
                 if(r == 0 && num!=0 && g != 0){
                     if(p.isConnected()){
                         try {
-                            x.inform("selezionare cella ed eliminare giallo");
+                            x.inform("SERVER: " + "selezionare cella ed eliminare giallo");
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1035,7 +1035,7 @@ public class Controller implements Serializable {
                 if(r == 0 && g == 0 && v != 0 && num!=0){
                     if(p.isConnected()){
                         try {
-                            x.inform("selezionare cella ed eliminare verde");
+                            x.inform("SERVER: " + "selezionare cella ed eliminare verde");
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1086,7 +1086,7 @@ public class Controller implements Serializable {
                 if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
                   if(p.isConnected()){
                       try {
-                          x.inform("selezionare cella ed eliminare blu");
+                          x.inform("SERVER: " + "selezionare cella ed eliminare blu");
                       } catch (Exception e) {
                           markDisconnected(nick);
                           throw new RuntimeException(e);
@@ -1152,7 +1152,7 @@ public class Controller implements Serializable {
                 while(finish > 0){
                     if(p.isConnected()){
                         try {
-                            x.inform("selezionare cella ed eliminare una batteria");
+                            x.inform("SERVER: " + "selezionare cella ed eliminare una batteria");
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1213,14 +1213,14 @@ public class Controller implements Serializable {
         VirtualView x = viewsByNickname.get(nick);
 
         try {
-            if(!x.ask("vuoi aggiungere un goods?")) flag=false;
+            if(!x.ask("SERVER: " + "vuoi aggiungere un goods?")) flag=false;
         } catch (Exception e) {
             markDisconnected(nick);
             throw new RuntimeException(e);
         }
         while (list.size() != 0 && flag == true) {
             try {
-                x.inform("seleziona una HOusing unit");
+                x.inform("SERVER: " + "seleziona una Housing unit");
             } catch (Exception e) {
                 markDisconnected(nick);
                 throw new RuntimeException(e);
@@ -1243,7 +1243,7 @@ public class Controller implements Serializable {
                             throw new RuntimeException(e);
                         }
                         try {
-                            x.ask("seleziona indice da rimuovere");
+                            x.ask("SERVER: " + "seleziona indice da rimuovere");
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -1259,7 +1259,7 @@ public class Controller implements Serializable {
                         list.add(tmp);
                     }
                     try {
-                        x.inform("seleziona la merce da inserire");
+                        x.inform("SERVER: " + "seleziona la merce da inserire");
                     } catch (Exception e) {
                         markDisconnected(nick);
                         throw new RuntimeException(e);
@@ -1275,7 +1275,7 @@ public class Controller implements Serializable {
                 }
                 default -> {
                     try {
-                        x.inform("cella non valida");
+                        x.inform("SERVER: " + "cella non valida");
                     } catch (Exception e) {
                         markDisconnected(nick);
                         throw new RuntimeException(e);
@@ -1285,7 +1285,7 @@ public class Controller implements Serializable {
 
             }
             try {
-                if(!x.ask("Vuoi continurare")) flag = false;
+                if(!x.ask("SERVER: " + "Vuoi continurare")) flag = false;
             } catch (Exception e) {
                 markDisconnected(nick);
                 throw new RuntimeException(e);
@@ -1360,7 +1360,7 @@ public class Controller implements Serializable {
         } else {
             while (num > 0) {
                 if(p.isConnected()){
-                    x.inform("seleziona un Housing unit");
+                    x.inform("SERVER: " + "seleziona un Housing unit");
                     int[] vari = askPlayerCoordinates(p);
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
@@ -1371,10 +1371,10 @@ public class Controller implements Serializable {
                                 if(tmp == 3) p.setPurpleAlien();
                                 num--;
                             }else{
-                                x.inform("seleziona una housing unit valida");
+                                x.inform("SERVER: " + "seleziona una housing unit valida");
                             }
                         }
-                        default -> x.inform("seleziona una abitazione valida");
+                        default -> x.inform("SERVER: " + "seleziona una abitazione valida");
                     }
                 }else{
                     Tile[][] tmpDash = p.getDashMatrix();
@@ -1450,18 +1450,18 @@ public class Controller implements Serializable {
         VirtualView x = viewsByNickname.get(nick);
 
         while (!flag) {
-            if (x.ask("vuoi usare uno scudo?")) {
+            if (x.ask("SERVER: " + "vuoi usare uno scudo?")) {
                 int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
                 Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
                 switch (y) {
                     case Shield shield -> {
                         if (!(shield.getProtectedCorner(d) == 8)) {
-                            x.inform("seleziona un'altro scudo");
+                            x.inform("SERVER: " + "seleziona un'altro scudo");
                         } else {
                             return manageEnergyCell(nick);
                         }
                     }
-                    default -> x.inform("cella non valida");
+                    default -> x.inform("SERVER: " + "cella non valida");
 
                 }
             } else {
@@ -1597,7 +1597,7 @@ public class Controller implements Serializable {
 //            markDisconnected(nick);
 //            throw new RuntimeException(e);
 //        }
-        if (!askPlayerDecision("Do you want to use a battery?", player)) {
+        if (!askPlayerDecision("SERVER: " + "Do you want to use a battery?", player)) {
             return false;
         } else {
             while (!exits) {
@@ -1627,7 +1627,7 @@ public class Controller implements Serializable {
                                 throw new RuntimeException(e);
                             }
                              */
-                            if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
+                            if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
                                 return false;
                         } else {
                             c.useBattery();
@@ -1646,7 +1646,7 @@ public class Controller implements Serializable {
                             throw new RuntimeException(e);
                         }
                         */
-                        if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
+                        if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
                             exits = true;
                     }
                 }
@@ -1798,7 +1798,7 @@ public class Controller implements Serializable {
         if(p.isConnected()){
             int[] xy;
             try {
-                v.inform("choose your starting housing unit");
+                v.inform("SERVER: " + "choose your starting housing unit");
                 xy = askPlayerCoordinates(p);
             } catch (RemoteException e) {
                 markDisconnected(nickname);
@@ -1813,7 +1813,7 @@ public class Controller implements Serializable {
                     case HousingUnit h -> flag = false;
                     default -> {
                         try {
-                            v.inform("Position non valid , choose another tile");
+                            v.inform("SERVER: " + "Position non valid , choose another tile");
                             xy = askPlayerCoordinates(p);
                         } catch (RemoteException e) {
                             markDisconnected(nickname);

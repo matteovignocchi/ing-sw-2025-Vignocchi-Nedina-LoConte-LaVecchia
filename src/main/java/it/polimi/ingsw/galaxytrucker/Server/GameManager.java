@@ -47,37 +47,34 @@ public class GameManager {
             nicknameToGameId.put(nickname, gameId);
             if (controller.countConnectedPlayers() == controller.getMaxPlayers())
                 controller.startGame();
-        } else {
-            controller.markReconnected(nickname, v);
-            controller.broadcastInform(nickname + " is reconnected");
         }
+
         safeSave(gameId, controller);
     }
 
     public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        controller.broadcastInform(nickname + " has abandoned: the game ends.");
+        controller.broadcastInform("SERVER: " + nickname + " has abandoned: the game ends.");
         controller.setExit();
         removeGame(gameId);
     }
 
-    //deve mandare businesslogicException, ma inform e setGameId mandano exception generica
-    public synchronized void login(String nickname, VirtualView v) throws Exception {
+    //TODO: deve mandare businesslogicException, ma inform e setGameId mandano exception generica
+    public synchronized int login(String nickname, VirtualView v) throws Exception {
         // caso nuovo utente
         if (loggedInUsers.add(nickname)) {
-            return;
+            return -2;
         }
         // caso reconnect
         Integer gameId = nicknameToGameId.get(nickname);
         if (gameId != null && games.containsKey(gameId)) {
             Controller controller = getControllerCheck(gameId);
             controller.markReconnected(nickname, v);
-            controller.broadcastInform(nickname + " is reconnected");
             controller.notifyAllViews();
             // comunico al client a schermo:
-            v.inform("Reconnect to the game #" + gameId);
+            controller.broadcastInform("SERVER: " + nickname + " reconnected to game");
             v.setGameId(gameId);
-            return;
+            return gameId;
         }
         // nick in uso ma non in partita: rifiuto
         throw new BusinessLogicException("Nickname already used: " + nickname);
