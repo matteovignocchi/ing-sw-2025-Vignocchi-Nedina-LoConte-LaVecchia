@@ -613,7 +613,7 @@ public class TUIView implements View {
                 listOfOptions.add("LogOut");
             }
             case SCORING  -> listOfOptions.add("logOut");
-            default -> listOfOptions.add("error-404");
+            default -> listOfOptions.add("logOut");
         }
         return listOfOptions;
     }

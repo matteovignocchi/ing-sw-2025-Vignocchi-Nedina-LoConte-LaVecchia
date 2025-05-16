@@ -75,7 +75,7 @@ public class ClientController {
                     case 2 -> joinExistingGame();
                     case 3 -> {
                         virtualClient.logOut();
-                        System.exit(0);
+                        isConnected = false;
                     }
                     default -> view.inform("Choice not valid");
                 }
@@ -120,17 +120,6 @@ public class ClientController {
             view.inform("Game not entered");
         }
     }
-
-//    private void waitForPlayers() throws Exception {
-//        while (true) {
-//            String status = virtualClient.askInformationAboutStart();
-//            if (status.contains("start")) {
-//                startGame();
-//                break;
-//            }
-////            view.inform(status);
-//        }
-//    }
 
     private void waitForGameStart() throws Exception {
         while (true) {
@@ -211,28 +200,6 @@ public class ClientController {
             gameState = virtualClient.getGameFase();
         } while (!gameState.equals(GamePhase.EXIT));
     }
-
-//    private void choosePossibleActions() throws Exception {
-//        String key = view.sendAvailableChoices();
-//        switch (key) {
-//            case "getblankettile" -> tmpTile = virtualClient.getTileServer();
-//            case "takediscoverytile" -> tmpTile = virtualClient.getUncoveredTile();
-//            case "returntile" -> virtualClient.getBackTile(tmpTile);
-//            case "placetile" -> virtualClient.positionTile(tmpTile);
-//            case "drawcard" -> virtualClient.drawCard();
-//            case "spinthehourglass" -> virtualClient.rotateGlass();
-//            case "declareready" -> virtualClient.setReady();
-//            case "watchadeck" -> virtualClient.lookDeck();
-//            case "watchaship" -> virtualClient.lookDashBoard();
-//            case "rightrotatetile" -> rotateRight();
-//            case "leftrotatetile" -> rotateLeft();
-//            case "logout" -> {
-//                virtualClient.logOut();
-//                idCurrentGame = 0;
-//            }
-//            default -> view.inform("Action not recognized");
-//        }
-//    }
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {

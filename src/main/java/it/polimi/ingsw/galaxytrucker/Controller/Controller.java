@@ -277,11 +277,10 @@ public class Controller implements Serializable {
             try {
                 v.updateMapPosition(playerPosition);
                 v.setIsDemo(isDemo);
+                v.updateGameState(GamePhase.BOARD_SETUP);
                 v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
                 v.inform("Game is starting!");
                 v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
-
-                v.updateGameState(GamePhase.BOARD_SETUP);
             } catch (Exception e) {
                 markDisconnected(nick);
             }
