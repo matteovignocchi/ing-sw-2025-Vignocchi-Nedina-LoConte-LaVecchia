@@ -26,6 +26,6 @@ public interface VirtualServer extends Remote {
     Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException;
     Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException;
-    void logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException;
+    int logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException;
     void logOut(String nickname) throws RemoteException, BusinessLogicException;
 }

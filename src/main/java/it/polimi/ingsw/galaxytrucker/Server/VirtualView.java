@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -52,7 +53,7 @@ public interface VirtualView extends Remote {
 
     void startMach() throws Exception;
 
-    boolean sendLogin(String username) throws Exception;
+    int sendLogin(String username) throws Exception;
 
     int sendGameRequest(String message) throws Exception;
 
@@ -92,4 +93,6 @@ public interface VirtualView extends Remote {
     String askInformationAboutStart() throws Exception;
 
     void setCentralTile(Tile tile) throws Exception;
+
+    void enterGame(int gameId) throws Exception;
 }

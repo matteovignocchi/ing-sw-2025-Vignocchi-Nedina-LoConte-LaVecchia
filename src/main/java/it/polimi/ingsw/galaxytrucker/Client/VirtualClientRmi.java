@@ -146,13 +146,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER IL LOGIN ///
 
     @Override
-    public boolean sendLogin(String username) throws RemoteException {
+    public int sendLogin(String username) throws RemoteException {
         try {
-            server.logIn(username , this);
+            return server.logIn(username , this);
         } catch (BusinessLogicException e) {
-            return false;
+            return -1;
         }
-        return true;
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {
@@ -388,6 +387,18 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public String askInformationAboutStart() throws RemoteException {
         synchronized (startLock) {
             return start;
+        }
+    }
+
+    //////////////////////////////////////////////////
+    //TODO:solo una bozza, scriverlo meglio. Stesso per socket
+    public void enterGame(int gameId) throws RemoteException {
+        try{
+            server.enterGame(gameId, this , nickname);
+            setGameId(gameId);
+            //TODO: continuare come bisogna fare
+        } catch (Exception e) {
+            view.reportError("you miss " + e.getMessage() );
         }
     }
 

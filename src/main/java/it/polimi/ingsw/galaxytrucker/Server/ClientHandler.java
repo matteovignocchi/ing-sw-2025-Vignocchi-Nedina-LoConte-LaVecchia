@@ -365,5 +365,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
         out.flush();
     }
+
+    @Override
+    public void enterGame(int gameId) throws Exception {
+
+    }
 }
 
