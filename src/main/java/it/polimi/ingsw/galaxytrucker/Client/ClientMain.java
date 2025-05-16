@@ -34,14 +34,20 @@ public class ClientMain {
 
         //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        String host = "192.168.1.13";
+        String host = "localhost";
         int port = 30001;
 
         Scanner input = new Scanner(System.in);
-        System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
-        int protocolChoice = input.nextInt();
-        System.out.println("> Choose the type of view:\n 1 - TUI \n2 - GUI");
-        int viewChoice = input.nextInt();
+        int protocolChoice;
+        int viewChoice;
+        do{
+            System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
+            protocolChoice = input.nextInt();
+        }while(protocolChoice < 1 || protocolChoice > 3);
+        do{
+            System.out.println("> Choose the type of view:\n 1 - TUI \n2 - GUI");
+            viewChoice = input.nextInt();
+        }while(viewChoice < 1 || viewChoice > 3);
 
         View view = (viewChoice == 1) ? new TUIView() : new GUIView();
 
