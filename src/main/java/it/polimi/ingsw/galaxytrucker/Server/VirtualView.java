@@ -52,7 +52,7 @@ public interface VirtualView extends Remote {
 
     void startMach() throws Exception;
 
-    int sendLogin(String username) throws Exception;
+    boolean sendLogin(String username) throws Exception;
 
     int sendGameRequest(String message) throws Exception;
 
@@ -85,13 +85,11 @@ public interface VirtualView extends Remote {
 
     void updateMapPosition(Map<String, Integer> Position) throws Exception;
 
-    void setFlagStart() throws Exception;
-
     void setStart() throws Exception;
 
     String askInformationAboutStart() throws Exception;
 
     void setCentralTile(Tile tile) throws Exception;
 
-    void enterGame(int gameId) throws Exception;
+    void setIsDemo(Boolean demo) throws Exception;
 }

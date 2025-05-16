@@ -12,6 +12,7 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -25,7 +26,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private String nickname;
     private int gameId = 0;
     private Tile[][] Dash_Matrix;
-    boolean flag = true;
     private final Object startLock = new Object();
     private String start = "false";
 
@@ -146,12 +146,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER IL LOGIN ///
 
     @Override
-    public int sendLogin(String username) throws RemoteException {
+    public boolean sendLogin(String username) throws RemoteException {
         try {
-            return server.logIn(username , this);
+            server.logIn(username , this);
         } catch (BusinessLogicException e) {
-            return -1;
+            return false;
         }
+        return true;
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {
@@ -213,39 +214,31 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return 0;
     }
 
-    @Override
-    public void setFlagStart(){
-        flag=false;
-    }
-
-
-
     /// COMANDI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
 
     @Override
-    public Tile getTileServer() throws RemoteException {
-        while(true){
+    public Tile getTileServer() throws RemoteException , BusinessLogicException {
             try {
                 Tile tmp = server.getCoveredTile(gameId, nickname);
-                view.printTile(tmp);
                 return tmp;
-            } catch (Exception e) {
-                view.reportError("you miss " + e.getMessage() );
+            } catch (BusinessLogicException e) {
+                throw new RemoteException(e.getMessage());
             }
         }
-    }
+
     @Override
-    public Tile getUncoveredTile() throws RemoteException{
+    public Tile getUncoveredTile() throws BusinessLogicException ,  RemoteException {
         List<Tile> tmp;
-        while(true){
-            try {
-                tmp = server.getUncoveredTilesList(gameId, nickname);
-                break;
-            } catch (Exception e) {
-                view.reportError("problem with server");
-            }
+        try {
+            tmp = server.getUncoveredTilesList(gameId, nickname);
+
+        } catch (Exception e) {
+            view.reportError("problem with server");
+            throw new BusinessLogicException("non ci sono ancora tile");
         }
+
         view.printPileShown(tmp);
+        view.inform("selected tile");
         int index;
         while(true){
             while (true) {
@@ -261,16 +254,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
     }
     @Override
-    public void getBackTile(Tile tile) throws RemoteException{
-        while(true){
+    public void getBackTile(Tile tile) throws RemoteException , BusinessLogicException{
             try {
                 server.dropTile(gameId,nickname,tile);
-                break;
-            } catch (Exception e) {
-                view.reportError("Problem with server");
+            } catch (BusinessLogicException e) {
+                throw new BusinessLogicException(e.getMessage());
             }
         }
-    }
+
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         view.printDashShip(Dash_Matrix);
@@ -281,48 +272,41 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
-            } catch (Exception e) {
-                view.reportError("not valid coordinate" );
+            } catch (BusinessLogicException e) {
+                view.reportError(e.getMessage());
             }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;
         view.printDashShip(Dash_Matrix);
     }
     @Override
-    public void drawCard() throws RemoteException {
-        while(true){
+    public void drawCard() throws RemoteException , BusinessLogicException {
             try {
                 server.drawCard(gameId,nickname);
-                break;
-            } catch (Exception e) {
-                view.reportError("problem with server");
-            }
+            } catch (BusinessLogicException e) {
+                throw new BusinessLogicException(e.getMessage());            }
         }
 
-    }
+
     @Override
-    public void rotateGlass() throws RemoteException{
-        while(true){
+    public void rotateGlass() throws RemoteException ,  BusinessLogicException {
             try {
                 server.rotateGlass(gameId,nickname);
-                break;
             } catch (BusinessLogicException e) {
-                view.reportError("problem with server");
+                throw new BusinessLogicException(e.getMessage());
             }
-        }
     }
+
+
     @Override
-    public void setReady() throws RemoteException{
-        while(true){
+    public void setReady() throws RemoteException , BusinessLogicException{
             try {
                 server.setReady(gameId,nickname);
-                break;
-            } catch (Exception e) {
-                view.reportError("problem with server");
+            } catch (BusinessLogicException e) {
+                throw new BusinessLogicException(e.getMessage());
             }
         }
 
-    }
     @Override
     public void lookDeck() throws RemoteException{
         view.inform("choose deck : 1 / 2 / 3");
@@ -333,8 +317,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 List<Card> deck = server.showDeck(gameId, index);
                 view.printDeck(deck);
                 break;
-            } catch (Exception e) {
+            } catch (BusinessLogicException e) {
                 view.reportError("index not valid");
+            } catch (IOException e) {
+                view.reportError("insert a number");
             }
         }
     }
@@ -354,6 +340,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         view.inform("Space Ship of :" + tmp);
         view.printDashShip(dashPlayer);
+        view.printListOfCommand();
     }
     @Override
     public void logOut() throws RemoteException{
@@ -390,16 +377,9 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
     }
 
-    //////////////////////////////////////////////////
-    //TODO:solo una bozza, scriverlo meglio. Stesso per socket
-    public void enterGame(int gameId) throws RemoteException {
-        try{
-            server.enterGame(gameId, this , nickname);
-            setGameId(gameId);
-            //TODO: continuare come bisogna fare
-        } catch (Exception e) {
-            view.reportError("you miss " + e.getMessage() );
-        }
+    @Override
+    public void setIsDemo(Boolean demo) throws RemoteException{
+        view.setIsDemo(demo);
     }
 
 }

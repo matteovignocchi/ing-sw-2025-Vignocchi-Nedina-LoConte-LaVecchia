@@ -139,6 +139,7 @@ public class Controller implements Serializable {
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
+        playerPosition.put(nickname, p.getId());
 
         view.inform("Player " + nickname + " added to game");
         broadcastInform(nickname + "  joined");
@@ -276,11 +277,11 @@ public class Controller implements Serializable {
         viewsByNickname.forEach((nick, v) -> {
             try {
                 v.updateMapPosition(playerPosition);
-                v.inform("Game is starting!");
-                v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
-                v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
-
+                v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
+                v.setCentralTile(getPlayerByNickname(nick).getTile(2,3));
+                v.inform("Game is starting!");
+                v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
             } catch (Exception e) {
                 markDisconnected(nick);
             }
@@ -288,6 +289,8 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
+//                v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
+                notifyView(nick);
                 v.setStart();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -295,8 +298,6 @@ public class Controller implements Serializable {
         });
 
         if (!isDemo) startHourglass();
-//        notifyAllViews();
-
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
@@ -315,6 +316,7 @@ public class Controller implements Serializable {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
+        if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("No tiles found");
 
         Player p = getPlayerCheck(nickname);
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);

@@ -186,6 +186,16 @@ public class GUIView extends Application implements View {
         return "";
     }
 
+    @Override
+    public void printListOfCommand() {
+
+    }
+
+    @Override
+    public void setIsDemo(Boolean demo) {
+
+    }
+
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }

@@ -22,6 +22,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
 
+    //TODO : franci ho aggiunto un metodo che mi serve per il client in fondo
+
     public ClientHandler(Socket socket, GameManager gameManager) throws IOException {
         this.socket = socket;
         this.gameManager = gameManager;
@@ -348,11 +350,11 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.flush();
     }
 
-    @Override
-    public void setFlagStart() throws IOException {
-        out.writeObject(Message.update(Message.OP_SET_FLAG_START, null));
-        out.flush();
-    }
+//    @Override
+//    public void setFlagStart() throws IOException {
+//        out.writeObject(Message.update(Message.OP_SET_FLAG_START, null));
+//        out.flush();
+//    }
 
     @Override
     public void setStart() throws IOException {
@@ -367,8 +369,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void enterGame(int gameId) throws Exception {
-
+    public void setIsDemo(Boolean demo) throws Exception {
+        out.writeObject(Message.update(Message.OP_SET_IS_DEMO, demo));
+        out.flush();
     }
 }
 
