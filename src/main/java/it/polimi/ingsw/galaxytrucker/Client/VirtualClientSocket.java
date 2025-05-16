@@ -145,7 +145,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     throw new RuntimeException(e);
                 }
             }
-            case Message.OP_SET_FLAG_START, Message.OP_START_GAME -> this.setStart();
+            case Message.OP_SET_FLAG_START -> this.setStart();
             default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
         }
     }
