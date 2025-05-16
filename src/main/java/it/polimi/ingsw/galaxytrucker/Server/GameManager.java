@@ -280,12 +280,22 @@ public class GameManager {
     }
 
     public synchronized Map<Integer,int[]> listActiveGames() {
-        return games.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> {
-                    Controller controller = e.getValue();
-                    return new int[]{ controller.countConnectedPlayers(), controller.getMaxPlayers() };
-                }
-        ));
+        return games.entrySet().stream()
+                .filter(e -> {
+                    Controller c = e.getValue();
+                    return c.countConnectedPlayers() < c.getMaxPlayers();
+                })
+                //Mappo in int[]{ current, max, demoFlag }
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> {
+                            Controller c = e.getValue();
+                            return new int[]{
+                                    c.countConnectedPlayers(),
+                                    c.getMaxPlayers(),
+                                    c.getIsDemo() ? 1 : 0
+                            };
+                        }
+                ));
     }
 }
