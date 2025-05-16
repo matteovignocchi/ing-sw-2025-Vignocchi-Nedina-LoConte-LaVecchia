@@ -50,4 +50,6 @@ public abstract class VirtualViewAdapter implements VirtualView{
 //    @Override public void setFlagStart() throws Exception {}
     @Override public void setStart() throws Exception {}
     @Override public String askInformationAboutStart() throws Exception { return null; }
+    @Override public void setIsDemo(Boolean demo) throws Exception {};
+    @Override public void enterGame(int gameId) throws Exception {};
 }

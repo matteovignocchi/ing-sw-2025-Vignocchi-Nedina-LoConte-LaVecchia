@@ -4,9 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 
-public class CardGeneration {
+public class CardGeneration implements Serializable {
     private final List<Card> level1Cards;
     private final List<Card> level2Cards;
     private final List<Card> demoCards;

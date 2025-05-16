@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class FirstWarzoneCard implements Card {
+public class FirstWarzoneCard implements Card, Serializable {
     private final String idCard;
     private final int days;
     private final int num_crewmates;

@@ -21,9 +21,12 @@ public class GameManager {
     private final Map<String,Integer> nicknameToGameId = new ConcurrentHashMap<>();
     private final AtomicInteger idCounter = new AtomicInteger(1);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final File savesDir;
     private final Set<String> loggedInUsers = ConcurrentHashMap.newKeySet();
 
     public GameManager() {
+        String dirProp = System.getProperty("game.saves.dir", "saves");
+        this.savesDir = new File(dirProp);
         loadSavedGames();// Caricamento automatico all'avvio
         schedulePeriodicSaves();
     }
@@ -205,7 +208,7 @@ public class GameManager {
     //serializza il controller su file temporaneo
     //Chiude il flusso e lo rinomina in modo da garantire che non ci siano mai file visibili se il processo si interrompe a metà
     private void saveGameState(int gameId, Controller controller) throws IOException {
-        File dir = new File("saves");
+        File dir = savesDir;
         if (!dir.exists()) dir.mkdirs();
 
         File tmp = new File(dir, "game_" + gameId + ".sav.tmp");
@@ -225,7 +228,7 @@ public class GameManager {
     //Rimuove il file di salvataggio di quel gameId quando il gioco viene definitivamente cancellato (ad esempio perché è finito o abbandonato).
     //Non lancia eccezioni se il file non esiste.
     private void deleteSavedGame(int gameId) {
-        new File("saves/game_" + gameId + ".sav").delete();
+        new File(savesDir, "game_" + gameId + ".sav").delete();
     }
 
     //controlla se esiste saves/
@@ -234,7 +237,7 @@ public class GameManager {
     //Inserisce l'istanza nella mappa games usando l'ID estratto dal nome del file
     //Riallinea idCounter per non riutilizzare ID già caricati
     private void loadSavedGames() {
-        File dir = new File("saves");
+        File dir = savesDir;
         if (!dir.exists()) return;
         int maxId = 0;
         File[] files = dir.listFiles((d,n)->n.matches("game_\\d+\\.sav"));

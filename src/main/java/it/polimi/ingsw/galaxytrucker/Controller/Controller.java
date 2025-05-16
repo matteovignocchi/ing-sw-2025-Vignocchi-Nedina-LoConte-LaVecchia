@@ -37,7 +37,7 @@ public class Controller implements Serializable {
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
-    private final Consumer<Integer> onGameEnd;
+    private transient final Consumer<Integer> onGameEnd;
     private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase;
     private int numberOfEnter =0;
@@ -51,7 +51,7 @@ public class Controller implements Serializable {
     private Deck deck;
     private List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
-    private static final ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
+    private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {

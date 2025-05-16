@@ -1,9 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
+import java.io.Serializable;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
-public class Hourglass {
+public class Hourglass implements Serializable {
     private final int TIMER = 60;
     private int flips = 0;
     private HourglassState state = HourglassState.EXPIRED;
