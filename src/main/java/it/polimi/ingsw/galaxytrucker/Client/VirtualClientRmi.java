@@ -340,6 +340,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         view.inform("Space Ship of :" + tmp);
         view.printDashShip(dashPlayer);
+        view.printListOfCommand();
     }
     @Override
     public void logOut() throws RemoteException{

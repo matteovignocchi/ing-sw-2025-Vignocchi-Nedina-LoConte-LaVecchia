@@ -35,7 +35,6 @@ public class GameManager {
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
         nicknameToGameId.put(nickname, gameId);
-        controller.notifyAllViews();
         safeSave(gameId, controller);
         return gameId;
     }
@@ -52,7 +51,6 @@ public class GameManager {
             controller.markReconnected(nickname, v);
             controller.broadcastInform(nickname + " is reconnected");
         }
-        controller.notifyAllViews();
         safeSave(gameId, controller);
     }
 

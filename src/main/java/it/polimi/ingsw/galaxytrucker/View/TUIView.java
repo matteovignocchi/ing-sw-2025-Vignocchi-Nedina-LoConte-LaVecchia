@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TUIView implements View {
     private GamePhase game;
     private boolean isDemo;
+    private boolean[][] maschera;
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
@@ -21,6 +22,7 @@ public class TUIView implements View {
     private static final String BROWN = "\u001B[33m";
     private static final String PEFOH = "\u001B[36m";
     private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+
 
     //per ora lascio il server come int
     //alla fine di ogni comando scritto dagli altri una show update
@@ -209,9 +211,22 @@ public class TUIView implements View {
                 border.append("+---------");
                 switch (tile) {
                     case EmptySpace x -> {
-                        top.append("|         ");
-                        mid.append("|         ");
-                        bot.append("|         ");
+                        if (!maschera[row][col]) {
+                            String block = "█████████"; // 9 caratteri pieni
+                            top.append("|").append(block);
+                            mid.append("|").append(block);
+                            bot.append("|").append(block);
+                        } else {
+                            if (row == 0 && (col == 5 || col == 6)) {
+                                top.append("|         ");
+                                mid.append("|    C    ");
+                                bot.append("|         ");
+                            } else {
+                                top.append("|         ");
+                                mid.append("|         ");
+                                bot.append("|         ");
+                            }
+                        }
                     }
                     default -> {
                         String[] rendered = renderTile(tile);
@@ -263,9 +278,7 @@ public class TUIView implements View {
             case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
             case EXIT -> inform("Goodbye!");
         }
-        for(String s : mapPosition.keySet()){
-            System.out.println(s + ": " + mapPosition.get(s));
-        }
+        printMapPosition();
         System.out.println();
 
         printListOfCommand();
@@ -636,7 +649,95 @@ public class TUIView implements View {
 
     @Override
     public void setIsDemo(Boolean demo) {
+        boolean[][] validStatus = new boolean[5][7];
         this.isDemo = demo;
+        if (isDemo) {
+            //first row
+            validStatus[0][0]  = false;
+            validStatus[0][1]  = false;
+            validStatus[0][2]  = false;
+            validStatus[0][3]  = true;
+            validStatus[0][4]  = false;
+            validStatus[0][5]  = false;
+            validStatus[0][6]  = false;
+            //second row
+            validStatus[1][0]  = false;
+            validStatus[1][1]  = false;
+            validStatus[1][2]  = true;
+            validStatus[1][3]  = true;
+            validStatus[1][4]  = true;
+            validStatus[1][5]  = false;
+            validStatus[1][6]  = false;
+            //third row
+            validStatus[2][0]  = false;
+            validStatus[2][1]  = true;
+            validStatus[2][2]  = true;
+            validStatus[2][3]  = true;
+            validStatus[2][4]  = true;
+            validStatus[2][5]  = true;
+            validStatus[2][6]  =false;
+            //fourth row
+            validStatus[3][0]  = false;
+            validStatus[3][1]  = true;
+            validStatus[3][2]  = true;
+            validStatus[3][3]  = true;
+            validStatus[3][4]  = true;
+            validStatus[3][5]  = true;
+            validStatus[3][6]  = false;
+            //fifth row
+            validStatus[4][0]  = false;
+            validStatus[4][1]  = true;
+            validStatus[4][2]  = true;
+            validStatus[4][3]  = false;
+            validStatus[4][4]  = true;
+            validStatus[4][5]  = true;
+            validStatus[4][6]  = false;
+        } else {
+            //first row
+            validStatus[0][0]  = false;
+            validStatus[0][1]  = false;
+            validStatus[0][2]  = true;
+            validStatus[0][3]  = false;
+            validStatus[0][4]  = true;
+            validStatus[0][5]  = true;
+            validStatus[0][6]  = true;
+            //second row
+            validStatus[1][0]  = false;
+            validStatus[1][1]  = true;
+            validStatus[1][2]  = true;
+            validStatus[1][3]  = true;
+            validStatus[1][4]  = true;
+            validStatus[1][5]  = true;
+            validStatus[1][6]  = false;
+            //third row
+            validStatus[2][0]  = true;
+            validStatus[2][1]  = true;
+            validStatus[2][2]  = true;
+            validStatus[2][3]  = true;
+            validStatus[2][4]  = true;
+            validStatus[2][5]  = true;
+            validStatus[2][6]  = true;
+            //fourth row
+            validStatus[3][0]  = true;
+            validStatus[3][1]  = true;
+            validStatus[3][2]  = true;
+            validStatus[3][3]  = true;
+            validStatus[3][4]  = true;
+            validStatus[3][5]  = true;
+            validStatus[3][6]  = true;
+            //fifth row
+            validStatus[4][0]  = true;
+            validStatus[4][1]  = true;
+            validStatus[4][2]  = true;
+            validStatus[4][3]  = false;
+            validStatus[4][4]  = true;
+            validStatus[4][5]  = true;
+            validStatus[4][6]  = true;
+        }
+        this.maschera = validStatus;
+
     }
+
 }
+
 

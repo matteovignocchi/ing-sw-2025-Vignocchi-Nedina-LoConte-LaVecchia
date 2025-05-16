@@ -112,9 +112,7 @@ public class ClientController {
     public void joinExistingGame() throws Exception {
         int response = virtualClient.sendGameRequest("JOIN");
         if (response != 0) {
-            view.inform("Joining existing game");
             virtualClient.setGameId(response);
-            view.inform("Waiting for game start");
             waitForGameStart();
         } else {
             view.inform("Game not entered");

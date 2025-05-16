@@ -139,6 +139,7 @@ public class Controller implements Serializable {
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
+        playerPosition.put(nickname, p.getId());
 
         view.inform("Player " + nickname + " added to game");
         broadcastInform(nickname + "  joined");
@@ -288,6 +289,8 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
+//                v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
+                notifyView(nick);
                 v.setStart();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -295,8 +298,6 @@ public class Controller implements Serializable {
         });
 
         if (!isDemo) startHourglass();
-//        notifyAllViews();
-
     }
 
     public Tile getCoveredTile(String nickname) throws BusinessLogicException {
