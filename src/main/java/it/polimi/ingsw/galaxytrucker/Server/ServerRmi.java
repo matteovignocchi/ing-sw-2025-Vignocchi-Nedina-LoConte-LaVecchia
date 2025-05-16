@@ -114,7 +114,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException{
+    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
         if (tile == null) { throw new RemoteException("Tile cannot be null"); }
         if (cord == null || cord.length != 2 || cord[0] < 0 || cord[1] < 0) { throw new RemoteException("Invalid parameters"); }

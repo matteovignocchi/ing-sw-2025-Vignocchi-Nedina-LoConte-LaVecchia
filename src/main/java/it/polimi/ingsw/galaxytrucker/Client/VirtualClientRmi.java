@@ -275,8 +275,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 break;
             } catch (BusinessLogicException e) {
                 view.reportError(e.getMessage());
-            }catch (IllegalArgumentException e){
-                view.reportError("choose coordinate");
             }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;

@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
@@ -427,7 +426,7 @@ public class Player implements Serializable {
      * @param t Tile to be added
      * @throws IllegalArgumentException if the player tries to place the tile in an illegal position
      */
-    public void addTile(int x, int y, Tile t) throws BusinessLogicException {
+    public void addTile(int x, int y, Tile t) throws IllegalArgumentException {
 
         if (validStatus[x][y] == Status.FREE ) {
             Dash_Matrix[x][y] = t;
@@ -437,7 +436,7 @@ public class Player implements Serializable {
             }
 
         } else {
-            throw new BusinessLogicException("Position not valid");
+            throw new IllegalArgumentException("Position not valid");
         }
     }
 
