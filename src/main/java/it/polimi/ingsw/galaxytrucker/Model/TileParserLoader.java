@@ -4,11 +4,12 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class TileParserLoader {
+public class TileParserLoader implements Serializable {
 
     public List<Tile> loadTiles() {
         List<Tile> pileOfTile = new ArrayList<>();

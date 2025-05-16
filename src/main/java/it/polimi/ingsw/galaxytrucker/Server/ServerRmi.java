@@ -181,13 +181,10 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException {
+    public int logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
-        handleGameManagerCall("login", () -> {
-            gameManager.login(nickname, v);
-            return null;
-        });
+        return handleGameManagerCall("login", () -> gameManager.login(nickname, v));
     }
 }
 

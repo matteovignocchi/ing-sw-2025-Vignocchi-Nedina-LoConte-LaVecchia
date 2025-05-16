@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import java.io.Serializable;
+import java.security.SecureRandomParameters;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -9,7 +11,7 @@ import java.util.List;
  * @author Matteo Vignocchi
  */
 
-public class HousingUnit extends Tile{
+public class HousingUnit extends Tile implements Serializable {
     private List<Human> listOfToken = new ArrayList<>();
     private int max;
     private Human isAlien;

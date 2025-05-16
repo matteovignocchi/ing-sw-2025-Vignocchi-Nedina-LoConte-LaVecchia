@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -9,7 +10,7 @@ import java.util.*;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class Deck {
+public class Deck  implements Serializable {
     private final Queue<Card> cards;
 
     /**

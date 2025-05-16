@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * @author Francesco Lo Conte && Gabriele La Vecchia
  */
 
-public class DeckManager {
+public class DeckManager implements Serializable {
     private final CardGeneration generator;
 
     /**

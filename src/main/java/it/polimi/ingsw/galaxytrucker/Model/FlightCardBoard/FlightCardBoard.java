@@ -1,6 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard;
 
 import it.polimi.ingsw.galaxytrucker.Model.Player;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -11,7 +13,7 @@ import java.util.List;
  * @author Gabriele La Vecchia && Francesco Lo Conte
  */
 
-public class FlightCardBoard {
+public class FlightCardBoard implements Serializable {
     public int spacesNumber;
     protected int bonusBestShip;
     protected int bonusFirstPosition;

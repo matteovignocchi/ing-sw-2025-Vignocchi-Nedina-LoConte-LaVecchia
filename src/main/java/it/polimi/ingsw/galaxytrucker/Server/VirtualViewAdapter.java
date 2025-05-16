@@ -30,7 +30,7 @@ public abstract class VirtualViewAdapter implements VirtualView{
 
     @Override public void updateGameState(GamePhase fase) throws Exception {}
     @Override public void startMach() throws Exception {}
-    @Override public boolean sendLogin(String username) throws Exception { return false; }
+    @Override public int sendLogin(String username) throws Exception { return 0; }
     @Override public int sendGameRequest(String message) throws Exception { return 0; }
     @Override public GamePhase getCurrentGameState() throws Exception { return null; }
     @Override public GamePhase getGameFase() throws Exception { return null; }
@@ -50,4 +50,6 @@ public abstract class VirtualViewAdapter implements VirtualView{
 //    @Override public void setFlagStart() throws Exception {}
     @Override public void setStart() throws Exception {}
     @Override public String askInformationAboutStart() throws Exception { return null; }
+    @Override public void setIsDemo(Boolean demo) throws Exception {};
+    @Override public void enterGame(int gameId) throws Exception {};
 }

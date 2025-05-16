@@ -1,13 +1,15 @@
 package it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard;
 
 import it.polimi.ingsw.galaxytrucker.Model.Player;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Class that extends FlightCardBoard, used for lvl. 2 flights
  * @author Gabriele La Vecchia && Francesco Lo Conte
  */
-public class FlightCardBoard2 extends FlightCardBoard {
+public class FlightCardBoard2 extends FlightCardBoard implements Serializable {
 
     public FlightCardBoard2() {
         this.spacesNumber = 24;

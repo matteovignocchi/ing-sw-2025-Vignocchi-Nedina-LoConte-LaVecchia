@@ -6,11 +6,13 @@ import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CardEffectVisitor implements CardVisitor {
+public class CardEffectVisitor implements CardVisitor, Serializable {
     private final Controller controller;
     private final FlightCardBoard f;
     private final List<Player> players;

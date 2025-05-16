@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Tile;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.InvalidIndex;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.Objects;
  * and check if the good can be put in the storage
  * @author Matteo Vignocchi
  */
-public class StorageUnit extends Tile {
+public class StorageUnit extends Tile implements Serializable {
     private List<Colour> listOfGoods = new ArrayList<>();
     private int max;
     private boolean advanced;

@@ -1,9 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import java.io.Serializable;
+
 /**
  * class for the multi joint tile
  */
-public class MultiJoint extends Tile {
+public class MultiJoint extends Tile implements Serializable {
     /**
      * the values are standard, and they are given when the game starts from the application
      * @param a

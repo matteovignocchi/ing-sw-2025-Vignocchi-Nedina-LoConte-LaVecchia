@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import java.io.Serializable;
+
 /**
  * class for the shields
  * the orientation of the protected corners is standard, and it is given by the new array protectedCorners
@@ -9,7 +11,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Tile;
  */
 
 
-public class Shield extends Tile {
+public class Shield extends Tile implements Serializable {
     final int[] protectedCorners = new int[4];
     /**
      * the values are standard, and they are given when the game starts from the application

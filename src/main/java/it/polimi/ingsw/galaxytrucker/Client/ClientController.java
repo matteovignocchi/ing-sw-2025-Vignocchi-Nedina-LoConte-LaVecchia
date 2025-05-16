@@ -34,22 +34,30 @@ public class ClientController {
         isConnected = true;
         view.inform("Connected with success");
 
-        loginLoop();
-        mainMenuLoop();
+        int gameId = loginLoop();
+        if(gameId<0) mainMenuLoop();
+        else virtualClient.enterGame(gameId);
     }
 
-    private void loginLoop() throws Exception {
+    private int loginLoop() throws Exception {
+        int ans = -1;
         while (isConnected) {
             view.inform("Insert your username :");
             String username = virtualClient.askString();
-            if (virtualClient.sendLogin(username)) {
+            ans  = virtualClient.sendLogin(username);
+            if (ans == -1) {
+                view.reportError("Credential not valid");
+            } else if (ans == -2) {
                 view.inform("Login successful");
                 virtualClient.setNickname(username);
                 break;
             } else {
-                view.reportError("Credential not valid");
+                //view.inform("Reconnection successful");
+                virtualClient.setNickname(username);
+                break;
             }
         }
+        return ans;
     }
 
     private void mainMenuLoop() throws Exception {

@@ -323,11 +323,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public boolean sendLogin(String username) throws IOException, InterruptedException {
+    public int sendLogin(String username) throws IOException, InterruptedException {
         Message loginRequest = Message.request(Message.OP_LOGIN, username);
         sendRequest(loginRequest);
         String answer = (String) responseHandler.waitForResponse();
-        return "OK".equals(answer);
+        //TODO: sistemare questo
+        //return "OK".equals(answer);
+        return 0;
     }
 
 
@@ -475,5 +477,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void setIsDemo(Boolean demo) {
         view.setIsDemo(demo);
     }
+
+    @Override
+    public void enterGame(int gameId) throws Exception {
+
+    }
+
 }
 

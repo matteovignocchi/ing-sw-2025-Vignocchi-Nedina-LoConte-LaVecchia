@@ -1,12 +1,14 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import java.io.Serializable;
+
 /**
  * class for double and triple energy cell
  * when the game initializes the tile, it will give a different capacity
  * this class store the information of how many battery the player has left
  * @author Matteo Vignocchi
  */
-public class EnergyCell extends Tile{
+public class EnergyCell extends Tile implements Serializable {
     private int capacity;
     /**
      * the values are standard, and they are given when the game starts from the application

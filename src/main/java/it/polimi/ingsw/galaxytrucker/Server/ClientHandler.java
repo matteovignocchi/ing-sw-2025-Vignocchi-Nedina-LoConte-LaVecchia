@@ -373,5 +373,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.writeObject(Message.update(Message.OP_SET_IS_DEMO, demo));
         out.flush();
     }
+
+    @Override
+    public void enterGame(int gameId) throws Exception {
+
+    }
 }
 
