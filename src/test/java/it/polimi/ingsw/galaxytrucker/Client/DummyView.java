@@ -123,7 +123,7 @@ public class DummyView implements View {
     }
 
     @Override
-    public void printTile(Tile tile) {
+    public void printTile(ClientTile tile) {
 
     }
 

@@ -332,10 +332,12 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
-    public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+    public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException{
         Player p = getPlayerCheck(nickname);
-
-        p.addTile(cord[0], cord[1], tile);
+        try{p.addTile(cord[0], cord[1], tile);
+        }catch (Exception e){
+            throw new BusinessLogicException("wrong cordinate");
+        }
         p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
