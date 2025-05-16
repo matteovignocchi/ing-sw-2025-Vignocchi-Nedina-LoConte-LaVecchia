@@ -358,7 +358,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public void setStart() throws IOException {
-        out.writeObject(Message.update(Message.OP_START_GAME, null));
+        out.writeObject(Message.update(Message.OP_SET_FLAG_START, null));
         out.flush();
     }
 

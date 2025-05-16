@@ -314,8 +314,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     for (Integer i : availableGames.keySet()) {
                         if(availableGames.get(i)[2] == 1){
                             view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1] + " DEMO");
+                        }else{
+                            view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
                         }
-                        view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
+
                     }
                 }
 
