@@ -145,13 +145,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     throw new RuntimeException(e);
                 }
             }
-            case Message.OP_SET_FLAG_START -> {
-                try {
-                    this.setStart();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            case Message.OP_SET_FLAG_START, Message.OP_START_GAME -> this.setStart();
             default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
         }
     }
@@ -274,8 +268,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                         int numberOfPlayer;
                         do {
                             v.inform("select max 4 players");
-                            numberOfPlayer = v.askIndex();
-                        } while (numberOfPlayer > 4 || numberOfPlayer < 1);
+                            numberOfPlayer = v.askIndex() + 1;
+                        } while (numberOfPlayer > 4 || numberOfPlayer < 2);
                         List<Object> payloadGame = new ArrayList<>();
                         payloadGame.add(demo);
                         payloadGame.add(nickname);
@@ -312,14 +306,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     return -1;
                 }else{
                     for (Integer i : availableGames.keySet()) {
-                        if(availableGames.get(i)[2] == 1){
-                            view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1] + " DEMO");
-                        }
-                        view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
+                        int[] info = availableGames.get(i);
+                        boolean isDemo = info[2] == 1;
+                        String suffix = isDemo ? " DEMO" : "";
+                        view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                     }
                 }
 
-                Integer choice = askIndex();
+                int choice = askIndex() + 1;
                 List<Object> payloadJoin = List.of(choice, nickname);
                 Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
                 sendRequest(gameChoice);
@@ -334,11 +328,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendLogin(String username) throws IOException, InterruptedException {
-        Message loginRequest = Message.request(Message.OP_LOGIN, username);
-        sendRequest(loginRequest);
-        return (int) responseHandler.waitForResponse();
-
+        sendRequest(Message.request(Message.OP_LOGIN, username));
+        Object resp = responseHandler.waitForResponse();
+        try {
+            return (Integer) resp;
+        } catch (ClassCastException e) {
+            throw new IOException("Login: payload di tipo inatteso dal server: " + resp.getClass().getName(), e);
+        }
     }
+
 
 
 
@@ -452,7 +450,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Message request = Message.request(Message.OP_LOGOUT, payloadGame);
             sendRequest(request);
         }
-
+        active = false;
+        socket.close();
     }
 
     @Override

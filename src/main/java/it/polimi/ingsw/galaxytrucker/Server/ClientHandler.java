@@ -40,7 +40,6 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
                 Message req = (Message) in.readObject();
 
-                // solo TYPE_REQUEST è accettata
                 if (!Message.TYPE_REQUEST.equals(req.getMessageType())) {
                     out.writeObject(Message.error("Expected REQUEST but got " + req.getMessageType()));
                     out.flush();
@@ -98,11 +97,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         }
     }
 
-    private Message handleLogin(Object p) throws Exception{
+    private Message handleLogin(Object p) throws Exception {
         String nickname = (String) p;
-        int login = gameManager.login(nickname, this);
-        // se arriva qui, o è nuovo login (void) o è già riconnesso
-        return Message.response(login);
+        int code = gameManager.login(nickname, this);
+        return Message.response(code);
     }
 
     @SuppressWarnings("unchecked")
@@ -116,8 +114,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     private Message handleListGames() {
-        Map<Integer,int[]> map = gameManager.listActiveGames();
-        return Message.response(map);
+        Map<Integer,int[]> lobby = gameManager.listActiveGames();
+        return Message.response(lobby);
     }
 
     @SuppressWarnings("unchecked")

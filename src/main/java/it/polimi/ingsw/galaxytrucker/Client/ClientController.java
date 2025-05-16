@@ -35,8 +35,11 @@ public class ClientController {
         view.inform("Connected with success");
 
         int gameId = loginLoop();
-        if(gameId<0) mainMenuLoop();
-        else virtualClient.enterGame(gameId);
+        if(gameId<0) {
+            mainMenuLoop();
+        } else {
+            virtualClient.enterGame(gameId);
+        }
     }
 
     private int loginLoop() throws Exception {
@@ -84,6 +87,7 @@ public class ClientController {
                     case 3 -> {
                         virtualClient.logOut();
                         isConnected = false;
+                        return;
                     }
                     default -> view.inform("Choice not valid");
                 }
@@ -202,6 +206,8 @@ public class ClientController {
                 case "logout" -> {
                     virtualClient.logOut();
                     idCurrentGame = 0;
+                    isConnected=false;
+                    return;
                 }
                 default -> view.inform("Action not recognized");
             }
