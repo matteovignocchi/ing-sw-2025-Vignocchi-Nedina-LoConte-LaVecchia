@@ -34,7 +34,7 @@ public class ClientController {
         view.inform("Connected with success");
 
         int gameId = loginLoop();
-        if(gameId<=0) mainMenuLoop();
+        if(gameId<0) mainMenuLoop();
         else virtualClient.enterGame(gameId);
     }
 
