@@ -119,11 +119,13 @@ public class ClientController {
     }
     public void joinExistingGame() throws Exception {
         int response = virtualClient.sendGameRequest("JOIN");
-        if (response != 0) {
+        if (response > 0) {
             virtualClient.setGameId(response);
             waitForGameStart();
-        } else {
+        } else if(response == 0){
             view.inform("Game not entered");
+        } else if (response == -1) {
+            mainMenuLoop();
         }
     }
 
