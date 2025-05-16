@@ -218,9 +218,10 @@ public class TUIView implements View {
                             bot.append("|").append(block);
                         } else {
                             if (row == 0 && (col == 5 || col == 6)) {
-                                top.append("|         ");
-                                mid.append("|    C    ");
-                                bot.append("|         ");
+                                String block = YELLOW+"█████████"+RESET; // 9 caratteri pieni
+                                top.append("|").append(block);
+                                mid.append("|").append(block);
+                                bot.append("|").append(block);
                             } else {
                                 top.append("|         ");
                                 mid.append("|         ");
