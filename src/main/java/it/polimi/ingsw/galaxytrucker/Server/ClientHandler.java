@@ -100,9 +100,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     private Message handleLogin(Object p) throws Exception{
         String nickname = (String) p;
-        gameManager.login(nickname, this);
+        int login = gameManager.login(nickname, this);
         // se arriva qui, o è nuovo login (void) o è già riconnesso
-        return Message.response("OK");
+        return Message.response(login);
     }
 
     @SuppressWarnings("unchecked")

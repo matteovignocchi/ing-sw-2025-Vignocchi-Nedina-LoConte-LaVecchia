@@ -328,9 +328,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendLogin(String username) throws IOException, InterruptedException {
-        List<Object> payload = new ArrayList<>();
-        payload.add(username);
-        Message loginRequest = Message.request(Message.OP_LOGIN, payload);
+        Message loginRequest = Message.request(Message.OP_LOGIN, username);
         sendRequest(loginRequest);
         return (int) responseHandler.waitForResponse();
 
