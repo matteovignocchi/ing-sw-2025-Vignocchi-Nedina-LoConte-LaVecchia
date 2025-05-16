@@ -195,7 +195,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     view.reportError("you miss " + e.getMessage() );
                 }
                 for(Integer i : availableGames.keySet()){
+                    if(availableGames.get(i)[2] == 1){
+                        view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1] + " DEMO");
+                    }
                     view.inform(i+". Players in game : "+availableGames.get(i)[0]+"/"+availableGames.get(i)[1]);
+
                 }
                 int choice;
                while(true){
