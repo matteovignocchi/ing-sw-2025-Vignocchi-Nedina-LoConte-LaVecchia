@@ -15,7 +15,6 @@ public class Message implements Serializable {
     public static final String OP_UPDATE_VIEW = "UPDATE_VIEW";
     public static final String OP_ACTIONS = "ACTIONS";
     public static final String OP_LEAVE_GAME = "LEAVE_GAME";
-    public static final String OP_START_GAME = "START_GAME";
     public static final String OP_CREATE_GAME = "CREATE_GAME";
     public static final String OP_JOIN_EXIST_GAME = "JOIN_EXIST_GAME";
     public static final String OP_ENTER_GAME = "ENTER_GAME";
