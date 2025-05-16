@@ -196,6 +196,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 }
                 if(availableGames.isEmpty()){
                     view.inform("No available games");
+                    return 0;
                 } else {
                     for (Integer i : availableGames.keySet()) {
                         int[] info = availableGames.get(i);

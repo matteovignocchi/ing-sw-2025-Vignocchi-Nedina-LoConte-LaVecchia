@@ -309,6 +309,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 availableGames = (Map<Integer, int[]>) responseHandler.waitForResponse();
                 if(availableGames.isEmpty()){
                     view.inform("No available games");
+                    return 0;
                 }else{
                     for (Integer i : availableGames.keySet()) {
                         if(availableGames.get(i)[2] == 1){
