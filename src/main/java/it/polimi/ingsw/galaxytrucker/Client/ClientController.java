@@ -21,6 +21,7 @@ public class ClientController {
     private boolean isConnected = false;
     private int idCurrentGame;
 
+
     private static ClientController instance;
 
 
