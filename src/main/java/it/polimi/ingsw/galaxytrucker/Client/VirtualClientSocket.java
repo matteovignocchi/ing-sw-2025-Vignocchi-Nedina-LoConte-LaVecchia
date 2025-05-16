@@ -330,7 +330,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public int sendLogin(String username) throws IOException, InterruptedException {
         List<Object> payload = new ArrayList<>();
         payload.add(username);
-        payload.add(this);
         Message loginRequest = Message.request(Message.OP_LOGIN, payload);
         sendRequest(loginRequest);
         return (int) responseHandler.waitForResponse();
