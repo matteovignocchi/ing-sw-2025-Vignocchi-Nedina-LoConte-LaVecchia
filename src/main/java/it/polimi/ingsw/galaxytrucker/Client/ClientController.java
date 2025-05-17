@@ -40,6 +40,7 @@ public class ClientController {
             mainMenuLoop();
         } else {
             virtualClient.enterGame(gameId);
+            startGame();
         }
     }
 
@@ -88,7 +89,7 @@ public class ClientController {
                     case 3 -> {
                         virtualClient.logOut();
                         isConnected = false;
-                        return;
+                        System.exit(0);
                     }
                     default -> view.inform("Choice not valid");
                 }
@@ -146,13 +147,16 @@ public class ClientController {
                 break;
             }
         }
-        view.inform("game started");
+//        view.inform("game started");
     }
 
     private void startGame() throws Exception {
         GamePhase gameState;
         do {
             String key = view.sendAvailableChoices();
+            gameState = virtualClient.getGameFase();
+            if (gameState == GamePhase.EXIT) key = "logout";
+
             switch (key) {
                 case "getacoveredtile" -> {
                     try {
@@ -207,7 +211,7 @@ public class ClientController {
                 case "logout" -> {
                     virtualClient.logOut();
                     idCurrentGame = 0;
-                    isConnected=false;
+                    mainMenuLoop();
                     return;
                 }
                 default -> view.inform("Action not recognized");

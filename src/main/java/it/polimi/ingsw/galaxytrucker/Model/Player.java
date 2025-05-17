@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
@@ -65,6 +66,7 @@ public class Player implements Serializable {
 
         //initialized a matrix with the valid position of the ship
         validStatus = new Status[5][7];
+        validStatus[2][3] = Status.BLOCK;
         if (isDemo) {
             //first row
             validStatus[0][0]  = Status.BLOCK;
@@ -86,7 +88,6 @@ public class Player implements Serializable {
             validStatus[2][0]  = Status.BLOCK;
             validStatus[2][1]  = Status.FREE;
             validStatus[2][2]  = Status.FREE;
-            validStatus[2][3]  = Status.FREE;
             validStatus[2][4]  = Status.FREE;
             validStatus[2][5]  = Status.FREE;
             validStatus[2][6]  = Status.BLOCK;
@@ -127,7 +128,6 @@ public class Player implements Serializable {
             validStatus[2][0]  = Status.FREE;
             validStatus[2][1]  = Status.FREE;
             validStatus[2][2]  = Status.FREE;
-            validStatus[2][3]  = Status.FREE;
             validStatus[2][4]  = Status.FREE;
             validStatus[2][5]  = Status.FREE;
             validStatus[2][6]  = Status.FREE;
@@ -426,17 +426,15 @@ public class Player implements Serializable {
      * @param t Tile to be added
      * @throws IllegalArgumentException if the player tries to place the tile in an illegal position
      */
-    public void addTile(int x, int y, Tile t) throws IllegalArgumentException {
-
+    public void addTile(int x, int y, Tile t) throws BusinessLogicException {
         if (validStatus[x][y] == Status.FREE ) {
             Dash_Matrix[x][y] = t;
             validStatus[x][y] = Status.USED;
             if(x == 0 && (y == 5 || y ==6)){
                 addToDiscardPile(t);
             }
-
         } else {
-            throw new IllegalArgumentException("Position not valid");
+            throw new BusinessLogicException("Position not valid");
         }
     }
 

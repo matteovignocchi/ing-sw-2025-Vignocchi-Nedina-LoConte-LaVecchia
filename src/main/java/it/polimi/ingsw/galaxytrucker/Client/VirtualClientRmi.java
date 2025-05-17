@@ -283,7 +283,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
-            } catch (BusinessLogicException e) {
+            } catch (Exception e) {
                 view.reportError(e.getMessage());
             }
         }
@@ -358,6 +358,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         if(gameId != 0) {
             try {
                 server.LeaveGame(gameId, nickname);
+                gameId = 0;
             } catch (Exception e) {
                 view.reportError("problem with server");
             }

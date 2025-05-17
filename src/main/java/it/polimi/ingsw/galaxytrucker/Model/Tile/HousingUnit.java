@@ -39,17 +39,18 @@ public class HousingUnit extends Tile implements Serializable {
      * @throws FullHousingList if the party is full
      */
     public void addHuman(Human token) throws FullHousingList, IllegalArgumentException {
-        if (listOfToken.size() == max) {
-            throw new FullHousingList("HousingList is full");
-        }else if (isAlien == Human.HUMAN && token != Human.HUMAN){
-            throw new IllegalArgumentException("Aliens can not stay in the human housing");
-        } else if (isAlien == Human.BROWN_ALIEN && !isConnected && token != Human.BROWN_ALIEN) {
-            throw new IllegalArgumentException("Wrong place!");
-        }else if (isAlien == Human.PURPLE_ALIEN && !isConnected && token != Human.PURPLE_ALIEN) {
-            throw new IllegalArgumentException("Wrong place!");
-        }else{
-            listOfToken.add(token);
-        }
+//        if (listOfToken.size()>=2) {
+//            throw new FullHousingList("HousingList is full");
+//        }else if (isAlien == Human.HUMAN && token != Human.HUMAN){
+//            throw new IllegalArgumentException("Aliens can not stay in the human housing");
+//        } else if (isAlien == Human.BROWN_ALIEN && !isConnected && token != Human.BROWN_ALIEN) {
+//            throw new IllegalArgumentException("Wrong place!");
+//        }else if (isAlien == Human.PURPLE_ALIEN && !isConnected && token != Human.PURPLE_ALIEN) {
+//            throw new IllegalArgumentException("Wrong place!");
+//        }else{
+//            listOfToken.add(token);
+//        }
+        listOfToken.add(token);
     }
 
     /**

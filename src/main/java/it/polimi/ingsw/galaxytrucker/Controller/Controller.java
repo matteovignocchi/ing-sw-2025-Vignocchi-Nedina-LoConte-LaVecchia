@@ -255,6 +255,8 @@ public class Controller implements Serializable {
                 if (winner != null) {
                     try {
                         viewsByNickname.get(winner).inform("SERVER: " + "You win by timeout!");
+                        viewsByNickname.get(winner).updateGameState(GamePhase.EXIT);
+                        notifyView(winner);
                     } catch (Exception ignored) {}
                 }
                 onGameEnd.accept(gameId);
@@ -333,7 +335,6 @@ public class Controller implements Serializable {
 
     public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
-
         p.addTile(cord[0], cord[1], tile);
         p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
@@ -363,19 +364,9 @@ public class Controller implements Serializable {
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
         broadcastInform("SERVER: " + "Flight started!");
-        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.CARD_EFFECT));
-
-        /**/ System.out.println("Dopo che setto la fase a tutti");
-
-        //metodo per mettere gli umani giusti in ogni cella e tile
+        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
         addHuman();
-
-        /**/ System.out.println("Dopo che chiamo addHuman");
-
         viewsByNickname.forEach((nick, v) -> {
-
-            /**/ System.out.println("Prima di checkPlayerAssembly");
-
             //metodo per gestire il control assembly del giocatore , va fatta indipendentemente se coonnesso o meno
             checkPlayerAssembly(nick , 2 , 3);
 
@@ -1309,34 +1300,50 @@ public class Controller implements Serializable {
                             Human tmp = h.getType();
                             switch (tmp){
                                 case HUMAN -> {
-                                    Human tmp2 = Human.HUMAN;
-                                    for(int z = 0; z<2 ; z++) h.addHuman(tmp2);}
+                                    for(int z = 0; z<2 ; z++){
+                                        Human tmp2 = Human.HUMAN;
+                                        h.addHuman(tmp2);}
+                                }
                                 case PURPLE_ALIEN -> {
                                     try {
                                         if(askPlayerDecision("alien",p)){
                                             Human tmp2 = Human.PURPLE_ALIEN;
                                             h.addHuman(tmp2);
                                         }else{
-                                            Human tmp2 = Human.HUMAN;
-                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                            for(int z = 0 ; z<2 ; z++) {
+                                                Human tmp2 = Human.HUMAN;
+                                                h.addHuman(tmp2);}
                                         }
                                     } catch (BusinessLogicException e) {
-                                        throw new RuntimeException(e);
+                                        for(String nick : viewsByNickname.keySet()){
+                                            if(playersByNickname.get(nick).equals(p)){
+                                                markDisconnected(nick);
+                                                break;
+                                            }
+                                        }
                                     }
 
                                 }
                                 case BROWN_ALIEN -> {
                                     try {
-                                        if(askPlayerDecision("alien",p)){
+                                        if (askPlayerDecision("alien", p)) {
                                             Human tmp2 = Human.BROWN_ALIEN;
                                             h.addHuman(tmp2);
-                                        }else{
+                                        } else {
                                             Human tmp2 = Human.HUMAN;
-                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                         }
                                     } catch (BusinessLogicException e) {
-                                        throw new RuntimeException(e);
+                                        for (String nick : viewsByNickname.keySet()) {
+                                            if (playersByNickname.get(nick).equals(p)) {
+                                                markDisconnected(nick);
+                                                break;
+                                            }
+                                        }
+                                    }catch (Exception e) {
+
                                     }
+
                                 }
                             }
                         }
@@ -1932,6 +1939,18 @@ public class Controller implements Serializable {
 
     public void setExit(){
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+        viewsByNickname.values().forEach(view -> {
+            try {
+                view.updateGameState(GamePhase.EXIT);
+            } catch (Exception e) {
+                for(String nick : viewsByNickname.keySet()){
+                    if(viewsByNickname.get(nick).equals(view)){
+                        markDisconnected(nick);
+                        break;
+                    }
+                }
+            }
+        });
         notifyAllViews();
     }
 }

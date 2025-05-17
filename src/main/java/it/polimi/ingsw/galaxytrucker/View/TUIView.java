@@ -635,8 +635,13 @@ public class TUIView implements View {
     @Override
     public String sendAvailableChoices() {
         List<String> listOfOptions = commandConstructor();
-        inform("Insert the command number");
-        int tmp = askIndex();
+        int tmp;
+        while(true){
+            inform("Insert the command number");
+            tmp = askIndex();
+            if (tmp<listOfOptions.size() && tmp>=0) break;
+            inform("indice sbagliato");
+        }
         return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
     @Override
