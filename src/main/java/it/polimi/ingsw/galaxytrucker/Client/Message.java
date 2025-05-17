@@ -47,7 +47,7 @@ public class Message implements Serializable {
     public static final String OP_SET_VIEW = "SET_VIEW";
     public static final String OP_SET_GAMEID = "SET_GAMEID";
     public static final String OP_MAP_POSITION = "MAP_POSITION";
-    public static final String OP_SET_FLAG_START = "SET FLAG";
+    public static final String OP_SET_FLAG_START = "SET_FLAG_START";
 
 
 

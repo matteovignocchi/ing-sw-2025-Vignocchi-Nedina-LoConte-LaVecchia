@@ -466,7 +466,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void setStart(){
-        start = "Start";
+        start = "start";
     }
 
     @Override
