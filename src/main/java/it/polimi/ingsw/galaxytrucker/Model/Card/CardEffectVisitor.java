@@ -136,7 +136,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 break;
             } else if (player_fire_power < slavers_fire_power) {
                 try {
-                    controller.removeCrewmate(p, card.getNumCrewmates());
+                    controller.removeCrewmates(p, card.getNumCrewmates());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -179,7 +179,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         f.moveRocket(-card.getDays(), players.get(idx_crew));
         try {
-            controller.removeCrewmate(players.get(idx_firepower), card.getNumCrewmates());
+            controller.removeCrewmates(players.get(idx_firepower), card.getNumCrewmates());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -334,7 +334,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 p.addCredits(credits);
                 int num_crewmates = card.getNumCrewmates();
                 try {
-                    controller.removeCrewmate(p, num_crewmates);
+                    controller.removeCrewmates(p, num_crewmates);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

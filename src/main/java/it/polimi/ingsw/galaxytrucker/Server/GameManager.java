@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -45,12 +46,12 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-        if (controller.getPlayerByNickname(nickname) == null) {
+        //if (controller.getPlayerByNickname(nickname) == null)
             controller.addPlayer(nickname, v);
             nicknameToGameId.put(nickname, gameId);
             if (controller.countConnectedPlayers() == controller.getMaxPlayers())
                 controller.startGame();
-        }
+
 
         safeSave(gameId, controller);
     }

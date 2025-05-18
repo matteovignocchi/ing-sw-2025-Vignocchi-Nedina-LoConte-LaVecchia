@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.*;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;

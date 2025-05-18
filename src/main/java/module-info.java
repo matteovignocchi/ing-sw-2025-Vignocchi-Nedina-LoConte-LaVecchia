@@ -23,8 +23,8 @@ module it.polimi.ingsw.galaxytrucker {
     opens it.polimi.ingsw.galaxytrucker to javafx.fxml;
     opens it.polimi.ingsw.galaxytrucker.Model.Card to com.fasterxml.jackson.databind;
     opens it.polimi.ingsw.galaxytrucker.Model to com.fasterxml.jackson.databind;
-
-
+    exports it.polimi.ingsw.galaxytrucker.Client;
+    opens it.polimi.ingsw.galaxytrucker.Client to java.rmi;
 
 
 }
