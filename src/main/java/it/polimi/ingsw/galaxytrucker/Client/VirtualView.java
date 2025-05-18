@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;

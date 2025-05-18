@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server.Model;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectException;
 import it.polimi.ingsw.galaxytrucker.Model.Card.OpenSpaceCard;
@@ -40,7 +41,7 @@ class ControllerTest {
 
     @Test
     @DisplayName("activate openSpaceCard")
-    void activateCardTest1() throws CardEffectException, IOException {
+    void activateCardTest1() throws BusinessLogicException, IOException {
         OpenSpaceCard card = new OpenSpaceCard();
         doReturn(2).when(spyController).getPowerEngine(p1);
         doReturn(4).when(spyController).getPowerEngine(p2);

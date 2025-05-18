@@ -1,12 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
