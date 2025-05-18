@@ -410,9 +410,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(gameId);
         payloadGame.add(nickname);
         payloadGame.add(tile);
-        Message request =  Message.request(Message.OP_RETURN_TILE , payloadGame);
-        sendRequest(request);
+        Message request = Message.request(Message.OP_RETURN_TILE , payloadGame);
+        Message response = sendRequestWithResponse(request);
+
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
+
     }
+
     @Override
     public void positionTile(Tile tile) throws Exception {
         view.inform("choose coordinate");
@@ -423,7 +435,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(tile);
         payloadGame.add(tmp);
         Message request = Message.request(Message.OP_POSITION_TILE , payloadGame);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
 
     @Override
@@ -432,7 +453,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(gameId);
         payloadGame.add(nickname);
         Message request = Message.request(Message.OP_GET_CARD, payloadGame);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
 
     @Override
@@ -441,7 +471,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(gameId);
         payloadGame.add(nickname);
         Message request = Message.request(Message.OP_ROTATE_GLASS , payloadGame);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
     @Override
     public void setReady() throws Exception {
@@ -449,7 +488,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(gameId);
         payloadGame.add(nickname);
         Message request = Message.request(Message.OP_SET_READY, payloadGame);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
 
     @Override
@@ -457,7 +505,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         view.inform("choose deck : 1 / 2 / 3");
         int index = askIndex();
         Message request = Message.request(Message.OP_LOOK_DECK, index);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
 
     @Override
@@ -467,7 +524,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payloadGame.add(gameId);
         payloadGame.add(player);
         Message request = Message.request(Message.OP_LOOK_SHIP, payloadGame);
-        sendRequest(request);
+        Message response = sendRequestWithResponse(request);
+        Object payload = response.getPayload();
+        switch(payload){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
     }
 
     @Override
@@ -477,12 +543,30 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             payloadGame.add(gameId);
             payloadGame.add(nickname);
             Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
-            sendRequest(request);
+            Message response = sendRequestWithResponse(request);
+            Object payload = response.getPayload();
+            switch(payload){
+                case String p ->{
+                    if (!p.equals("OK")){
+                        view.reportError("Unexpected response from server: " + payload);
+                    }
+                }
+                default -> throw new IOException("Unexpected payload: " + payload);
+            }
         }else{
             List<Object> payloadGame = new ArrayList<>();
             payloadGame.add(nickname);
             Message request = Message.request(Message.OP_LOGOUT, payloadGame);
-            sendRequest(request);
+            Message response = sendRequestWithResponse(request);
+            Object payload = response.getPayload();
+            switch(payload){
+                case String p ->{
+                    if (!p.equals("OK")){
+                        view.reportError("Unexpected response from server: " + payload);
+                    }
+                }
+                default -> throw new IOException("Unexpected payload: " + payload);
+            }
         }
         active = false;
         socket.close();
