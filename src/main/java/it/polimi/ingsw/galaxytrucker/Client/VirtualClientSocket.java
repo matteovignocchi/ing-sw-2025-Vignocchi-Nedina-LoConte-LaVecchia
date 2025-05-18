@@ -269,20 +269,25 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         if(message.equals("CREATE")){
             while (true) {
                 switch (view){
-                    case TUIView v ->{
-                        boolean demo = v.ask("would you like a demo version?");
+                    case TUIView v -> {
+                        boolean demo = v.ask("Would you like a demo version?");
+                        v.inform("Select a number of players between 2 and 4");
                         int numberOfPlayer;
-                        do {
-                            v.inform("select max 4 players");
+                        while (true) {
                             numberOfPlayer = v.askIndex() + 1;
-                        } while (numberOfPlayer > 4 || numberOfPlayer < 2);
+                            if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
+                                break;
+                            }
+                            v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
+                        }
+                        // una volta uscito dal loop, invii la richiesta
                         List<Object> payloadGame = new ArrayList<>();
                         payloadGame.add(demo);
                         payloadGame.add(nickname);
                         payloadGame.add(numberOfPlayer);
                         Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
                         Message msg = sendRequestWithResponse(createGame);
-                        return ((int) msg.getPayload());
+                        return (int) msg.getPayload();
                     }
                     case GUIView v ->{
                         List<Object> data = v.getDataForGame();
@@ -361,8 +366,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             default -> throw new IOException("Unexpected payload: " + msg.getPayload().getClass().getName());
         };
     }
-
-
 
 
     @Override

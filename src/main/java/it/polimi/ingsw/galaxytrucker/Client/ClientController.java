@@ -7,6 +7,8 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 
+import java.io.IOException;
+
 import static java.lang.String.valueOf;
 
 
@@ -161,14 +163,14 @@ public class ClientController {
                         view.reportError(e.getMessage());
                     }
                 }
-                case "getashowntile" ->{
+                case "getashowntile" -> {
                     try {
                         tmpTile = virtualClient.getUncoveredTile();
                         view.printTile(tmpTile);
-                        view.printListOfCommand();
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException | IOException | InterruptedException e) {
                         view.reportError(e.getMessage());
                     }
+                    view.printListOfCommand();
                 }
                 case "returnthetile" ->{
                     try {

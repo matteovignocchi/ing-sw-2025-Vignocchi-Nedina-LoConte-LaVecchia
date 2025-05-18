@@ -243,7 +243,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             tmp = server.getUncoveredTilesList(gameId, nickname);
 
         } catch (Exception e) {
-            view.reportError("problem with server");
             throw new BusinessLogicException("non ci sono ancora tile");
         }
 
