@@ -67,26 +67,25 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             String op = req.getOperation();
             Object p  = req.getPayload();
 
-            switch (op) {
-                case Message.OP_LEAVE_GAME:         return handleLeaveGame(p);
-                case Message.OP_LOGIN:              return handleLogin(p);
-                case Message.OP_CREATE_GAME:        return handleCreateGame(p);
-                case Message.OP_LIST_GAMES:         return handleListGames();
-                case Message.OP_ENTER_GAME:         return handleEnterGame(p);
-                case Message.OP_GET_TILE:           return handleGetTile(p);
-                case Message.OP_GET_UNCOVERED:      return handleGetUncovered(p);
-                case Message.OP_GET_UNCOVERED_LIST: return handleGetUncoveredList(p);
-                case Message.OP_RETURN_TILE:        return handleReturnTile(p);
-                case Message.OP_POSITION_TILE:      return handlePositionTile(p);
-                case Message.OP_GET_CARD:           return handleDrawCard(p);
-                case Message.OP_ROTATE_GLASS:       return handleRotateGlass(p);
-                case Message.OP_SET_READY:          return handleSetReady(p);
-                case Message.OP_LOOK_DECK:          return handleLookDeck(p);
-                case Message.OP_LOOK_SHIP:          return handleLookShip(p);
-                case Message.OP_LOGOUT:             return handleLogout(p);
-                default:
-                    return Message.error("Unknown operation: " + op);
-            }
+            return switch (op) {
+                case Message.OP_LEAVE_GAME         -> wrap(req, handleLeaveGame(p));
+                case Message.OP_LOGIN              -> wrap(req, handleLogin(p));
+                case Message.OP_CREATE_GAME        -> wrap(req, handleCreateGame(p));
+                case Message.OP_LIST_GAMES         -> wrap(req, handleListGames());
+                case Message.OP_ENTER_GAME         -> wrap(req, handleEnterGame(p));
+                case Message.OP_GET_TILE           -> wrap(req, handleGetTile(p));
+                case Message.OP_GET_UNCOVERED      -> wrap(req, handleGetUncovered(p));
+                case Message.OP_GET_UNCOVERED_LIST -> wrap(req, handleGetUncoveredList(p));
+                case Message.OP_RETURN_TILE        -> wrap(req, handleReturnTile(p));
+                case Message.OP_POSITION_TILE      -> wrap(req, handlePositionTile(p));
+                case Message.OP_GET_CARD           -> wrap(req, handleDrawCard(p));
+                case Message.OP_ROTATE_GLASS       -> wrap(req, handleRotateGlass(p));
+                case Message.OP_SET_READY          -> wrap(req, handleSetReady(p));
+                case Message.OP_LOOK_DECK          -> wrap(req, handleLookDeck(p));
+                case Message.OP_LOOK_SHIP          -> wrap(req, handleLookShip(p));
+                case Message.OP_LOGOUT             -> wrap(req, handleLogout(p));
+                default -> Message.error("Unknown operation: " + op, req.getRequestId());
+            };
         } catch (BusinessLogicException e) {
             return Message.error("Logic error: " + e.getMessage());
         } catch (IOException e) {
@@ -97,143 +96,145 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         }
     }
 
-    private Message handleLogin(Object p) throws Exception {
+    private Message wrap(Message request, Object payload) {
+        return Message.response(payload, request.getRequestId());
+    }
+
+    private Object handleLogin(Object p) throws Exception {
         String nickname = (String) p;
-        int code = gameManager.login(nickname, this);
-        return Message.response(code);
+        return gameManager.login(nickname, this);
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleCreateGame(Object p) throws BusinessLogicException, Exception {
+    private Object handleCreateGame(Object p) throws BusinessLogicException, Exception {
         List<Object> payload = (List<Object>) p;
         boolean isDemo = (Boolean) payload.get(0);
         String nickname = (String)  payload.get(1);
         int maxPlayers = (Integer) payload.get(2);
-        int gameId = gameManager.createGame(isDemo,this, nickname, maxPlayers);
-        return Message.response(gameId);
+        return gameManager.createGame(isDemo,this, nickname, maxPlayers);
+
     }
 
-    private Message handleListGames() {
-        Map<Integer,int[]> lobby = gameManager.listActiveGames();
-        return Message.response(lobby);
+    private Object handleListGames() {
+        return gameManager.listActiveGames();
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleEnterGame(Object p) throws BusinessLogicException, Exception {
+    private Object handleEnterGame(Object p) throws BusinessLogicException, Exception {
         List<Object> args = (List<Object>) p;
         int gameId = (Integer) args.get(0);
         String nickname = (String)  args.get(1);
         gameManager.joinGame(gameId,this, nickname);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleGetTile(Object p) throws BusinessLogicException {
+    private Object handleGetTile(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
-        Tile t = gameManager.getCoveredTile(gameId, nickname);
-        return Message.response(t);
+        return gameManager.getCoveredTile(gameId, nickname);
+
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleGetUncovered(Object p) throws BusinessLogicException {
+    private Object handleGetUncovered(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
         int idTile = (Integer) payload.get(2);
-        Tile t = gameManager.chooseUncoveredTile(gameId, nickname, idTile);
-        return Message.response(t);
+        return gameManager.chooseUncoveredTile(gameId, nickname, idTile);
+
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleGetUncoveredList(Object p) throws BusinessLogicException {
+    private Object handleGetUncoveredList(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
-        List<Tile> list = gameManager.getUncoveredTilesList(gameId, nickname);
-        return Message.response(list);
+        return gameManager.getUncoveredTilesList(gameId, nickname);
+
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleReturnTile(Object p) throws BusinessLogicException {
+    private Object handleReturnTile(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
         Tile tile = (Tile) payload.get(2);
         gameManager.dropTile(gameId, nick, tile);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handlePositionTile(Object p) throws BusinessLogicException {
+    private Object handlePositionTile(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
         Tile tile = (Tile) payload.get(2);
         int[] coordinate = (int[]) payload.get(3);
         gameManager.placeTile(gameId, nick, tile, coordinate);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleDrawCard(Object p) throws BusinessLogicException {
+    private Object handleDrawCard(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
         gameManager.drawCard(gameId, nickname);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleRotateGlass(Object p) throws BusinessLogicException, RemoteException {
+    private Object handleRotateGlass(Object p) throws BusinessLogicException, RemoteException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
         gameManager.flipHourglass(gameId, nick);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleSetReady(Object p) throws BusinessLogicException, RemoteException {
+    private Object handleSetReady(Object p) throws BusinessLogicException, RemoteException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
         gameManager.setReady(gameId, nick);
-        return Message.response("OK");
+        return "OK";
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleLookDeck(Object p) throws BusinessLogicException {
+    private Object handleLookDeck(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         int idxDeck = (Integer) payload.get(1);
-        List<Card> deck = gameManager.showDeck(gameId, idxDeck);
-        return Message.response(deck);
+        return gameManager.showDeck(gameId, idxDeck);
+
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleLookShip(Object p) throws BusinessLogicException {
+    private Object handleLookShip(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
-        Tile [][] ship = gameManager.lookAtDashBoard(nickname, gameId);
-        return Message.response(ship);
+        return gameManager.lookAtDashBoard(nickname, gameId);
+
     }
 
     @SuppressWarnings("unchecked")
-    private Message handleLeaveGame(Object p) throws BusinessLogicException {
+    private Object handleLeaveGame(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
         gameManager.quitGame(gameId, nickname);
-        return Message.response("OK");
+        return "OK";
     }
 
-    private Message handleLogout(Object p) throws BusinessLogicException {
+    private Object handleLogout(Object p) throws BusinessLogicException {
         String nickname = (String) p;
         gameManager.logout(nickname);
-        return Message.response("OK");
+        return "OK";
     }
 
     @Override
@@ -347,12 +348,6 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.writeObject(Message.update(Message.OP_MAP_POSITION, map));
         out.flush();
     }
-
-//    @Override
-//    public void setFlagStart() throws IOException {
-//        out.writeObject(Message.update(Message.OP_SET_FLAG_START, null));
-//        out.flush();
-//    }
 
     @Override
     public void setStart() throws IOException {
