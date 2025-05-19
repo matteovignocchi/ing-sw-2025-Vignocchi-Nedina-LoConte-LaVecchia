@@ -17,13 +17,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 //TODO: verificare che in ogni possibile caso di riconnessione, la fase recuperata sia quella corretta
+//TODO: capire bene quando updatare le fasi per evitare update inutili (da drawcardmanagement in poi idealmente)
+
+//TODO: corner-case: crash in startGame
+//TODO: corner-case: crash del leader quando deve pescare
+
 //TODO: verificare che tutti i metodi invocati sulla view vanno e vengono invocati correttamente anche per socket
-//TODO: sistemare cardVisitor con le fasi e le chiamate ai metodi , verificare se meglio la mappa o il player (va gestita sta cosa gabri sa a cosa mi riferisco)
 //TODO: inserire i timeout in tutti i metodi che mettono in attesa il server. Creare nuovi metodi inform, ecc.. nel controller? se si, come integrare
 // nei metodi sostituendoli alla perfezione ai precedenti?
-//TODO: discorso gestione disconnessioni nei metodi di oleg. disconnetto e poi continuo con esecuzione, o devo returnare. capire.
+//TODO: discorso gestione disconnessioni nei metodi di oleg. disconnetto e poi continuo con esecuzione, o devo returnare. (mandare mail).
 //TODO: gestione degli askPlayerDecision, askPlayerIndex ecc.. nei metodi di oleg
-//TODO: capire bene quando updatare le fasi per evitare update inutili (da drawcardmanagement in poi idealmente)
 //TODO: parser per non passare oggetti del model
 
 
@@ -31,6 +34,7 @@ public class Controller implements Serializable {
     private final int gameId;
     private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
+    private final Map<String , Integer> playersPosition = new ConcurrentHashMap<>();
 
     //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
@@ -39,7 +43,6 @@ public class Controller implements Serializable {
     private final int MaxPlayers;
     private final boolean isDemo;
     private transient final Consumer<Integer> onGameEnd;
-    private final Map<String , Integer> playerPosition = new ConcurrentHashMap<>();
     private GamePhase principalGamePhase;
     private int numberOfEnter =0;
     private final int TIME_OUT = 30;
@@ -112,9 +115,10 @@ public class Controller implements Serializable {
         }
     }
 
-    public void notifyAllViews() {
+    public void notifyAllViews() throws BusinessLogicException {
         for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
-            notifyView(nickname);
+            Player p = getPlayerCheck(nickname);
+            if(p.isConnected()) notifyView(nickname);
         }
     }
 
@@ -139,7 +143,7 @@ public class Controller implements Serializable {
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
-        playerPosition.put(nickname, p.getId());
+        playersPosition.put(nickname, p.getId());
 
         broadcastInform("SERVER: " + nickname + "  joined");
     }
@@ -161,7 +165,7 @@ public class Controller implements Serializable {
         return view;
     }
 
-    private String getNickByPlayer(Player player) throws BusinessLogicException {
+    public String getNickByPlayer(Player player) throws BusinessLogicException {
         return playersByNickname.entrySet().stream()
                 .filter(e -> e.getValue().equals(player))
                 .map(Map.Entry::getKey)
@@ -267,7 +271,7 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-                v.updateMapPosition(playerPosition);
+                v.updateMapPosition(playersPosition);
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
                 v.setCentralTile(getPlayerCheck(nick).getTile(2,3));
@@ -283,7 +287,6 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-                //v.printPlayerDashboard(getPlayerByNickname(nick).getDashMatrix());
                 notifyView(nick);
                 v.setStart();
             } catch (IOException e) {
@@ -350,8 +353,6 @@ public class Controller implements Serializable {
         }
     }
 
-    //l'update non va gestito nel try-catch, metto notifyallviews alla fine prima di activateDrawPhase()
-    //vedere bene questo metodo
     public void startFlight() throws BusinessLogicException {
 
         if(!isDemo) mergeDecks();
@@ -360,13 +361,21 @@ public class Controller implements Serializable {
         List<Player> playersInFlight = fBoard.getOrderedPlayers();
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
+        //aggiorno la mappa di oleg
+        for(Map.Entry<String, Player> entry : playersByNickname.entrySet()) {
+            Player p = entry.getValue();
+            String nickname = entry.getKey();
+            playersPosition.put(nickname, p.getPos());
+        }
+
         broadcastInform("SERVER: " + "Flight started!");
-        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.CARD_EFFECT));
+        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
 
         addHuman();
 
         viewsByNickname.forEach((nick, v) -> checkPlayerAssembly(nick , 2 , 3));
-        notifyAllViews();
+
+        //notifyAllViews();
 
         activateDrawPhase();
     }
@@ -378,8 +387,9 @@ public class Controller implements Serializable {
 
         if(candidates.isEmpty()) throw new BusinessLogicException("No player connected");
 
+        String leaderNick = null;
         for(Player leader : candidates) {
-            String leaderNick = playersByNickname.entrySet().stream()
+            leaderNick = playersByNickname.entrySet().stream()
                     .filter(e -> e.getValue().equals(leader))
                     .map(Map.Entry::getKey)
                     .findFirst()
@@ -389,18 +399,22 @@ public class Controller implements Serializable {
 
             try {
                 v.inform("SERVER: " + "You're the leader! Draw a card");
+                v.notify();
                 break;
             } catch (IOException e) {
                 markDisconnected(leaderNick);
-                leader.setGamePhase(GamePhase.CARD_EFFECT);
+                leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
             } catch (Exception e){
                 markDisconnected(leaderNick);
-                leader.setGamePhase(GamePhase.CARD_EFFECT);
+                leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
                 System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
             }
         }
 
-        notifyAllViews();
+        for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
+            Player p = getPlayerCheck(nickname);
+            if(p.isConnected() && !nickname.equals(leaderNick)) notifyView(nickname);
+        }
     }
 
     public void startHourglass(){
@@ -490,9 +504,9 @@ public class Controller implements Serializable {
         Card card = deck.draw();
         
         Player drawer = getPlayerCheck(nickname);
-        drawer.setGamePhase(GamePhase.CARD_EFFECT);
+        drawer.setGamePhase(GamePhase.WAITING_FOR_TURN);
         try{
-            getViewCheck(nickname).updateGameState(GamePhase.CARD_EFFECT);
+            getViewCheck(nickname).updateGameState(GamePhase.WAITING_FOR_TURN);
         } catch (IOException e){
             markDisconnected(nickname);
         } catch (Exception e){
@@ -502,35 +516,40 @@ public class Controller implements Serializable {
 
 
         broadcastInform("SERVER: " + "Card drawn!");
-        viewsByNickname.forEach( (s, v) -> {
-            try {
-                v.printCard(card);
-            } catch (IOException e) {
-                markDisconnected(s);
-            } catch (Exception e){
-                markDisconnected(s);
-                System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
+
+        for(Map.Entry<String, VirtualView> entry :viewsByNickname.entrySet()){
+            String nick = entry.getKey();
+            VirtualView v = entry.getValue();
+            Player p = getPlayerCheck(nick);
+
+            if(p.isConnected()){
+                try {
+                    v.printCard(card);
+                } catch (IOException e) {
+                    markDisconnected(nick);
+                } catch (Exception e){
+                    markDisconnected(nick);
+                    System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
+                }
             }
-        });
+        }
 
         activateCard(card);
 
         if(deck.isEmpty()){
             startAwardsPhase();
         } else {
-            playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.CARD_EFFECT));
-            notifyAllViews();
+            playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
             activateDrawPhase();
-            //TODO: update per tutti (così facendo, il leader effettivo verrà updatato due volte, non penso sia un problema, capire)
         }
     }
 
-    public void startAwardsPhase(){
+    public void startAwardsPhase() throws BusinessLogicException {
 
         playersByNickname.forEach( (s, p) -> {
             p.setGamePhase(GamePhase.SCORING);
-            notifyAllViews();
         });
+        notifyAllViews();
 
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -588,13 +607,14 @@ public class Controller implements Serializable {
             VirtualView v = viewsByNickname.get(nick);
             int totalCredits = p.getCredit();
             p.setGamePhase(GamePhase.EXIT);
-            //TODO: anche qui, se una view è disconnessa, provo lo stesso ad updatarle -> finirò nel catch e
-            // lo rimetterò disconnesso anche se già lo è
+
             try{
-                if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
-                else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
-                v.inform("SERVER: " + "Game over. Thank you for playing!");
-                //TODO: update view
+                if(p.isConnected()){
+                    if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
+                    else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
+                    v.inform("SERVER: " + "Game over. Thank you for playing!");
+                    v.notify();
+                }
             } catch (IOException e) {
                 markDisconnected(nick);
             } catch (Exception e){
@@ -985,7 +1005,6 @@ public class Controller implements Serializable {
                             vari = askPlayerCoordinates(p);
                         } catch (Exception e) {
                             markDisconnected(nick);
-                            throw new RuntimeException(e);
                         }
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
@@ -1224,7 +1243,6 @@ public class Controller implements Serializable {
                 vari = askPlayerCoordinates(p);
             } catch (Exception e) {
                 markDisconnected(nick);
-                throw new RuntimeException(e);
             }
             Tile t = p.getTile(vari[0], vari[1]);
             switch (t){
@@ -1346,7 +1364,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void removeCrewmates(Player p, int num) throws Exception {
+    public void removeCrewmates(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
 
@@ -1464,7 +1482,7 @@ public class Controller implements Serializable {
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
-    public boolean isProtected(String nick, int d) throws Exception {
+    public boolean isProtected(String nick, int d) throws BusinessLogicException {
         boolean flag = false;
         VirtualView x = viewsByNickname.get(nick);
 
@@ -1529,7 +1547,7 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws Exception {
+    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
 
         if (dir == 0) {
@@ -1570,7 +1588,7 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws Exception {
+    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws BusinessLogicException {
 
         for (String p : playersByNickname.keySet()) {
             if (dir == 0) {
@@ -1702,7 +1720,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public boolean checkProtection(int dir, int dir2, String player) throws Exception {
+    public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         boolean result = false;
         if (dir == 0) {
             boolean flag = true;
@@ -1928,42 +1946,42 @@ public class Controller implements Serializable {
 
     //metodi da inserire nel card visitor per gestione tui
 
-    public void changePhaseFromCard(Player p, GamePhase tmp) throws BusinessLogicException {
-       String nick =  getNickByPlayer(p);
-        try {
-            viewsByNickname.get(nick).updateGameState(tmp);
-            notifyView(nick);
-        } catch (IOException e) {
-            markDisconnected(nick);
-        } catch (Exception e){
-            markDisconnected(nick);
-            System.err.println("[ERROR] in changePhaseFromCard: " + e.getMessage());
-        }
-    }
-
-    public void changeMapPosition() throws BusinessLogicException {
-        for(String nick : playerPosition.keySet()){
-            Player p = getPlayerCheck(nick);
-            playerPosition.put(nick,p.getPos());
-        }
-    }
-
-    public void updatePositionForEveryBody(){
-        for(String nick : playerPosition.keySet()){
+    public void changePhaseFromCard(String nick, Player p, GamePhase tmp){
+        if(p.isConnected()){
             try {
-                viewsByNickname.get(nick).updateMapPosition(playerPosition);
-
+                viewsByNickname.get(nick).updateGameState(tmp);
+                //notifyView(nick);
             } catch (IOException e) {
                 markDisconnected(nick);
             } catch (Exception e){
                 markDisconnected(nick);
-                System.err.println("[ERROR] in updatePositionForEverybody: " + e.getMessage());
+                System.err.println("[ERROR] in changePhaseFromCard: " + e.getMessage());
             }
         }
-        notifyAllViews();
     }
 
-    public void setExit(){
+    public void changeMapPosition(String nick, Player p) throws BusinessLogicException {
+        playersPosition.put(nick, p.getPos());
+    }
+
+    public void updatePositionForEveryBody() throws BusinessLogicException {
+        for(String nick : playersPosition.keySet()){
+            Player p = getPlayerCheck(nick);
+            if(p.isConnected()){
+                try {
+                    viewsByNickname.get(nick).updateMapPosition(playersPosition);
+                } catch (IOException e) {
+                    markDisconnected(nick);
+                } catch (Exception e){
+                    markDisconnected(nick);
+                    System.err.println("[ERROR] in updatePositionForEverybody: " + e.getMessage());
+                }
+            }
+        }
+        //notifyAllViews();
+    }
+
+    public void setExit() throws BusinessLogicException {
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
         notifyAllViews();
     }

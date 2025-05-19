@@ -53,16 +53,19 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (Player p : players) {
+            String nick = controller.getNickByPlayer(p);
 
             //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int x = controller.getPowerEngineForCard(p);
             f.moveRocket(x, p);
 
             //modifico posizione e stampo quelle nuove
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changeMapPosition(nick, p);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }
@@ -77,20 +80,22 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      */
 
     @Override
-    public void visit (StardustCard card) throws CardEffectException , BusinessLogicException {
+    public void visit (StardustCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (int i = players.size() - 1; i >= 0; i--) {
-            //setto fase effetto carta
-            controller.changePhaseFromCard(players.get(i), GamePhase.CARD_EFFECT);
-
             Player p = players.get(i);
+            String nick = controller.getNickByPlayer(p);
+
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+
             int x = p.countExposedConnectors();
             f.moveRocket(-x, p);
 
-            //modifico posizione e stampo quelle nuove
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changeMapPosition(nick, p);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }
@@ -112,12 +117,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(SlaversCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+        boolean exit = false;
 
         double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > slavers_fire_power) {
@@ -126,24 +132,20 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
 
-                //boolean ans = false;
-                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
-
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
                     p.addCredits(credits);
                 }
-                break;
-            } else if (player_fire_power < slavers_fire_power) {
-                try {
-                    controller.removeCrewmates(p, card.getNumCrewmates());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+                controller.changeMapPosition(nick, p);
+                controller.updatePositionForEveryBody();
+                exit = true;
+            } else if (player_fire_power < slavers_fire_power)
+                controller.removeCrewmates(p, card.getNumCrewmates());
+
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+
+            if(exit) break;
         }
     }
 
@@ -164,6 +166,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(FirstWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
+        List<String> nicks = new ArrayList<>();
+        for(Player p : players) {
+            String nick = controller.getNickByPlayer(p);
+            nicks.add(nick);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+        }
+
         int idx_firepower = 0;
         int idx_crew = 0;
         int idx_engine = 0;
@@ -178,21 +188,20 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         }
 
         f.moveRocket(-card.getDays(), players.get(idx_crew));
-        try {
-            controller.removeCrewmates(players.get(idx_firepower), card.getNumCrewmates());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        controller.removeCrewmates(players.get(idx_firepower), card.getNumCrewmates());
+
         Player p = players.get(idx_engine);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
             int res = p.throwDice() + p.throwDice();
-            try {
-                controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+        }
+
+        for(int i = 0; i < players.size(); i++) {
+            Player player = players.get(i);
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -213,6 +222,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(SecondWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
+        List<String> nicks = new ArrayList<>();
+        for(Player p : players) {
+            String nick = controller.getNickByPlayer(p);
+            nicks.add(nick);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+        }
+
         int idx_firepower = 0;
         int idx_engine = 0;
         int idx_crew = 0;
@@ -226,21 +243,20 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 idx_engine = i;
         }
         f.moveRocket(-card.getDays(), players.get(idx_firepower));
-        try {
-            controller.removeGoods(players.get(idx_engine), card.getNumGoods());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        controller.removeGoods(players.get(idx_engine), card.getNumGoods());
+
         Player p = players.get(idx_crew);
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
             int res = p.throwDice() + p.throwDice();
-            try {
-                controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
+        }
+
+        for(int i = 0; i < players.size(); i++) {
+            Player player = players.get(i);
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -261,12 +277,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(SmugglersCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+        boolean exit = false;
 
         double smugglers_fire_power = card.getFirePower();
         for(Player p : players) {
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > smugglers_fire_power){
@@ -276,29 +293,20 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 String string = String.format("Do you want to redeem %s goods and lose %d flight days?",
                         reward_goods_string, days);
 
-                //boolean ans = false;
-                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
-
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
-                    try {
-                        controller.addGoods(p, card.getRewardGoods());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    controller.addGoods(p, card.getRewardGoods());
                 }
-                break;
-            } else if (player_fire_power < smugglers_fire_power) {
-                try {
-                    controller.removeGoods(p, card.getNumRemovedGoods());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+                controller.changeMapPosition(nick, p);
+                controller.updatePositionForEveryBody();
+                exit = true;
+            } else if (player_fire_power < smugglers_fire_power)
+                controller.removeGoods(p, card.getNumRemovedGoods());
 
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+
+            if(exit) break;
         }
     }
 
@@ -316,16 +324,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(AbandonedShipCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+        boolean exit = false;
 
         for(Player p : players) {
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
-
-            //boolean ans = false;
-            //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
             if (controller.askPlayerDecision(string, p)) {
                 int days = card.getDays();
@@ -333,17 +339,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 int credits = card.getCredits();
                 p.addCredits(credits);
                 int num_crewmates = card.getNumCrewmates();
-                try {
-                    controller.removeCrewmates(p, num_crewmates);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                break;
+                controller.removeCrewmates(p, num_crewmates);
+
+                controller.changeMapPosition(nick, p);
+                controller.updatePositionForEveryBody();
+                exit = true;
             }
 
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+
+            if(exit) break;
         }
     }
 
@@ -362,34 +368,31 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(AbandonedStationCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+        boolean exit = false;
 
         for(Player p: players) {
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
-                //boolean ans = false;
-                //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
-
                 if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
-                    try {
-                        controller.addGoods(p, card.getStationGoods());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    controller.addGoods(p, card.getStationGoods());
                 }
-                break;
+                controller.changeMapPosition(nick, p);
+                controller.updatePositionForEveryBody();
+                exit = true;
             }
 
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+
+            if(exit) break;
         }
     }
 
@@ -405,19 +408,29 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      */
 
     @Override
-    public void visit(MeteoritesRainCard card) throws CardEffectException {
+    public void visit(MeteoritesRainCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+
+        List<String> nicks = new ArrayList<>();
+        for(Player p : players) {
+            String nick = controller.getNickByPlayer(p);
+            nicks.add(nick);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+        }
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             //superfluo ? capire se abbinare il lancio del dado al playe effettivamente, oppure semplice generazione di randomici
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
 
-            try {
-                controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+        }
+
+        for(int i = 0; i < players.size(); i++) {
+            Player p = players.get(i);
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nicks.get(i), p, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -442,49 +455,40 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         List<Player> losers = new ArrayList<>();
         for(Player p : players) {
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
 
             if(controller.getFirePowerForCard(p) > card.getFirePower()){
                 String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
-                boolean ans = false;
-                if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
-
-                if(ans){
+                if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
                     f.moveRocket(-days, p);
                     int credits = card.getCredits();
                     p.addCredits(credits);
                 }
+                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                controller.changeMapPosition(nick, p);
+                controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                controller.updatePositionForEveryBody();
                 break;
             } else if (controller.getFirePowerForCard(p) < card.getFirePower())
                 losers.add(p);
-
-
-            controller.changeMapPosition();
-            controller.updatePositionForEveryBody();
-
-
         }
+
         if(!losers.isEmpty()){
             int res = losers.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + losers.stream().filter(Player::isConnected).toList().getFirst().throwDice();
             for(Player p : losers){
-
-                //setto fase effetto carta
-                controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
-
                 for(int i = 0; i < card.getShots_directions().size(); i++){
-                    try {
-                        controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
+                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
-                controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
+
+                String nick = controller.getNickByPlayer(p);
+                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             }
         }
     }
@@ -506,33 +510,31 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(PlanetsCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+        boolean exit = false;
 
         int z = 0;
         for(Player p : players){
-
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
-
-            //boolean ans = false;
-            //if(p.isConnected()) ans = controller.askPlayerDecision(string, p);
 
             if(controller.askPlayerDecision(string, p)){
                 int days = card.getDays();
                 f.moveRocket(-days, p);
-                try {
-                    controller.addGoods(p, card.getRewardGoods().get(z));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                controller.addGoods(p, card.getRewardGoods().get(z));
                 z++;
-                if(z >= card.getRewardGoods().size()) break;
+
+                controller.changeMapPosition(nick, p);
+                controller.updatePositionForEveryBody();
+                if(z >= card.getRewardGoods().size()) exit = true;
             }
 
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+
+            if(exit) break;
         }
     }
 
@@ -546,22 +548,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      */
 
     @Override
-    public void visit(PlaugeCard card) throws CardEffectException  , BusinessLogicException{
+    public void visit(PlaugeCard card) throws BusinessLogicException{
         for(Player p : players){
+            String nick = controller.getNickByPlayer(p);
+            //p.setGamePhase(GamePhase.CARD_EFFECT);
+            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
-            //setto fase effetto carta
-            controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.startPlauge(p);
 
-            try {
-                controller.startPlauge(p);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            controller.changeMapPosition();
-            controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
-            controller.updatePositionForEveryBody();
+            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
         }
-
-
     }
+
 }

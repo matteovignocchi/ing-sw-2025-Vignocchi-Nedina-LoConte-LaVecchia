@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker;
 public enum GamePhase {
     WAITING_IN_LOBBY,
     RUNNING,
-    WAITING_FOR_START_GAME,
     BOARD_SETUP,
     TILE_MANAGEMENT,
     WAITING_FOR_PLAYERS,
