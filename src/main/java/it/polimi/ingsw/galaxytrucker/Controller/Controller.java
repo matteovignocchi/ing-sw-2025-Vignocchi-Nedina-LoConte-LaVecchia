@@ -16,9 +16,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-//TODO: verificare che in ogni possibile caso di riconnessione, la fase recuperata sia quella corretta
-//TODO: capire bene quando updatare le fasi per evitare update inutili (da drawcardmanagement in poi idealmente)
-
 //TODO: corner-case: crash in startGame
 //TODO: corner-case: crash del leader quando deve pescare
 
