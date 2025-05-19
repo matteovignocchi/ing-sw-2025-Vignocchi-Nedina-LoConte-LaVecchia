@@ -413,7 +413,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             List<Object> tileRequestPayload = new ArrayList<>();
             tileRequestPayload.add(gameId);
             tileRequestPayload.add(nickname);
-            tileRequestPayload.add(tmp.get(index).getIdTile());
+
 
             Message tileRequest = Message.request(Message.OP_GET_UNCOVERED, tileRequestPayload);
             Message tileResponse = sendRequestWithResponse(tileRequest);
@@ -603,7 +603,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     view.inform("Space Ship di: " + tmp);
                     view.printDashShip(dashPlayer);
                     view.printListOfCommand();
-
+                    return;
                 }
                 case String error -> {
                     view.reportError("Invalid player name: " + error);
