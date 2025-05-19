@@ -126,7 +126,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
-            case Message.OP_SET_IS_DEMO -> this.setIsDemo((Boolean) msg.getPayload());
+            case Message.OP_SET_IS_DEMO -> this.setIsDemo((boolean) msg.getPayload());
             case Message.OP_SET_CENTRAL_TILE -> this.setCentralTile((Tile) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
@@ -281,7 +281,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             }
                             v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
                         }
-                        // una volta uscito dal loop, invii la richiesta
                         List<Object> payloadGame = new ArrayList<>();
                         payloadGame.add(demo);
                         payloadGame.add(nickname);
@@ -692,6 +691,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void setIsDemo(Boolean demo) {
+        System.out.println("CAlllin setIsDemo: " + demo);
         view.setIsDemo(demo);
     }
 
