@@ -247,7 +247,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
         view.printPileShown(tmp);
-        view.inform("selected tile");
+        view.inform("Select a tile");
         int index;
         while(true){
             while (true) {

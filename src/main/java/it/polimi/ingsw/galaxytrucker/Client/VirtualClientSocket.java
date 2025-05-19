@@ -17,6 +17,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class VirtualClientSocket implements Runnable, VirtualView {
     private final Socket socket;
@@ -30,7 +31,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private boolean active = true;
     private String start = "false";
     private final ResponseHandler responseHandler = new ResponseHandler();
-    private final java.util.concurrent.CountDownLatch startLatch = new java.util.concurrent.CountDownLatch(1);
+    private final CountDownLatch startLatch = new CountDownLatch(1);
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -369,53 +370,68 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public Tile getUncoveredTile() throws Exception {
-
+    public Tile getUncoveredTile() throws IOException, InterruptedException {
         List<Object> payloadGame = new ArrayList<>();
         payloadGame.add(gameId);
         payloadGame.add(nickname);
+
         Message listRequest = Message.request(Message.OP_GET_UNCOVERED_LIST, payloadGame);
         Message listResponse = sendRequestWithResponse(listRequest);
+        Object listPayload = listResponse.getPayload();
 
-        List<Tile> listTile = switch (listResponse.getPayload()) {
-            case List<?> rawList -> {
-                try {
-                    @SuppressWarnings("unchecked")
-                    List<Tile> casted = (List<Tile>) rawList;
-                    yield casted;
-                } catch (ClassCastException e) {
-                    throw new IOException("Error : " + e.getMessage(), e);
+        List<Tile> tmp = List.of();
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<Tile> casted = (List<Tile>) listPayload;
+            tmp = casted;
+        } catch (ClassCastException e) {
+            switch (listPayload) {
+                case String error:
+                    throw new IOException("Server error: " + error);
+                default:
+                    new IOException("Unexpected payload type while reading tile list.", e);
+                    break;
+            }
+        }
+        if (tmp.isEmpty()) {
+            throw new IOException("The list of shown tiles is empty.");
+        }
+
+
+        view.printPileShown(tmp);
+        view.inform("Select a tile");
+
+        while (true) {
+            int index;
+            while (true) {
+                index = askIndex();
+                if (index >= 0 && index < tmp.size()) break;
+                view.inform("Invalid index. Try again.");
+            }
+
+            List<Object> tileRequestPayload = new ArrayList<>();
+            tileRequestPayload.add(gameId);
+            tileRequestPayload.add(nickname);
+            tileRequestPayload.add(tmp.get(index).getIdTile());
+
+            Message tileRequest = Message.request(Message.OP_GET_UNCOVERED, tileRequestPayload);
+            Message tileResponse = sendRequestWithResponse(tileRequest);
+            Object tilePayload = tileResponse.getPayload();
+
+            try {
+                return (Tile) tilePayload;
+            } catch (ClassCastException e) {
+                switch (tilePayload){
+                    case String error: throw new IOException("Server error: " + error);
+                    default:  throw new IOException("Unexpected payload type when fetching tile.", e);
                 }
             }
-            case String error -> throw new IOException("Error from server: " + error);
-            default -> throw new IOException("Unexpected: " + listResponse.getPayload().getClass().getName());
-        };
-
-        if (listTile.isEmpty()) {
-            throw new IOException("Empty list");
-        }
-
-        view.printPileShown(listTile);
-        while (true) {
-            int index = askIndex();
-            if (index < 0 || index >= listTile.size()) {
-                view.reportError("Invalid index: ");
-                continue;
-            }
-
-            Tile tile = listTile.get(index);
-
-            // Richiesta della tessera selezionata
-            Message request = Message.request(Message.OP_GET_UNCOVERED, tile);
-            Message tileResponse = sendRequestWithResponse(request);
-
-            return switch (tileResponse.getPayload()) {
-                case Tile t -> t;
-                case String error -> throw new IOException("Error from server: " + error);
-                default -> throw new IOException("Unexpected payload: " + tileResponse.getPayload().getClass().getName());
-            };
         }
     }
+
+
+
 
 
     @Override
