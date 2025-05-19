@@ -444,24 +444,36 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void positionTile(Tile tile) throws Exception {
-        view.inform("choose coordinate");
-        int[] tmp = view.askCoordinate();
-        List<Object> payloadGame = new ArrayList<>();
-        payloadGame.add(gameId);
-        payloadGame.add(nickname);
-        payloadGame.add(tile);
-        payloadGame.add(tmp);
-        Message request = Message.request(Message.OP_POSITION_TILE , payloadGame);
-        Message response = sendRequestWithResponse(request);
-        Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
+        view.printDashShip(Dash_Matrix);
+        int[] tmp;
+
+        while (true) {
+            view.inform("Choose coordiante");
+            tmp = view.askCoordinate();
+
+            List<Object> payloadGame = new ArrayList<>();
+            payloadGame.add(gameId);
+            payloadGame.add(nickname);
+            payloadGame.add(tile);
+            payloadGame.add(tmp);
+
+            Message request = Message.request(Message.OP_POSITION_TILE, payloadGame);
+            Message response = sendRequestWithResponse(request);
+
+            Object payload = response.getPayload();
+
+            switch (payload) {
+                case String p when p.equals("OK") -> {}
+                case String error -> {
+                    view.reportError("Errorr from server: " + error);
+                    continue;
                 }
+                default -> throw new IOException("Unexptected payload: ");
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            break;
         }
+        Dash_Matrix[tmp[0]][tmp[1]] = tile;
+        view.printDashShip(Dash_Matrix);
     }
 
     @Override
@@ -631,6 +643,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void enterGame(int gameId) throws Exception {
+
+        List<Object> payload = new ArrayList<>();
+        payload.add(gameId);
+        payload.add(nickname);
+        Message request = Message.request(Message.OP_ENTER_GAME, payload);
+        Message response = sendRequestWithResponse(request);
+        Object payloadResponse = response.getPayload();
+        switch(payloadResponse){
+            case String p ->{
+                if (!p.equals("OK")){
+                    view.reportError("Unexpected response from server: " + payload);
+                }
+            }
+            default -> throw new IOException("Unexpected payload: " + payload);
+        }
 
     }
 

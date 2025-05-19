@@ -276,7 +276,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.printDashShip(Dash_Matrix);
         int[] tmp;
         while(true){
-            view.inform("choose coordinate");
+            view.inform("Choose coordinates");
             tmp = view.askCoordinate();
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
