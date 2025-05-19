@@ -691,7 +691,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void setIsDemo(Boolean demo) {
-        System.out.println("CAlllin setIsDemo: " + demo);
         view.setIsDemo(demo);
     }
 
