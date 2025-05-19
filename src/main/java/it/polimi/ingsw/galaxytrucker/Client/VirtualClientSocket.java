@@ -571,22 +571,37 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void lookDashBoard() throws Exception {
-        String player = view.choosePlayer();
-        List<Object> payloadGame = new ArrayList<>();
-        payloadGame.add(gameId);
-        payloadGame.add(player);
-        Message request = Message.request(Message.OP_LOOK_SHIP, payloadGame);
-        Message response = sendRequestWithResponse(request);
-        Object payload = response.getPayload();
-        switch (payload) {
-            case String p when p.equals("OK") -> {
+        while (true) {
+            String tmp = view.choosePlayer();
+
+            List<Object> payload = new ArrayList<>();
+            payload.add(gameId);
+            payload.add(tmp);
+
+            Message request = Message.request(Message.OP_LOOK_SHIP, payload);
+            Message response = sendRequestWithResponse(request);
+            Object payloadResponse = response.getPayload();
+
+            switch (payloadResponse) {
+                case Tile[][] dashPlayer -> {
+                    view.inform("Space Ship di: " + tmp);
+                    view.printDashShip(dashPlayer);
+                    view.printListOfCommand();
+
+                }
+                case String error -> {
+                    view.reportError("Invalid player name: " + error);
+                }
+                default -> {
+                    view.reportError("Unexpected payload type: " + payloadResponse.getClass().getName());
+
+                }
             }
-            case String error -> {
-                throw new IOException("Error from server: " + error);
-            }
-            default -> throw new IOException("Unexpected payload: " );
         }
     }
+
+
+
 
     @Override
     public void logOut() throws Exception {
