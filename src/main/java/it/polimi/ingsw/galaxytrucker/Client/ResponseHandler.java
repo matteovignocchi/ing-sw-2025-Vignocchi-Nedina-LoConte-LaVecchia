@@ -37,7 +37,7 @@ public class ResponseHandler {
         if (queue == null) {
             throw new IllegalStateException("No response from this requestId: " + requestId);
         }
-        Message response = queue.poll(20, TimeUnit.SECONDS);    // opzionale: timeout per evitare blocchi infiniti
+        Message response = queue.poll(1, TimeUnit.MINUTES);    // opzionale: timeout per evitare blocchi infiniti
         if (response == null) {
             throw new InterruptedException("Timeout expired: " + requestId);
         }

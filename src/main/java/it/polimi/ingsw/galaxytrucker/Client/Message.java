@@ -82,16 +82,18 @@ public class Message implements Serializable {
         return new Message(TYPE_UPDATE, operation, payload, null);
     }
 
+    public static Message notify(String message) {
+        return new Message(TYPE_NOTIFICATION, null, message, null);
+    }
+
     public static Message error(String errorMessage, String requestId) {
         return new Message(TYPE_ERROR, null, errorMessage, requestId);
     }
 
-    // 🔧 Backward-compatible static error
     public static Message error(String errorMessage) {
         return new Message(TYPE_ERROR, null, errorMessage, null);
     }
 
-    // 🔧 Getter
     public String getMessageType() {
         return messageType;
     }

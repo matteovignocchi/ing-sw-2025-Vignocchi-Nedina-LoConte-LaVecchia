@@ -108,9 +108,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     @SuppressWarnings("unchecked")
     private Object handleCreateGame(Object p) throws BusinessLogicException, Exception {
         List<Object> payload = (List<Object>) p;
-        boolean isDemo = (Boolean) payload.get(0);
+        boolean isDemo = (boolean) payload.get(0);
         String nickname = (String)  payload.get(1);
-        int maxPlayers = (Integer) payload.get(2);
+        int maxPlayers = (int) payload.get(2);
+        this.setIsDemo(isDemo);
         return gameManager.createGame(isDemo,this, nickname, maxPlayers);
 
     }
@@ -239,7 +240,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public void inform(String message) throws IOException {
-        out.writeObject(Message.request(Message.TYPE_NOTIFICATION, message));
+        out.writeObject(Message.notify(message));
         out.flush();
     }
 
@@ -363,6 +364,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public void setIsDemo(Boolean demo) throws Exception {
+
+
+
         out.writeObject(Message.update(Message.OP_SET_IS_DEMO, demo));
         out.flush();
     }
