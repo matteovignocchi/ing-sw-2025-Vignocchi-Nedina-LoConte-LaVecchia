@@ -387,23 +387,37 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     throw new IOException("Error : " + e.getMessage(), e);
                 }
             }
-            case String error -> throw new IOException("Errore from server: " + error);
+            case String error -> throw new IOException("Error from server: " + error);
             default -> throw new IOException("Unexpected: " + listResponse.getPayload().getClass().getName());
         };
 
+        if (listTile.isEmpty()) {
+            throw new IOException("Empty list");
+        }
+
         view.printPileShown(listTile);
-        int index = askIndex();
-        Tile tile = listTile.get(index);
+        while (true) {
+            int index = askIndex();
+            if (index < 0 || index >= listTile.size()) {
+                view.reportError("Invalid index: ");
+                continue;
+            }
 
-        // Richiesta della tessera selezionata
-        Message request = Message.request(Message.OP_GET_UNCOVERED, tile);
-        Message tileResponse = sendRequestWithResponse(request);
 
-        return switch (tileResponse.getPayload()) {
-            case Tile t -> t;
-            case String error -> throw new IOException("Error from server: " + error);
-            default -> throw new IOException("Unexpected payload: " + tileResponse.getPayload().getClass().getName());
-        };
+
+            Tile tile = listTile.get(index);
+
+            // Richiesta della tessera selezionata
+            Message request = Message.request(Message.OP_GET_UNCOVERED, tile);
+            Message tileResponse = sendRequestWithResponse(request);
+
+            return switch (tileResponse.getPayload()) {
+                case Tile t -> t;
+                case String error -> throw new IOException("Error from server: " + error);
+                default ->
+                        throw new IOException("Unexpected payload: " + tileResponse.getPayload().getClass().getName());
+            };
+        }
     }
 
 
