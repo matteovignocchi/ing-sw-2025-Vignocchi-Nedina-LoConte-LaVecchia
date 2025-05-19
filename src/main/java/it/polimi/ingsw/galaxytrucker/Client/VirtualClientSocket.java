@@ -403,8 +403,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 continue;
             }
 
-
-
             Tile tile = listTile.get(index);
 
             // Richiesta della tessera selezionata
@@ -414,8 +412,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             return switch (tileResponse.getPayload()) {
                 case Tile t -> t;
                 case String error -> throw new IOException("Error from server: " + error);
-                default ->
-                        throw new IOException("Unexpected payload: " + tileResponse.getPayload().getClass().getName());
+                default -> throw new IOException("Unexpected payload: " + tileResponse.getPayload().getClass().getName());
             };
         }
     }
@@ -431,13 +428,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message response = sendRequestWithResponse(request);
 
         Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+        switch (payload) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> {
+                throw new IOException("Error from server: " + error);
+            }
+            default -> throw new IOException("Unexpected payload: " );
         }
 
     }
@@ -484,13 +481,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message request = Message.request(Message.OP_GET_CARD, payloadGame);
         Message response = sendRequestWithResponse(request);
         Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+        switch (payload) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> throw new IOException("Error from server: " + error);
+
+            default -> throw new IOException("Unexpected payload: " );
         }
     }
 
@@ -499,18 +495,22 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         List<Object> payloadGame = new ArrayList<>();
         payloadGame.add(gameId);
         payloadGame.add(nickname);
-        Message request = Message.request(Message.OP_ROTATE_GLASS , payloadGame);
+
+        Message request = Message.request(Message.OP_ROTATE_GLASS, payloadGame);
         Message response = sendRequestWithResponse(request);
+
         Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+
+        switch (payload) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> {
+                throw new IOException("Error from server: " + error);
+            }
+            default -> throw new IOException("Unexpected payload: " );
         }
     }
+
     @Override
     public void setReady() throws Exception {
         List<Object> payloadGame = new ArrayList<>();
@@ -519,32 +519,55 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message request = Message.request(Message.OP_SET_READY, payloadGame);
         Message response = sendRequestWithResponse(request);
         Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+        switch (payload) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> {
+                throw new IOException("Error from server: " + error);
+            }
+            default -> throw new IOException("Unexpected payload: " );
         }
     }
 
     @Override
     public void lookDeck() throws Exception {
-        view.inform("choose deck : 1 / 2 / 3");
-        int index = askIndex();
-        Message request = Message.request(Message.OP_LOOK_DECK, index);
-        Message response = sendRequestWithResponse(request);
-        Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
+        while (true) {
+            view.inform("Choose deck: 1 / 2 / 3");
+            int index = askIndex();
+
+            List<Object> payload = new ArrayList<>();
+            payload.add(gameId);
+            payload.add(index);
+
+            Message request = Message.request(Message.OP_LOOK_DECK, payload);
+            Message response = sendRequestWithResponse(request);
+
+            Object payloadResponse = response.getPayload();
+
+            switch (payloadResponse) {
+                case List<?> rawList -> {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        List<Card> deck = (List<Card>) rawList;
+                        view.printDeck(deck);
+                        return;
+                    } catch (ClassCastException e) {
+                        view.reportError("Error: " + e.getMessage());
+                        return;
+                    }
+                }
+                case String error -> {
+                    view.reportError("Invalid index: " + error);
+                }
+                default -> {
+                    view.reportError("Unexpected value: " );
+                    return;
                 }
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
         }
     }
+
+
 
     @Override
     public void lookDashBoard() throws Exception {
@@ -555,13 +578,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message request = Message.request(Message.OP_LOOK_SHIP, payloadGame);
         Message response = sendRequestWithResponse(request);
         Object payload = response.getPayload();
-        switch(payload){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+        switch (payload) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> {
+                throw new IOException("Error from server: " + error);
+            }
+            default -> throw new IOException("Unexpected payload: " );
         }
     }
 
@@ -574,13 +597,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
             Message response = sendRequestWithResponse(request);
             Object payload = response.getPayload();
-            switch(payload){
-                case String p ->{
-                    if (!p.equals("OK")){
-                        view.reportError("Unexpected response from server: " + payload);
-                    }
+            switch (payload) {
+                case String p when p.equals("OK") -> {
                 }
-                default -> throw new IOException("Unexpected payload: " + payload);
+                case String error -> {
+                    throw new IOException("Error from server: " + error);
+                }
+                default -> throw new IOException("Unexpected payload: " );
             }
         }else{
             List<Object> payloadGame = new ArrayList<>();
@@ -588,13 +611,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Message request = Message.request(Message.OP_LOGOUT, payloadGame);
             Message response = sendRequestWithResponse(request);
             Object payload = response.getPayload();
-            switch(payload){
-                case String p ->{
-                    if (!p.equals("OK")){
-                        view.reportError("Unexpected response from server: " + payload);
-                    }
+            switch (payload) {
+                case String p when p.equals("OK") -> {
                 }
-                default -> throw new IOException("Unexpected payload: " + payload);
+                case String error -> {
+                    throw new IOException("Error from server: " + error);
+                }
+                default -> throw new IOException("Unexpected payload: " );
             }
         }
         active = false;
@@ -650,13 +673,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Message request = Message.request(Message.OP_ENTER_GAME, payload);
         Message response = sendRequestWithResponse(request);
         Object payloadResponse = response.getPayload();
-        switch(payloadResponse){
-            case String p ->{
-                if (!p.equals("OK")){
-                    view.reportError("Unexpected response from server: " + payload);
-                }
+        switch (payloadResponse) {
+            case String p when p.equals("OK") -> {
             }
-            default -> throw new IOException("Unexpected payload: " + payload);
+            case String error -> {
+                throw new IOException("Error from server: " + error);
+            }
+            default -> throw new IOException("Unexpected payload: " );
         }
 
     }
