@@ -351,21 +351,24 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.printDashShip(dashPlayer);
         view.printListOfCommand();
     }
+
     @Override
-    public void logOut() throws RemoteException{
-        if(gameId != 0) {
-            try {
-                server.LeaveGame(gameId, nickname);
-            } catch (Exception e) {
-                view.reportError("problem with server");
-            }
-        }else{
-                try {
-                    server.logOut(nickname);
-                } catch (Exception  e) {
-                    view.reportError("problem with server");
-                }
+    public void leaveGame() throws RemoteException, BusinessLogicException {
+        if (gameId != 0) {
+            server.LeaveGame(gameId, nickname);
+            gameId = 0;
         }
+    }
+
+    @Override
+    public void logOut() throws RemoteException {
+        try {
+            server.logOut(nickname);
+        } catch (BusinessLogicException e) {
+            view.reportError("Server error: " + e.getMessage());
+        }
+        System.out.println("Goodbye!");
+        System.exit(0);
     }
 
     @Override

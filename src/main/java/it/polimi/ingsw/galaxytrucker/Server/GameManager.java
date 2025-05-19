@@ -56,9 +56,9 @@ public class GameManager {
         safeSave(gameId, controller);
     }
 
-    public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException {
+    public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException, Exception {
         Controller controller = getControllerCheck(gameId);
-        controller.broadcastInform("SERVER: " + nickname + " has abandoned: the game ends.");
+        controller.broadcastInform( nickname + " has abandoned: the game ends.");
         controller.setExit();
         removeGame(gameId);
     }

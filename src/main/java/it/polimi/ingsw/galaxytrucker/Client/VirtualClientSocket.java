@@ -615,44 +615,69 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
     }
 
-
-
+    @Override
+    public void leaveGame() throws Exception {
+        if (gameId != 0) {
+            Message req = Message.request(Message.OP_LEAVE_GAME, List.of(gameId, nickname));
+            Message resp = sendRequestWithResponse(req);
+            if (!"OK".equals(resp.getPayload())) {
+                throw new IOException("Error from server: " + resp.getPayload());
+            }
+            gameId = 0;
+        }
+    }
 
     @Override
     public void logOut() throws Exception {
-        if(gameId != 0) {
-            List<Object> payloadGame = new ArrayList<>();
-            payloadGame.add(gameId);
-            payloadGame.add(nickname);
-            Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
-            Message response = sendRequestWithResponse(request);
-            Object payload = response.getPayload();
-            switch (payload) {
-                case String p when p.equals("OK") -> {
-                }
-                case String error -> {
-                    throw new IOException("Error from server: " + error);
-                }
-                default -> throw new IOException("Unexpected payload: " );
-            }
-        }else{
-            List<Object> payloadGame = new ArrayList<>();
-            payloadGame.add(nickname);
-            Message request = Message.request(Message.OP_LOGOUT, payloadGame);
-            Message response = sendRequestWithResponse(request);
-            Object payload = response.getPayload();
-            switch (payload) {
-                case String p when p.equals("OK") -> {
-                }
-                case String error -> {
-                    throw new IOException("Error from server: " + error);
-                }
-                default -> throw new IOException("Unexpected payload: " );
-            }
+        Message req = Message.request(Message.OP_LOGOUT, nickname);
+        Message resp = sendRequestWithResponse(req);
+        String ok = (String) resp.getPayload();
+        if (!"OK".equals(ok)) {
+            throw new IOException("Error from server: " + ok);
         }
         active = false;
         socket.close();
+        System.out.println("Goodbye!");
+        System.exit(0);
     }
+
+
+
+//    @Override
+//    public void logOut() throws Exception {
+//        if(gameId != 0) {
+//            List<Object> payloadGame = new ArrayList<>();
+//            payloadGame.add(gameId);
+//            payloadGame.add(nickname);
+//            Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
+//            Message response = sendRequestWithResponse(request);
+//            Object payload = response.getPayload();
+//            switch (payload) {
+//                case String p when p.equals("OK") -> {
+//                }
+//                case String error -> {
+//                    throw new IOException("Error from server: " + error);
+//                }
+//                default -> throw new IOException("Unexpected payload: " );
+//            }
+//        }else{
+//            Message request = Message.request(Message.OP_LOGOUT, nickname);
+//            Message response = sendRequestWithResponse(request);
+//            Object payload = response.getPayload();
+//            switch (payload) {
+//                case String p when p.equals("OK") -> {
+//                }
+//                case String error -> {
+//                    throw new IOException("Error from server: " + error);
+//                }
+//                default -> throw new IOException("Unexpected payload: " );
+//            }
+//        }
+//        active = false;
+//        System.out.println("Goodbye!");
+//        socket.close();
+//        System.exit(0);
+//    }
 
     @Override
     public void setNickname(String nickname) {

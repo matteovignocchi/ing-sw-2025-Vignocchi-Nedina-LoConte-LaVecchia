@@ -142,7 +142,7 @@ public class Controller implements Serializable {
         viewsByNickname.put(nickname, view);
         playersPosition.put(nickname, p.getId());
 
-        broadcastInform("SERVER: " + nickname + "  joined");
+        broadcastInform( nickname + "  joined");
     }
 
     //Se tutto va, eliminabile
@@ -1978,9 +1978,16 @@ public class Controller implements Serializable {
         //notifyAllViews();
     }
 
-    public void setExit() throws BusinessLogicException {
-        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
-        notifyAllViews();
+    public void setExit() throws Exception{
+        for (var entry : viewsByNickname.entrySet()) {
+            VirtualView v = entry.getValue();
+            try {
+                v.updateGameState(GamePhase.EXIT);
+            } catch (IOException e) {
+                markDisconnected(entry.getKey());
+            }
+        }
     }
+
 }
 

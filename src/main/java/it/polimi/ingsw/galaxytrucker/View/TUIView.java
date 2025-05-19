@@ -71,7 +71,7 @@ public class TUIView implements View {
     }
     @Override
     public void reportError(String message) {
-        System.err.print("\n[ERROR] " + message + "\n> ");
+        System.err.print("\n[ERROR] " + message + "\n ");
     }
     @Override
     public void updateState(GamePhase gamePhase) {
@@ -152,20 +152,18 @@ public class TUIView implements View {
 
     @Override
     public int askIndex() {
-        int index;
         while (true) {
             inform("Insert index:");
+            String line = askString();
             try {
-                index = scanner.nextInt();
-                scanner.nextLine();
-                break;
-            } catch (InputMismatchException e) {
-                inform("Invalid input. Please enter a number.");
-                scanner.nextLine();
+                int value = Integer.parseInt(line.trim());
+                return value - 1;
+            } catch (NumberFormatException e) {
+                reportError("Invalid input. Please enter a number.");
             }
         }
-        return index - 1;
     }
+
 
     @Override
     public String askString() {
@@ -627,7 +625,7 @@ public class TUIView implements View {
                 listOfOptions.add("LogOut");
             }
             case SCORING  -> listOfOptions.add("logOut");
-            default -> listOfOptions.add("logOut");
+            default -> {}
         }
         return listOfOptions;
     }
@@ -635,7 +633,6 @@ public class TUIView implements View {
     @Override
     public String sendAvailableChoices() {
         List<String> listOfOptions = commandConstructor();
-        inform("Insert the command number");
         int tmp = askIndex();
         return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }

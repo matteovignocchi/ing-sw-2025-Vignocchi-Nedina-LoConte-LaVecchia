@@ -94,4 +94,6 @@ public interface VirtualView extends Remote {
     void setIsDemo(Boolean demo) throws Exception;
 
     void enterGame(int gameId) throws Exception;
+
+    void leaveGame() throws Exception;
 }

@@ -224,7 +224,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @SuppressWarnings("unchecked")
-    private Object handleLeaveGame(Object p) throws BusinessLogicException {
+    private Object handleLeaveGame(Object p) throws BusinessLogicException,Exception {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nickname = (String) payload.get(1);
