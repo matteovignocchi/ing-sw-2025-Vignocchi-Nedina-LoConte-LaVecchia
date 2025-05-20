@@ -57,7 +57,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 Message msg = (Message) in.readObject();
 
                 switch (msg.getMessageType()) {
-                    case Message.TYPE_NOTIFICATION -> this.inform((String) msg.getPayload());
+                    case Message.TYPE_NOTIFICATION ->{
+                        String note = (String) msg.getPayload();
+                        this.inform(note);
+                        if (note.contains("has abandoned")) {
+                            updateGameState(GamePhase.EXIT);
+                        }
+                    }
                     case Message.TYPE_REQUEST -> handleRequest(msg);
                     case Message.TYPE_RESPONSE -> responseHandler.handleResponse(msg.getRequestId(), msg);
                     case Message.TYPE_UPDATE -> handleUpdate(msg);
@@ -66,11 +72,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
 
             } catch (IOException | ClassNotFoundException e) {
-                try {
-                    view.reportError("Connection error: " + e.getMessage());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                if (active) {
+                    try {
+                        view.reportError("Connection error: " + e.getMessage());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
+                break;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -638,15 +647,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void logOut() throws Exception {
         Message req = Message.request(Message.OP_LOGOUT, nickname);
         Message resp = sendRequestWithResponse(req);
-        String ok = (String) resp.getPayload();
-        if (!"OK".equals(ok)) {
-            throw new IOException("Error from server: " + ok);
+        if (!"OK".equals(resp.getPayload())) {
+            throw new IOException("Error from server: " + resp.getPayload());
         }
         active = false;
         socket.close();
         System.out.println("Goodbye!");
         System.exit(0);
     }
+
 
 
 

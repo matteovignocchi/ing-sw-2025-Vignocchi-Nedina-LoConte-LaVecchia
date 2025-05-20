@@ -45,7 +45,8 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.enterGame(gameId);
-            handleWaitForGameStart();
+            waitForGameStart();
+            view.inform("Game started");
             startGame();
         }
 
@@ -138,7 +139,7 @@ public class ClientController {
                 if (gameId > 0) {
                     virtualClient.setGameId(gameId);
                     v.inform("Waiting for players in lobby");
-                    handleWaitForGameStart();
+                    waitForGameStart();
                     startGame();
                 } else {
                     view.reportError("Game creation failed");
@@ -162,59 +163,87 @@ public class ClientController {
         int gameId = virtualClient.sendGameRequest("JOIN");
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
-            handleWaitForGameStart();
+            waitForGameStart();
             startGame();
-        } else if (gameId==0) {
-            mainMenuLoop();
         } else {
             view.reportError("Cannot join game");
         }
     }
 
+//    public void joinExistingGame() throws Exception {
+//        view.inform("Joining Existing Game...");
+//        int gameId = virtualClient.sendGameRequest("JOIN");
+//        if (gameId > 0) {
+//            virtualClient.setGameId(gameId);
+//            handleWaitForGameStart();
+//            startGame();
+//        } else if (gameId==0) {
+//            mainMenuLoop();
+//        } else {
+//            view.reportError("Cannot join game");
+//        }
+//    }
 
-    public void waitForGameStart() throws Exception {
-        System.out.println("Waiting for the game to start... (type 'exit' to return to the main menu)");
+
+    private void waitForGameStart() throws Exception {
         while (true) {
-            if (exitWaitingQueue) {
-                mainMenuLoop();
-                return;
+            switch (view){
+                case GUIView v -> v.setMainScene(SceneEnum.WAITING_QUEUE);
+                default -> {}
             }
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {
                 return;
             }
-            Thread.sleep(500); // evita spam
         }
     }
 
-    public void exitQueue() {
-        exitWaitingQueue = true;
-    }
+    private boolean handleWaitForGameStart() throws Exception {
+        view.inform("Waiting for other players…");
+        view.inform("Type 'exit' to abandon the lobby and return to main menu.");
 
-    public void handleWaitForGameStart() {
-        ClientController controller = this;
-        Thread waitingThread = new Thread(() -> {
-            try {
-                controller.waitForGameStart();
-            } catch (Exception e) {
-                e.printStackTrace();
+        while (true) {
+            // il server ha avanzato lo stato: il gioco parte
+            if (virtualClient.getGameFase() != GamePhase.WAITING_FOR_PLAYERS) {
+                view.inform("Game is starting!");
+                return true;
             }
-        });
-        waitingThread.start();
-        Scanner scanner = new Scanner(System.in);
-        while (waitingThread.isAlive()) {
-            String input = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(input.trim())) {
-                controller.exitQueue();
-                break;
+
+            String line = view.askString().trim();
+            if ("exit".equalsIgnoreCase(line)) {
+                virtualClient.leaveGame();
+                view.inform("Returned to main menu");
+                return false;
             }
+            view.inform("Still waiting… type 'exit' to cancel or wait for game to start.");
         }
     }
+
+
+//    public void handleWaitForGameStart() {
+//        view.inform("Waiting for players (type 'exit' to cancel)");
+//        ClientController controller = this;
+//        Thread waitingThread = new Thread(() -> {
+//            try {
+//                controller.waitForGameStart();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        waitingThread.start();
+//        Scanner scanner = new Scanner(System.in);
+//        while (waitingThread.isAlive()) {
+//            String input = scanner.nextLine();
+//            if ("exit".equalsIgnoreCase(input.trim())) {
+//                controller.exitQueue();
+//                break;
+//            }
+//        }
+//    }
 
 
     private void startGame() throws Exception {
-        view.inform("game started");
-        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        boolean firstTurn = true;
 
         while (true) {
             GamePhase gameState = virtualClient.getGameFase();
@@ -223,18 +252,12 @@ public class ClientController {
                 return;
             }
 
-            String key = null;
-            while (key == null) {
-                if (virtualClient.getGameFase() == GamePhase.EXIT) {
-                    view.inform("Returned to main menù...");
-                    return;
-                }
-                if (stdin.ready()) {
-                    key = view.sendAvailableChoices();
-                } else {
-                    Thread.sleep(100);
-                }
+            if (!firstTurn) {
+                view.printListOfCommand();
             }
+
+            firstTurn = false;
+            String key = view.sendAvailableChoices();
 
             switch (key) {
                 case "getacoveredtile" -> {
