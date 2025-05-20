@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="fxml.css.GameListMenu"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="399.0" prefWidth="399.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController">
+   <children>
+      <ImageView fitHeight="407.0" fitWidth="399.0" preserveRatio="true" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@../LobbyImage2.png" />
+         </image>
+      </ImageView>
 
+      <Label fx:id="titleLabel" layoutX="140.0" layoutY="75.0" prefHeight="22.0" prefWidth="117.0" styleClass="label" text="Available Games" textAlignment="CENTER" AnchorPane.leftAnchor="140.0" AnchorPane.rightAnchor="140.0" AnchorPane.topAnchor="75.0" />
+
+      <ListView fx:id="gameListView" layoutX="113.0" layoutY="90.0" prefHeight="181.0" prefWidth="172.0" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="115.0" AnchorPane.rightAnchor="115.0" AnchorPane.topAnchor="100.0">
+         <styleClass>
+            <String fx:value="label" />
+         </styleClass>
+      </ListView>
+
+      <Button fx:id="backButton" layoutX="149.5" layoutY="310.0" onMouseClicked="#back" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Back" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="149.5" />
+   </children>
 </AnchorPane>

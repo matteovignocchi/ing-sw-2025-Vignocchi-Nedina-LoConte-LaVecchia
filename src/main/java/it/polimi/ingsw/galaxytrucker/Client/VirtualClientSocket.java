@@ -307,29 +307,51 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
         if(message.equals("JOIN")) {
             while (true) {
-                Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
-                Message msg = sendRequestWithResponse(gameRequest);
-                view.inform("Available Games");
-                Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
-                if(availableGames.isEmpty()){
-                    view.inform("No available games");
-                    return -1;
-                }else{
-                    for (Integer i : availableGames.keySet()) {
-                        int[] info = availableGames.get(i);
-                        boolean isDemo = info[2] == 1;
-                        String suffix = isDemo ? " DEMO" : "";
-                        view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                switch(view){
+                    case TUIView v -> {
+                        Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+                        Message msg = sendRequestWithResponse(gameRequest);
+                        v.inform("Available Games");
+                        Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        }else{
+                            for (Integer i : availableGames.keySet()) {
+                                int[] info = availableGames.get(i);
+                                boolean isDemo = info[2] == 1;
+                                String suffix = isDemo ? " DEMO" : "";
+                                v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                            }
+                        }
+                        int choice = askIndex() + 1;
+                        List<Object> payloadJoin = List.of(choice, nickname);
+                        Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                        sendRequest(gameChoice);
+                        return choice;
                     }
+                    case GUIView v -> {
+                        Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+                        Message msg = sendRequestWithResponse(gameRequest);
+                        Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        }else{
+                            v.updateAvailableGames(availableGames);
+                        }
+                            int choice = v.getGameChoice();
+                            List<Object> payloadJoin = List.of(choice, nickname);
+                            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                            sendRequest(gameChoice);
+                            return choice;
+                        }
+                        default -> {}
+                    }
+
                 }
 
-                int choice = askIndex() + 1;
-                List<Object> payloadJoin = List.of(choice, nickname);
-                Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-                sendRequest(gameChoice);
-                return choice;
             }
-        }
         return 0;
     }
 
