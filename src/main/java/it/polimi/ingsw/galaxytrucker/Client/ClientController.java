@@ -294,7 +294,7 @@ public class ClientController {
                 case "takereservedtile" -> {
                     try{
 //                        virtualClient.takeReservedTile()
-                        tmpTile = virtualClient.getTileServer();
+                        tmpTile = virtualClient.takeReservedTile();
                         view.printTile(tmpTile);
                         view.printListOfCommand();
                     }catch (BusinessLogicException e){
@@ -422,6 +422,12 @@ public class ClientController {
 
     public void logOutGUI() throws Exception {
         virtualClient.logOut();
+    }
+
+    public void setCurrentTile(Tile tmp) {
+        this.tmpTile = tmp;
+        view.printTile(tmpTile);
+        view.printListOfCommand();
     }
 
 }

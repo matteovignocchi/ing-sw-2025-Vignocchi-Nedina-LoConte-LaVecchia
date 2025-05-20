@@ -28,6 +28,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private Tile[][] Dash_Matrix;
     private final Object startLock = new Object();
     private String start = "false";
+    private ClientController ciccio;
 
     public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
         super();
@@ -51,6 +52,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void setGameId(int gameId) throws RemoteException {
         this.gameId = gameId;
     }
+    @Override
+    public void setClientController(ClientController clientController) throws RemoteException {
+        this.ciccio = clientController;
+    }
 
 
     /// METODI PER PRINTARE A CLIENT ///
@@ -60,8 +65,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
 
-    public void setCentralTile(Tile tmp){
-        Dash_Matrix[2][3] = tmp;
+    @Override
+    public void setTile(Tile tmp){
+        switch (gamePhase){
+            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tmp);
+            default -> Dash_Matrix[2][3] = tmp;
+        }
     }
     @Override
     public void inform(String message) throws RemoteException {
@@ -405,11 +414,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
             else break;
         }
+        view.inform("id+"+ Dash_Matrix[index[0]][index[1]].idTile);
             try {
-                view.setValidity(index[0], index[1]);
+//                view.setValidity(index[0], index[1]);
+                Tile tmp = Dash_Matrix[index[0]][index[1]];
                 Dash_Matrix[index[0]][index[1]] = new EmptySpace();
                 view.printDashShip(Dash_Matrix);
-                tmpTile = server.getReservedTile(gameId,nickname,Dash_Matrix[index[0]][index[1]].getIdTile());
+                tmpTile = server.getReservedTile(gameId,nickname,tmp.getIdTile());
             } catch (BusinessLogicException e) {
                 view.reportError("you miss " + e.getMessage() + "select new command" );
                 throw new BusinessLogicException(e.getMessage());
