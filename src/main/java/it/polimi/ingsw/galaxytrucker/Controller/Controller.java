@@ -105,6 +105,7 @@ public class Controller implements Serializable {
                     p.getTotalHuman(),
                     p.getTotalEnergy()
             );
+            //update tile se sono in tile management
         } catch (IOException e) {
             markDisconnected(nickname);
         } catch (Exception e) {
@@ -307,6 +308,8 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
+        //salvare l'ultima tile del player
+
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
@@ -319,6 +322,7 @@ public class Controller implements Serializable {
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
         if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("No tiles found");
 
+        //salvare l'ultima tile del server
         Player p = getPlayerCheck(nickname);
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
@@ -347,6 +351,8 @@ public class Controller implements Serializable {
         List<Tile> discardPile = p.getTilesInDiscardPile();
         for(Tile t : discardPile) {
             if(t.getIdTile() == id) {
+
+                //salvare ultima tile del player
                 discardPile.remove(t);
                 p.setGamePhase(GamePhase.TILE_MANAGEMENT);
                 notifyView(nickname);
