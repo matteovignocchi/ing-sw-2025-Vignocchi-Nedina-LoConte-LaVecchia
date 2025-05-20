@@ -409,7 +409,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 view.setValidity(index[0], index[1]);
                 Dash_Matrix[index[0]][index[1]] = new EmptySpace();
                 view.printDashShip(Dash_Matrix);
-                tmpTile = server.getReservedTile(gameId,nickname,Dash_Matrix[index[0]][index[1]].idTile);
+                tmpTile = server.getReservedTile(gameId,nickname,Dash_Matrix[index[0]][index[1]].getIdTile());
             } catch (BusinessLogicException e) {
                 view.reportError("you miss " + e.getMessage() + "select new command" );
                 throw new BusinessLogicException(e.getMessage());
