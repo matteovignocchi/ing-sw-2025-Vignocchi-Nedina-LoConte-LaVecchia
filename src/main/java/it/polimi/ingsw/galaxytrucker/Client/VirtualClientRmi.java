@@ -162,7 +162,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     case TUIView v ->{
                         boolean demo = v.ask("would you like a demo version?");
                         v.inform("select max 4 players");
-                        int numberOfPlayer = v.askIndex()+1;
+                        int numberOfPlayer ;
+                        while (true) {
+                            numberOfPlayer = v.askIndex() + 1;
+                            if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
+                                break;
+                            }
+                            v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
+                        }
                         try {
                             return server.createNewGame(demo , this , nickname , numberOfPlayer);
                         } catch (Exception e) {
@@ -197,6 +204,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     view.inform("No available games");
                     return -1;
                 } else {
+                    view.inform(0 + ". return to main menu");
                     for (Integer i : availableGames.keySet()) {
                         int[] info = availableGames.get(i);
                         if(info[2] == 1){
@@ -209,11 +217,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 int choice;
                while(true){
                     choice = askIndex()+1;
-                    if(availableGames.containsKey(choice)) break;
+                    if(availableGames.containsKey(choice) || choice==0) break;
                    view.inform("index not valid");
                }
                 try {
-                    server.enterGame(choice, this , nickname);
+                    if(availableGames.containsKey(choice)){
+                        server.enterGame(choice, this , nickname);
+                    }
                     return choice;
                 } catch (Exception e) {
                     view.reportError("you miss " + e.getMessage() );

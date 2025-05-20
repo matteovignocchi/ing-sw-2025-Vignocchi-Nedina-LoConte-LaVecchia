@@ -404,7 +404,7 @@ public class Controller implements Serializable {
             } catch (Exception e){
                 markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
+                System.err.println("[ERROR] in activateDrawPhase:" + e.getMessage());
             }
         }
 
@@ -1985,6 +1985,16 @@ public class Controller implements Serializable {
                 v.updateGameState(GamePhase.EXIT);
             } catch (IOException e) {
                 markDisconnected(entry.getKey());
+            }
+        }
+    }
+    public void notifyViewFromCArd(Player player){
+        String tmp;
+        for(String nick : playersByNickname.keySet()){
+            if(playersByNickname.get(nick).equals(player)) {
+                tmp = nick;
+                notifyView(tmp);
+                break;
             }
         }
     }

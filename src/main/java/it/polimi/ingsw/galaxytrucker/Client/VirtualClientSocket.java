@@ -315,6 +315,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     view.inform("No available games");
                     return -1;
                 }else{
+                    view.inform(0 + ". return to main menu");
                     for (Integer i : availableGames.keySet()) {
                         int[] info = availableGames.get(i);
                         boolean isDemo = info[2] == 1;
@@ -322,12 +323,18 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                         view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                     }
                 }
-
-                int choice = askIndex() + 1;
-                List<Object> payloadJoin = List.of(choice, nickname);
-                Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-                sendRequest(gameChoice);
-                return choice;
+                int choice;
+                while(true){
+                    choice = askIndex()+1;
+                    if(availableGames.containsKey(choice) || choice==0) break;
+                    view.inform("index not valid");
+                }
+                if(availableGames.containsKey(choice)){
+                    List<Object> payloadJoin = List.of(choice, nickname);
+                    Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                    sendRequest(gameChoice);
+                    return choice;
+                }else break;
             }
         }
         return 0;
