@@ -7,7 +7,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -244,12 +243,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             tmp = server.getUncoveredTilesList(gameId, nickname);
 
         } catch (Exception e) {
-            view.reportError("problem with server");
-            throw new BusinessLogicException("non ci sono ancora tile");
+            throw new BusinessLogicException("Empty list");
         }
 
         view.printPileShown(tmp);
-        view.inform("selected tile");
+        view.inform("Select a tile");
         int index;
         while(true){
             while (true) {
@@ -278,12 +276,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.printDashShip(Dash_Matrix);
         int[] tmp;
         while(true){
-            view.inform("choose coordinate");
+            view.inform("Choose coordinates");
             tmp = view.askCoordinate();
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
-            } catch (Exception e) {
+            } catch (BusinessLogicException e) {
                 view.reportError(e.getMessage());
             }
         }
@@ -320,7 +318,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void lookDeck() throws RemoteException{
-        view.inform("choose deck : 1 / 2 / 3");
+        view.inform("Choose deck : 1 / 2 / 3");
         int index;
         while(true){
             index = askIndex();
@@ -353,22 +351,24 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.printDashShip(dashPlayer);
         view.printListOfCommand();
     }
+
     @Override
-    public void logOut() throws RemoteException{
-        if(gameId != 0) {
-            try {
-                server.LeaveGame(gameId, nickname);
-                gameId = 0;
-            } catch (Exception e) {
-                view.reportError("problem with server");
-            }
-        }else{
-                try {
-                    server.logOut(nickname);
-                } catch (Exception  e) {
-                    view.reportError("problem with server");
-                }
+    public void leaveGame() throws RemoteException, BusinessLogicException {
+        if (gameId != 0) {
+            server.LeaveGame(gameId, nickname);
+            gameId = 0;
         }
+    }
+
+    @Override
+    public void logOut() throws RemoteException {
+        try {
+            server.logOut(nickname);
+        } catch (BusinessLogicException e) {
+            view.reportError("Server error: " + e.getMessage());
+        }
+        System.out.println("Goodbye!");
+        System.exit(0);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class Message implements Serializable {
 
@@ -9,6 +10,7 @@ public class Message implements Serializable {
     public static final String TYPE_ERROR = "ERROR";
     public static final String TYPE_UPDATE = "UPDATE";
     public static final String TYPE_NOTIFICATION = "NOTIFICATION";
+
     public static final String OP_LOGIN = "LOGIN";
     public static final String OP_LOGOUT = "LOGOUT";
     public static final String OP_REGISTER = "REGISTER";
@@ -47,38 +49,49 @@ public class Message implements Serializable {
     public static final String OP_SET_VIEW = "SET_VIEW";
     public static final String OP_SET_GAMEID = "SET_GAMEID";
     public static final String OP_MAP_POSITION = "MAP_POSITION";
-    public static final String OP_SET_FLAG_START = "SET FLAG";
-
+    public static final String OP_SET_FLAG_START = "SET_FLAG_START";
 
 
     private final String messageType;
     private final String operation;
     private final Object payload;
+    private final String requestId;
 
-    //utile per debug e testing così ci printa i messaggi
-    private final String timestamp;
 
-    public Message(String messageType, String operation, Object payload) {
+    public Message(String messageType, String operation, Object payload, String requestId) {
         this.messageType = messageType;
         this.operation = operation;
         this.payload = payload;
-        this.timestamp = java.time.LocalDateTime.now().toString();
+        this.requestId = requestId;
     }
 
+    // 🔧 Factory con UUID generato automaticamente
     public static Message request(String operation, Object payload) {
-        return new Message(TYPE_REQUEST, operation, payload);
+        return new Message(TYPE_REQUEST, operation, payload, UUID.randomUUID().toString());
     }
 
-    public static Message response(Object payload) {
-        return new Message(TYPE_RESPONSE, null, payload);
+    public static Message request(String operation, Object payload, String requestId) {
+        return new Message(TYPE_REQUEST, operation, payload, requestId);
+    }
+
+    public static Message response(Object payload, String requestId) {
+        return new Message(TYPE_RESPONSE, null, payload, requestId);
     }
 
     public static Message update(String operation, Object payload) {
-        return new Message(TYPE_UPDATE, operation, payload);
+        return new Message(TYPE_UPDATE, operation, payload, null);
+    }
+
+    public static Message notify(String message) {
+        return new Message(TYPE_NOTIFICATION, null, message, null);
+    }
+
+    public static Message error(String errorMessage, String requestId) {
+        return new Message(TYPE_ERROR, null, errorMessage, requestId);
     }
 
     public static Message error(String errorMessage) {
-        return new Message(TYPE_ERROR, null, errorMessage);
+        return new Message(TYPE_ERROR, null, errorMessage, null);
     }
 
     public String getMessageType() {
@@ -93,8 +106,8 @@ public class Message implements Serializable {
         return payload;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getRequestId() {
+        return requestId;
     }
 
     public boolean isType(String type) {
@@ -104,12 +117,4 @@ public class Message implements Serializable {
     public boolean isOperation(String operation) {
         return this.operation != null && this.operation.equals(operation);
     }
-
-    @Override
-    public String toString() {
-        return String.format("Message[%s|%s|%s|%s]",
-                messageType, operation, payload, timestamp);
-    }
-
-
 }

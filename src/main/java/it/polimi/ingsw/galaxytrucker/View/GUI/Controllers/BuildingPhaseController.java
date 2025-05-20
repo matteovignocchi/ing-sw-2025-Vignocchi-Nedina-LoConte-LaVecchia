@@ -1,9 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
-import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;

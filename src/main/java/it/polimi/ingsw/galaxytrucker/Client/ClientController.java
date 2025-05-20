@@ -2,11 +2,14 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import static java.lang.String.valueOf;
 
@@ -36,80 +39,177 @@ public class ClientController {
         view.inform("Connected with success");
 
         int gameId = loginLoop();
-        if(gameId<0) {
-            mainMenuLoop();
-        } else {
+
+        if (gameId > 0) {
             virtualClient.enterGame(gameId);
+            waitForGameStart();
             startGame();
+        }
+
+        while (isConnected) {
+            mainMenuLoop();
+            String cmd = view.askString();
+            switch (cmd) {
+                case "1" -> createNewGame();
+                case "2" -> joinExistingGame();
+                case "3" -> {
+                    virtualClient.logOut();
+                    isConnected = false;
+                }
+                default  -> view.reportError("Enter 1, 2 or 3.");
+            }
         }
     }
 
     private int loginLoop() throws Exception {
-        int ans = -1;
-        while (isConnected) {
-            view.inform("Insert your username :");
+        while (true) {
+            view.inform("Insert your username:");
             String username = virtualClient.askString();
-            ans  = virtualClient.sendLogin(username);
-            if (ans == -1) {
-                view.reportError("Credential not valid, enter a new username:  ");
-            } else if (ans == -2) {
-                view.inform("Login successful");
-                virtualClient.setNickname(username);
-                break;
+            int res = virtualClient.sendLogin(username);
+            if (res == -1) {
+                view.reportError("Credential not valid, try again.");
             } else {
-                //view.inform("Reconnection successful");
+                // nickname accettato (nuovo o reconnect)
                 virtualClient.setNickname(username);
-                break;
+                if (res == -2) {
+                    view.inform("Login successful");
+                } else {
+                    view.inform("Reconnection successful, rejoining game " + res);
+                }
+                return res;
             }
         }
-        return ans;
     }
+
+//    private int loginLoop() throws Exception {
+//        int ans = -1;
+//        while (isConnected) {
+//            view.inform("Insert your username :");
+//            String username = virtualClient.askString();
+//            ans  = virtualClient.sendLogin(username);
+//            if (ans == -1) {
+//                view.reportError("Credential not valid, enter a new username:  ");
+//            } else if (ans == -2) {
+//                view.inform("Login successful");
+//                virtualClient.setNickname(username);
+//                break;
+//            } else {
+//                //view.inform("Reconnection successful");
+//                virtualClient.setNickname(username);
+//                break;
+//            }
+//        }
+//        return ans;
+//    }
 
     private void mainMenuLoop() throws Exception {
         while (isConnected) {
-            view.inform("-----MENU-----");
-            view.inform("1. Create new game");
-            view.inform("2. Enter in a game");
-            view.inform("3. Logout");
             int choice = 0;
             while (true) {
+                printMainMenu();
+                String line;
                 switch (view) {
-                    case TUIView v -> {
-                        choice = virtualClient.askIndex() + 1;
-                        if (choice > 0 && choice < 4) break;
-                        view.inform("Invalid choice");
-                    }
-                    case GUIView v -> {}
-                    default -> {}
+                    case TUIView v -> line = v.askString();
+                    case GUIView g -> line= view.askString(); // appena implementerai in GUI, per adesso ho messo un metodo a caso
+                    default -> line = view.askString();
                 }
 
-                switch (choice) {
-                    case 1 -> createNewGame();
-                    case 2 -> joinExistingGame();
-                    case 3 -> {
-                        virtualClient.logOut();
-                        isConnected = false;
-                        System.exit(0);
-                    }
-                    default -> view.inform("Choice not valid");
+                try {
+                    choice = Integer.parseInt(line);
+                } catch (NumberFormatException e) {
+                    view.reportError("Invalid input. Please enter a number between 1 and 3.\n");
+                    continue;
+                }
+
+                if (choice < 1 || choice > 3) {
+                    view.reportError("Invalid choice. Please enter a number between 1 and 3.\n");
+                    continue;
+                }
+                break;
+            }
+
+            switch (choice) {
+                case 1 -> createNewGame();
+                case 2 -> joinExistingGame();
+                case 3 -> {
+                    virtualClient.logOut();
+                    isConnected = false;
+                    return;
                 }
             }
         }
+    }
+//    private void mainMenuLoop() throws Exception {
+//        while (isConnected) {
+//            printMainMenu();
+//            int choice = 0;
+//            while (true) {
+//                switch (view) {
+//                    case TUIView v -> {
+//                        while (true) {
+//                            choice = virtualClient.askIndex() + 1;
+//                            if (choice >= 1 && choice <= 3) {
+//                                break;
+//                            }
+//                            view.reportError("Invalid choice. Please enter a number between 1 and 3.");
+//                            printMainMenu();
+//                        }
+//                    }
+//                    case GUIView v -> {}
+//                    default -> {}
+//                }
+//
+//                switch (choice) {
+//                    case 1 -> createNewGame();
+//                    case 2 -> joinExistingGame();
+//                    case 3 -> {
+//                        virtualClient.logOut();
+//                        isConnected = false;
+//                        return;
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+//    private void printMainMenu() {
+//        view.inform("-----MENU-----");
+//        view.inform("1. Create new game");
+//        view.inform("2. Enter in a game");
+//        view.inform("3. Logout");
+//    }
+
+    private void printMainMenu() {
+        view.inform("-----MENU-----");
+        view.inform("1. Create new game");
+        view.inform("2. Enter in a game");
+        view.inform("3. Logout");
+        view.inform("Insert index:");
     }
 
     public void createNewGame() throws Exception {
         switch (view) {
             case TUIView v -> {
-                v.inform("Creating New Game");
-                int response = virtualClient.sendGameRequest("CREATE");
-                if (response != 0) {
-                    v.inform("Game created successfully");
-                    virtualClient.setGameId(response);
+                view.inform("Creating New Game...");
+                int gameId = virtualClient.sendGameRequest("CREATE");
+                if (gameId > 0) {
+                    virtualClient.setGameId(gameId);
                     v.inform("Waiting for players in lobby");
                     waitForGameStart();
+                    startGame();
                 } else {
-                    v.reportError("Game creation failed");
+                    view.reportError("Game creation failed");
                 }
+//                v.inform("Creating New Game");
+//                int response = virtualClient.sendGameRequest("CREATE");
+//                if (response != 0) {
+//                    v.inform("Game created successfully");
+//                    virtualClient.setGameId(response);
+//                    v.inform("Waiting for players in lobby");
+//                    waitForGameStart();
+//                } else {
+//                    v.reportError("Game creation failed");
+//                }
             }
             case GUIView v -> {
                 int response = virtualClient.sendGameRequest("CREATE");
@@ -123,17 +223,29 @@ public class ClientController {
             default -> {}
         }
     }
+
     public void joinExistingGame() throws Exception {
-        int response = virtualClient.sendGameRequest("JOIN");
-        if (response > 0) {
-            virtualClient.setGameId(response);
+        view.inform("Joining Existing Game...");
+        int gameId = virtualClient.sendGameRequest("JOIN");
+        if (gameId > 0) {
+            virtualClient.setGameId(gameId);
             waitForGameStart();
-        } else if(response == 0){
-            view.inform("Game not entered");
-        } else if (response == -1) {
-            mainMenuLoop();
+            startGame();
+        } else {
+            view.reportError("Cannot join game");
         }
     }
+//    public void joinExistingGame() throws Exception {
+//        int response = virtualClient.sendGameRequest("JOIN");
+//        if (response > 0) {
+//            virtualClient.setGameId(response);
+//            waitForGameStart();
+//        } else if(response == 0){
+//            view.inform("Game not entered");
+//        } else if (response == -1) {
+//            mainMenuLoop();
+//        }
+//    }
 
     private void waitForGameStart() throws Exception {
         while (true) {
@@ -143,42 +255,58 @@ public class ClientController {
             }
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {
-                startGame();
-                break;
+//                startGame();
+                return;
             }
         }
-//        view.inform("game started");
     }
 
     private void startGame() throws Exception {
-        GamePhase gameState;
-        do {
-            String key = view.sendAvailableChoices();
-            gameState = virtualClient.getGameFase();
-            if (gameState == GamePhase.EXIT) key = "logout";
+        view.inform("game started");
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+
+        while (true) {
+            GamePhase gameState = virtualClient.getGameFase();
+            if (gameState == GamePhase.EXIT) {
+                view.inform("Returned to mai menù...");
+                return;
+            }
+
+            String key = null;
+            while (key == null) {
+                if (virtualClient.getGameFase() == GamePhase.EXIT) {
+                    view.inform("Returned to main menù...");
+                    return;
+                }
+                if (stdin.ready()) {
+                    key = view.sendAvailableChoices();
+                } else {
+                    Thread.sleep(100);
+                }
+            }
 
             switch (key) {
                 case "getacoveredtile" -> {
                     try {
                         tmpTile = virtualClient.getTileServer();
                         view.printTile(tmpTile);
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }
                 }
-                case "getashowntile" ->{
+                case "getashowntile" -> {
                     try {
                         tmpTile = virtualClient.getUncoveredTile();
                         view.printTile(tmpTile);
-//                        view.printListOfCommand();
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException | IOException | InterruptedException e) {
                         view.reportError(e.getMessage());
                     }
+                    view.printListOfCommand();
                 }
-                case "returnthetile" ->{
+                case "returnthetile" -> {
                     try {
                         virtualClient.getBackTile(tmpTile);
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }
                 }
@@ -186,21 +314,21 @@ public class ClientController {
                 case "drawacard" -> {
                     try {
                         virtualClient.drawCard();
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }
                 }
                 case "spinthehourglass" -> {
                     try {
                         virtualClient.rotateGlass();
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }
                 }
                 case "declareready" -> {
                     try {
                         virtualClient.setReady();
-                    }catch (BusinessLogicException e) {
+                    } catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }
                 }
@@ -208,17 +336,91 @@ public class ClientController {
                 case "watchaplayersship" -> virtualClient.lookDashBoard();
                 case "rightrotatethetile" -> rotateRight();
                 case "leftrotatethetile" -> rotateLeft();
+
                 case "logout" -> {
-                    virtualClient.logOut();
-                    idCurrentGame = 0;
-                    mainMenuLoop();
+                    virtualClient.leaveGame();
+                    view.inform("Returned to main menù...");
                     return;
                 }
+
                 default -> view.inform("Action not recognized");
             }
-            gameState = virtualClient.getGameFase();
-        } while (!gameState.equals(GamePhase.EXIT));
+        }
     }
+
+
+    //SOLUZIONE E PROBLEMA SECONDO ME:
+//Il problema vero è che, mentre tu sei dentro a String key = view.sendAvailableChoices();
+//sei bloccato finché l’utente non digita qualcosa, e quindi non puoi mai ripassare al controllo di if (virtualClient.getGameFase() == GamePhase.EXIT) { … }
+//La soluzione più rapida è trasformare quell’input da bloccante a un piccolo polling loop: invece di chiamare una volta sola sendAvailableChoices(),
+// fai un ciclo in cui ogni 100 ms controlli se ti è arrivato l’EXIT; solo se non c’è entri a leggere l’input.
+
+
+//    private void startGame() throws Exception {
+//        view.inform("game started");
+//        GamePhase gameState;
+//        do {
+//            String key = view.sendAvailableChoices();
+//            switch (key) {
+//                case "getacoveredtile" -> {
+//                    try {
+//                        tmpTile = virtualClient.getTileServer();
+//                        view.printTile(tmpTile);
+//                    }catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "getashowntile" -> {
+//                    try {
+//                        tmpTile = virtualClient.getUncoveredTile();
+//                        view.printTile(tmpTile);
+//                    } catch (BusinessLogicException | IOException | InterruptedException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                    view.printListOfCommand();
+//                }
+//                case "returnthetile" ->{
+//                    try {
+//                        virtualClient.getBackTile(tmpTile);
+//                    }catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "placethetile" -> virtualClient.positionTile(tmpTile);
+//                case "drawacard" -> {
+//                    try {
+//                        virtualClient.drawCard();
+//                    }catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "spinthehourglass" -> {
+//                    try {
+//                        virtualClient.rotateGlass();
+//                    }catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "declareready" -> {
+//                    try {
+//                        virtualClient.setReady();
+//                    }catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "watchadeck" -> virtualClient.lookDeck();
+//                case "watchaplayersship" -> virtualClient.lookDashBoard();
+//                case "rightrotatethetile" -> rotateRight();
+//                case "leftrotatethetile" -> rotateLeft();
+//                case "logout" -> {
+//                    virtualClient.leaveGame();
+//                    return;
+//                }
+//                default -> view.inform("Action not recognized");
+//            }
+//            gameState = virtualClient.getGameFase();
+//        } while (gameState != GamePhase.EXIT);
+//    }
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {

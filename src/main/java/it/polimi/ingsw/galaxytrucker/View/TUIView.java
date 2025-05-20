@@ -71,7 +71,7 @@ public class TUIView implements View {
     }
     @Override
     public void reportError(String message) {
-        System.err.print("\n[ERROR] " + message + "\n> ");
+        System.err.print("\n[ERROR] " + message + "\n ");
     }
     @Override
     public void updateState(GamePhase gamePhase) {
@@ -124,33 +124,25 @@ public class TUIView implements View {
 
             while (true) {
                 inform("Insert the row:");
-                while (true) {
-                    try {
-                        coordinate[0] = scanner.nextInt();
-                        scanner.nextLine(); // consuma il newline
-                    } catch (InputMismatchException e) {
-                        inform("Invalid input. Please enter a number for the row.");
-                        scanner.nextLine(); // consuma l'input errato
-                    }
-                    if(coordinate[0] >= 5 && coordinate[0] <= 9) break;
-                    else inform("Invalid input. Please enter a number for the row.");
+                try {
+                    coordinate[0] = scanner.nextInt();
+                    scanner.nextLine(); // consuma il newline
+                    break;
+                } catch (InputMismatchException e) {
+                    inform("Invalid input. Please enter a number for the row.");
+                    scanner.nextLine(); // consuma l'input errato
                 }
-                break;
             }
             while (true) {
                 inform("Insert the column:");
-                while (true) {
-                    try {
-                        coordinate[1] = scanner.nextInt();
-                        scanner.nextLine(); // consuma il newline
-                    } catch (InputMismatchException e) {
-                        inform("Invalid input. Please enter a number for the row.");
-                        scanner.nextLine(); // consuma l'input errato
-                    }
-                    if(coordinate[1] >= 4 && coordinate[1] <= 10) break;
-                    else inform("Invalid input. Please enter a number for the row.");
+                try {
+                    coordinate[1] = scanner.nextInt();
+                    scanner.nextLine(); // consuma il newline
+                    break;
+                } catch (InputMismatchException e) {
+                    inform("Invalid input. Please enter a number for the column.");
+                    scanner.nextLine(); // consuma l'input errato
                 }
-                break;
             }
             coordinate[0] = coordinate[0] - 5;
             coordinate[1] = coordinate[1] - 4;
@@ -160,20 +152,18 @@ public class TUIView implements View {
 
     @Override
     public int askIndex() {
-        int index;
         while (true) {
             inform("Insert index:");
+            String line = askString();
             try {
-                index = scanner.nextInt();
-                scanner.nextLine();
-                break;
-            } catch (InputMismatchException e) {
-                inform("Invalid input. Please enter a number.");
-                scanner.nextLine();
+                int value = Integer.parseInt(line.trim());
+                return value - 1;
+            } catch (NumberFormatException e) {
+                reportError("Invalid input. Please enter a number.");
             }
         }
-        return index - 1;
     }
+
 
     @Override
     public String askString() {
@@ -635,7 +625,7 @@ public class TUIView implements View {
                 listOfOptions.add("LogOut");
             }
             case SCORING  -> listOfOptions.add("logOut");
-            default -> listOfOptions.add("logOut");
+            default -> {}
         }
         return listOfOptions;
     }
@@ -643,13 +633,7 @@ public class TUIView implements View {
     @Override
     public String sendAvailableChoices() {
         List<String> listOfOptions = commandConstructor();
-        int tmp;
-        while(true){
-            inform("Insert the command number");
-            tmp = askIndex();
-            if (tmp<listOfOptions.size() && tmp>=0) break;
-            inform("indice sbagliato");
-        }
+        int tmp = askIndex();
         return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
     @Override

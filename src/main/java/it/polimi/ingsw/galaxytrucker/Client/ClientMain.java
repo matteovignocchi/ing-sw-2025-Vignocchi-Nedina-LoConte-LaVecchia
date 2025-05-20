@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.Server.ServerRmi;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.*;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -30,11 +28,9 @@ public class ClientMain {
                         "                          |___/                                     \n"
         );
 
-        //codice di inizializzazione del client
-
         //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
         //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        String host = "localhost";
+        String host = "192.168.1.12";
         int port = 30001;
 
         Scanner input = new Scanner(System.in);

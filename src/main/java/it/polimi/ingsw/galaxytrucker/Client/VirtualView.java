@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker.Server;
+package it.polimi.ingsw.galaxytrucker.Client;
 
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
@@ -94,4 +94,6 @@ public interface VirtualView extends Remote {
     void setIsDemo(Boolean demo) throws Exception;
 
     void enterGame(int gameId) throws Exception;
+
+    void leaveGame() throws Exception;
 }

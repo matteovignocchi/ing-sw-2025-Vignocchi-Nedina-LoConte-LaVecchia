@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class MeteoritesRainCard implements Card, Serializable {
     }
 
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException{
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
         visitor.visit(this);
     }
 

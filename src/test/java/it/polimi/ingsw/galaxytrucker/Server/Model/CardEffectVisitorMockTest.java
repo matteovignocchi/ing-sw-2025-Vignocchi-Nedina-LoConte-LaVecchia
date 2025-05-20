@@ -114,15 +114,15 @@ class CardEffectVisitorMockTest {
         CardEffectVisitor visitor = new CardEffectVisitor(mockCtrl);
         visitor.visit(card);
 
-        verify(mockCtrl).removeCrewmate(p1, card.getNumCrewmates());
+        verify(mockCtrl).removeCrewmates(p1, card.getNumCrewmates());
         verify(mockCtrl, never()).askPlayerDecision(anyString(), eq(p2));
         verify(mockBoard, never()).moveRocket(-6, p2);
-        verify(mockCtrl, never()).removeCrewmate(p2, card.getNumCrewmates());
+        verify(mockCtrl, never()).removeCrewmates(p2, card.getNumCrewmates());
         verify(mockBoard).moveRocket(-6, p3);
         verify(p3).addCredits(10);
         verify(mockBoard, never()).moveRocket(-6, p4);
         verify(mockCtrl, never()).askPlayerDecision(anyString(), eq(p4));
-        verify(mockCtrl, never()).removeCrewmate(p4, card.getNumCrewmates());
+        verify(mockCtrl, never()).removeCrewmates(p4, card.getNumCrewmates());
     }
 
     @Test
@@ -176,7 +176,7 @@ class CardEffectVisitorMockTest {
 
         InOrder inOrder = inOrder(mockBoard, mockCtrl);
         inOrder.verify(mockBoard).moveRocket(-3, p2);
-        inOrder.verify(mockCtrl).removeCrewmate(p2, 2);
+        inOrder.verify(mockCtrl).removeCrewmates(p2, 2);
         inOrder.verify(mockCtrl).defenceFromCannon(0, false, 5, p3);
         inOrder.verify(mockCtrl).defenceFromCannon(2, true, 11, p3);
         inOrder.verifyNoMoreInteractions();
@@ -228,10 +228,10 @@ class CardEffectVisitorMockTest {
 
         verify(mockBoard).moveRocket(-1, p1);
         verify(p1).addCredits(6);
-        verify(mockCtrl).removeCrewmate(p1, 2);
+        verify(mockCtrl).removeCrewmates(p1, 2);
 
         verify(mockCtrl, never()).askPlayerDecision(anyString(), eq(p2));
-        verify(mockCtrl, never()).removeCrewmate(eq(p2), anyInt());
+        verify(mockCtrl, never()).removeCrewmates(eq(p2), anyInt());
     }
 
     @Test

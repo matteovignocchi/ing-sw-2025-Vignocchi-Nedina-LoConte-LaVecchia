@@ -63,7 +63,7 @@ public interface CardVisitor {
      * @param card: card object on which the method is activated.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(MeteoritesRainCard card) throws CardEffectException;
+    void visit(MeteoritesRainCard card) throws BusinessLogicException;
     /**
      * Apply PiratesCard effect
      * @param card: card object on which the method is activated.
