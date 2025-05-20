@@ -23,6 +23,6 @@
          </styleClass>
       </ListView>
 
-      <Button fx:id="backButton" layoutX="149.5" layoutY="310.0" onMouseClicked="#back" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Back" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="149.5" />
+      <Button fx:id="backButton" layoutX="149.5" layoutY="310.0" onAction="#back" onMouseClicked="#back" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Back" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="149.5" />
    </children>
 </AnchorPane>

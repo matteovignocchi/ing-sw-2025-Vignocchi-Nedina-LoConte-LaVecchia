@@ -23,7 +23,7 @@ public class GameListMenuController extends GUIController{
             if (event.getClickCount() == 2) {
                 String selectedItem = gameListView.getSelectionModel().getSelectedItem();
                 if (selectedItem != null) {
-                    int gameId = Integer.parseInt(selectedItem.split("\.")[0]);
+                    int gameId = Integer.parseInt(selectedItem.split("\\.")[0]);
                     handleGameSelection(gameId);
                 }
             }
@@ -37,5 +37,11 @@ public class GameListMenuController extends GUIController{
     private void handleGameSelection(int index) {
         guiView.resolveGameChoice(index);
     }
+
+    @FXML
+    public void back() throws IOException {
+        guiView.setMainScene(SceneEnum.MAIN_MENU);
+    }
+
 }
 
