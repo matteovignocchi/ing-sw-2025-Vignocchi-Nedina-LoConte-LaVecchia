@@ -3,6 +3,8 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import javafx.application.Application;
+
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -10,6 +12,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
 import java.util.Set;
+
 
 public class ClientMain {
 
@@ -42,31 +45,45 @@ public class ClientMain {
                 Set.of("1", "2")
         );
 
-        View view = (viewChoice == 1) ? new TUIView() : new GUIView();
+        switch (viewChoice) {
+            case 1 -> {
+                View view = new TUIView();
+                try {
+                    VirtualView virtualClient;
+                    if (protocolChoice == 1) {
+                        Registry registry = LocateRegistry.getRegistry(host, 1099);
+                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
+                        virtualClient = new VirtualClientRmi(server, view);
+                    } else {
+                        virtualClient = new VirtualClientSocket(host, port, view);
+                    }
 
-        try {
-            VirtualView virtualClient;
-            if (protocolChoice == 1) {
-                Registry registry = LocateRegistry.getRegistry(host, 1099);
-                VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                virtualClient = new VirtualClientRmi(server, view);
-            } else {
-                virtualClient = new VirtualClientSocket(host, port, view);
+                    ClientController controller = new ClientController(view, virtualClient);
+
+                    switch (view) {
+                        case GUIView gui -> gui.setClientController(controller);
+                        default -> {
+                        }
+                    }
+
+                    controller.start();
+                } catch (Exception e) {
+                    System.err.println("error: " + e.getMessage());
+                    e.printStackTrace();
+                } finally {
+                    scanner.close();
+                }
             }
+            case 2 -> {
+                GUIView.setStartupConfig(protocolChoice, host, port);
+                System.out.println("Launching GUI...");
+                Application.launch(GUIView.class);
+                System.out.println("GUI closed.");
 
-            ClientController controller = new ClientController(view, virtualClient);
-            if (view instanceof GUIView gui) {
-                gui.setClientController(controller);
             }
-            controller.start();
-
-        } catch (Exception e) {
-            System.err.println("error: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            scanner.close();
         }
     }
+
     private static final String ANSI_RED    = "\u001B[31m";
     private static final String ANSI_BOLD   = "\u001B[1m";
     private static final String ANSI_RESET  = "\u001B[0m";

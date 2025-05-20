@@ -193,40 +193,66 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         if(message.contains("JOIN")){
             while (true){
-                view.inform("Available Games");
-                Map<Integer, int[]> availableGames = Map.of();
-                try {
-                    availableGames = server.requestGamesList();
-                } catch (BusinessLogicException e) {
-                    view.reportError("you miss " + e.getMessage() );
-                }
-                if(availableGames.isEmpty()){
-                    view.inform("No available games");
-                    return -1;
-                } else {
-                    view.inform(0 + ". return to main menu");
-                    for (Integer i : availableGames.keySet()) {
-                        int[] info = availableGames.get(i);
-                        if(info[2] == 1){
-                            view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + " DEMO");
-                        }else{
-                            view.inform(i + ". Players in game : " + info[0] + "/" + info[1]);
+                switch(view){
+                    case TUIView v -> {
+                        v.inform("Available Games");
+                        Map<Integer, int[]> availableGames = Map.of();
+                        try {
+                            availableGames = server.requestGamesList();
+                        } catch (BusinessLogicException e) {
+                            v.reportError("you miss " + e.getMessage() );
+                        }
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        } else {
+                            for (Integer i : availableGames.keySet()) {
+                                int[] info = availableGames.get(i);
+                                if(info[2] == 1){
+                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + " DEMO");
+                                }else{
+                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1]);
+                                }
+                            }
+                        }
+                        int choice;
+                        while(true){
+                            choice = askIndex()+1;
+                            if(availableGames.containsKey(choice)) break;
+                            v.inform("index not valid");
+                        }
+                        try {
+                            server.enterGame(choice, this , nickname);
+                            return choice;
+                        } catch (Exception e) {
+                            v.reportError("you miss " + e.getMessage() );
                         }
                     }
-                }
-                int choice;
-               while(true){
-                    choice = askIndex()+1;
-                    if(availableGames.containsKey(choice) || choice==0) break;
-                   view.inform("index not valid");
-               }
-                try {
-                    if(availableGames.containsKey(choice)){
-                        server.enterGame(choice, this , nickname);
+                    case GUIView v -> {
+                        Map<Integer, int[]> availableGames = Map.of();
+                        try {
+                            availableGames = server.requestGamesList();
+                            v.updateAvailableGames(availableGames);
+
+                        } catch (BusinessLogicException e) {
+                            v.reportError("you miss " + e.getMessage() );
+                        }
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        }
+                        int choice;
+                        while(true){
+                            choice = v.getGameChoice();
+                            try {
+                                server.enterGame(choice,this,nickname);
+                                return choice;
+                            } catch (Exception e) {
+                                v.reportError("you miss " + e.getMessage() );
+                            }
+                        }
                     }
-                    return choice;
-                } catch (Exception e) {
-                    view.reportError("you miss " + e.getMessage() );
+                    default -> {}
                 }
             }
 

@@ -1,23 +1,35 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 import it.polimi.ingsw.galaxytrucker.Client.ClientController;
+import it.polimi.ingsw.galaxytrucker.Client.VirtualClientRmi;
+import it.polimi.ingsw.galaxytrucker.Client.VirtualClientSocket;
+import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
+import java.net.URL;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -30,25 +42,84 @@ public class GUIView extends Application implements View {
     public Tile currentTile;
     public Tile[][] dashBoard;
     public List<Object> dataForGame;
+    public int gameChoice;
     private SceneEnum sceneEnum;
-    public GUIView(){
-        Platform.startup(()->{});
+    private GamePhase gamePhase;
+    private boolean demo;
+    private static int protocolChoice;
+    private static String host;
+    private static int port;
 
+
+
+
+    public static void setStartupConfig(int protocol, String h, int p) {
+        protocolChoice = protocol;
+        host = h;
+        port = p;
     }
 
+    public GUIView(){
+
+
+    }
 
 
     @Override
-    public void start(javafx.stage.Stage stage) throws Exception {
+    public void start(Stage stage) {
         this.mainStage = stage;
+        stage.setTitle("Welcome");
+        StackPane root = new StackPane();
+        Scene scene = new Scene(root, 400, 300);
+        stage.setScene(scene);
+        stage.show();
 
+        nicknameFuture = new CompletableFuture<>();
+
+        // Mostra il dialogo e aspetta il nickname in modo asincrono
+        Platform.runLater(() -> {
+            showNicknameDialog();
+
+            nicknameFuture.thenAccept(nickname -> {
+                if (nickname == null || nickname.trim().isEmpty()) {
+                    Platform.runLater(() -> reportError("Nickname cannot be null or empty."));
+                    return;
+                }
+
+                try {
+                    VirtualView virtualClient;
+                    if (protocolChoice == 1) {
+                        Registry registry = LocateRegistry.getRegistry(host, 1099);
+                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
+                        virtualClient = new VirtualClientRmi(server, this);
+                    } else {
+                        virtualClient = new VirtualClientSocket(host, port, this);
+                    }
+
+                    virtualClient.setNickname(nickname);
+                    ClientController controller = new ClientController(this, virtualClient);
+                    this.setClientController(controller);
+                    controller.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
+                }
+            });
+        });
     }
+
+
+
+
+
 
 
     @Override
     public void inform(String message) {
         if( sceneEnum == SceneEnum.WAITING_QUEUE){
             //TODO fare metodo che mette messaggi sullo schermo di chi si è connesso
+        } else if (sceneEnum == SceneEnum.MAIN_MENU){
+
         }
     }
 
@@ -86,7 +157,6 @@ public class GUIView extends Application implements View {
 
     @Override
     public void start() {
-
     }
 
     @Override
@@ -127,16 +197,18 @@ public class GUIView extends Application implements View {
 
     @Override
     public String askString() {
-        nicknameFuture = new CompletableFuture<>();
+        if(sceneEnum == SceneEnum.NICKNAME_DIALOG){
+            nicknameFuture = new CompletableFuture<>();
 
-        Platform.runLater(this::showNicknameDialog);
-
-        try {
-            return nicknameFuture.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+            Platform.runLater(this::showNicknameDialog);
+            try {
+                return nicknameFuture.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "";
+            }
         }
+        return "";
     }
 
     @Override
@@ -158,6 +230,23 @@ public class GUIView extends Application implements View {
 
     @Override
     public void updateState(GamePhase gamePhase) {
+        this.gamePhase = gamePhase;
+        switch (gamePhase){
+            case WAITING_IN_LOBBY -> sceneEnum = SceneEnum.WAITING_QUEUE;
+            case BOARD_SETUP -> {
+                if (demo) {
+                    sceneEnum = SceneEnum.BUILDING_PHASE_DEMO;
+                } else {
+                    sceneEnum = SceneEnum.BUILDING_PHASE;
+                }
+            }
+            case WAITING_FOR_PLAYERS -> {}//Aspetto che gli altri finiscano di completare la nave
+            case WAITING_FOR_TURN -> {} //aspetto il mio turno di scelta
+            case DRAW_PHASE -> {} //Metto possibilità di pescare
+            case SCORING -> {} //lo metterò nella scena dello scoring
+            case EXIT -> {} //boh ci ragioniamo
+        }
+
 
     }
 
@@ -193,7 +282,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public void setIsDemo(Boolean demo) {
-
+        this.demo = demo;
     }
 
     public void setClientController(ClientController clientController) {
@@ -213,6 +302,7 @@ public class GUIView extends Application implements View {
         this.mainStage.setScene(scene);
         loader.getController();
     }
+
     public void resolveCoordinates(int row, int col) {
         if (coordinateFuture != null && !coordinateFuture.isDone()) {
             coordinateFuture.complete(new int[] {row, col});
@@ -221,9 +311,13 @@ public class GUIView extends Application implements View {
 
     private void showNicknameDialog() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/nicknameDialog.fxml"));
-            Parent root = loader.load();
+            URL fxmlLocation = getClass().getResource(SceneEnum.NICKNAME_DIALOG.value());
+            if (fxmlLocation == null) {
+                throw new IOException("FXML file not found: " + SceneEnum.NICKNAME_DIALOG.value());
+            }
 
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
             NicknameDialogController dialogController = loader.getController();
             dialogController.setGuiView(this);
 
@@ -233,11 +327,12 @@ public class GUIView extends Application implements View {
             dialogStage.setScene(new Scene(root));
             dialogStage.setResizable(false);
             dialogStage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 
     public void resolveNickname(String nickname) {
         if (nicknameFuture != null && !nicknameFuture.isDone()) {
@@ -245,6 +340,13 @@ public class GUIView extends Application implements View {
         }
     }
 
+    public void resolveGameChoice(int gameChoice){
+        this.gameChoice = gameChoice;
+    }
+
+    public int getGameChoice() {
+        return gameChoice;
+    }
     public void resolveDataGame(List<Object> dataGame) {
         this.dataForGame = dataGame;
     }
@@ -252,5 +354,39 @@ public class GUIView extends Application implements View {
     public List<Object> getDataForGame() {
         return dataForGame;
     }
+
+    public void updateAvailableGames(Map<Integer, int[]> availableGames) {
+        Platform.runLater(() -> {
+            Scene currentScene = mainStage.getScene();
+            if (currentScene == null) return;
+
+            Object controller = currentScene.getUserData();
+
+            switch (controller) {
+                case GameListMenuController gameListController -> {
+                    ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
+
+                    if (availableGames == null || availableGames.isEmpty()) {
+                        gameDescriptions.add("No available games");
+                    } else {
+                        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+                            int id = entry.getKey();
+                            int[] info = entry.getValue();
+                            String description = id + ". Players in game: " + info[0] + "/" + info[1];
+                            if (info.length > 2 && info[2] == 1) {
+                                description += " DEMO";
+                            }
+                            gameDescriptions.add(description);
+                        }
+                    }
+
+                    gameListController.displayGames(gameDescriptions);
+                }
+                default -> {
+                }
+            }
+        });
+    }
+
 
 }

@@ -15,7 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
 
-public class BuildingPhaseController extends GUIController{
+public class BuildingPhaseController extends GUIController {
 
     @FXML
     private GridPane gameGrid;
@@ -26,31 +26,25 @@ public class BuildingPhaseController extends GUIController{
     @FXML
     private Button rotateRightBtn;
 
-
     private ImageView draggedTileView;
-
-
+    private int rotationAngle = 0;
 
     @FXML
     public void initialize() {
-
         setupGridStructure();
-
 
         rotateLeftBtn.setVisible(false);
         rotateRightBtn.setVisible(false);
         rotateLeftBtn.setDisable(true);
         rotateRightBtn.setDisable(true);
 
-
         dashBoard = new Tile[5][7];
     }
 
-    //TODO come ruotare l'
     @FXML
     private void rotateRight() {
         if (currentTile != null) {
-            currentTile.rotateRight();
+            rotationAngle = (rotationAngle + 90) % 360;
             refreshTileView();
         }
     }
@@ -58,19 +52,14 @@ public class BuildingPhaseController extends GUIController{
     @FXML
     private void rotateLeft() {
         if (currentTile != null) {
-            currentTile.rotateLeft();
+            rotationAngle = (rotationAngle - 90 + 360) % 360;
             refreshTileView();
         }
     }
 
-
-
-
-
-
-
     public void setCurrentTile(Tile tile) {
         this.currentTile = tile;
+        this.rotationAngle = 0;
 
         Platform.runLater(() -> {
             createDraggableTileView();
@@ -107,7 +96,6 @@ public class BuildingPhaseController extends GUIController{
         }
     }
 
-
     private void createDraggableTileView() {
         if (currentTile == null) return;
 
@@ -118,6 +106,7 @@ public class BuildingPhaseController extends GUIController{
         draggedTileView.setLayoutX(rootPane.getWidth() / 2);
         draggedTileView.setLayoutY(rootPane.getHeight() / 2);
 
+        draggedTileView.setRotate(rotationAngle);
 
         draggedTileView.setOnMousePressed(this::onTilePressed);
         draggedTileView.setOnMouseDragged(this::onTileDragged);
@@ -151,21 +140,20 @@ public class BuildingPhaseController extends GUIController{
 
             if (col >= 0 && col < gameGrid.getColumnConstraints().size() &&
                     row >= 0 && row < gameGrid.getRowConstraints().size()) {
-                    placeTileOnGrid(row, col);
+                placeTileOnGrid(row, col);
             }
         }
 
         event.consume();
     }
-    //TODO gestire piazzamento che non va bene
+
     private void placeTileOnGrid(int row, int col) {
         if (getNodeAt(gameGrid, col, row) != null) return;
 
         ImageView tileView = new ImageView(Tile.loadImageById(currentTile.getIdTile()));
         tileView.setFitWidth(gameGrid.getWidth() / gameGrid.getColumnConstraints().size());
         tileView.setFitHeight(gameGrid.getHeight() / gameGrid.getRowConstraints().size());
-
-
+        tileView.setRotate(rotationAngle);
         gameGrid.add(tileView, col, row);
 
         if (guiView != null) {
@@ -186,21 +174,20 @@ public class BuildingPhaseController extends GUIController{
         return null;
     }
 
-
-
     private void resetTileSelection() {
         if (draggedTileView != null) {
             rootPane.getChildren().remove(draggedTileView);
             draggedTileView = null;
         }
         currentTile = null;
+        rotationAngle = 0;
         updateRotationButtons();
     }
 
     private void refreshTileView() {
         if (draggedTileView == null || currentTile == null) return;
+
         rootPane.getChildren().remove(draggedTileView);
         createDraggableTileView();
     }
-
 }

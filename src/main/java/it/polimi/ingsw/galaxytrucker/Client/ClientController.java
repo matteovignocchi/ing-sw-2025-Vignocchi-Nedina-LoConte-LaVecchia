@@ -50,7 +50,11 @@ public class ClientController {
         }
 
         while (isConnected) {
-            mainMenuLoop();
+            switch (view){
+                case TUIView v -> mainMenuLoop();
+                default -> {}
+            }
+
             String cmd = view.askString();
             switch (cmd) {
                 case "1" -> createNewGame();
@@ -89,11 +93,10 @@ public class ClientController {
             int choice = 0;
             while (true) {
                 printMainMenu();
-                String line;
+                String line = "";
                 switch (view) {
                     case TUIView v -> line = v.askString();
-                    case GUIView g -> line= view.askString(); // appena implementerai in GUI, per adesso ho messo un metodo a caso
-                    default -> line = view.askString();
+                    default -> {}
                 }
 
                 try {
@@ -213,13 +216,13 @@ public class ClientController {
 
 
     private void startGame() throws Exception {
-        view.inform("game started");
+        view.inform("Game started");
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
         while (true) {
             GamePhase gameState = virtualClient.getGameFase();
             if (gameState == GamePhase.EXIT) {
-                view.inform("Returned to mai menù...");
+                view.inform("Returned to main menù...");
                 return;
             }
 
