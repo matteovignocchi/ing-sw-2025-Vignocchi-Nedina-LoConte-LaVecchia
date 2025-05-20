@@ -170,7 +170,7 @@ public class ClientController {
                     try {
                         tmpTile = virtualClient.getUncoveredTile();
                         view.printTile(tmpTile);
-                        view.printListOfCommand();
+//                        view.printListOfCommand();
                     }catch (BusinessLogicException e) {
                         view.reportError(e.getMessage());
                     }

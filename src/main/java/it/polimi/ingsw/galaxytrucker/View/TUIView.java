@@ -124,25 +124,33 @@ public class TUIView implements View {
 
             while (true) {
                 inform("Insert the row:");
-                try {
-                    coordinate[0] = scanner.nextInt();
-                    scanner.nextLine(); // consuma il newline
-                    break;
-                } catch (InputMismatchException e) {
-                    inform("Invalid input. Please enter a number for the row.");
-                    scanner.nextLine(); // consuma l'input errato
+                while (true) {
+                    try {
+                        coordinate[0] = scanner.nextInt();
+                        scanner.nextLine(); // consuma il newline
+                    } catch (InputMismatchException e) {
+                        inform("Invalid input. Please enter a number for the row.");
+                        scanner.nextLine(); // consuma l'input errato
+                    }
+                    if(coordinate[0] >= 5 && coordinate[0] <= 9) break;
+                    else inform("Invalid input. Please enter a number for the row.");
                 }
+                break;
             }
             while (true) {
                 inform("Insert the column:");
-                try {
-                    coordinate[1] = scanner.nextInt();
-                    scanner.nextLine(); // consuma il newline
-                    break;
-                } catch (InputMismatchException e) {
-                    inform("Invalid input. Please enter a number for the column.");
-                    scanner.nextLine(); // consuma l'input errato
+                while (true) {
+                    try {
+                        coordinate[1] = scanner.nextInt();
+                        scanner.nextLine(); // consuma il newline
+                    } catch (InputMismatchException e) {
+                        inform("Invalid input. Please enter a number for the row.");
+                        scanner.nextLine(); // consuma l'input errato
+                    }
+                    if(coordinate[1] >= 4 && coordinate[1] <= 10) break;
+                    else inform("Invalid input. Please enter a number for the row.");
                 }
+                break;
             }
             coordinate[0] = coordinate[0] - 5;
             coordinate[1] = coordinate[1] - 4;

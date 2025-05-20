@@ -56,6 +56,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
+
 
             int x = controller.getPowerEngineForCard(p);
             f.moveRocket(x, p);
@@ -65,6 +67,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -83,6 +87,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (int i = players.size() - 1; i >= 0; i--) {
             //setto fase effetto carta
             controller.changePhaseFromCard(players.get(i), GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(players.get(i));
+
 
             Player p = players.get(i);
             int x = p.countExposedConnectors();
@@ -93,6 +99,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
     }
 
     /**
@@ -118,6 +125,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
+
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > slavers_fire_power) {
@@ -145,6 +154,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -194,6 +205,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -242,6 +255,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -267,6 +282,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
+
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > smugglers_fire_power){
@@ -300,6 +317,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -321,6 +340,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
 
             String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
 
@@ -345,6 +365,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -367,6 +389,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
+
 
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
@@ -391,6 +415,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -419,6 +445,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 throw new RuntimeException(e);
             }
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -445,6 +473,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+//            controller.notifyViewFromCArd(p);
+
 
 
             if(controller.getFirePowerForCard(p) > card.getFirePower()){
@@ -476,6 +506,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 //setto fase effetto carta
                 controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+//                controller.notifyViewFromCArd(p);
+
 
                 for(int i = 0; i < card.getShots_directions().size(); i++){
                     try {
@@ -487,6 +519,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             }
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -512,6 +546,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+//            controller.notifyViewFromCArd(p);
+
 
             String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
 
@@ -534,6 +570,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+        controller.notifyAllViews();
+
     }
 
     /**
@@ -551,6 +589,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             //setto fase effetto carta
             controller.changePhaseFromCard(p, GamePhase.CARD_EFFECT);
+            controller.notifyViewFromCArd(p);
+
 
             try {
                 controller.startPlauge(p);
@@ -561,7 +601,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.changePhaseFromCard(p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
-
+        controller.notifyAllViews();
 
     }
+
 }

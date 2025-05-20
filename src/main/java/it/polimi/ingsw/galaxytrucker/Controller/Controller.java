@@ -378,8 +378,8 @@ public class Controller implements Serializable {
 
                 /**/ System.out.println("Nel try dove manca l'update");
 
-                //viewsByNickname.get(nick).updateMapPosition(playerPosition);
-                //updatePlayer(nick);
+                viewsByNickname.get(nick).updateMapPosition(playerPosition);
+                notifyView(nick);
                 //non mi convince
                 //viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
                 //v.updateGameState(GamePhase.CARD_EFFECT);
@@ -1520,7 +1520,8 @@ public class Controller implements Serializable {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(nick, dir) && !type)) {
                     p.removeFrom3(dir2);
-                    askStartHousingForControl(nick);
+//                    askStartHousingForControl(nick);
+                    checkPlayerAssembly(nick , 2, 3);
                 }
             }
         }
@@ -1908,7 +1909,6 @@ public class Controller implements Serializable {
        String nick =  getNickByPlayer(p);
         try {
             viewsByNickname.get(nick).updateGameState(tmp);
-            notifyView(nick);
         }  catch (Exception e) {
             markDisconnected(nick);
         }
@@ -1934,7 +1934,7 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             }
         }
-        notifyAllViews();
+//        notifyAllViews();
     }
 
     public void setExit(){
@@ -1952,6 +1952,17 @@ public class Controller implements Serializable {
             }
         });
         notifyAllViews();
+    }
+
+    public void notifyViewFromCArd(Player player){
+        String tmp;
+        for(String nick : playersByNickname.keySet()){
+            if(playersByNickname.get(nick).equals(player)) {
+                tmp = nick;
+                notifyView(tmp);
+                break;
+            }
+        }
     }
 }
 
