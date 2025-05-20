@@ -205,37 +205,41 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             while (true){
                 switch(view){
                     case TUIView v -> {
-                        v.inform("Available Games");
-                        Map<Integer, int[]> availableGames = Map.of();
+                        Map<Integer,int[]> availableGames;
                         try {
                             availableGames = server.requestGamesList();
                         } catch (BusinessLogicException e) {
-                            v.reportError("you miss " + e.getMessage() );
-                        }
-                        if(availableGames.isEmpty()){
-                            v.inform("No available games");
+                            v.reportError("Server error: " + e.getMessage());
                             return -1;
-                        } else {
-                            for (Integer i : availableGames.keySet()) {
-                                int[] info = availableGames.get(i);
-                                if(info[2] == 1){
-                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + " DEMO");
-                                }else{
-                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1]);
-                                }
-                            }
+                        }
+
+                        if (availableGames.isEmpty()) {
+                            v.inform("**No available games**");
+                            return -1;
+                        }
+
+                        v.inform("**Available Games:**");
+                        v.inform("0. Return to main menu");
+                        for (Integer id : availableGames.keySet()) {
+                            int[] info = availableGames.get(id);
+                            boolean isDemo = info[2] == 1;
+                            String suffix = isDemo ? " DEMO" : "";
+                            v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                         }
                         int choice;
-                        while(true){
-                            choice = askIndex()+1;
-                            if(availableGames.containsKey(choice)) break;
-                            v.inform("index not valid");
+                        while (true) {
+                            choice = v.askIndex() + 1;
+                            if (choice == 0 || availableGames.containsKey(choice)) break;
+                            v.reportError("Invalid choice, try again.");
                         }
+                        if (choice == 0) return 0;
+
                         try {
-                            server.enterGame(choice, this , nickname);
+                            server.enterGame(choice, this, nickname);
                             return choice;
                         } catch (Exception e) {
-                            v.reportError("you miss " + e.getMessage() );
+                            v.reportError("Cannot join: " + e.getMessage());
+                            return -1;
                         }
                     }
                     case GUIView v -> {

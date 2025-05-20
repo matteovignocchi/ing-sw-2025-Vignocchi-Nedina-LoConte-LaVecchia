@@ -324,24 +324,32 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     case TUIView v -> {
                         Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
                         Message msg = sendRequestWithResponse(gameRequest);
-                        v.inform("Available Games");
+                        @SuppressWarnings("unchecked")
                         Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
-                        if(availableGames.isEmpty()){
-                            v.inform("No available games");
+
+                        if (availableGames.isEmpty()) {
+                            view.inform("**No available games**");
                             return -1;
-                        }else{
-                            for (Integer i : availableGames.keySet()) {
-                                int[] info = availableGames.get(i);
-                                boolean isDemo = info[2] == 1;
-                                String suffix = isDemo ? " DEMO" : "";
-                                v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
-                            }
                         }
+
+                        view.inform("**Available Games:**");
+                        view.inform("0. Return to main menu");
+                        for (Integer id : availableGames.keySet()) {
+                            int[] info = availableGames.get(id);
+                            boolean isDemo = info[2] == 1;
+                            String suffix = isDemo ? " DEMO" : "";
+                            view.inform(id + ". Players in game: " + info[0] + "/" + info[1] + suffix);
+                        }
+
                         int choice = askIndex() + 1;
-                        List<Object> payloadJoin = List.of(choice, nickname);
-                        Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-                        sendRequest(gameChoice);
-                        return choice;
+                        if (choice == 0) return 0;
+                        if (availableGames.containsKey(choice)) {
+                            List<Object> payloadJoin = List.of(choice, nickname);
+                            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                            sendRequest(gameChoice);
+                            return choice;
+                        }
+                        view.reportError("Invalid index, try again.");
                     }
                     case GUIView v -> {
                         Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
