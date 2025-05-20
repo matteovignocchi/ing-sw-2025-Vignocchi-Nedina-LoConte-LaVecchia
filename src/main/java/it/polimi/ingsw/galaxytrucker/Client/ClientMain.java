@@ -1,49 +1,46 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.View.GUI.*;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
-
-import java.io.*;
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
-
-import static java.lang.String.valueOf;
+import java.util.Set;
 
 public class ClientMain {
 
     public static void main(String[] args) throws RemoteException, IOException, NotBoundException {
-
+        // Banner ASCII
         System.out.println(
-                " _____       _                    _____               _             \n"+
-                        "|  __ \\     | |                  |_   _|             | |            \n"+
-                        "| |  \\/ __ _| | __ ___  ___   _    | |_ __ _   _  ___| | _____ _ __ \n"+
-                        "| | __ / _` | |/ _` \\ \\/ / | | |   | | '__| | | |/ __| |/ / _ \\ '__|\n"+
-                        "| |_\\ \\ (_| | | (_| |>  <| |_| |   | | |  | |_| | (__|   <  __/ |   \n"+
-                        " \\____/\\__,_|_|\\__,_/_/\\_\\\\__, |   \\_/_|   \\__,_|\\___|_|\\_\\___|_|   \n"+
-                        "                           __/ |                                    \n"+
+                " _____       _                    _____               _             \n" +
+                        "|  __ \\     | |                  |_   _|             | |            \n" +
+                        "| |  \\/ __ _| | __ ___  ___   _    | |_ __ _   _  ___| | _____ _ __ \n" +
+                        "| | __ / _` | |/ _` \\ \\/ / | | |   | | '__| | | |/ __| |/ / _ \\ '__|\n" +
+                        "| |_\\ \\ (_| | | (_| |>  <| |_| |   | | |  | |_| | (__|   <  __/ |   \n" +
+                        " \\____/\\__,_|_|\\__,_/_/\\_\\\\__, |   \\_/_|   \\__,_|\\___|_|\\_\\___|_|   \n" +
+                        "                           __/ |                                    \n" +
                         "                          |___/                                     \n"
         );
 
-        //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
-        //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        String host = "192.168.1.12";
+        String host = "localhost";
         int port = 30001;
+        Scanner scanner = new Scanner(System.in);
 
-        Scanner input = new Scanner(System.in);
-        int protocolChoice;
-        int viewChoice;
-        do{
-            System.out.println("> Choose the type of protocol:\n 1 - RMI \n2 - SOCKET");
-            protocolChoice = input.nextInt();
-        }while(protocolChoice < 1 || protocolChoice > 3);
-        do{
-            System.out.println("> Choose the type of view:\n 1 - TUI \n2 - GUI");
-            viewChoice = input.nextInt();
-        }while(viewChoice < 1 || viewChoice > 3);
+        int protocolChoice = readChoice(
+                scanner,
+                "> Choose the type of protocol:\n 1 - RMI\n 2 - SOCKET",
+                Set.of("1", "2")
+        );
+
+        int viewChoice = readChoice(
+                scanner,
+                "> Choose the type of view:\n 1 - TUI\n 2 - GUI",
+                Set.of("1", "2")
+        );
 
         View view = (viewChoice == 1) ? new TUIView() : new GUIView();
 
@@ -51,24 +48,40 @@ public class ClientMain {
             VirtualView virtualClient;
             if (protocolChoice == 1) {
                 Registry registry = LocateRegistry.getRegistry(host, 1099);
-                //ServerRmi server = (ServerRmi) registry.lookup("RmiServer");
                 VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
                 virtualClient = new VirtualClientRmi(server, view);
             } else {
                 virtualClient = new VirtualClientSocket(host, port, view);
             }
+
             ClientController controller = new ClientController(view, virtualClient);
-            switch (view) {
-                case GUIView v -> v.setClientController(controller);
-                default -> {}
+            if (view instanceof GUIView gui) {
+                gui.setClientController(controller);
             }
             controller.start();
 
-        }catch (Exception e){
-        System.err.println("error:"+e.getMessage());
-        e.printStackTrace();}
+        } catch (Exception e) {
+            System.err.println("error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            scanner.close();
+        }
     }
+    private static final String ANSI_RED    = "\u001B[31m";
+    private static final String ANSI_BOLD   = "\u001B[1m";
+    private static final String ANSI_RESET  = "\u001B[0m";
 
+    private static int readChoice(Scanner scanner, String prompt, Set<String> validOptions) {
+        while (true) {
+            System.out.println(prompt);
+            System.out.print("> ");
+            String line = scanner.nextLine().trim();
+            if (validOptions.contains(line)) {
+                return Integer.parseInt(line);
+            }
+            System.out.println(ANSI_RED + "[ERROR] Invalid choice. Please enter " + ANSI_BOLD + "1" + ANSI_RESET + ANSI_RED + " or " + ANSI_BOLD + "2" + ANSI_RESET);
+        }
+    }
 }
 
 

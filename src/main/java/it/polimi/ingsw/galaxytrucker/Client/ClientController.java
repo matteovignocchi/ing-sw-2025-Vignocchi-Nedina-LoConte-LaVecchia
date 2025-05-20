@@ -10,6 +10,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Scanner;
 
 import static java.lang.String.valueOf;
 
@@ -23,6 +24,8 @@ public class ClientController {
     private Tile tmpTile;
     private boolean isConnected = false;
     private int idCurrentGame;
+    private volatile boolean exitWaitingQueue = false;
+
 
 
     private static ClientController instance;
@@ -42,7 +45,7 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.enterGame(gameId);
-            waitForGameStart();
+            handleWaitForGameStart();
             startGame();
         }
 
@@ -85,27 +88,6 @@ public class ClientController {
         }
     }
 
-//    private int loginLoop() throws Exception {
-//        int ans = -1;
-//        while (isConnected) {
-//            view.inform("Insert your username :");
-//            String username = virtualClient.askString();
-//            ans  = virtualClient.sendLogin(username);
-//            if (ans == -1) {
-//                view.reportError("Credential not valid, enter a new username:  ");
-//            } else if (ans == -2) {
-//                view.inform("Login successful");
-//                virtualClient.setNickname(username);
-//                break;
-//            } else {
-//                //view.inform("Reconnection successful");
-//                virtualClient.setNickname(username);
-//                break;
-//            }
-//        }
-//        return ans;
-//    }
-
     private void mainMenuLoop() throws Exception {
         while (isConnected) {
             int choice = 0;
@@ -142,45 +124,6 @@ public class ClientController {
             }
         }
     }
-//    private void mainMenuLoop() throws Exception {
-//        while (isConnected) {
-//            printMainMenu();
-//            int choice = 0;
-//            while (true) {
-//                switch (view) {
-//                    case TUIView v -> {
-//                        while (true) {
-//                            choice = virtualClient.askIndex() + 1;
-//                            if (choice >= 1 && choice <= 3) {
-//                                break;
-//                            }
-//                            view.reportError("Invalid choice. Please enter a number between 1 and 3.");
-//                            printMainMenu();
-//                        }
-//                    }
-//                    case GUIView v -> {}
-//                    default -> {}
-//                }
-//
-//                switch (choice) {
-//                    case 1 -> createNewGame();
-//                    case 2 -> joinExistingGame();
-//                    case 3 -> {
-//                        virtualClient.logOut();
-//                        isConnected = false;
-//                        return;
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    private void printMainMenu() {
-//        view.inform("-----MENU-----");
-//        view.inform("1. Create new game");
-//        view.inform("2. Enter in a game");
-//        view.inform("3. Logout");
-//    }
 
     private void printMainMenu() {
         view.inform("-----MENU-----");
@@ -198,27 +141,17 @@ public class ClientController {
                 if (gameId > 0) {
                     virtualClient.setGameId(gameId);
                     v.inform("Waiting for players in lobby");
-                    waitForGameStart();
+                    handleWaitForGameStart();
                     startGame();
                 } else {
                     view.reportError("Game creation failed");
                 }
-//                v.inform("Creating New Game");
-//                int response = virtualClient.sendGameRequest("CREATE");
-//                if (response != 0) {
-//                    v.inform("Game created successfully");
-//                    virtualClient.setGameId(response);
-//                    v.inform("Waiting for players in lobby");
-//                    waitForGameStart();
-//                } else {
-//                    v.reportError("Game creation failed");
-//                }
             }
             case GUIView v -> {
                 int response = virtualClient.sendGameRequest("CREATE");
                 if (response != 0) {
                     virtualClient.setGameId(response);
-                    waitForGameStart();
+                    handleWaitForGameStart();
                 }else{
                     v.reportError("Game creation failed");
                 }
@@ -232,37 +165,55 @@ public class ClientController {
         int gameId = virtualClient.sendGameRequest("JOIN");
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
-            waitForGameStart();
+            handleWaitForGameStart();
             startGame();
+        } else if (gameId==0) {
+            mainMenuLoop();
         } else {
             view.reportError("Cannot join game");
         }
     }
-//    public void joinExistingGame() throws Exception {
-//        int response = virtualClient.sendGameRequest("JOIN");
-//        if (response > 0) {
-//            virtualClient.setGameId(response);
-//            waitForGameStart();
-//        } else if(response == 0){
-//            view.inform("Game not entered");
-//        } else if (response == -1) {
-//            mainMenuLoop();
-//        }
-//    }
 
-    private void waitForGameStart() throws Exception {
+
+    public void waitForGameStart() throws Exception {
+        System.out.println("Waiting for the game to start... (type 'exit' to return to the main menu)");
         while (true) {
-            switch (view){
-                case GUIView v -> v.setMainScene(SceneEnum.WAITING_QUEUE);
-                default -> {}
+            if (exitWaitingQueue) {
+                mainMenuLoop();
+                return;
             }
             String status = virtualClient.askInformationAboutStart();
             if (status.contains("start")) {
-//                startGame();
                 return;
+            }
+            Thread.sleep(500); // evita spam
+        }
+    }
+
+    public void exitQueue() {
+        exitWaitingQueue = true;
+    }
+
+    public void handleWaitForGameStart() {
+        ClientController controller = this;
+        Thread waitingThread = new Thread(() -> {
+            try {
+                controller.waitForGameStart();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        waitingThread.start();
+        Scanner scanner = new Scanner(System.in);
+        while (waitingThread.isAlive()) {
+            String input = scanner.nextLine();
+            if ("exit".equalsIgnoreCase(input.trim())) {
+                controller.exitQueue();
+                break;
             }
         }
     }
+
 
     private void startGame() throws Exception {
         view.inform("Game started");

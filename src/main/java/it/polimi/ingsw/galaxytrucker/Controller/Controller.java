@@ -395,16 +395,17 @@ public class Controller implements Serializable {
             leader.setGamePhase(GamePhase.DRAW_PHASE);
 
             try {
+//                v.updateGameState(GamePhase.DRAW_PHASE);
                 v.inform("SERVER: " + "You're the leader! Draw a card");
                 v.notify();
                 break;
             } catch (IOException e) {
-                markDisconnected(leaderNick);
+//                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
             } catch (Exception e){
-                markDisconnected(leaderNick);
+//                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
+                System.err.println("[ERROR] in activateDrawPhase:" + e.getMessage());
             }
         }
 
@@ -544,7 +545,7 @@ public class Controller implements Serializable {
     public void startAwardsPhase() throws BusinessLogicException {
 
         playersByNickname.forEach( (s, p) -> {
-            p.setGamePhase(GamePhase.SCORING);
+            p.setGamePhase(GamePhase.EXIT);
         });
         notifyAllViews();
 
@@ -932,6 +933,11 @@ public class Controller implements Serializable {
                     }
                 }
             }
+            try {
+                viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+            } catch (Exception e) {
+                markDisconnected(nick);
+            }
         }
         if(num < totalGood){
             while(num != 0){
@@ -1137,6 +1143,11 @@ public class Controller implements Serializable {
                   }
 
                 }
+                try {
+                    viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                } catch (Exception e) {
+                    markDisconnected(nick);
+                }
             }
         }
         if(num > totalGood){
@@ -1194,6 +1205,11 @@ public class Controller implements Serializable {
                         }
 
                     }
+                    try {
+                        viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                    }
                 }
             }else{
                 for (int i = 0; i < 5; i++) {
@@ -1207,9 +1223,12 @@ public class Controller implements Serializable {
                         }
                     }
                 }
-
-
             }
+        }
+        try {
+            viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+        } catch (Exception e) {
+            markDisconnected(nick);
         }
     }
 
@@ -1384,7 +1403,7 @@ public class Controller implements Serializable {
                     switch (y){
                         case HousingUnit h -> {
                             if(h.returnLenght()>0){
-                                int tmp = h.removeHumans(1);
+                                int tmp = h.removeHumans(0);
                                 if(tmp == 2) p.setBrownAlien();
                                 if(tmp == 3) p.setPurpleAlien();
                                 num--;
@@ -1409,6 +1428,11 @@ public class Controller implements Serializable {
                                 System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
                             }
                         }
+                    }
+                    try {
+                        viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                    } catch (Exception e) {
+                        markDisconnected(nick);
                     }
                 }else{
                     Tile[][] tmpDash = p.getDashMatrix();
@@ -1985,6 +2009,16 @@ public class Controller implements Serializable {
                 v.updateGameState(GamePhase.EXIT);
             } catch (IOException e) {
                 markDisconnected(entry.getKey());
+            }
+        }
+    }
+    public void notifyViewFromCArd(Player player){
+        String tmp;
+        for(String nick : playersByNickname.keySet()){
+            if(playersByNickname.get(nick).equals(player)) {
+                tmp = nick;
+                notifyView(tmp);
+                break;
             }
         }
     }

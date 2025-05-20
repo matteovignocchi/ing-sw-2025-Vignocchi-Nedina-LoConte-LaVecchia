@@ -162,7 +162,14 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     case TUIView v ->{
                         boolean demo = v.ask("would you like a demo version?");
                         v.inform("select max 4 players");
-                        int numberOfPlayer = v.askIndex()+1;
+                        int numberOfPlayer ;
+                        while (true) {
+                            numberOfPlayer = v.askIndex() + 1;
+                            if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
+                                break;
+                            }
+                            v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
+                        }
                         try {
                             return server.createNewGame(demo , this , nickname , numberOfPlayer);
                         } catch (Exception e) {
@@ -248,6 +255,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                     default -> {}
                 }
             }
+
         }
         return 0;
     }

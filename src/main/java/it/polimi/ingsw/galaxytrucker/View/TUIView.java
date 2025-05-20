@@ -122,27 +122,30 @@ public class TUIView implements View {
     public int[] askCoordinate() {
             int[] coordinate = new int[2];
 
-            while (true) {
-                inform("Insert the row:");
-                try {
-                    coordinate[0] = scanner.nextInt();
-                    scanner.nextLine(); // consuma il newline
-                    break;
-                } catch (InputMismatchException e) {
-                    inform("Invalid input. Please enter a number for the row.");
-                    scanner.nextLine(); // consuma l'input errato
+                while (true) {
+                    inform("Insert the row:");
+                    try {
+                        coordinate[0] = scanner.nextInt();
+                        scanner.nextLine(); // consuma il newline
+                    } catch (InputMismatchException e) {
+                        inform("Invalid input. Please enter a number for the row.");
+                        scanner.nextLine(); // consuma l'input errato
+                    }
+
+                    if(coordinate[0] >=5 && coordinate[0] <=9) break;
+                    else inform("Invalid input. Please enter a number for the row.");
                 }
-            }
             while (true) {
                 inform("Insert the column:");
                 try {
                     coordinate[1] = scanner.nextInt();
                     scanner.nextLine(); // consuma il newline
-                    break;
                 } catch (InputMismatchException e) {
                     inform("Invalid input. Please enter a number for the column.");
                     scanner.nextLine(); // consuma l'input errato
                 }
+                if(coordinate[1] >=4 && coordinate[1] <=10) break;
+                else inform("Invalid input. Please enter a number for the column.");
             }
             coordinate[0] = coordinate[0] - 5;
             coordinate[1] = coordinate[1] - 4;
@@ -633,7 +636,13 @@ public class TUIView implements View {
     @Override
     public String sendAvailableChoices() {
         List<String> listOfOptions = commandConstructor();
-        int tmp = askIndex();
+        int tmp;
+        while(true){
+            inform("Insert the command number");
+            tmp = askIndex();
+            if (tmp<listOfOptions.size() && tmp>=0) break;
+            inform("indice sbagliato");
+        }
         return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
     @Override
