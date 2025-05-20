@@ -422,8 +422,6 @@ public class ClientController {
         virtualClient.logOut();
     }
 
-
-
 }
 
 
