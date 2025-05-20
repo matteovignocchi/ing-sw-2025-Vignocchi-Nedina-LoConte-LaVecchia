@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -32,6 +33,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private String start = "false";
     private final ResponseHandler responseHandler = new ResponseHandler();
     private final CountDownLatch startLatch = new CountDownLatch(1);
+    private ClientController ciccio;
+
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -136,7 +139,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
             case Message.OP_SET_IS_DEMO -> this.setIsDemo((boolean) msg.getPayload());
-            case Message.OP_SET_CENTRAL_TILE -> this.setCentralTile((Tile) msg.getPayload());
+            case Message.OP_SET_CENTRAL_TILE -> this.setTile((Tile) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -155,6 +158,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
             }
             case Message.OP_SET_FLAG_START -> this.setStart();
+            case Message.OP_UPDATE_DA -> this.updateDashMatrix((Tile[][]) msg.getPayload());
             default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
         }
     }
@@ -316,36 +320,51 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
         if(message.equals("JOIN")) {
             while (true) {
-                Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
-                Message msg = sendRequestWithResponse(gameRequest);
-                view.inform("Available Games");
-                Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
-                if(availableGames.isEmpty()){
-                    view.inform("No available games");
-                    return -1;
-                }else{
-                    view.inform(0 + ". return to main menu");
-                    for (Integer i : availableGames.keySet()) {
-                        int[] info = availableGames.get(i);
-                        boolean isDemo = info[2] == 1;
-                        String suffix = isDemo ? " DEMO" : "";
-                        view.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                switch(view){
+                    case TUIView v -> {
+                        Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+                        Message msg = sendRequestWithResponse(gameRequest);
+                        v.inform("Available Games");
+                        Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        }else{
+                            for (Integer i : availableGames.keySet()) {
+                                int[] info = availableGames.get(i);
+                                boolean isDemo = info[2] == 1;
+                                String suffix = isDemo ? " DEMO" : "";
+                                v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                            }
+                        }
+                        int choice = askIndex() + 1;
+                        List<Object> payloadJoin = List.of(choice, nickname);
+                        Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                        sendRequest(gameChoice);
+                        return choice;
                     }
+                    case GUIView v -> {
+                        Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
+                        Message msg = sendRequestWithResponse(gameRequest);
+                        Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
+                        if(availableGames.isEmpty()){
+                            v.inform("No available games");
+                            return -1;
+                        }else{
+                            v.updateAvailableGames(availableGames);
+                        }
+                            int choice = v.getGameChoice();
+                            List<Object> payloadJoin = List.of(choice, nickname);
+                            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
+                            sendRequest(gameChoice);
+                            return choice;
+                        }
+                        default -> {}
+                    }
+
                 }
-                int choice;
-                while(true){
-                    choice = askIndex()+1;
-                    if(availableGames.containsKey(choice) || choice==0) break;
-                    view.inform("index not valid");
-                }
-                if(availableGames.containsKey(choice)){
-                    List<Object> payloadJoin = List.of(choice, nickname);
-                    Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-                    sendRequest(gameChoice);
-                    return choice;
-                }else break;
+
             }
-        }
         return 0;
     }
 
@@ -711,6 +730,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         startLatch.countDown();
     }
 
+    @Override
+    public void setClientController(ClientController clientController) throws RemoteException {
+        this.ciccio = clientController;
+    }
+
+
 
     @Override
     public String askInformationAboutStart() {
@@ -725,9 +750,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public void setCentralTile(Tile tile) throws Exception {
-        Dash_Matrix[2][3] = tile;
-
+    public void setTile(Tile tile) throws Exception {
+        switch (gamePhase){
+            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tile);
+            default -> Dash_Matrix[2][3] = tile;
+        }
     }
 
     @Override
@@ -755,5 +782,47 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     }
 
-}
+    @Override
+    public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
+        if(!view.ReturnValidity(0,5) && !view.ReturnValidity(0,6)) {
+            throw new BusinessLogicException("Invalid coordinates");
+        }
+        view.printDashShip(Dash_Matrix);
+        view.inform("Select a tile");
+        int[] index;
+        Tile tmpTile = null;
+        while(true) {
+            index = askCoordinate();
+            if(index[0]!=0 || !view.ReturnValidity(0 , index[1])) view.inform("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
+            else break;
+        }
+        List<Object> payload = new ArrayList<>();
+        payload.add(gameId);
+        payload.add(nickname);
+        payload.add(Dash_Matrix[index[0]][index[1]].idTile);
+        Dash_Matrix[index[0]][index[1]] = new EmptySpace();
+        view.printDashShip(Dash_Matrix);
+        Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
+        Message response = sendRequestWithResponse(request);
+        Object payloadResponse = response.getPayload();
+        try {
+            return (Tile) payloadResponse;
+        } catch (ClassCastException e) {
+            switch (payloadResponse){
+                case String error: throw new IOException("Server error: " + error);
+                default:  throw new IOException("Unexpected payload type when fetching tile.", e);
+            }
+        }
+    }
+
+    @Override
+    public void updateDashMatrix(Tile[][] data) throws IOException, BusinessLogicException, InterruptedException {
+        Dash_Matrix = data;
+
+    }
+
+
+
+    }
 

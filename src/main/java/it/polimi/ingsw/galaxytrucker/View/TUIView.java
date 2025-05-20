@@ -596,6 +596,7 @@ public class TUIView implements View {
                 listOfOptions.add("Get a shown tile");
                 listOfOptions.add("Declare Ready");
                 listOfOptions.add("Watch a player's ship");
+                listOfOptions.add("Take Reserved Tile");
                 if(!isDemo){
                     listOfOptions.add("Watch a deck");
                     listOfOptions.add("Spin the hourglass");
@@ -764,6 +765,18 @@ public class TUIView implements View {
             validStatus[4][6]  = true;
         }
         this.maschera = validStatus;
+
+    }
+    @Override
+    public boolean ReturnValidity(int a , int b){
+        return maschera[a][b];
+    }
+    @Override
+    public void setValidity(int a , int b){
+        boolean tmp =  !maschera[a][b];
+        if((a == 0 && b ==5)||(a==0 && b==6)) maschera[a][b] = tmp;
+        maschera[a][b] = false;
+
 
     }
 

@@ -17,7 +17,9 @@ module it.polimi.ingsw.galaxytrucker {
     exports it.polimi.ingsw.galaxytrucker.Controller;
     exports it.polimi.ingsw.galaxytrucker.View;
     exports it.polimi.ingsw.galaxytrucker.Server;
-    // … eventuali altri exports.
+    exports it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
+
+    exports it.polimi.ingsw.galaxytrucker.View.GUI;
 
     opens it.polimi.ingsw.galaxytrucker.Server to java.rmi;
     opens it.polimi.ingsw.galaxytrucker to javafx.fxml;
@@ -25,6 +27,7 @@ module it.polimi.ingsw.galaxytrucker {
     opens it.polimi.ingsw.galaxytrucker.Model to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.galaxytrucker.Client;
     opens it.polimi.ingsw.galaxytrucker.Client to java.rmi;
+    opens it.polimi.ingsw.galaxytrucker.View.GUI.Controllers to javafx.fxml;
 
 
 }

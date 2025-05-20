@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 //TODO: discorso gestione disconnessioni nei metodi di oleg. disconnetto e poi continuo con esecuzione, o devo returnare. (mandare mail).
 //TODO: gestione degli askPlayerDecision, askPlayerIndex ecc.. nei metodi di oleg
 //TODO: parser per non passare oggetti del model
+//TODO: inserire mappa virtualview-player? e usare quella al posto di getPlayer.. ogni volta? vedere alla fine.
 
 
 public class Controller implements Serializable {
@@ -174,14 +175,17 @@ public class Controller implements Serializable {
     public void broadcastInform(String msg) {
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
-            VirtualView v = viewsByNickname.get(nickname);
-            try {
-                v.inform(msg);
-            } catch (IOException e) {
-                markDisconnected(nickname);
-            } catch (Exception e) {
-                markDisconnected(nickname);
-                System.err.println("[ERROR] in broadcastInform: " + e.getMessage());
+            Player p = getPlayerByNickname(nickname);
+            if(p.isConnected()) {
+                VirtualView v = viewsByNickname.get(nickname);
+                try {
+                    v.inform(msg);
+                } catch (IOException e) {
+                    markDisconnected(nickname);
+                } catch (Exception e) {
+                    markDisconnected(nickname);
+                    System.err.println("[ERROR] in broadcastInform: " + e.getMessage());
+                }
             }
         }
     }
@@ -271,7 +275,7 @@ public class Controller implements Serializable {
                 v.updateMapPosition(playersPosition);
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
-                v.setCentralTile(getPlayerCheck(nick).getTile(2,3));
+                v.setTile(getPlayerCheck(nick).getTile(2,3));
                 v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
             } catch (IOException e) {
@@ -337,22 +341,45 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
+    public Tile getReservedTile(String nickname , int id) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+        System.out.println(id);
+
+        List<Tile> discardPile = p.getTilesInDiscardPile();
+        for(Tile t : discardPile) {
+            System.out.println(t.getIdTile());
+            if(t.getIdTile() == id) {
+                System.out.println("id corretto");
+                System.out.println(t.getIdTile());
+                p.removeTileInDiscardPile(t);
+                return t;
+            }
+        }
+
+        throw new BusinessLogicException("Tile not found");
+    }
+
     public void setReady(String nickname) throws BusinessLogicException, RemoteException {
         Player p = getPlayerCheck(nickname);
 
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
 
         p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
-        notifyView(nickname);
 
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
+            return;
         }
+
+        notifyView(nickname);
     }
 
     public void startFlight() throws BusinessLogicException {
 
-        if(!isDemo) mergeDecks();
+        if(!isDemo){
+            hourglass.cancel();
+            mergeDecks();
+        }
 
         //metto in lista gli eventuali players disconnesi che non hanno chiamato il metodo setReady
         List<Player> playersInFlight = fBoard.getOrderedPlayers();
@@ -370,7 +397,7 @@ public class Controller implements Serializable {
 
         addHuman();
 
-        viewsByNickname.forEach((nick, v) -> checkPlayerAssembly(nick , 2 , 3));
+        for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
 
         //notifyAllViews();
 
@@ -397,7 +424,7 @@ public class Controller implements Serializable {
             try {
 //                v.updateGameState(GamePhase.DRAW_PHASE);
                 v.inform("SERVER: " + "You're the leader! Draw a card");
-                v.notify();
+                notifyView(leaderNick);
                 break;
             } catch (IOException e) {
 //                markDisconnected(leaderNick);
@@ -611,7 +638,7 @@ public class Controller implements Serializable {
                     if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
                     else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
                     v.inform("SERVER: " + "Game over. Thank you for playing!");
-                    v.notify();
+                    notifyView(nick);
                 }
             } catch (IOException e) {
                 markDisconnected(nick);
@@ -1248,6 +1275,7 @@ public class Controller implements Serializable {
         while (list.size() != 0 && flag == true) {
             try {
                 x.inform("SERVER: " + "seleziona una Housing unit");
+                x.printPlayerDashboard(p.getDashMatrix());
             } catch (IOException e) {
                 markDisconnected(nick);
             } catch (Exception e){
@@ -1410,6 +1438,7 @@ public class Controller implements Serializable {
                             }else{
                                 try{
                                     x.inform("SERVER: " + "seleziona una housing unit valida");
+                                    x.printPlayerDashboard(p.getDashMatrix());
                                 } catch (IOException e) {
                                     markDisconnected(nick);
                                 } catch (Exception e){
@@ -1421,6 +1450,7 @@ public class Controller implements Serializable {
                         default -> {
                             try {
                                 x.inform("SERVER: " + "seleziona una abitazione valida");
+                                x.printPlayerDashboard(p.getDashMatrix());
                             } catch (IOException e) {
                                 markDisconnected(nick);
                             } catch (Exception e){
@@ -1917,10 +1947,10 @@ public class Controller implements Serializable {
 
     }
 
-    private void checkPlayerAssembly(String id , int x , int y){
+    private void checkPlayerAssembly(String id , int x , int y) throws BusinessLogicException {
         playersByNickname.get(id).controlAssembly(x,y);
         try {
-            notifyView(id);
+            //notifyView(id);
             viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
         } catch (IOException e) {
             markDisconnected(id);
@@ -2012,6 +2042,8 @@ public class Controller implements Serializable {
             }
         }
     }
+
+    /*
     public void notifyViewFromCArd(Player player){
         String tmp;
         for(String nick : playersByNickname.keySet()){
@@ -2021,7 +2053,7 @@ public class Controller implements Serializable {
                 break;
             }
         }
-    }
+    } */
 
 }
 
