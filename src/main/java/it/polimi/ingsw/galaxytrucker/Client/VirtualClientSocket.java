@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
@@ -761,5 +762,46 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     }
 
-}
+    @Override
+    public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
+        if(!view.ReturnValidity(0,5) && !view.ReturnValidity(0,6)) {
+            throw new BusinessLogicException("Invalid coordinates");
+        }
+        view.printDashShip(Dash_Matrix);
+        view.inform("Select a tile");
+        int[] index;
+        Tile tmpTile = null;
+        while(true) {
+            index = askCoordinate();
+            if(index[0]!=0 || !view.ReturnValidity(0 , index[1])) view.inform("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
+            else break;
+        }
+        List<Object> payload = new ArrayList<>();
+        payload.add(gameId);
+        payload.add(nickname);
+        payload.add(Dash_Matrix[index[0]][index[1]].idTile);
+
+        Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
+        Message response = sendRequestWithResponse(request);
+        Object payloadResponse = response.getPayload();
+        try {
+            return (Tile) payloadResponse;
+        } catch (ClassCastException e) {
+            switch (payloadResponse){
+                case String error: throw new IOException("Server error: " + error);
+                default:  throw new IOException("Unexpected payload type when fetching tile.", e);
+            }
+        }
+    }
+
+    @Override
+    public void updateDashMatrix(Tile[][] data) throws IOException, BusinessLogicException, InterruptedException {
+        Dash_Matrix = data;
+
+    }
+
+
+
+    }
 

@@ -14,6 +14,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -322,6 +323,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;
+
         view.printDashShip(Dash_Matrix);
     }
     @Override
@@ -389,6 +391,32 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
+    public Tile takeReservedTile() throws RemoteException  , BusinessLogicException{
+        if(!view.ReturnValidity(0,5) && !view.ReturnValidity(0,6)) {
+            throw new BusinessLogicException("Invalid coordinates");
+        }
+        view.printDashShip(Dash_Matrix);
+        view.inform("Select a tile");
+        int[] index;
+        Tile tmpTile = null;
+        while(true) {
+            index = askCoordinate();
+            if(index[0]!=0 || !view.ReturnValidity(0 , index[1])) view.inform("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
+            else break;
+        }
+            try {
+                view.setValidity(index[0], index[1]);
+                Dash_Matrix[index[0]][index[1]] = new EmptySpace();
+                view.printDashShip(Dash_Matrix);
+                tmpTile = server.getReservedTile(gameId,nickname,Dash_Matrix[index[0]][index[1]].idTile);
+            } catch (BusinessLogicException e) {
+                view.reportError("you miss " + e.getMessage() + "select new command" );
+                throw new BusinessLogicException(e.getMessage());
+            }
+        return tmpTile;
+    }
+    @Override
     public void leaveGame() throws RemoteException, BusinessLogicException {
         if (gameId != 0) {
             server.LeaveGame(gameId, nickname);
@@ -441,5 +469,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             view.reportError("you miss " + e.getMessage() );
         }
     }
+
+    @Override
+    public void updateDashMatrix(Tile[][] data) throws RemoteException {
+        Dash_Matrix = data;
+    }
+
+
 
 }

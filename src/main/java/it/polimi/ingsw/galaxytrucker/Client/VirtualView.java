@@ -96,4 +96,9 @@ public interface VirtualView extends Remote {
     void enterGame(int gameId) throws Exception;
 
     void leaveGame() throws Exception;
+
+    Tile takeReservedTile() throws Exception;
+
+    void updateDashMatrix(Tile[][] data) throws Exception;
+
 }

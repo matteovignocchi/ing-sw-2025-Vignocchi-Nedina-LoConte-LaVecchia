@@ -291,6 +291,15 @@ public class ClientController {
                 case "rightrotatethetile" -> rotateRight();
                 case "leftrotatethetile" -> rotateLeft();
 
+                case "takereservedtile" -> {
+                    try{
+//                        virtualClient.takeReservedTile()
+                        view.printTile(virtualClient.takeReservedTile());
+                    }catch (BusinessLogicException e){
+                        view.reportError(e.getMessage());
+                    }
+                }
+
                 case "logout" -> {
                     virtualClient.leaveGame();
                     view.inform("Returned to main menù...");
