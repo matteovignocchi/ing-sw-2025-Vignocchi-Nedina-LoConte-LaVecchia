@@ -28,6 +28,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private Tile[][] Dash_Matrix;
     private final Object startLock = new Object();
     private String start = "false";
+    private ClientController ciccio;
 
     public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
         super();
@@ -51,6 +52,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void setGameId(int gameId) throws RemoteException {
         this.gameId = gameId;
     }
+    @Override
+    public void setClientController(ClientController clientController) throws RemoteException {
+        this.ciccio = clientController;
+    }
 
 
     /// METODI PER PRINTARE A CLIENT ///
@@ -60,8 +65,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
 
-    public void setCentralTile(Tile tmp){
-        Dash_Matrix[2][3] = tmp;
+    @Override
+    public void setTile(Tile tmp){
+        switch (gamePhase){
+            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tmp);
+            default -> Dash_Matrix[2][3] = tmp;
+        }
     }
     @Override
     public void inform(String message) throws RemoteException {

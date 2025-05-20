@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
+import it.polimi.ingsw.galaxytrucker.Client.ClientController;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
@@ -25,7 +26,7 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void printDeck(List<Card> deck) throws Exception {}
     @Override public void setView(View view) throws Exception {}
     @Override public void setGameId(int gameId) throws RemoteException {}
-    @Override public void setCentralTile(Tile tile) throws Exception {}
+    @Override public void setTile(Tile tile) throws Exception {}
 
     @Override public void leaveGame() throws Exception{}
     @Override public int askIndex() throws Exception { return 0; }
@@ -58,4 +59,5 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void enterGame(int gameId) throws Exception {};
     @Override public void updateDashMatrix(Tile[][] dashMatrix) throws Exception {}
     @Override public Tile takeReservedTile() throws Exception { return null; }
+    @Override public void setClientController(ClientController clientController) throws Exception {}
 }

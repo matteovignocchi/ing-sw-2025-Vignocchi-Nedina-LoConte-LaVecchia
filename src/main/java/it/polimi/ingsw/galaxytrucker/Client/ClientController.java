@@ -424,6 +424,12 @@ public class ClientController {
         virtualClient.logOut();
     }
 
+    public void setCurrentTile(Tile tmp) {
+        this.tmpTile = tmp;
+        view.printTile(tmpTile);
+        view.printListOfCommand();
+    }
+
 }
 
 

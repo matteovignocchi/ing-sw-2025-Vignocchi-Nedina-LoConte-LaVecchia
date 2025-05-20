@@ -33,6 +33,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private String start = "false";
     private final ResponseHandler responseHandler = new ResponseHandler();
     private final CountDownLatch startLatch = new CountDownLatch(1);
+    private ClientController ciccio;
+
 
     /// METODI DI INIZIALIZZAZIONE ///
 
@@ -128,7 +130,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
             case Message.OP_SET_IS_DEMO -> this.setIsDemo((boolean) msg.getPayload());
-            case Message.OP_SET_CENTRAL_TILE -> this.setCentralTile((Tile) msg.getPayload());
+            case Message.OP_SET_CENTRAL_TILE -> this.setTile((Tile) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
                 UpdateViewRequest payload = (UpdateViewRequest) msg.getPayload();
                 try {
@@ -719,6 +721,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         startLatch.countDown();
     }
 
+    @Override
+    public void setClientController(ClientController clientController) throws RemoteException {
+        this.ciccio = clientController;
+    }
+
+
 
     @Override
     public String askInformationAboutStart() {
@@ -733,9 +741,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public void setCentralTile(Tile tile) throws Exception {
-        Dash_Matrix[2][3] = tile;
-
+    public void setTile(Tile tile) throws Exception {
+        switch (gamePhase){
+            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tile);
+            default -> Dash_Matrix[2][3] = tile;
+        }
     }
 
     @Override

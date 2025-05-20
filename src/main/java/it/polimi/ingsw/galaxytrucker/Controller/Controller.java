@@ -275,7 +275,7 @@ public class Controller implements Serializable {
                 v.updateMapPosition(playersPosition);
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
-                v.setCentralTile(getPlayerCheck(nick).getTile(2,3));
+                v.setTile(getPlayerCheck(nick).getTile(2,3));
                 v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
             } catch (IOException e) {
