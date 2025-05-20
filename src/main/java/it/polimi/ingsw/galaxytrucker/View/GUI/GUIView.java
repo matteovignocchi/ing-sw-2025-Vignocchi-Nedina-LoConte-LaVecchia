@@ -285,6 +285,16 @@ public class GUIView extends Application implements View {
         this.demo = demo;
     }
 
+    @Override
+    public boolean ReturnValidity(int a, int b) {
+        return false;
+    }
+
+    @Override
+    public void setValidity(int a, int b) {
+
+    }
+
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }
