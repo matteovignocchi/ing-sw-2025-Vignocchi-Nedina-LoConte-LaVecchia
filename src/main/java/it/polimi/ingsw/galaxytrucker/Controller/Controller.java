@@ -341,6 +341,20 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
+    public Tile getReservedTile(String nickname , int id) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+
+        List<Tile> discardPile = p.getTilesInDiscardPile();
+        for(Tile t : discardPile) {
+            if(t.getIdTile() == id) {
+                discardPile.remove(t);
+                return t;
+            }
+        }
+
+        throw new BusinessLogicException("Tile not found");
+    }
+
     public void setReady(String nickname) throws BusinessLogicException, RemoteException {
         Player p = getPlayerCheck(nickname);
 
@@ -379,7 +393,7 @@ public class Controller implements Serializable {
 
         addHuman();
 
-        viewsByNickname.forEach((nick, v) -> checkPlayerAssembly(nick , 2 , 3));
+        for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
 
         //notifyAllViews();
 
@@ -1929,7 +1943,7 @@ public class Controller implements Serializable {
 
     }
 
-    private void checkPlayerAssembly(String id , int x , int y){
+    private void checkPlayerAssembly(String id , int x , int y) throws BusinessLogicException {
         playersByNickname.get(id).controlAssembly(x,y);
         try {
             //notifyView(id);

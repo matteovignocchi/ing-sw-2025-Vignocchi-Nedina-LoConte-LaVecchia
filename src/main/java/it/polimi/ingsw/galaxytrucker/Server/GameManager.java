@@ -141,6 +141,16 @@ public class GameManager {
         }
     }
 
+    public Tile getReservedTile(int gameId, String nickname , int id) throws BusinessLogicException {
+        Controller controller = getControllerCheck(gameId);
+        Tile t;
+        synchronized (controller) {
+            t = controller.getReservedTile(nickname, id);
+            safeSave(gameId, controller);
+        }
+        return t;
+    }
+
     public void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {

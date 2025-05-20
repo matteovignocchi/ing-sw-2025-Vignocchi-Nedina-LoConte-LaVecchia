@@ -5,6 +5,8 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.View;
+
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
@@ -54,4 +56,6 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public String askInformationAboutStart() throws Exception { return null; }
     @Override public void setIsDemo(Boolean demo) throws Exception {};
     @Override public void enterGame(int gameId) throws Exception {};
+    @Override public void updateDashMatrix(Tile[][] dashMatrix) throws Exception {}
+    @Override public Tile takeReservedTile() throws Exception { return null; }
 }
