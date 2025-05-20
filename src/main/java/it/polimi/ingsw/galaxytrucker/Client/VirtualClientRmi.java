@@ -405,11 +405,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
             else break;
         }
+        view.inform("id+"+ Dash_Matrix[index[0]][index[1]].idTile);
             try {
-                view.setValidity(index[0], index[1]);
+//                view.setValidity(index[0], index[1]);
+                Tile tmp = Dash_Matrix[index[0]][index[1]];
                 Dash_Matrix[index[0]][index[1]] = new EmptySpace();
                 view.printDashShip(Dash_Matrix);
-                tmpTile = server.getReservedTile(gameId,nickname,Dash_Matrix[index[0]][index[1]].getIdTile());
+                tmpTile = server.getReservedTile(gameId,nickname,tmp.getIdTile());
             } catch (BusinessLogicException e) {
                 view.reportError("you miss " + e.getMessage() + "select new command" );
                 throw new BusinessLogicException(e.getMessage());

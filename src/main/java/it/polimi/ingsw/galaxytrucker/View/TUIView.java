@@ -751,7 +751,8 @@ public class TUIView implements View {
     }
     @Override
     public void setValidity(int a , int b){
-        if((a == 0 && b ==5)||(a==0 && b==6)) maschera[a][b] = !maschera[a][b];
+        boolean tmp =  !maschera[a][b];
+        if((a == 0 && b ==5)||(a==0 && b==6)) maschera[a][b] = tmp;
         maschera[a][b] = false;
 
 

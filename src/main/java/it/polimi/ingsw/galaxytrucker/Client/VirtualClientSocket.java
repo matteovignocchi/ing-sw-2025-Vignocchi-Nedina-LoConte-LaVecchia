@@ -782,7 +782,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payload.add(gameId);
         payload.add(nickname);
         payload.add(Dash_Matrix[index[0]][index[1]].idTile);
-
+        Dash_Matrix[index[0]][index[1]] = new EmptySpace();
+        view.printDashShip(Dash_Matrix);
         Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
         Message response = sendRequestWithResponse(request);
         Object payloadResponse = response.getPayload();

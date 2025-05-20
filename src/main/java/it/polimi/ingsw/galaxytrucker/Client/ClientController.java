@@ -294,7 +294,7 @@ public class ClientController {
                 case "takereservedtile" -> {
                     try{
 //                        virtualClient.takeReservedTile()
-                        tmpTile = virtualClient.getTileServer();
+                        tmpTile = virtualClient.takeReservedTile();
                         view.printTile(tmpTile);
                         view.printListOfCommand();
                     }catch (BusinessLogicException e){

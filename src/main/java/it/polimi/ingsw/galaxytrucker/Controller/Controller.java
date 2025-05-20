@@ -343,11 +343,15 @@ public class Controller implements Serializable {
 
     public Tile getReservedTile(String nickname , int id) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
+        System.out.println(id);
 
         List<Tile> discardPile = p.getTilesInDiscardPile();
         for(Tile t : discardPile) {
+            System.out.println(t.getIdTile());
             if(t.getIdTile() == id) {
-                discardPile.remove(t);
+                System.out.println("id corretto");
+                System.out.println(t.getIdTile());
+                p.removeTileInDiscardPile(t);
                 return t;
             }
         }
