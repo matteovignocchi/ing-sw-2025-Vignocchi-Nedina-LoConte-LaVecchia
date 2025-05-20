@@ -395,14 +395,15 @@ public class Controller implements Serializable {
             leader.setGamePhase(GamePhase.DRAW_PHASE);
 
             try {
+                v.updateGameState(GamePhase.DRAW_PHASE);
                 v.inform("SERVER: " + "You're the leader! Draw a card");
                 v.notify();
                 break;
             } catch (IOException e) {
-                markDisconnected(leaderNick);
+//                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
             } catch (Exception e){
-                markDisconnected(leaderNick);
+//                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
                 System.err.println("[ERROR] in activateDrawPhase:" + e.getMessage());
             }
