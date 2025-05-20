@@ -348,10 +348,11 @@ public class Controller implements Serializable {
         for(Tile t : discardPile) {
             if(t.getIdTile() == id) {
                 discardPile.remove(t);
+                p.setGamePhase(GamePhase.TILE_MANAGEMENT);
+                notifyView(nickname);
                 return t;
             }
         }
-
         throw new BusinessLogicException("Tile not found");
     }
 
