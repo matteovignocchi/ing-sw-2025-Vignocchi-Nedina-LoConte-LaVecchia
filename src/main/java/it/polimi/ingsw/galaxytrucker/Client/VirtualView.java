@@ -54,7 +54,7 @@ public interface VirtualView extends Remote {
 
     int sendLogin(String username) throws Exception;
 
-    int sendGameRequest(String message) throws Exception;
+    int sendGameRequest(String message ,int numberOfPlayer , Boolean isdemo) throws Exception;
 
     GamePhase getCurrentGameState() throws Exception;
 

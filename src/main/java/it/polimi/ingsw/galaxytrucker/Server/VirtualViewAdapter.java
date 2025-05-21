@@ -36,7 +36,7 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void updateGameState(GamePhase fase) throws Exception {}
     @Override public void startMach() throws Exception {}
     @Override public int sendLogin(String username) throws Exception { return 0; }
-    @Override public int sendGameRequest(String message) throws Exception { return 0; }
+    @Override public int sendGameRequest(String message , int num , Boolean isDemo) throws Exception { return 0; }
     @Override public GamePhase getCurrentGameState() throws Exception { return null; }
     @Override public GamePhase getGameFase() throws Exception { return null; }
 
@@ -59,5 +59,5 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void enterGame(int gameId) throws Exception {};
     @Override public void updateDashMatrix(Tile[][] dashMatrix) throws Exception {}
     @Override public Tile takeReservedTile() throws Exception { return null; }
-    @Override public void setClientController(ClientController clientController) throws Exception {}
+    @Override public void setClientController(ClientController clientController) throws Exception{}
 }

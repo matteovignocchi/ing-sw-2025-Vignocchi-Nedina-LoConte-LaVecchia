@@ -138,6 +138,7 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.WAITING_IN_LOBBY);
         view.updateGameState(GamePhase.WAITING_IN_LOBBY);
+//        view.setTile(p.getTile(2,3));
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);

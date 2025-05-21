@@ -279,7 +279,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public int sendGameRequest(String message) throws IOException, InterruptedException {
+    public int sendGameRequest(String message , int numPlayer , Boolean isDemo2) throws IOException, InterruptedException {
         if(message.equals("CREATE")){
             while (true) {
                 switch (view){
@@ -739,7 +739,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void setClientController(ClientController clientController) throws RemoteException {
+    public void setClientController(ClientController clientController) {
         this.ciccio = clientController;
     }
 
