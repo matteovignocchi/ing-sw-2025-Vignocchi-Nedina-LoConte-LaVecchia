@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 
 public class Controller implements Serializable {
     private final int gameId;
-    private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
+    public transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
     private final Map<String , Integer> playersPosition = new ConcurrentHashMap<>();
 
@@ -260,6 +260,15 @@ public class Controller implements Serializable {
                 }
                 onGameEnd.accept(gameId);
             }, 1, TimeUnit.MINUTES);
+        }
+    }
+
+    public void sendInformTo(String nickname, String msg) {
+        try {
+            VirtualView v = getViewCheck(nickname);
+            v.inform(msg);
+        } catch (Exception e) {
+            markDisconnected(nickname);
         }
     }
 
