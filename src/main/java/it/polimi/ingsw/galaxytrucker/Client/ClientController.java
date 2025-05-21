@@ -56,17 +56,6 @@ public class ClientController {
 
                 default -> {}
             }
-
-            String cmd = view.askString();
-            switch (cmd) {
-                case "1" -> createNewGame();
-                case "2" -> joinExistingGame();
-                case "3" -> {
-                    virtualClient.logOut();
-                    isConnected = false;
-                }
-                default  -> view.reportError("Enter 1, 2 or 3.");
-            }
         }
     }
 
@@ -182,17 +171,13 @@ public class ClientController {
         view.inform("Waiting for other players… \ntype 'exit' to return to main menù");
 
         while (true) {
-            // se tu o un altro chiamate leaveGame(), il server invia EXIT a tutti
             if (virtualClient.getGameFase() == GamePhase.EXIT) {
                 view.inform("Lobby closed, returning to main menu");
                 return false;
             }
-
-            // aspetta che arrivi la fase BOARD_SETUP, non “diverso da WAITING_FOR_PLAYERS”
             if (virtualClient.getGameFase() == GamePhase.BOARD_SETUP) {
                 return true;
             }
-
             String line = view.askString().trim();
             if ("exit".equalsIgnoreCase(line)) {
                 virtualClient.leaveGame();
@@ -247,22 +232,18 @@ public class ClientController {
 
 
     private void startGame() throws Exception {
-        boolean firstTurn = true;
-
         while (true) {
-            GamePhase gameState = virtualClient.getGameFase();
-            if (gameState == GamePhase.EXIT) {
-                view.inform("Returned to main menù...");
+            // 1) controllo rapido di EXIT
+            if (virtualClient.getGameFase() == GamePhase.EXIT) {
+                view.inform("Returned to main menu...");
                 return;
             }
 
-            if (!firstTurn) {
-                view.printListOfCommand();
-            }
+            // 2) **qui** (e solo qui) stampo la lista dei comandi
+            view.printListOfCommand();
 
-            firstTurn = false;
+            // 3) leggo una scelta valida SENZA ristampare il menu
             String key = view.sendAvailableChoices();
-
             switch (key) {
                 case "getacoveredtile" -> {
                     try {

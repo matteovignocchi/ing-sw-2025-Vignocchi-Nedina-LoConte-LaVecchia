@@ -282,9 +282,6 @@ public class TUIView implements View {
         }
         printMapPosition();
         System.out.println();
-
-        printListOfCommand();
-
     }
 
     //metodo che riceve una lista, in cui prendi
@@ -637,19 +634,26 @@ public class TUIView implements View {
 
     @Override
     public String sendAvailableChoices() {
-        List<String> listOfOptions = commandConstructor();
+        List<String> options = commandConstructor();
+
         while (true) {
             if (game == GamePhase.EXIT) {
                 return "logout";
             }
 
-            int idx = askIndex(); // questo è bloccante…
-            if (idx >= 0 && idx < listOfOptions.size()) {
-                return listOfOptions.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
+            int idx = askIndex();  // chiede solo "Insert index:"
+            if (idx >= 0 && idx < options.size()) {
+                return options
+                        .get(idx)
+                        .toLowerCase()
+                        .replaceAll("[^a-z0-9]", "");
             }
+
             reportError("Invalid choice, try again.");
         }
     }
+
+
 
 
 

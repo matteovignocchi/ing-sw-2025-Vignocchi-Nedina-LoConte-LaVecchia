@@ -56,9 +56,14 @@ public class GameManager {
         safeSave(gameId, controller);
     }
 
-    public synchronized void quitGame(int gameId, String nickname) throws BusinessLogicException, Exception {
+    public synchronized void quitGame(int gameId, String nickname) throws Exception {
         Controller controller = getControllerCheck(gameId);
-        controller.broadcastInform( nickname + " has abandoned: the game ends.");
+        for (String other : controller.viewsByNickname.keySet()) {
+            if (!other.equals(nickname)) {
+                controller.sendInformTo(other,
+                        nickname + " abandoned: press any key to return to the main menù!");
+            }
+        }
         controller.setExit();
         removeGame(gameId);
     }

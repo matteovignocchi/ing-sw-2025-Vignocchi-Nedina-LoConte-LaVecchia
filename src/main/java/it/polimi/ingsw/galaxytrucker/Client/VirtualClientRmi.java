@@ -67,10 +67,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setTile(Tile tmp){
-        switch (gamePhase){
-            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tmp);
-            default -> Dash_Matrix[2][3] = tmp;
-        }
+//        switch (gamePhase){
+//            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tmp);
+//            default -> Dash_Matrix[2][3] = tmp;
+//        }
     }
     @Override
     public void inform(String message) throws RemoteException {

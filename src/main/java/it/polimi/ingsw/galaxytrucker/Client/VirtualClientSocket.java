@@ -686,45 +686,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         System.exit(0);
     }
 
-
-
-
-//    @Override
-//    public void logOut() throws Exception {
-//        if(gameId != 0) {
-//            List<Object> payloadGame = new ArrayList<>();
-//            payloadGame.add(gameId);
-//            payloadGame.add(nickname);
-//            Message request = Message.request(Message.OP_LEAVE_GAME, payloadGame);
-//            Message response = sendRequestWithResponse(request);
-//            Object payload = response.getPayload();
-//            switch (payload) {
-//                case String p when p.equals("OK") -> {
-//                }
-//                case String error -> {
-//                    throw new IOException("Error from server: " + error);
-//                }
-//                default -> throw new IOException("Unexpected payload: " );
-//            }
-//        }else{
-//            Message request = Message.request(Message.OP_LOGOUT, nickname);
-//            Message response = sendRequestWithResponse(request);
-//            Object payload = response.getPayload();
-//            switch (payload) {
-//                case String p when p.equals("OK") -> {
-//                }
-//                case String error -> {
-//                    throw new IOException("Error from server: " + error);
-//                }
-//                default -> throw new IOException("Unexpected payload: " );
-//            }
-//        }
-//        active = false;
-//        System.out.println("Goodbye!");
-//        socket.close();
-//        System.exit(0);
-//    }
-
     @Override
     public void setNickname(String nickname) {
         this.nickname = nickname;
@@ -762,10 +723,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void setTile(Tile tile) throws Exception {
-        switch (gamePhase){
-            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tile);
-            default -> Dash_Matrix[2][3] = tile;
-        }
+//        switch (gamePhase){
+//            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tile);
+//            default -> Dash_Matrix[2][3] = tile;
+//        }
     }
 
     @Override
