@@ -21,18 +21,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
-import java.net.URL;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -90,9 +85,9 @@ public class GUIView extends Application implements View {
                 if (protocolChoice == 1) {
                     Registry registry = LocateRegistry.getRegistry(host, 1099);
                     VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                    virtualClient = new VirtualClientRmi(server, this);
+                    virtualClient = new VirtualClientRmi(server);
                 } else {
-                    virtualClient = new VirtualClientSocket(host, port, this);
+                    virtualClient = new VirtualClientSocket(host, port);
                 }
 
                 ClientController controller = new ClientController(this, virtualClient);

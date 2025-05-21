@@ -7,19 +7,14 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
-    //private final ServerRmi server;
-
-//    private transient View view;
     private String nickname;
     private int gameId = 0;
     private final Object startLock = new Object();
@@ -27,19 +22,18 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private transient ClientController ciccio;
     private final VirtualServer server;
 
-    public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
+    public VirtualClientRmi(VirtualServer server) throws RemoteException {
         super();
         this.server = server;
-//        this.view = view;
     }
     @Override
     public void setNickname(String nickname) throws RemoteException {
         this.nickname = nickname;
     }
-    @Override
-    public void setView(View view) {
-//        this.view = view;
-    }
+//    @Override
+//    public void setView(View view) {
+//       this.view = view;
+//    }
     public void setGameId(int gameId) throws RemoteException {
         this.gameId = gameId;
     }
@@ -122,8 +116,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER SETTARE COSE AL CLIENT RIGUARDO AL GAMEFLOW ///
 
     @Override
-    public void updateGameState(GamePhase fase) throws RemoteException {
-        ciccio.updateGameStateByController(fase);
+    public void updateGameState(GamePhase phase) throws RemoteException {
+        ciccio.updateGameStateByController(phase);
     }
     @Override
     public void startMach() throws RemoteException {

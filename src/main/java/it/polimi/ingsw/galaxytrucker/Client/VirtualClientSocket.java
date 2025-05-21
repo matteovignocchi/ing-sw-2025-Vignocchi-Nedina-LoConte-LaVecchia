@@ -6,9 +6,6 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
-import it.polimi.ingsw.galaxytrucker.View.TUIView;
-import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -24,11 +21,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     private final Socket socket;
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
-    private  View view;
-    private GamePhase gamePhase;
     private int gameId = 0;
     private String nickname;
-    private Tile[][] Dash_Matrix;
     private boolean active = true;
     private String start = "false";
     private final ResponseHandler responseHandler = new ResponseHandler();
@@ -38,19 +32,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     /// METODI DI INIZIALIZZAZIONE ///
 
-    public VirtualClientSocket(String host, int port , View view) throws IOException {
+    public VirtualClientSocket(String host, int port) throws IOException {
         this.socket = new Socket(host, port);
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.out.flush();
         this.in = new ObjectInputStream(socket.getInputStream());
-        this.view = view;
         new Thread(this).start();
-        Dash_Matrix = new Tile[5][7];
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 7; j++) {
-                Dash_Matrix[i][j] = new EmptySpace();
-            }
-        }
     }
 
     @Override
@@ -77,7 +64,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             } catch (IOException | ClassNotFoundException e) {
                 if (active) {
                     try {
-                        view.reportError("Connection error: " + e.getMessage());
+                        ciccio.reportErrorByController("Connection error: " + e.getMessage());
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -135,7 +122,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
             case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
             case Message.OP_SET_NICKNAME -> this.setNickname((String) msg.getPayload());
-            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
+//            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
             case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
             case Message.OP_SET_IS_DEMO -> this.setIsDemo((boolean) msg.getPayload());
@@ -181,51 +168,51 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void inform(String message){
-        view.inform(message);
+        ciccio.informByController(message);
     }
 
     @Override
     public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        view.updateView(nickname , firePower , powerEngine , credits , /*position ,*/ purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
+        ciccio.showUpdateByController(nickname , firePower , powerEngine , credits , /*position ,*/ purpleAline , brownAlien , numberOfHuman , numberOfEnergy);
     }
 
     @Override
     public void reportError(String error){
-        view.reportError(error);
+        ciccio.reportErrorByController(error);
     }
     @Override
     public void printListOfTileCovered(List<Tile> tiles) {
-        view.printPileCovered();
+        ciccio.printListOfTileCoveredByController();
     }
     @Override
     public void printListOfTileShown(List<Tile> tiles)  {
-        view.printPileShown(tiles);
+        ciccio.printListOfTileShownByController(tiles);
     }
     @Override
     public void printListOfGoods(List<Colour> listOfGoods) {
-        view.printListOfGoods(listOfGoods);
+        ciccio.printListOfGoodsByController(listOfGoods);
     }
     @Override
     public void printCard(Card card){
-        view.printCard(card);
+        ciccio.printCardByController(card);
     }
     @Override
     public void printTile(Tile tile){
-        view.printTile(tile);
+        ciccio.printTileByController(tile);
     }
     @Override
     public void printPlayerDashboard(Tile[][] dashBoard){
-        view.printDashShip(dashBoard);
+        ciccio.printPlayerDashboardByController(dashBoard);
     }
     @Override
     public void printDeck(List<Card> deck){
-        view.printDeck(deck);
+        ciccio.printDeckByController(deck);
     }
 
-    @Override
-    public void setView(View view)  {
-        this.view=view;
-    }
+//    @Override
+//    public void setView(View view)  {
+////        this.view=view;
+//    }
 
     @Override
     public void setGameId(int gameId) {
@@ -236,19 +223,19 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public boolean ask(String message){
-        return view.ask(message);
+        return ciccio.askByController(message);
     }
     @Override
     public int askIndex(){
-        return view.askIndex();
+        return ciccio.askIndexByController();
     }
     @Override
     public int[] askCoordinate() {
-        return view.askCoordinate();
+        return ciccio.askCoordinateByController();
     }
     @Override
     public String askString(){
-        return view.askString();
+        return ciccio.askStringByController();
     }
 
 
@@ -260,8 +247,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void updateGameState(GamePhase phase){
-        this.gamePhase = phase;
-        view.updateState(gamePhase);
+        ciccio.updateGameStateByController(phase);
     }
 
     @Override
@@ -273,7 +259,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public GamePhase getGameFase(){
-        return gamePhase;
+        return null;
     }
     /// METODI PER IL LOGIN ///
 
@@ -281,67 +267,27 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public int sendGameRequest(String message , int numPlayer , Boolean isDemo2) throws IOException, InterruptedException {
         if(message.equals("CREATE")){
-            while (true) {
-                switch (view){
-                    case TUIView v -> {
-                        boolean demo = v.ask("Would you like a demo version?");
-                        v.inform("Select a number of players between 2 and 4");
-                        int numberOfPlayer;
-                        while (true) {
-                            numberOfPlayer = v.askIndex() + 1;
-                            if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
-                                break;
-                            }
-                            v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
-                        }
                         List<Object> payloadGame = new ArrayList<>();
-                        payloadGame.add(demo);
+                        payloadGame.add(isDemo2);
                         payloadGame.add(nickname);
-                        payloadGame.add(numberOfPlayer);
+                        payloadGame.add(numPlayer);
                         Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
                         Message msg = sendRequestWithResponse(createGame);
                         return (int) msg.getPayload();
-                    }
-                    case GUIView v ->{
-                        List<Object> data = v.getDataForGame();
-                        boolean demo = (boolean) data.get(0);
-                        int numberOfPlayer = (int) data.get(1);
-                        List<Object> payloadGame = new ArrayList<>();
-                        payloadGame.add(demo);
-                        payloadGame.add(nickname);
-                        payloadGame.add(numberOfPlayer);
-                        Message createGame = Message.request(Message.OP_CREATE_GAME, payloadGame);
-                        Message msg = sendRequestWithResponse(createGame);
-                        return ((int) msg.getPayload());
-                    }
-                    default -> {}
-                }
-            }
         }
         if(message.equals("JOIN")) {
             while (true) {
-                switch(view){
-                    case TUIView v -> {
                         Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
                         Message msg = sendRequestWithResponse(gameRequest);
                         @SuppressWarnings("unchecked")
                         Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
 
                         if (availableGames.isEmpty()) {
-                            view.inform("**No available games**");
+                            ciccio.informByController("**No available games**");
                             return -1;
                         }
 
-                        view.inform("**Available Games:**");
-                        view.inform("0. Return to main menu");
-                        for (Integer id : availableGames.keySet()) {
-                            int[] info = availableGames.get(id);
-                            boolean isDemo = info[2] == 1;
-                            String suffix = isDemo ? " DEMO" : "";
-                            view.inform(id + ". Players in game: " + info[0] + "/" + info[1] + suffix);
-                        }
-
-                        int choice = askIndex() + 1;
+                        int choice = ciccio.printAvailableGames(availableGames);
                         if (choice == 0) return 0;
                         if (availableGames.containsKey(choice)) {
                             List<Object> payloadJoin = List.of(choice, nickname);
@@ -349,27 +295,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                             sendRequest(gameChoice);
                             return choice;
                         }
-                        view.reportError("Invalid index, try again.");
-                    }
-                    case GUIView v -> {
-                        Message gameRequest = Message.request(Message.OP_LIST_GAMES, message);
-                        Message msg = sendRequestWithResponse(gameRequest);
-                        Map<Integer, int[]> availableGames = (Map<Integer, int[]>) msg.getPayload();
-                        if(availableGames.isEmpty()){
-                            v.inform("No available games");
-                            return -1;
-                        }else{
-                            v.updateAvailableGames(availableGames);
-                        }
-                            int choice = v.getGameChoice();
-                            List<Object> payloadJoin = List.of(choice, nickname);
-                            Message gameChoice = Message.request(Message.OP_ENTER_GAME, payloadJoin);
-                            sendRequest(gameChoice);
-                            return choice;
-                        }
-                        default -> {}
-                    }
-
                 }
 
             }
@@ -444,15 +369,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
 
 
-        view.printPileShown(tmp);
-        view.inform("Select a tile");
+        ciccio.printListOfTileShownByController(tmp);
+        ciccio.informByController("Select a tile");
 
         while (true) {
             int index;
             while (true) {
                 index = askIndex();
                 if (index >= 0 && index < tmp.size()) break;
-                view.inform("Invalid index. Try again.");
+                ciccio.informByController("Invalid index. Try again.");
             }
 
             List<Object> tileRequestPayload = new ArrayList<>();
@@ -502,12 +427,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void positionTile(Tile tile) throws Exception {
-        view.printDashShip(Dash_Matrix);
+        ciccio.printMyDashBoardByController();
         int[] tmp;
 
         while (true) {
-            view.inform("Choose coordiante");
-            tmp = view.askCoordinate();
+            ciccio.informByController("Choose coordiante");
+            tmp = ciccio.askCoordinateByController();
 
             List<Object> payloadGame = new ArrayList<>();
             payloadGame.add(gameId);
@@ -523,15 +448,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             switch (payload) {
                 case String p when p.equals("OK") -> {}
                 case String error -> {
-                    view.reportError("Errorr from server: " + error);
+                    ciccio.reportErrorByController("Errorr from server: " + error);
                     continue;
                 }
                 default -> throw new IOException("Unexptected payload: ");
             }
             break;
         }
-        Dash_Matrix[tmp[0]][tmp[1]] = tile;
-        view.printDashShip(Dash_Matrix);
+        ciccio.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
+        ciccio.printMyDashBoardByController();
     }
 
     @Override
@@ -593,7 +518,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDeck() throws Exception {
         while (true) {
-            view.inform("Choose deck: 1 / 2 / 3");
+            ciccio.informByController("Choose deck : 1 / 2 / 3");
             int index = askIndex();
 
             List<Object> payload = new ArrayList<>();
@@ -610,18 +535,18 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     try {
                         @SuppressWarnings("unchecked")
                         List<Card> deck = (List<Card>) rawList;
-                        view.printDeck(deck);
+                        ciccio.printDeckByController(deck);
                         return;
                     } catch (ClassCastException e) {
-                        view.reportError("Error: " + e.getMessage());
+                        ciccio.reportErrorByController("Error: " + e.getMessage());
                         return;
                     }
                 }
                 case String error -> {
-                    view.reportError("Invalid index: " + error);
+                    ciccio.reportErrorByController("Invalid index: " + error);
                 }
                 default -> {
-                    view.reportError("Unexpected value: " );
+                    ciccio.reportErrorByController("Unexpected value: " );
                     return;
                 }
             }
@@ -633,7 +558,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDashBoard() throws Exception {
         while (true) {
-            String tmp = view.choosePlayer();
+            String tmp = ciccio.choocePlayerByController();
+
 
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);
@@ -645,16 +571,16 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
             switch (payloadResponse) {
                 case Tile[][] dashPlayer -> {
-                    view.inform("Space Ship di: " + tmp);
-                    view.printDashShip(dashPlayer);
-                    view.printListOfCommand();
+                    ciccio.informByController("Space Ship di: " + tmp);
+                    ciccio.printPlayerDashboardByController(dashPlayer);
+                    ciccio.printListOfCommands();
                     return;
                 }
                 case String error -> {
-                    view.reportError("Invalid player name: " + error);
+                    ciccio.reportErrorByController("Invalid player name: " + error);
                 }
                 default -> {
-                    view.reportError("Unexpected payload type: " + payloadResponse.getClass().getName());
+                    ciccio.reportErrorByController("Unexpected payload type: " + payloadResponse.getClass().getName());
 
                 }
             }
@@ -693,7 +619,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void updateMapPosition(Map<String, Integer> Position)  {
-        view.updateMap(Position);
+        ciccio.updateMapPositionByController(Position);
     }
 
     @Override
@@ -723,15 +649,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void setTile(Tile tile) throws Exception {
-//        switch (gamePhase){
-//            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tile);
-//            default -> Dash_Matrix[2][3] = tile;
-//        }
+        ciccio.setCurrentTile(tile);
     }
 
     @Override
     public void setIsDemo(Boolean demo) {
-        view.setIsDemo(demo);
+        ciccio.setIsDemoByController(demo);
     }
 
     @Override
@@ -756,25 +679,26 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
-        if(!view.ReturnValidity(0,5) && !view.ReturnValidity(0,6)) {
+        if(!ciccio.returOKAY(0,5) && !ciccio.returOKAY(0,6)) {
             throw new BusinessLogicException("Invalid coordinates");
         }
-        view.printDashShip(Dash_Matrix);
-        view.inform("Select a tile");
+        ciccio.printMyDashBoardByController();
+        ciccio.informByController("Select a tile");
         int[] index;
         Tile tmpTile = null;
         while(true) {
             index = askCoordinate();
-            if(index[0]!=0 || !view.ReturnValidity(0 , index[1])) view.inform("Invalid coordinate");
-            else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
+            if(index[0]!=0 || !ciccio.returOKAY(0 , index[1])) ciccio.informByController("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) ciccio.informByController("Invalid coordinate");
             else break;
         }
         List<Object> payload = new ArrayList<>();
         payload.add(gameId);
         payload.add(nickname);
-        payload.add(Dash_Matrix[index[0]][index[1]].idTile);
-        Dash_Matrix[index[0]][index[1]] = new EmptySpace();
-        view.printDashShip(Dash_Matrix);
+        Tile tmp = ciccio.getSomeTile(index[0], index[1]);
+        payload.add(tmp.idTile);
+        ciccio.setTileInMatrix(new EmptySpace(), index[0], index[1]);
+        ciccio.printMyDashBoardByController();
         Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
         Message response = sendRequestWithResponse(request);
         Object payloadResponse = response.getPayload();
@@ -790,8 +714,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void updateDashMatrix(Tile[][] data) throws IOException, BusinessLogicException, InterruptedException {
-        Dash_Matrix = data;
-
+        ciccio.newShip(data);
     }
 
 

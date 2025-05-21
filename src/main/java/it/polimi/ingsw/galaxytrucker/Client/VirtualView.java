@@ -36,7 +36,7 @@ public interface VirtualView extends Remote {
 
     void printDeck(List<Card> deck) throws Exception;
 
-    void setView(View view) throws Exception;
+//    void setView(View view) throws Exception;
 
     void setGameId(int gameId) throws RemoteException;
 
