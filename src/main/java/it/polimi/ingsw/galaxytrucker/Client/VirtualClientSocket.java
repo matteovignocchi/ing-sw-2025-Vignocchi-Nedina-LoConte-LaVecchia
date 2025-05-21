@@ -358,6 +358,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public int sendLogin(String username) throws IOException, InterruptedException {
+        if(username == null || username.trim().isEmpty()){
+           throw new IllegalArgumentException("Username cannot be null or empty");
+        }
         Message msg = sendRequestWithResponse(Message.request(Message.OP_LOGIN, username));
         Integer resp = (Integer) msg.getPayload();
         try {

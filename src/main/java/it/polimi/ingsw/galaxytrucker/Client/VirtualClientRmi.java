@@ -146,13 +146,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public int sendLogin(String username) throws RemoteException {
+        if (username == null || username.trim().isEmpty()) {
+            throw new RemoteException("Nickname cannot be null or empty");
+        }
 
         try {
-            return server.logIn(username , this);
+            return server.logIn(username, this);
         } catch (BusinessLogicException e) {
             return -1;
         }
-
     }
     @Override
     public int sendGameRequest(String message) throws RemoteException {

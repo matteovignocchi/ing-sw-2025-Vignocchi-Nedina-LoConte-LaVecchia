@@ -52,6 +52,7 @@ public class ClientController {
         while (isConnected) {
             switch (view){
                 case TUIView v -> mainMenuLoop();
+
                 default -> {}
             }
 
@@ -71,6 +72,10 @@ public class ClientController {
     private int loginLoop() throws Exception {
         while (true) {
             view.inform("Insert your username:");
+            switch (view){
+                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+                default -> {}
+            }
             String username = virtualClient.askString();
             int res = virtualClient.sendLogin(username);
             if (res == -1) {

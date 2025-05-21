@@ -22,12 +22,14 @@ public class NicknameDialogController {
         String nickname = nicknameField.getText();
         if (nickname != null && !nickname.trim().isEmpty()) {
             guiView.resolveNickname(nickname.trim());
-            Stage stage = (Stage) nicknameField.getScene().getWindow();
-            stage.close();
+            Stage dialogStage = (Stage) nicknameField.getScene().getWindow();
+            dialogStage.close();
         } else {
             showError("Nickname cannot be empty. Please enter a valid nickname.");
         }
     }
+
+
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
