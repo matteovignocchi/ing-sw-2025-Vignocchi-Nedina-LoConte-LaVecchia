@@ -45,7 +45,8 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.enterGame(gameId);
-            handleWaitForGameStart();
+            waitForGameStart();
+            view.inform("Game started");
             startGame();
         }
 
@@ -145,8 +146,9 @@ public class ClientController {
                 int gameId = virtualClient.sendGameRequest("CREATE");
                 if (gameId > 0) {
                     virtualClient.setGameId(gameId);
-                    v.inform("Waiting for players in lobby");
-                    handleWaitForGameStart();
+                    boolean started = waitForGameStart();
+                    if (!started) return;
+                    view.inform("Game is starting!");
                     startGame();
                 } else {
                     view.reportError("Game creation failed");
@@ -170,59 +172,82 @@ public class ClientController {
         int gameId = virtualClient.sendGameRequest("JOIN");
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
-            handleWaitForGameStart();
+            boolean started = waitForGameStart();
+            if (!started) return;
             startGame();
-        } else if (gameId==0) {
-            mainMenuLoop();
-        } else {
-            view.reportError("Cannot join game");
         }
     }
 
+    private boolean waitForGameStart() throws Exception {
+        view.inform("Waiting for other players… \ntype 'exit' to return to main menù");
 
-    public void waitForGameStart() throws Exception {
-        System.out.println("Waiting for the game to start... (type 'exit' to return to the main menu)");
         while (true) {
-            if (exitWaitingQueue) {
-                mainMenuLoop();
-                return;
+            // se tu o un altro chiamate leaveGame(), il server invia EXIT a tutti
+            if (virtualClient.getGameFase() == GamePhase.EXIT) {
+                view.inform("Lobby closed, returning to main menu");
+                return false;
             }
-            String status = virtualClient.askInformationAboutStart();
-            if (status.contains("start")) {
-                return;
+
+            // aspetta che arrivi la fase BOARD_SETUP, non “diverso da WAITING_FOR_PLAYERS”
+            if (virtualClient.getGameFase() == GamePhase.BOARD_SETUP) {
+                return true;
             }
-            Thread.sleep(500); // evita spam
+
+            String line = view.askString().trim();
+            if ("exit".equalsIgnoreCase(line)) {
+                virtualClient.leaveGame();
+                view.inform("You left the lobby, returning to main menu");
+                return false;
+            }
         }
     }
 
-    public void exitQueue() {
-        exitWaitingQueue = true;
-    }
 
-    public void handleWaitForGameStart() {
-        ClientController controller = this;
-        Thread waitingThread = new Thread(() -> {
-            try {
-                controller.waitForGameStart();
-            } catch (Exception e) {
-                e.printStackTrace();
+    private boolean handleWaitForGameStart() throws Exception {
+        view.inform("Waiting for other players…");
+        view.inform("Type 'exit' to abandon the lobby and return to main menu.");
+
+        while (true) {
+            // il server ha avanzato lo stato: il gioco parte
+            if (virtualClient.getGameFase() != GamePhase.WAITING_FOR_PLAYERS) {
+                view.inform("Game is starting!");
+                return true;
             }
-        });
-        waitingThread.start();
-        Scanner scanner = new Scanner(System.in);
-        while (waitingThread.isAlive()) {
-            String input = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(input.trim())) {
-                controller.exitQueue();
-                break;
+
+            String line = view.askString().trim();
+            if ("exit".equalsIgnoreCase(line)) {
+                virtualClient.leaveGame();
+                view.inform("Returned to main menu");
+                return false;
             }
         }
     }
+
+
+//    public void handleWaitForGameStart() {
+//        view.inform("Waiting for players (type 'exit' to cancel)");
+//        ClientController controller = this;
+//        Thread waitingThread = new Thread(() -> {
+//            try {
+//                controller.waitForGameStart();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        waitingThread.start();
+//        Scanner scanner = new Scanner(System.in);
+//        while (waitingThread.isAlive()) {
+//            String input = scanner.nextLine();
+//            if ("exit".equalsIgnoreCase(input.trim())) {
+//                controller.exitQueue();
+//                break;
+//            }
+//        }
+//    }
 
 
     private void startGame() throws Exception {
-        view.inform("Game started");
-        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        boolean firstTurn = true;
 
         while (true) {
             GamePhase gameState = virtualClient.getGameFase();
@@ -231,18 +256,12 @@ public class ClientController {
                 return;
             }
 
-            String key = null;
-            while (key == null) {
-                if (virtualClient.getGameFase() == GamePhase.EXIT) {
-                    view.inform("Returned to main menù...");
-                    return;
-                }
-                if (stdin.ready()) {
-                    key = view.sendAvailableChoices();
-                } else {
-                    Thread.sleep(100);
-                }
+            if (!firstTurn) {
+                view.printListOfCommand();
             }
+
+            firstTurn = false;
+            String key = view.sendAvailableChoices();
 
             switch (key) {
                 case "getacoveredtile" -> {
@@ -308,79 +327,6 @@ public class ClientController {
     }
 
 
-    //SOLUZIONE E PROBLEMA SECONDO ME:
-//Il problema vero è che, mentre tu sei dentro a String key = view.sendAvailableChoices();
-//sei bloccato finché l’utente non digita qualcosa, e quindi non puoi mai ripassare al controllo di if (virtualClient.getGameFase() == GamePhase.EXIT) { … }
-//La soluzione più rapida è trasformare quell’input da bloccante a un piccolo polling loop: invece di chiamare una volta sola sendAvailableChoices(),
-// fai un ciclo in cui ogni 100 ms controlli se ti è arrivato l’EXIT; solo se non c’è entri a leggere l’input.
-
-
-//    private void startGame() throws Exception {
-//        view.inform("game started");
-//        GamePhase gameState;
-//        do {
-//            String key = view.sendAvailableChoices();
-//            switch (key) {
-//                case "getacoveredtile" -> {
-//                    try {
-//                        tmpTile = virtualClient.getTileServer();
-//                        view.printTile(tmpTile);
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "getashowntile" -> {
-//                    try {
-//                        tmpTile = virtualClient.getUncoveredTile();
-//                        view.printTile(tmpTile);
-//                    } catch (BusinessLogicException | IOException | InterruptedException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                    view.printListOfCommand();
-//                }
-//                case "returnthetile" ->{
-//                    try {
-//                        virtualClient.getBackTile(tmpTile);
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "placethetile" -> virtualClient.positionTile(tmpTile);
-//                case "drawacard" -> {
-//                    try {
-//                        virtualClient.drawCard();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "spinthehourglass" -> {
-//                    try {
-//                        virtualClient.rotateGlass();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "declareready" -> {
-//                    try {
-//                        virtualClient.setReady();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "watchadeck" -> virtualClient.lookDeck();
-//                case "watchaplayersship" -> virtualClient.lookDashBoard();
-//                case "rightrotatethetile" -> rotateRight();
-//                case "leftrotatethetile" -> rotateLeft();
-//                case "logout" -> {
-//                    virtualClient.leaveGame();
-//                    return;
-//                }
-//                default -> view.inform("Action not recognized");
-//            }
-//            gameState = virtualClient.getGameFase();
-//        } while (gameState != GamePhase.EXIT);
-//    }
-
     private void rotateRight() throws Exception {
         if (tmpTile != null) {
             tmpTile.rotateRight();
@@ -417,8 +363,6 @@ public class ClientController {
     public void logOutGUI() throws Exception {
         virtualClient.logOut();
     }
-
-
 
 }
 

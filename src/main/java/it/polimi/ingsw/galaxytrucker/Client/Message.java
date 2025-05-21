@@ -50,7 +50,8 @@ public class Message implements Serializable {
     public static final String OP_SET_GAMEID = "SET_GAMEID";
     public static final String OP_MAP_POSITION = "MAP_POSITION";
     public static final String OP_SET_FLAG_START = "SET_FLAG_START";
-
+    public static final String OP_GET_RESERVED_TILE= "OP_GET_RESERVED_TILE";
+    public static final String OP_UPDATE_DA = "UPDATE_DA";
 
     private final String messageType;
     private final String operation;

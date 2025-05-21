@@ -68,6 +68,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             Object p  = req.getPayload();
 
             return switch (op) {
+                case Message.OP_GET_RESERVED_TILE  -> wrap(req, handleGetReservedTile(p));
                 case Message.OP_LEAVE_GAME         -> wrap(req, handleLeaveGame(p));
                 case Message.OP_LOGIN              -> wrap(req, handleLogin(p));
                 case Message.OP_CREATE_GAME        -> wrap(req, handleCreateGame(p));
@@ -118,6 +119,15 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     private Object handleListGames() {
         return gameManager.listActiveGames();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object handleGetReservedTile(Object p) throws BusinessLogicException{
+        List<Object> args = (List<Object>) p;
+        int gameId = (Integer) args.get(0);
+        String nickname = (String)  args.get(1);
+        int IdTile = (Integer) args.get(2);
+        return gameManager.getReservedTile(gameId, nickname, IdTile);
     }
 
     @SuppressWarnings("unchecked")
@@ -357,17 +367,20 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void setCentralTile(Tile tile) throws IOException {
+    public void setTile(Tile tile) throws IOException {
         out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
         out.flush();
     }
 
     @Override
     public void setIsDemo(Boolean demo) throws Exception {
-
-
-
         out.writeObject(Message.update(Message.OP_SET_IS_DEMO, demo));
+        out.flush();
+    }
+
+    @Override
+    public void updateDashMatrix(Tile[][] data) throws Exception {
+        out.writeObject(Message.update(Message.OP_UPDATE_DA, data));
         out.flush();
     }
 }

@@ -89,11 +89,18 @@ public interface VirtualView extends Remote {
 
     String askInformationAboutStart() throws Exception;
 
-    void setCentralTile(Tile tile) throws Exception;
+    void setTile(Tile tile) throws Exception;
 
     void setIsDemo(Boolean demo) throws Exception;
 
     void enterGame(int gameId) throws Exception;
 
     void leaveGame() throws Exception;
+
+    Tile takeReservedTile() throws Exception;
+
+    void updateDashMatrix(Tile[][] data) throws Exception;
+
+    void setClientController(ClientController clientController) throws Exception;
+
 }

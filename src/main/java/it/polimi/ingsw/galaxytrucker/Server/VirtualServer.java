@@ -29,4 +29,5 @@ public interface VirtualServer extends Remote {
     Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException;
     int logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException;
     void logOut(String nickname) throws RemoteException, BusinessLogicException;
+    Tile getReservedTile(int gameId, String nickname , int id) throws RemoteException, BusinessLogicException;
 }

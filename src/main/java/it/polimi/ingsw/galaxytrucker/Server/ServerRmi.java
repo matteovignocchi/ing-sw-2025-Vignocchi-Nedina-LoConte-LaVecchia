@@ -187,5 +187,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
         return handleGameManagerCall("login", () -> gameManager.login(nickname, v));
     }
+
+    @Override
+    public Tile getReservedTile(int gameId, String nickname , int id) throws RemoteException, BusinessLogicException {
+        if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
+
+        return handleGameManagerCall("getReservedTile", () -> gameManager.getReservedTile(gameId, nickname, id));
+    }
+
 }
 

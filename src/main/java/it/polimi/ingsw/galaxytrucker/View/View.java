@@ -34,6 +34,8 @@ public interface View {
     String choosePlayer();
     void printListOfCommand();
     void setIsDemo(Boolean demo);
+    boolean ReturnValidity(int a , int b);
+    void setValidity(int a , int b);
 }
 
 //public interface VirtualViewRmi extends VirtualView {

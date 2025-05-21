@@ -31,6 +31,16 @@ public class Hourglass implements Serializable {
         }, TIMER, TimeUnit.SECONDS);
     }
 
+    public synchronized void cancel() {
+        if (scheduledFuture != null && !scheduledFuture.isDone()) {
+            scheduledFuture.cancel(false);
+        }
+
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+    }
+
     public synchronized int  getFlips() { return flips; }
 
     public synchronized HourglassState getState() { return state; }

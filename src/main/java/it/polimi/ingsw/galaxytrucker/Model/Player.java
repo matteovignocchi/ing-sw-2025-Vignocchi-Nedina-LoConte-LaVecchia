@@ -275,10 +275,10 @@ public class Player implements Serializable {
      * the method add the tile in the discard pile
      * @param tile
      */
-    public void addToDiscardPile(Tile tile) throws IndexOutOfBoundsException{
+    public void addToDiscardPile(Tile tile) throws BusinessLogicException{
         if(gamePhase != GamePhase.BOARD_SETUP) discardPile.add(tile);
         else {
-            if(discardPile.size()>=2) throw new IndexOutOfBoundsException();
+            if(discardPile.size()>=2) throw new BusinessLogicException("too many Reserved Tiles");
             discardPile.add(tile);
         }
     }
@@ -368,7 +368,7 @@ public class Player implements Serializable {
      * @param a raw of the matrix
      * @param b column of the matrix
      */
-    public void removeTile(int a, int b) {
+    public void removeTile(int a, int b) throws BusinessLogicException {
         addToDiscardPile(Dash_Matrix[a][b]);
         Dash_Matrix[a][b] = new EmptySpace();
         validStatus[a][b] = Status.FREE;
@@ -438,6 +438,15 @@ public class Player implements Serializable {
         }
     }
 
+    public List<Tile> getTilesInDiscardPile() {
+        return discardPile;
+    }
+
+    public void removeTileInDiscardPile(Tile tile) {
+        discardPile.remove(tile);
+    }
+
+
     //tile placement validation methods
 
     /**
@@ -445,7 +454,7 @@ public class Player implements Serializable {
      * every engine's value 6/7 it is not face to the index 2 of the orientation array, will be removed
      * if there is a tile under the index 2 of the orientation array, it will be removed
      */
-    public void controlEngine() {
+    public void controlEngine() throws BusinessLogicException {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = Dash_Matrix[i][j];
@@ -467,7 +476,7 @@ public class Player implements Serializable {
      * check if all the cannon is display in the correct way
      * it checks whether any cannons are facing inward toward the ship, if so, they are removed
      */
-    public void controlCannon(){
+    public void controlCannon() throws BusinessLogicException {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile c = Dash_Matrix[i][j];
@@ -551,7 +560,7 @@ public class Player implements Serializable {
         return true;
     }
 
-    public void controlAssembly(int x , int y){
+    public void controlAssembly(int x , int y) throws BusinessLogicException {
         controlEngine();
         controlCannon();
         boolean flag = true;
@@ -563,7 +572,7 @@ public class Player implements Serializable {
         controlOfConnection();
     }
 
-    public boolean controlAssembly2(int xx, int yy) {
+    public boolean controlAssembly2(int xx, int yy) throws BusinessLogicException {
         //istanzio le mie variabili
         int count = 0;
         boolean[][] visited = new boolean[5][7];
@@ -813,7 +822,7 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 column index
      */
-    public void removeFrom0(int dir2) {
+    public void removeFrom0(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 0;
         while (flag && i < 5) {
@@ -831,7 +840,7 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 row index
      */
-    public void removeFrom1(int dir2) {
+    public void removeFrom1(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 6;
         while (flag && i >= 0) {
@@ -848,7 +857,7 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 column index
      */
-    public void removeFrom2(int dir2) {
+    public void removeFrom2(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 4;
         while (flag && i >= 0) {
@@ -865,7 +874,7 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 row index
      */
-    public void removeFrom3(int dir2) {
+    public void removeFrom3(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 0;
         while (flag && i < 7) {

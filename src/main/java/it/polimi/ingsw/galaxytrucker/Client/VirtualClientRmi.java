@@ -14,6 +14,7 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private Tile[][] Dash_Matrix;
     private final Object startLock = new Object();
     private String start = "false";
+    private ClientController ciccio;
 
     public VirtualClientRmi(VirtualServer server, View view) throws RemoteException {
         super();
@@ -50,6 +52,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void setGameId(int gameId) throws RemoteException {
         this.gameId = gameId;
     }
+    @Override
+    public void setClientController(ClientController clientController) throws RemoteException {
+        this.ciccio = clientController;
+    }
 
 
     /// METODI PER PRINTARE A CLIENT ///
@@ -59,8 +65,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
 
-    public void setCentralTile(Tile tmp){
-        Dash_Matrix[2][3] = tmp;
+    @Override
+    public void setTile(Tile tmp){
+        switch (gamePhase){
+            case TILE_MANAGEMENT -> ciccio.setCurrentTile(tmp);
+            default -> Dash_Matrix[2][3] = tmp;
+        }
     }
     @Override
     public void inform(String message) throws RemoteException {
@@ -197,37 +207,41 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             while (true){
                 switch(view){
                     case TUIView v -> {
-                        v.inform("Available Games");
-                        Map<Integer, int[]> availableGames = Map.of();
+                        Map<Integer,int[]> availableGames;
                         try {
                             availableGames = server.requestGamesList();
                         } catch (BusinessLogicException e) {
-                            v.reportError("you miss " + e.getMessage() );
-                        }
-                        if(availableGames.isEmpty()){
-                            v.inform("No available games");
+                            v.reportError("Server error: " + e.getMessage());
                             return -1;
-                        } else {
-                            for (Integer i : availableGames.keySet()) {
-                                int[] info = availableGames.get(i);
-                                if(info[2] == 1){
-                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1] + " DEMO");
-                                }else{
-                                    v.inform(i + ". Players in game : " + info[0] + "/" + info[1]);
-                                }
-                            }
+                        }
+
+                        if (availableGames.isEmpty()) {
+                            v.inform("**No available games**");
+                            return -1;
+                        }
+
+                        v.inform("**Available Games:**");
+                        v.inform("0. Return to main menu");
+                        for (Integer id : availableGames.keySet()) {
+                            int[] info = availableGames.get(id);
+                            boolean isDemo = info[2] == 1;
+                            String suffix = isDemo ? " DEMO" : "";
+                            v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                         }
                         int choice;
-                        while(true){
-                            choice = askIndex()+1;
-                            if(availableGames.containsKey(choice)) break;
-                            v.inform("index not valid");
+                        while (true) {
+                            choice = v.askIndex() + 1;
+                            if (choice == 0 || availableGames.containsKey(choice)) break;
+                            v.reportError("Invalid choice, try again.");
                         }
+                        if (choice == 0) return 0;
+
                         try {
-                            server.enterGame(choice, this , nickname);
+                            server.enterGame(choice, this, nickname);
                             return choice;
                         } catch (Exception e) {
-                            v.reportError("you miss " + e.getMessage() );
+                            v.reportError("Cannot join: " + e.getMessage());
+                            return -1;
                         }
                     }
                     case GUIView v -> {
@@ -324,6 +338,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             }
         }
         Dash_Matrix[tmp[0]][tmp[1]] = tile;
+
         view.printDashShip(Dash_Matrix);
     }
     @Override
@@ -391,6 +406,34 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
+    public Tile takeReservedTile() throws RemoteException  , BusinessLogicException{
+        if(!view.ReturnValidity(0,5) && !view.ReturnValidity(0,6)) {
+            throw new BusinessLogicException("Invalid coordinates");
+        }
+        view.printDashShip(Dash_Matrix);
+        view.inform("Select a tile");
+        int[] index;
+        Tile tmpTile = null;
+        while(true) {
+            index = askCoordinate();
+            if(index[0]!=0 || !view.ReturnValidity(0 , index[1])) view.inform("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) view.inform("Invalid coordinate");
+            else break;
+        }
+        view.inform("id+"+ Dash_Matrix[index[0]][index[1]].idTile);
+            try {
+//                view.setValidity(index[0], index[1]);
+                Tile tmp = Dash_Matrix[index[0]][index[1]];
+                Dash_Matrix[index[0]][index[1]] = new EmptySpace();
+                view.printDashShip(Dash_Matrix);
+                tmpTile = server.getReservedTile(gameId,nickname,tmp.getIdTile());
+            } catch (BusinessLogicException e) {
+                view.reportError("you miss " + e.getMessage() + "select new command" );
+                throw new BusinessLogicException(e.getMessage());
+            }
+        return tmpTile;
+    }
+    @Override
     public void leaveGame() throws RemoteException, BusinessLogicException {
         if (gameId != 0) {
             server.LeaveGame(gameId, nickname);
@@ -443,5 +486,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             view.reportError("you miss " + e.getMessage() );
         }
     }
+
+    @Override
+    public void updateDashMatrix(Tile[][] data) throws RemoteException {
+        Dash_Matrix = data;
+    }
+
+
 
 }
