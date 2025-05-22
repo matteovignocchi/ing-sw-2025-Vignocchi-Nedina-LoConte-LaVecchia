@@ -13,14 +13,16 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView {
     private String nickname;
     private int gameId = 0;
-    private final Object startLock = new Object();
-    private String start = "false";
+    private final CountDownLatch startLatch = new CountDownLatch(1);
     private transient ClientController ciccio;
     private final VirtualServer server;
+    private boolean printedWaiting = false;
+    private boolean printedStarting = false;
 
     public VirtualClientRmi(VirtualServer server) throws RemoteException {
         super();
@@ -30,10 +32,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void setNickname(String nickname) throws RemoteException {
         this.nickname = nickname;
     }
-//    @Override
-//    public void setView(View view) {
-//       this.view = view;
-//    }
+
     public void setGameId(int gameId) throws RemoteException {
         this.gameId = gameId;
     }
@@ -56,6 +55,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void inform(String message) throws RemoteException {
+        System.out.print("\n");
         ciccio.informByController(message);
     }
     @Override
@@ -119,6 +119,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void updateGameState(GamePhase phase) throws RemoteException {
         ciccio.updateGameStateByController(phase);
     }
+
     @Override
     public void startMach() throws RemoteException {
 
@@ -365,16 +366,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void setStart() throws RemoteException{
-        synchronized (startLock) {
-            start = "start";
-        }    }
+    public void setStart() throws RemoteException {
+        startLatch.countDown();
+    }
 
     @Override
     public String askInformationAboutStart() throws RemoteException {
-        synchronized (startLock) {
-            return start;
+        try {
+            startLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RemoteException("Interrupted while waiting for start", e);
         }
+        return "start";
     }
 
     @Override
@@ -398,7 +402,4 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void updateDashMatrix(Tile[][] data) throws RemoteException {
         ciccio.newShip(data);
     }
-
-
-
 }

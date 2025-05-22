@@ -79,8 +79,12 @@ public class GameManager {
         if (gameId != null && games.containsKey(gameId)) {
             Controller controller = getControllerCheck(gameId);
             controller.markReconnected(nickname, v);
-            controller.notifyAllViews();
-            // comunico al client a schermo:
+            Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
+            try {
+                v.printPlayerDashboard(dash);
+            } catch (Exception e) {
+
+            }
             controller.broadcastInform("SERVER: " + nickname + " reconnected to game");
             v.setGameId(gameId);
             return gameId;

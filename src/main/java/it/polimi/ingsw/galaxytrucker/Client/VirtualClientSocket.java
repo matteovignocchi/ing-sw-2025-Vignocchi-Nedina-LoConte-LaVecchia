@@ -168,6 +168,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void inform(String message){
+        System.out.print("\n");
         ciccio.informByController(message);
     }
 
@@ -675,7 +676,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
         if(!ciccio.returOKAY(0,5) && !ciccio.returOKAY(0,6)) {
-            throw new BusinessLogicException("Invalid coordinates");
+            throw new BusinessLogicException("There is not any reserverd tile");
         }
         ciccio.printMyDashBoardByController();
         ciccio.informByController("Select a tile");

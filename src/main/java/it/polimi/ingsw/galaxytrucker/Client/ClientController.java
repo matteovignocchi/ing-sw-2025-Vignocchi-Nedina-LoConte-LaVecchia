@@ -64,9 +64,8 @@ public class ClientController {
         int gameId = loginLoop();
 
         if (gameId > 0) {
-            virtualClient.enterGame(gameId);
-            if(!waitForGameStart()) return;
-            view.inform("Game is starting");
+            virtualClient.setGameId(gameId);
+
             startGame();
         }
 
@@ -90,20 +89,25 @@ public class ClientController {
             view.inform("Insert your username:");
             String username = virtualClient.askString();
             int res = virtualClient.sendLogin(username);
+
             if (res == -1) {
                 view.reportError("Credential not valid, try again.");
-            } else {
-                // nickname accettato (nuovo o reconnect)
-                virtualClient.setNickname(username);
-                if (res == -2) {
-                    view.inform("Login successful");
-                } else {
-                    view.inform("Reconnection successful, rejoining game " + res);
-                }
+                continue;
+            }
+
+            // Salvo il nickname sul client
+            virtualClient.setNickname(username);
+
+            if (res > 0) {
                 return res;
+            } else {
+                // res == -2 ⇒ nuovo utente
+                view.inform("Login successful");
+                return 0;
             }
         }
     }
+
 
     private void mainMenuLoop() throws Exception {
         while (isConnected) {
@@ -172,7 +176,6 @@ public class ClientController {
                     virtualClient.setGameId(gameId);
                     boolean started = waitForGameStart();
                     if (!started) return;
-                    view.inform("Game is starting!");
                     startGame();
                 } else {
                     view.reportError("Game creation failed");
@@ -246,7 +249,6 @@ public class ClientController {
         while (true) {
             // il server ha avanzato lo stato: il gioco parte
             if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
-                view.inform("Game is starting!");
                 return true;
             }
 
@@ -259,87 +261,126 @@ public class ClientController {
         }
     }
 
-
-
     private void startGame() throws Exception {
+        view.inform("Game is starting, GOOD LUCK!\n");
+        view.printListOfCommand();
         while (true) {
-            if (currentGamePhase == GamePhase.EXIT) {
-                view.askString();
-                return;
-            }
 
-            view.printListOfCommand();
             String key = view.sendAvailableChoices();
-            switch (key) {
-                case "getacoveredtile" -> {
-                    try {
+            try {
+                // 4) Tutte le azioni in un unico switch
+                switch (key) {
+                    case "getacoveredtile"    -> {
                         tmpTile = virtualClient.getTileServer();
                         view.printTile(tmpTile);
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
                     }
-                }
-                case "getashowntile" -> {
-                    try {
+                    case "getashowntile"      -> {
                         tmpTile = virtualClient.getUncoveredTile();
                         view.printTile(tmpTile);
-                    } catch (BusinessLogicException | IOException | InterruptedException e) {
-                        view.reportError(e.getMessage());
                     }
-                    view.printListOfCommand();
-                }
-                case "returnthetile" -> {
-                    try {
-                        virtualClient.getBackTile(tmpTile);
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
-                    }
-                }
-                case "placethetile" -> virtualClient.positionTile(tmpTile);
-                case "drawacard" -> {
-                    try {
-                        virtualClient.drawCard();
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
-                    }
-                }
-                case "spinthehourglass" -> {
-                    try {
-                        virtualClient.rotateGlass();
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
-                    }
-                }
-                case "declareready" -> {
-                    try {
-                        virtualClient.setReady();
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
-                    }
-                }
-                case "watchadeck" -> virtualClient.lookDeck();
-                case "watchaplayersship" -> virtualClient.lookDashBoard();
-                case "rightrotatethetile" -> rotateRight();
-                case "leftrotatethetile" -> rotateLeft();
-
-                case "logout" -> {
-                    virtualClient.leaveGame();
-                    view.inform("Returned to main menù...");
-                    return;
-                }
-                case "takereservedtile" -> {
-                    try {
+                    case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
+                    case "placethetile"       -> virtualClient.positionTile(tmpTile);
+                    case "drawacard"          -> virtualClient.drawCard();
+                    case "spinthehourglass"   -> virtualClient.rotateGlass();
+                    case "declareready"       -> virtualClient.setReady();
+                    case "watchadeck"         -> virtualClient.lookDeck();
+                    case "watchaplayersship"  -> virtualClient.lookDashBoard();
+                    case "rightrotatethetile" -> rotateRight();
+                    case "leftrotatethetile"  -> rotateLeft();
+                    case "takereservedtile"   -> {
                         tmpTile = virtualClient.takeReservedTile();
                         view.printTile(tmpTile);
-                    } catch (BusinessLogicException e) {
-                        view.reportError(e.getMessage());
                     }
+                    case "logout"             -> {
+                        virtualClient.leaveGame();
+                        view.inform("Returned to main menu");
+                        return;
+                    }
+                    default -> view.reportError("Action not recognized");
                 }
-
-                default -> view.inform("Action not recognized");
+            } catch (BusinessLogicException | IOException | InterruptedException e) {
+                view.reportError(e.getMessage());
             }
+            view.printListOfCommand();
         }
     }
+
+
+
+//    private void startGame() throws Exception {
+//       while (true) {
+//            view.printListOfCommand();
+//            String key = view.sendAvailableChoices();
+//
+//            switch (key) {
+//                case "getacoveredtile" -> {
+//                    try {
+//                        tmpTile = virtualClient.getTileServer();
+//                        view.printTile(tmpTile);
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "getashowntile" -> {
+//                    try {
+//                        tmpTile = virtualClient.getUncoveredTile();
+//                        view.printTile(tmpTile);
+//                    } catch (BusinessLogicException | IOException | InterruptedException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "returnthetile" -> {
+//                    try {
+//                        virtualClient.getBackTile(tmpTile);
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "placethetile" -> virtualClient.positionTile(tmpTile);
+//                case "drawacard" -> {
+//                    try {
+//                        virtualClient.drawCard();
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "spinthehourglass" -> {
+//                    try {
+//                        virtualClient.rotateGlass();
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "declareready" -> {
+//                    try {
+//                        virtualClient.setReady();
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//                case "watchadeck" -> virtualClient.lookDeck();
+//                case "watchaplayersship" -> virtualClient.lookDashBoard();
+//                case "rightrotatethetile" -> rotateRight();
+//                case "leftrotatethetile" -> rotateLeft();
+//
+//                case "logout" -> {
+//                    virtualClient.leaveGame();
+//                    view.inform("Returned to main menù...");
+//                    return;
+//                }
+//                case "takereservedtile" -> {
+//                    try {
+//                        tmpTile = virtualClient.takeReservedTile();
+//                        view.printTile(tmpTile);
+//                    } catch (BusinessLogicException e) {
+//                        view.reportError(e.getMessage());
+//                    }
+//                }
+//
+//                default -> view.inform("Action not recognized");
+//            }
+//        }
+//    }
 
 
     private void rotateRight() throws Exception {
@@ -378,11 +419,14 @@ public class ClientController {
     public void logOutGUI() throws Exception {
         virtualClient.logOut();
     }
+
     public void setCurrentTile(Tile tile) {
-        switch (currentGamePhase){
-            case TILE_MANAGEMENT -> this.setCurrentTile(tile);
-            default -> this.setTileInMatrix(tile , 2,3);
-        }    }
+        if (currentGamePhase == GamePhase.TILE_MANAGEMENT) {
+            this.tmpTile = tile;
+        } else {
+            this.setTileInMatrix(tile, 2, 3);
+        }
+    }
 
     public void setTileInMatrix(Tile tile , int a , int b) {
         Dash_Matrix[a][b] = tile;

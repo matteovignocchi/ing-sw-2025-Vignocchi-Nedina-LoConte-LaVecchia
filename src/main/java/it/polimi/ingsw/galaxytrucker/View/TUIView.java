@@ -68,7 +68,7 @@ public class TUIView implements View {
     @Override
     public void inform(String message) {System.out.println("> " + message);}
     @Override
-    public void reportError(String message) {System.err.print("\n[ERROR] " + message);}
+    public void reportError(String message) {System.out.println(RED+ "\n[ERROR] " + message + RESET);}
     @Override
     public void updateState(GamePhase gamePhase) {
         game = gamePhase;
@@ -92,7 +92,7 @@ public class TUIView implements View {
                     return key;
                 }
             }
-            inform("Please enter a nickname of some player in game for god");
+            inform("Please enter a nickname of some player in game");
         }
     }
     @Override
@@ -191,6 +191,16 @@ public class TUIView implements View {
 
     @Override
     public void printDashShip(Tile[][] dashboard) {
+//        if (this.maschera == null
+//                || this.maschera.length != dashboard.length
+//                || this.maschera[0].length != dashboard[0].length) {
+//            this.maschera = new boolean[ dashboard.length ][ dashboard[0].length ];
+//            // se ti serve azzerarla, fallo subito:
+//            for (int i = 0; i < maschera.length; i++) {
+//                Arrays.fill(maschera[i], false);
+//            }
+//        }
+
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
             System.out.printf("    %2d    ", col + 4);
@@ -256,14 +266,26 @@ public class TUIView implements View {
         System.out.println();
     }
 
-    public void printMapPosition(){
-        StringBuilder string = new StringBuilder();
-        for(String key : mapPosition.keySet()){
-            string.append(" /").append(key).append(": ").append(mapPosition.get(key));
-        }
-        string.append("/");
-        inform(string.toString());
+    //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
+    public void printMapPosition() {
+        System.out.println("\nPlayers in game:");
+        mapPosition.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())    // ordina per posizione
+                .forEachOrdered(entry -> {
+                    int pos = entry.getValue();
+                    String nick = entry.getKey();
+                    inform(String.format("  %d - %s", pos, nick));
+                });
     }
+//    public void printMapPosition(){
+//        StringBuilder string = new StringBuilder();
+//        for(String key : mapPosition.keySet()){
+//            string.append(" /").append(key).append(": ").append(mapPosition.get(key));
+//        }
+//        string.append("/");
+//        inform(string.toString());
+//    }
+
     /// position diventa una mappa stringa intero
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {

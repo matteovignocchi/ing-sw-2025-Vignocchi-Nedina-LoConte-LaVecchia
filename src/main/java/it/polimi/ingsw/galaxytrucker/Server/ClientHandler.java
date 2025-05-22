@@ -88,7 +88,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
                 default -> Message.error("Unknown operation: " + op, req.getRequestId());
             };
         } catch (BusinessLogicException e) {
-            return Message.error("Logic error: " + e.getMessage());
+            return Message.response(e.getMessage(), req.getRequestId());
         } catch (IOException e) {
             return Message.error("I/O error: " + e.getMessage());
         } catch (Exception e) {
