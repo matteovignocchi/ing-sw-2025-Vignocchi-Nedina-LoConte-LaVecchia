@@ -90,5 +90,13 @@ public abstract class Tile implements Serializable {
     public int controlCorners(int i){
         return corners[i];
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // stesso riferimento
+        if (obj == null || getClass() != obj.getClass()) return false; // null o classi diverse
+        Tile tile = (Tile) obj;
+        return this.idTile == tile.idTile;
+    }
 }
 

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+
 import java.io.Serializable;
 import java.security.SecureRandomParameters;
 import java.util.ArrayList;
@@ -31,6 +33,8 @@ public class HousingUnit extends Tile implements Serializable {
         corners[3]=d;
         this.isAlien=isAlien;
         idTile = id;
+        if(isAlien!=Human.HUMAN) max=1;
+        else max=2;
     }
 
     /**
@@ -38,18 +42,8 @@ public class HousingUnit extends Tile implements Serializable {
      * @param token new human or alien to the house
      * @throws FullHousingList if the party is full
      */
-    public void addHuman(Human token) throws FullHousingList, IllegalArgumentException {
-//        if (listOfToken.size()>=2) {
-//            throw new FullHousingList("HousingList is full");
-//        }else if (isAlien == Human.HUMAN && token != Human.HUMAN){
-//            throw new IllegalArgumentException("Aliens can not stay in the human housing");
-//        } else if (isAlien == Human.BROWN_ALIEN && !isConnected && token != Human.BROWN_ALIEN) {
-//            throw new IllegalArgumentException("Wrong place!");
-//        }else if (isAlien == Human.PURPLE_ALIEN && !isConnected && token != Human.PURPLE_ALIEN) {
-//            throw new IllegalArgumentException("Wrong place!");
-//        }else{
-//            listOfToken.add(token);
-//        }
+    public void addHuman(Human token) throws FullHousingList, IllegalArgumentException, BusinessLogicException {
+//        if(listOfToken.size()>max) throw new BusinessLogicException("Huse is full");
         listOfToken.add(token);
     }
 

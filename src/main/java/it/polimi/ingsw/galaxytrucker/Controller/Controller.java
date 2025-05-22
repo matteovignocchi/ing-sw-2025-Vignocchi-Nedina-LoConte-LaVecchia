@@ -345,7 +345,6 @@ public class Controller implements Serializable {
 
     public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
-
         p.addTile(cord[0], cord[1], tile);
         p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
@@ -1368,7 +1367,7 @@ public class Controller implements Serializable {
         }
     }
 
-    public void addHuman()  {
+    public void addHuman() throws BusinessLogicException {
         for (Player p : playersByNickname.values()) {
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -1609,35 +1608,106 @@ public class Controller implements Serializable {
      * @param type dimension of the attack, true if it is big
      */
     public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
-        String nick = getNickByPlayer(p);
 
+
+        String direction = "";
+        int direction2 = dir2;
+        switch (dir) {
+            case 0 -> {
+                direction = "Nord";
+                direction2 = dir2+4;
+            }
+            case 1 -> {
+                direction = "East";
+                direction2 = dir2+5;
+            }
+            case 2 -> {
+                direction = "South";
+                direction2 = dir2+4;
+            }
+            case 3 -> {
+                direction = "West";
+                direction2 = dir2+5;
+            }
+        }
+        String nick = getNickByPlayer(p);
+        Tile[][] tmpDash = p.getDashMatrix();
+        try {
+            viewsByNickname.get(nick).inform("the attack is coming from "+direction+"  on the section  "+direction2);
+            viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
+            viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
+        } catch (Exception e) {
+            markDisconnected(nick);
+        }
         if (dir == 0) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(nick, dir) && !type)) {
-                    p.removeFrom0(dir2);
-                    askStartHousingForControl(nick);
+                    scriptOfDefence(nick , tmpDash , dir2);
+                } else {
+                    try {
+                        viewsByNickname.get(nick).inform("you are safe");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                    }
                 }
             }
         } else if (dir == 2) {
             if (dir2 > 3 && dir2 < 11) {
                 if (type || (!isProtected(nick, dir) && !type)) {
-                    p.removeFrom2(dir2);
-                    askStartHousingForControl(nick);
+                    scriptOfDefence(nick , tmpDash , dir2);
+                } else {
+                    try {
+                        viewsByNickname.get(nick).inform("you are safe");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                    }
                 }
             }
         } else if (dir == 1) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(nick, dir) && !type)) {
-                    p.removeFrom1(dir2);
-                    askStartHousingForControl(nick);
+                    scriptOfDefence(nick , tmpDash , dir2);
+                } else {
+                    try {
+                        viewsByNickname.get(nick).inform("you are safe");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                    }
                 }
             }
         } else if (dir == 3) {
             if (dir2 > 4 && dir2 < 10) {
                 if (type || (!isProtected(nick, dir) && !type)) {
-                    p.removeFrom3(dir2);
-                    askStartHousingForControl(nick);
+                    scriptOfDefence(nick , tmpDash , dir2);
+                } else {
+                    try {
+                        viewsByNickname.get(nick).inform("you are safe");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                    }
                 }
+            }
+        }
+
+    }
+
+
+    private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2) throws BusinessLogicException {
+        Player p = getPlayerByNickname(Nickname);
+        if(Arrays.deepEquals(tmpDash, p.getDashMatrix())){
+            try {
+                viewsByNickname.get(Nickname).printPlayerDashboard(p.getDashMatrix());
+                viewsByNickname.get(Nickname).inform("safe");
+            } catch (Exception e) {
+                markDisconnected(Nickname);
+            }
+        }else{
+            p.removeFrom0(dir2);
+            askStartHousingForControl(Nickname);
+            try {
+                viewsByNickname.get(Nickname).printPlayerDashboard(p.getDashMatrix());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -1651,44 +1721,103 @@ public class Controller implements Serializable {
      */
     public void defenceFromMeteorite(int dir, boolean type, int dir2) throws BusinessLogicException {
 
-        for (String p : playersByNickname.keySet()) {
+        String direction = "";
+        int direction2 = dir2;
+        switch (dir) {
+            case 0 -> {
+                direction = "Nord";
+                direction2 = dir2+4;
+            }
+            case 1 -> {
+                direction = "East";
+                direction2 = dir2+5;
+            }
+            case 2 -> {
+                direction = "South";
+                direction2 = dir2+4;
+            }
+            case 3 -> {
+                direction = "West";
+                direction2 = dir2+5;
+            }
+        }
+
+        for (String nick : playersByNickname.keySet()) {
+
+            Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
+            try {
+                viewsByNickname.get(nick).inform("the attack is coming from "+direction+"on the section"+direction2);
+                viewsByNickname.get(nick).inform("ship before the attack");
+                viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
+            } catch (Exception e) {
+                markDisconnected(nick);
+            }
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
-                    if (type && !checkProtection(dir, dir2, p)) {
-                        playersByNickname.get(p).removeFrom0(dir2);
-                        askStartHousingForControl(p);
+                    if (type && !checkProtection(dir, dir2, nick)) {
+                            scriptOfDefence(nick , tmpDash , dir2);
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                        }
                     }
-                    if (!type && playersByNickname.get(p).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p, dir)) {
-                            playersByNickname.get(p).removeFrom2(dir2);
-                            askStartHousingForControl(p);
+                    if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+                        if (!isProtected(nick,dir)) {
+                            scriptOfDefence(nick , tmpDash , dir2);
+                        }
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
                         }
                     }
                 }
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
-                    if (type && checkProtection(dir, dir2, p)) {
-                        playersByNickname.get(p).removeFrom0(dir2);
-                        askStartHousingForControl(p);
-                    }
-                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p, dir)) {
-                            playersByNickname.get(p).removeFrom2(dir2);
-                            askStartHousingForControl(p);
+                    if (type && checkProtection(dir, dir2, nick)) {
+                        scriptOfDefence(nick , tmpDash , dir2);
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
                         }
                     }
-
+                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+                        if (!isProtected(nick, dir)) {
+                            scriptOfDefence(nick , tmpDash , dir2);
+                        }
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                        }
+                    }
                 }
             } else if (dir == 1 || dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
-                    if (type && !checkProtection(dir, dir2, p)) {
-                        playersByNickname.get(p).removeFrom0(dir2);
-                        askStartHousingForControl(p);
+                    if (type && !checkProtection(dir, dir2, nick)) {
+                        scriptOfDefence(nick , tmpDash , dir2);
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                        }
                     }
-                    if (!type && !playersByNickname.get(p).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(p, dir)) {
-                            playersByNickname.get(p).removeFrom2(dir2);
-                            askStartHousingForControl(p);
+                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+                        if (!isProtected(nick, dir)) {
+                            scriptOfDefence(nick , tmpDash , dir2);
+                        }
+                    }else {
+                        try {
+                            viewsByNickname.get(nick).inform("you are safe");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
                         }
                     }
                 }
