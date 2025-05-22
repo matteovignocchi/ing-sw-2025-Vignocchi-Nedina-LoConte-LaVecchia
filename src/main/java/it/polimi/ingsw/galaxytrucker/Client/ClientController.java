@@ -17,6 +17,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.valueOf;
 
@@ -29,8 +30,6 @@ public class ClientController {
     private final VirtualView virtualClient;
     private Tile tmpTile;
     private boolean isConnected = false;
-    private int idCurrentGame;
-    private volatile boolean exitWaitingQueue = false;
     private Tile[][] Dash_Matrix;
     private GamePhase currentGamePhase;
 
@@ -66,8 +65,8 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.enterGame(gameId);
-            waitForGameStart();
-            view.inform("Game started");
+            if(!waitForGameStart()) return;
+            view.inform("Game is starting");
             startGame();
         }
 
@@ -153,29 +152,19 @@ public class ClientController {
     }
 
 
-
-
-
-
-
-
-
-
-
-
     public void createNewGame() throws Exception {
         switch (view) {
             case TUIView v -> {
                 view.inform("Creating New Game...");
-                boolean demo = askByController("would you like a demo version?");
-                v.inform("select max 4 players");
+                boolean demo = askByController("Would you like a demo version?");
+                v.inform("Select a number of players between 2 and 4");
                 int numberOfPlayer ;
                 while (true) {
                     numberOfPlayer = v.askIndex() + 1;
                     if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
                         break;
                     }
-                    v.reportError("Invalid number of players. Please enter a value between 2 and 4.");
+                    v.reportError("Invalid number of players. Please enter a value between 2 and 4.\n");
                 }
 
                 int gameId = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
@@ -244,27 +233,9 @@ public class ClientController {
     }
 
     private boolean waitForGameStart() throws Exception {
-        view.inform("Waiting for other players… \ntype 'exit' to return to main menù");
-
-        while (true) {
-            // se tu o un altro chiamate leaveGame(), il server invia EXIT a tutti
-            if (currentGamePhase == GamePhase.EXIT) {
-                view.inform("Lobby closed, returning to main menu");
-                return false;
-            }
-
-            // aspetta che arrivi la fase BOARD_SETUP, non “diverso da WAITING_FOR_PLAYERS”
-            if (currentGamePhase == GamePhase.BOARD_SETUP) {
-                return true;
-            }
-
-            String line = view.askString().trim();
-            if ("exit".equalsIgnoreCase(line)) {
-                virtualClient.leaveGame();
-                view.inform("You left the lobby, returning to main menu");
-                return false;
-            }
-        }
+        view.inform("Waiting for other players…");
+        virtualClient.askInformationAboutStart();
+        return true;
     }
 
 
@@ -291,22 +262,14 @@ public class ClientController {
 
 
     private void startGame() throws Exception {
-        boolean firstTurn = true;
-
         while (true) {
-            GamePhase gameState = currentGamePhase;
-            if (gameState == GamePhase.EXIT) {
-                view.inform("Returned to mai menù...");
+            if (currentGamePhase == GamePhase.EXIT) {
+                view.askString();
                 return;
             }
 
-            if (!firstTurn) {
-                view.printListOfCommand();
-            }
-
-            firstTurn = false;
+            view.printListOfCommand();
             String key = view.sendAvailableChoices();
-
             switch (key) {
                 case "getacoveredtile" -> {
                     try {
@@ -525,52 +488,6 @@ public class ClientController {
     public void newShip(Tile[][] data){
         Dash_Matrix = data;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
+ }
 
 
