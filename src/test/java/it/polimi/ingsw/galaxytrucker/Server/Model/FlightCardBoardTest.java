@@ -392,7 +392,7 @@ class FlightCardBoardTest {
 
     @Test
     @DisplayName("eliminateOverlappedPlayers rimuove i player overlappati")
-    void testEliminateOverlappedPlayers() {
+    void testSetOverlappedPlayersEliminated() {
         board.addPlayer(p1);
         board.addPlayer(p2);
         board.addPlayer(p3);
@@ -405,7 +405,7 @@ class FlightCardBoardTest {
         p2.setPos(6);
         p3.setPos(9);
         p4.setPos(10);
-        board.eliminateOverlappedPlayers();
+        board.setOverlappedPlayersEliminated();
         List<Player> remaining = board.getOrderedPlayers();
         assertFalse(remaining.contains(p1));
         assertTrue(remaining.contains(p2));
@@ -416,7 +416,7 @@ class FlightCardBoardTest {
 
     @Test
     @DisplayName("eliminateOverlappedPlayers rimuove i player overlappati")
-    void testEliminateOverlappedPlayers2() {
+    void testSetOverlappedPlayersEliminated2() {
         board.addPlayer(p1);
         board.addPlayer(p2);
         board.addPlayer(p3);
@@ -429,7 +429,7 @@ class FlightCardBoardTest {
         p2.setPos(2);
         p3.setPos(10);
         p4.setPos(9);
-        board.eliminateOverlappedPlayers();
+        board.setOverlappedPlayersEliminated();
         List<Player> remaining = board.getOrderedPlayers();
         assertFalse(remaining.contains(p1));
         assertFalse(remaining.contains(p2));

@@ -253,7 +253,18 @@ public class FlightCardBoard implements Serializable {
      * another one with a higher number of laps and a higher position on the board
      */
 
-    public void eliminateOverlappedPlayers() {
+    public void setOverlappedPlayersEliminated() {
+        for(Player p : orderedPlayersInFlight) {
+            if(p.isEliminated()) continue;
+            for(Player other : orderedPlayersInFlight) {
+                if(other.getId() == p.getId() || other.isEliminated()) continue;
+                if(other.getLap() > p.getLap() && other.getPos() > p.getPos()){
+                    p.setEliminated();
+                    break;
+                }
+            }
+        }
+
         Iterator<Player> iterator = orderedPlayersInFlight.iterator();
         while(iterator.hasNext()) {
             Player p = iterator.next();
@@ -267,9 +278,22 @@ public class FlightCardBoard implements Serializable {
             }
             if(overlapped){
                 iterator.remove();
-                p.setEliminated();
             }
         }
+    }
+
+    public List<Player> eliminatePlayers(){
+        List<Player> eliminated = new ArrayList<>();
+        Iterator<Player> iterator = orderedPlayersInFlight.iterator();
+        while(iterator.hasNext()) {
+            Player p = iterator.next();
+            if(p.isEliminated()){
+                iterator.remove();
+                eliminated.add(p);
+            }
+        }
+
+        return eliminated;
     }
 
 }

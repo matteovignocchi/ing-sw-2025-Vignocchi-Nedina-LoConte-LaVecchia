@@ -67,7 +67,7 @@ class ControllerTest {
 
     @Test
     @DisplayName("activate StardustCard")
-    void activateCardTest2() throws CardEffectException, IOException {
+    void activateCardTest2() throws BusinessLogicException, IOException {
         StardustCard card = new StardustCard();
         Player spyP1, spyP2, spyP3, spyP4;
         spyP1 = Mockito.spy(p1);

@@ -54,16 +54,12 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-
-            //setto fase effetto carta
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
             controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int x = controller.getPowerEngineForCard(p);
-            f.moveRocket(x, p);
+            if (x == 0) p.setEliminated();
+            else f.moveRocket(x, p);
 
-            //modifico posizione e stampo quelle nuove
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             controller.changeMapPosition(nick, p);
             controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
@@ -129,7 +125,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             if(player_fire_power > slavers_fire_power) {
                 int credits = card.getCredits();
                 int days = card.getDays();
-                String string = String.format("Do you want to redeem %d credits and lose %d flight days?",
+                String string = String.format("SERVER: Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
 
                 if(controller.askPlayerDecision(string, p)){
@@ -165,6 +161,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(FirstWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+
+        if(players.size() == 1) return;
 
         List<String> nicks = new ArrayList<>();
         for(Player p : players) {
@@ -221,6 +219,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(SecondWarzoneCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
+
+        if(players.size() == 1) return;
 
         List<String> nicks = new ArrayList<>();
         for(Player p : players) {
@@ -290,7 +290,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 int days = card.getDays();
                 List<Colour> reward_goods = card.getRewardGoods();
                 String reward_goods_string = reward_goods.stream().map(Colour::name).collect(Collectors.joining(", "));
-                String string = String.format("Do you want to redeem %s goods and lose %d flight days?",
+                String string = String.format("SERVER: Do you want to redeem %s goods and lose %d flight days?",
                         reward_goods_string, days);
 
                 if(controller.askPlayerDecision(string, p)){
@@ -331,7 +331,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             //p.setGamePhase(GamePhase.CARD_EFFECT);
             controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
-            String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
+            String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
             if (controller.askPlayerDecision(string, p)) {
                 int days = card.getDays();
@@ -377,7 +377,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
-                String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
+                String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
                 if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
@@ -461,7 +461,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
 
             if(controller.getFirePowerForCard(p) > card.getFirePower()){
-                String string = "Do you want to redeem the card's reward and lose the indicated flight days?";
+                String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
                 if(controller.askPlayerDecision(string, p)){
                     int days = card.getDays();
@@ -518,7 +518,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             //p.setGamePhase(GamePhase.CARD_EFFECT);
             controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
-            String string ="Do you want to redeem the card's reward and lose the indicated flight days?";
+            String string ="SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
             if(controller.askPlayerDecision(string, p)){
                 int days = card.getDays();

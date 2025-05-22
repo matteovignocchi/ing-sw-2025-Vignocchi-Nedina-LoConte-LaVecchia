@@ -380,9 +380,10 @@ public class ClientController {
     }
     public void setCurrentTile(Tile tile) {
         switch (currentGamePhase){
-            case TILE_MANAGEMENT -> this.setCurrentTile(tile);
+            case TILE_MANAGEMENT -> tmpTile = tile;
             default -> this.setTileInMatrix(tile , 2,3);
-        }    }
+        }
+    }
 
     public void setTileInMatrix(Tile tile , int a , int b) {
         Dash_Matrix[a][b] = tile;
