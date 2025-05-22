@@ -105,7 +105,7 @@ public class Controller implements Serializable {
                     p.getTotalHuman(),
                     p.getTotalEnergy()
             );
-            //update tile se sono in tile management
+            if(getPlayerCheck(nickname).getGamePhase()==GamePhase.TILE_MANAGEMENT) v.setTile(p.getLastTile());
         } catch (IOException e) {
             markDisconnected(nickname);
         } catch (Exception e) {
@@ -276,7 +276,7 @@ public class Controller implements Serializable {
                 v.updateMapPosition(playersPosition);
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
-                v.setCentralTile(getPlayerCheck(nick).getTile(2,3));
+                v.setTile(getPlayerCheck(nick).getTile(2,3));
                 v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
             } catch (IOException e) {
@@ -308,12 +308,13 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
-        //salvare l'ultima tile del player
+        Tile t = getTile(1);
+        p.setLastTile(t);
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
-        return getTile(1);
+        return t;
     }
 
     public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
@@ -322,11 +323,13 @@ public class Controller implements Serializable {
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
         if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("No tiles found");
 
-        //salvare l'ultima tile del server
         Player p = getPlayerCheck(nickname);
+        Tile t = getShownTile(uncoveredTiles.indexOf(opt.get()));
+        p.setLastTile(t);
+
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
-        return getShownTile(uncoveredTiles.indexOf(opt.get()));
+        return t;
     }
 
     public void dropTile (String nickname, Tile tile) throws BusinessLogicException {
@@ -351,9 +354,8 @@ public class Controller implements Serializable {
         List<Tile> discardPile = p.getTilesInDiscardPile();
         for(Tile t : discardPile) {
             if(t.getIdTile() == id) {
-
-                //salvare ultima tile del player
                 discardPile.remove(t);
+                p.setLastTile(t);
                 p.setGamePhase(GamePhase.TILE_MANAGEMENT);
                 notifyView(nickname);
                 return t;
