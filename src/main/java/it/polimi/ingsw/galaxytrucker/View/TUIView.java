@@ -66,13 +66,9 @@ public class TUIView implements View {
 
 
     @Override
-    public void inform(String message) {
-        System.out.println("> " + message + "\n");
-    }
+    public void inform(String message) {System.out.println("> " + message);}
     @Override
-    public void reportError(String message) {
-        System.err.print("\n[ERROR] " + message + "\n ");
-    }
+    public void reportError(String message) {System.err.print("\n[ERROR] " + message);}
     @Override
     public void updateState(GamePhase gamePhase) {
         game = gamePhase;
@@ -112,7 +108,7 @@ public class TUIView implements View {
                 break;
             }
             else {
-                reportError("The response entered is invalid. Try again: ");
+                reportError("The response entered is invalid. Try again: \n");
             }
         }
         return decision;
@@ -637,40 +633,23 @@ public class TUIView implements View {
         List<String> options = commandConstructor();
 
         while (true) {
-            if (game == GamePhase.EXIT) {
-                return "logout";
-            }
-
-            int idx = askIndex();  // chiede solo "Insert index:"
-            if (idx >= 0 && idx < options.size()) {
-                return options
-                        .get(idx)
-                        .toLowerCase()
-                        .replaceAll("[^a-z0-9]", "");
-            }
-
-            reportError("Invalid choice, try again.");
+            System.out.print("Insert index: ");
+            System.out.flush();             // forza lo sblocco del prompt
+            String line = scanner.nextLine().trim();
+            try {
+                int idx = Integer.parseInt(line) - 1;
+                if (idx >= 0 && idx < options.size()) {
+                    return options.get(idx)
+                            .toLowerCase()
+                            .replaceAll("[^a-z0-9]", "");
+                }
+            } catch (NumberFormatException ignored) { }
+            System.out.println("[ERROR] Invalid choice, try again.");
         }
     }
 
 
 
-
-
-
-    //metodo per gestire i comandi da mandare al server
-//    @Override
-//    public String sendAvailableChoices() {
-//        List<String> listOfOptions = commandConstructor();
-//        int tmp;
-//        while(true){
-//            inform("Insert the command number");
-//            tmp = askIndex();
-//            if (tmp<listOfOptions.size() && tmp>=0) break;
-//            inform("indice sbagliato");
-//        }
-//        return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
-//    }
 
     @Override
     public void printListOfCommand(){

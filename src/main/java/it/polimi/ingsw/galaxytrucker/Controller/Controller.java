@@ -105,6 +105,7 @@ public class Controller implements Serializable {
                     p.getTotalHuman(),
                     p.getTotalEnergy()
             );
+            if(getPlayerCheck(nickname).getGamePhase()==GamePhase.TILE_MANAGEMENT) v.setTile(p.getLastTile());
         } catch (IOException e) {
             markDisconnected(nickname);
         } catch (Exception e) {
@@ -286,7 +287,6 @@ public class Controller implements Serializable {
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
                 v.setTile(getPlayerCheck(nick).getTile(2,3));
-                v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
             } catch (IOException e) {
                 markDisconnected(nick);
@@ -317,10 +317,13 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
+        Tile t = getTile(1);
+        p.setLastTile(t);
+
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
-        return getTile(1);
+        return t;
     }
 
     public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
@@ -330,9 +333,12 @@ public class Controller implements Serializable {
         if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("No tiles found");
 
         Player p = getPlayerCheck(nickname);
+        Tile t = getShownTile(uncoveredTiles.indexOf(opt.get()));
+        p.setLastTile(t);
+
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
-        return getShownTile(uncoveredTiles.indexOf(opt.get()));
+        return t;
     }
 
     public void dropTile (String nickname, Tile tile) throws BusinessLogicException {
@@ -352,19 +358,17 @@ public class Controller implements Serializable {
 
     public Tile getReservedTile(String nickname , int id) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
-        System.out.println(id);
 
         List<Tile> discardPile = p.getTilesInDiscardPile();
         for(Tile t : discardPile) {
-            System.out.println(t.getIdTile());
             if(t.getIdTile() == id) {
-                System.out.println("id corretto");
-                System.out.println(t.getIdTile());
-                p.removeTileInDiscardPile(t);
+                discardPile.remove(t);
+                p.setLastTile(t);
+                p.setGamePhase(GamePhase.TILE_MANAGEMENT);
+                notifyView(nickname);
                 return t;
             }
         }
-
         throw new BusinessLogicException("Tile not found");
     }
 
@@ -465,10 +469,10 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped a second time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (IOException e) {
                         markDisconnected(nickname);
                     } catch (Exception e){
@@ -480,7 +484,7 @@ public class Controller implements Serializable {
             case 2:
                 if(state == HourglassState.ONGOING){
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (IOException e) {
                         markDisconnected(nickname);
                     } catch (Exception e){
@@ -489,10 +493,10 @@ public class Controller implements Serializable {
                     }
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped the last time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass for the last time: " +
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass for the last time: " +
                                 "You are not ready");
                     } catch (IOException e) {
                         markDisconnected(nickname);
@@ -502,7 +506,7 @@ public class Controller implements Serializable {
                     }
                 }
                 break;
-            default: throw new BusinessLogicException("Impossible to flip the hourglass another time!");
+            default: throw new BusinessLogicException("\nImpossible to flip the hourglass another time!");
         }
     }
 
@@ -511,13 +515,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("SERVER: " + "First Hourglass expired");
+                broadcastInform("\nSERVER: " + "First Hourglass expired");
                 break;
             case 2:
-                broadcastInform("SERVER: " + "Second Hourglass expired");
+                broadcastInform("\nSERVER: " + "Second Hourglass expired");
                 break;
             case 3:
-                broadcastInform("SERVER: " + "Time’s up! Building phase ended.");
+                broadcastInform("\nSERVER: " + "Time’s up! Building phase ended.");
                 startFlight();
                 break;
         }
@@ -2171,15 +2175,22 @@ public class Controller implements Serializable {
         //notifyAllViews();
     }
 
-    public void setExit() throws Exception{
-        for (var entry : viewsByNickname.entrySet()) {
-            VirtualView v = entry.getValue();
+    public void setExit() {
+        // metti in EXIT tutti i player
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+
+        // notifica tutte le view dell’EXIT
+        viewsByNickname.forEach((nick, view) -> {
             try {
-                v.updateGameState(GamePhase.EXIT);
-            } catch (IOException e) {
-                markDisconnected(entry.getKey());
+                view.updateGameState(GamePhase.EXIT);
+            } catch (Exception e) {
+                // se qualche client è già caduto, marcallo disconnected
+                markDisconnected(nick);
             }
-        }
+        });
+
+        // infine avvisa il GameManager che la partita è finita
+        onGameEnd.accept(gameId);
     }
 
     /*

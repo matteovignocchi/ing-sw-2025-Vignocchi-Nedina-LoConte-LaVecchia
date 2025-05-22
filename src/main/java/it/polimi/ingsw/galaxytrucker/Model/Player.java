@@ -35,6 +35,7 @@ public class Player implements Serializable {
     protected int position;
     private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
     private GamePhase gamePhase;
+    private Tile lastTile;
 
     /**
      * constructor that initialize all the variables
@@ -195,6 +196,7 @@ public class Player implements Serializable {
     public void setConnected(boolean connected) { this.connected = connected; }
 
 
+    public Tile getLastTile(){return lastTile;}
     /**
      * @return how many laps the player did
      */
@@ -224,6 +226,7 @@ public class Player implements Serializable {
         position = pos;
     }
 
+    public void setLastTile (Tile t) {this.lastTile = t;}
     /**
      * this method changes if the player has done a new lap
      * @param newLap number of lap

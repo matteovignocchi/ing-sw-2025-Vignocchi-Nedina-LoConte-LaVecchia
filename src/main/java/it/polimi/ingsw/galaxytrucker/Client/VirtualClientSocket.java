@@ -636,14 +636,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public String askInformationAboutStart() {
-        try {
-            startLatch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return "Interrupted";
-        }
-        return start;
+    public String askInformationAboutStart() throws Exception {
+        startLatch.await();
+        return "start";
     }
 
 
@@ -716,8 +711,5 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void updateDashMatrix(Tile[][] data) throws IOException, BusinessLogicException, InterruptedException {
         ciccio.newShip(data);
     }
-
-
-
-    }
+}
 

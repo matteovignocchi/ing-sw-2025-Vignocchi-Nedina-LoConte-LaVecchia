@@ -61,7 +61,7 @@ public class GameManager {
         for (String other : controller.viewsByNickname.keySet()) {
             if (!other.equals(nickname)) {
                 controller.sendInformTo(other,
-                        nickname + " abandoned: press any key to return to the main menù!");
+                        "\n" + nickname + " abandoned: press any key to return to the main menù!");
             }
         }
         controller.setExit();
@@ -301,7 +301,6 @@ public class GameManager {
                     Controller c = e.getValue();
                     return c.countConnectedPlayers() < c.getMaxPlayers();
                 })
-                //Mappo in int[]{ current, max, demoFlag }
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> {
