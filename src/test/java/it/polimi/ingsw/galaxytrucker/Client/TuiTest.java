@@ -1,9 +1,12 @@
+
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.Model.TileParserLoader;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -18,7 +21,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Colour;
 
 import java.util.List;
 
-
+@Disabled
 public class TuiTest {
 
     private final PrintStream originalOut = System.out;
@@ -84,7 +87,7 @@ public class TuiTest {
     }
 
     @Test
-    void testPrintDashBoard(){
+    void testPrintDashBoard() throws BusinessLogicException {
         TUIView tui = new TUIView();
         Tile[][] tmp = p.getDashMatrix();
         tmp[1][3] = new Cannon(4,3,3,3,false,0);

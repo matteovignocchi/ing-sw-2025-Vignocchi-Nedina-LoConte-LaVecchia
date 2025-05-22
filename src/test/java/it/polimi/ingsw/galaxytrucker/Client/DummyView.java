@@ -160,6 +160,21 @@ public class DummyView implements View {
         }
     }
 
+    @Override
+    public void setIsDemo(Boolean demo) {
+
+    }
+
+    @Override
+    public boolean ReturnValidity(int a, int b) {
+        return false;
+    }
+
+    @Override
+    public void setValidity(int a, int b) {
+
+    }
+
     // Metodo per costruire le opzioni in base alla fase del gioco
     private List<String> commandConstructor() {
         List<String> listOfOptions = new ArrayList<>();

@@ -21,8 +21,6 @@ public class Player implements Serializable {
     private int credits;
     //Ship building
     private int idPhoto;
-    private boolean isReady;
-    private boolean isComplete;
     private Tile[][] Dash_Matrix;
     private final Status[][] validStatus;
     private boolean purpleAlien;
@@ -52,8 +50,6 @@ public class Player implements Serializable {
         credits = 0;
         purpleAlien = false;
         brownAlien = false;
-        isComplete = false;
-        isReady = false;
         this.idPhoto = idPhoto;
         //initialize the matrix
         Dash_Matrix = new Tile[5][7];
@@ -154,34 +150,6 @@ public class Player implements Serializable {
 
     public Tile[][] getDashMatrix() {
         return Dash_Matrix;
-    }
-
-    /**
-     * set true when the player is ready to play
-     */
-    public void setIsReady(){
-        isReady = true;
-    }
-
-    /**
-     * @return the status
-     */
-    public boolean isReady(){
-        return isReady;
-    }
-
-    /**
-     * set if the player has completed the ship
-     */
-    public void setComplete(){
-        isComplete = true;
-    }
-
-    /**
-     * @return the status
-     */
-    public boolean isComplete(){
-        return isComplete;
     }
 
     /**

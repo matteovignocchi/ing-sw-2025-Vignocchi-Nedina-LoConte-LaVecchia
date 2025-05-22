@@ -149,6 +149,11 @@ public class Controller implements Serializable {
         broadcastInform( nickname + "  joined");
     }
 
+    //Per testing
+    public Map<String, Player> getPlayersByNickname(){
+        return playersByNickname;
+    }
+
     //Se tutto va, eliminabile
     public Player getPlayerByNickname(String nickname) {
         return playersByNickname.get(nickname);
@@ -674,18 +679,18 @@ public class Controller implements Serializable {
             int totalCredits = p.getCredits();
             p.setGamePhase(GamePhase.EXIT);  //se fase di exit messa prima, levare
 
-            try{
-                if(p.isConnected()){
+            if(p.isConnected()){
+                try{
                     if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
                     else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
                     v.inform("SERVER: " + "Game over. Thank you for playing!");
                     notifyView(nick);  //se fase di exit messa prima, levare
+                } catch (IOException e) {
+                    markDisconnected(nick);
+                } catch (Exception e){
+                    markDisconnected(nick);
+                    System.err.println("[ERROR] in startAwardPhase: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                markDisconnected(nick);
-            } catch (Exception e){
-                markDisconnected(nick);
-                System.err.println("[ERROR] in startAwardPhase: " + e.getMessage());
             }
         }
 
