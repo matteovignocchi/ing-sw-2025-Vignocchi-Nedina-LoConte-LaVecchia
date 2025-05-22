@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 //TODO: gestione degli askPlayerDecision, askPlayerIndex ecc.. nei metodi di oleg
 //TODO: parser per non passare oggetti del model
 //TODO: inserire mappa virtualview-player? e usare quella al posto di getPlayer.. ogni volta? vedere alla fine.
+//TODO: creare metodi inform ecc.. che chiamano i metodi corrispondenti sulla view, inglobando i try-catch, per snellire il codice negli altri metodi
 
 
 public class Controller implements Serializable {
@@ -98,7 +99,7 @@ public class Controller implements Serializable {
                     nickname,
                     getFirePower(p),
                     getPowerEngine(p),
-                    p.getCredit(),
+                    p.getCredits(),
                     //fBoard.getPositionOfPlayer(p),
                     p.presencePurpleAlien(),
                     p.presenceBrownAlien(),
@@ -146,6 +147,11 @@ public class Controller implements Serializable {
         playersPosition.put(nickname, p.getId());
 
         broadcastInform( nickname + "  joined");
+    }
+
+    //Per testing
+    public Map<String, Player> getPlayersByNickname(){
+        return playersByNickname;
     }
 
     //Se tutto va, eliminabile
@@ -224,6 +230,24 @@ public class Controller implements Serializable {
         }
         cancelLastPlayerTimeout();
         notifyView(nickname);
+    }
+
+    public void handleElimination(Player p) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView v = getViewCheck(nick);
+
+        //TODO: capire la fase di eliminazione
+        p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+
+        try{
+            v.inform("SERVER: You have been eliminated!");
+            notifyView(nick);
+        } catch (IOException e){
+            markDisconnected(nick);
+        } catch (Exception e){
+            markDisconnected(nick);
+            System.err.println("[ERROR] in handleElimination " + e.getMessage());
+        }
     }
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
@@ -435,23 +459,22 @@ public class Controller implements Serializable {
             leader.setGamePhase(GamePhase.DRAW_PHASE);
 
             try {
-//                v.updateGameState(GamePhase.DRAW_PHASE);
                 v.inform("SERVER: " + "You're the leader! Draw a card");
                 notifyView(leaderNick);
                 break;
             } catch (IOException e) {
-//                markDisconnected(leaderNick);
+                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
             } catch (Exception e){
-//                markDisconnected(leaderNick);
+                markDisconnected(leaderNick);
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
                 System.err.println("[ERROR] in activateDrawPhase:" + e.getMessage());
             }
         }
 
-        for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
+        for (String nickname : viewsByNickname.keySet()) {
             Player p = getPlayerCheck(nickname);
-            if(p.isConnected() && !nickname.equals(leaderNick)) notifyView(nickname);
+            if(p.isConnected() && !p.isEliminated() && !nickname.equals(leaderNick)) notifyView(nickname);
         }
     }
 
@@ -552,7 +575,6 @@ public class Controller implements Serializable {
             System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
         }
 
-
         broadcastInform("SERVER: " + "Card drawn!");
 
         for(Map.Entry<String, VirtualView> entry :viewsByNickname.entrySet()){
@@ -574,20 +596,34 @@ public class Controller implements Serializable {
 
         activateCard(card);
 
-        if(deck.isEmpty()){
+        if(deck.isEmpty() || fBoard.getOrderedPlayers().isEmpty()){
             startAwardsPhase();
         } else {
-            playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
+
+            for(Player p : playersByNickname.values()){
+                if(!p.isEliminated()){
+                    p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                    String msg = "SERVER: Do you want to abandon the flight? ";
+                    if(askPlayerDecision(msg, p)){
+                        p.setEliminated();
+                        handleElimination(p);
+                    }
+                }
+            }
+            fBoard.eliminatePlayers();
+
             activateDrawPhase();
         }
     }
 
+    //TODO: testare e capire se updatare e mettere in exit prima o dopo gli awards
     public void startAwardsPhase() throws BusinessLogicException {
 
-        playersByNickname.forEach( (s, p) -> {
-            p.setGamePhase(GamePhase.EXIT);
-        });
-        notifyAllViews();
+        //UPDATE FATTO DOPO, vedere se va bene
+        //playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+        //notifyAllViews();
+
+        broadcastInform("SERVER: Flight ended! Time to collect rewards!");
 
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -617,22 +653,19 @@ public class Controller implements Serializable {
 
         for (Player p : playersByNickname.values()) {
             List<Colour> goods = p.getTotalListOfGood();
-            for(Colour c : goods){
-                switch(c){
-                    case Colour.RED:
-                        p.addCredits(redGoodBonus);
-                        break;
-                    case Colour.YELLOW:
-                        p.addCredits(yellowGoodBonus);
-                        break;
-                    case Colour.GREEN:
-                        p.addCredits(greenGoodBonus);
-                        break;
-                    case Colour.BLUE:
-                        p.addCredits(blueGoodBonus);
-                        break;
+            double factor = p.isEliminated() ? 0.5 : 1.0;
+            double totalDouble = 0.0;
+
+            for (Colour c : goods) {
+                switch (c) {
+                    case RED    -> totalDouble += redGoodBonus    * factor;
+                    case YELLOW -> totalDouble += yellowGoodBonus * factor;
+                    case GREEN  -> totalDouble += greenGoodBonus  * factor;
+                    case BLUE   -> totalDouble += blueGoodBonus   * factor;
                 }
             }
+
+            p.addCredits((int) Math.ceil(totalDouble));
 
             int numBrokenTiles = p.checkDiscardPile();
             p.addCredits(numBrokenTiles * malusBrokenTile);
@@ -643,21 +676,21 @@ public class Controller implements Serializable {
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
             VirtualView v = viewsByNickname.get(nick);
-            int totalCredits = p.getCredit();
-            p.setGamePhase(GamePhase.EXIT);
+            int totalCredits = p.getCredits();
+            p.setGamePhase(GamePhase.EXIT);  //se fase di exit messa prima, levare
 
-            try{
-                if(p.isConnected()){
+            if(p.isConnected()){
+                try{
                     if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
                     else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
                     v.inform("SERVER: " + "Game over. Thank you for playing!");
-                    notifyView(nick);
+                    notifyView(nick);  //se fase di exit messa prima, levare
+                } catch (IOException e) {
+                    markDisconnected(nick);
+                } catch (Exception e){
+                    markDisconnected(nick);
+                    System.err.println("[ERROR] in startAwardPhase: " + e.getMessage());
                 }
-            } catch (IOException e) {
-                markDisconnected(nick);
-            } catch (Exception e){
-                markDisconnected(nick);
-                System.err.println("[ERROR] in startAwardPhase: " + e.getMessage());
             }
         }
 
@@ -2121,10 +2154,13 @@ public class Controller implements Serializable {
      */
 
     public void activateCard(Card card) throws BusinessLogicException {
-            CardEffectVisitor visitor = new CardEffectVisitor(this);
-            card.accept(visitor);
-            fBoard.eliminateOverlappedPlayers();
-            fBoard.orderPlayersInFlightList();
+        CardEffectVisitor visitor = new CardEffectVisitor(this);
+        card.accept(visitor);
+
+        fBoard.setOverlappedPlayersEliminated();
+        List<Player> eliminated = fBoard.eliminatePlayers();
+        for (Player player : eliminated) handleElimination(player);
+        fBoard.orderPlayersInFlightList();
     }
 
     /**
@@ -2192,18 +2228,6 @@ public class Controller implements Serializable {
         // infine avvisa il GameManager che la partita è finita
         onGameEnd.accept(gameId);
     }
-
-    /*
-    public void notifyViewFromCArd(Player player){
-        String tmp;
-        for(String nick : playersByNickname.keySet()){
-            if(playersByNickname.get(nick).equals(player)) {
-                tmp = nick;
-                notifyView(tmp);
-                break;
-            }
-        }
-    } */
 
 }
 

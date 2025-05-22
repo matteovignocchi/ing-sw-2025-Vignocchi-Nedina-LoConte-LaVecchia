@@ -18,11 +18,9 @@ public class Player implements Serializable {
     //Beginning
     private final int id;
     private boolean connected = true;
-    private int credit;
+    private int credits;
     //Ship building
     private int idPhoto;
-    private boolean isReady;
-    private boolean isComplete;
     private Tile[][] Dash_Matrix;
     private final Status[][] validStatus;
     private boolean purpleAlien;
@@ -33,7 +31,7 @@ public class Player implements Serializable {
     //Si inizia a contare da 1 per le posizioni
     protected int lap;
     protected int position;
-    private boolean isEliminated; //DA ELIMINARE E PARLARNE CON GLI ALTRI
+    private boolean isEliminated;
     private GamePhase gamePhase;
     private Tile lastTile;
 
@@ -49,11 +47,9 @@ public class Player implements Serializable {
         this.position = 0;
         this.isEliminated = false;
         this.discardPile = new ArrayList<Tile>();
-        credit = 0;
+        credits = 0;
         purpleAlien = false;
         brownAlien = false;
-        isComplete = false;
-        isReady = false;
         this.idPhoto = idPhoto;
         //initialize the matrix
         Dash_Matrix = new Tile[5][7];
@@ -157,34 +153,6 @@ public class Player implements Serializable {
     }
 
     /**
-     * set true when the player is ready to play
-     */
-    public void setIsReady(){
-        isReady = true;
-    }
-
-    /**
-     * @return the status
-     */
-    public boolean isReady(){
-        return isReady;
-    }
-
-    /**
-     * set if the player has completed the ship
-     */
-    public void setComplete(){
-        isComplete = true;
-    }
-
-    /**
-     * @return the status
-     */
-    public boolean isComplete(){
-        return isComplete;
-    }
-
-    /**
      * @return id of the player
      */
     public int getId() {
@@ -214,8 +182,8 @@ public class Player implements Serializable {
     /**
      * @return how many credits has the player
      */
-    public int getCredit(){
-        return credit;
+    public int getCredits(){
+        return credits;
     }
 
     /**
@@ -361,7 +329,7 @@ public class Player implements Serializable {
      * @param credits amount of credit
      */
     public void addCredits(int credits) {
-        this.credit = this.credit + credits;
+        this.credits = this.credits + credits;
     }
 
     //Tile insertion and placement methods
