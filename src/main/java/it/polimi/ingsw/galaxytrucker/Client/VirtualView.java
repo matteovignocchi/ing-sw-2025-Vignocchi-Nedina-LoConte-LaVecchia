@@ -36,7 +36,7 @@ public interface VirtualView extends Remote {
 
     void printDeck(List<Card> deck) throws Exception;
 
-    void setView(View view) throws Exception;
+//    void setView(View view) throws Exception;
 
     void setGameId(int gameId) throws RemoteException;
 
@@ -54,7 +54,7 @@ public interface VirtualView extends Remote {
 
     int sendLogin(String username) throws Exception;
 
-    int sendGameRequest(String message) throws Exception;
+    int sendGameRequest(String message ,int numberOfPlayer , Boolean isdemo) throws Exception;
 
     GamePhase getCurrentGameState() throws Exception;
 

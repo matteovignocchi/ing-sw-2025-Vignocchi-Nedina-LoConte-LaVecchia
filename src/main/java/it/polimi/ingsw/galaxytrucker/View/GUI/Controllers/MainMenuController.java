@@ -50,12 +50,12 @@ public class MainMenuController extends GUIController {
 
     @FXML
     private void joinGame() throws IOException {
-        ((GUIView) ClientController.getInstance().getViewInterface()).setMainScene(SceneEnum.JOIN_GAME_MENU);
+        guiView.setMainScene(SceneEnum.JOIN_GAME_MENU);
     }
 
     @FXML
     private void createGame() throws IOException {
-        ((GUIView) ClientController.getInstance().getViewInterface()).setMainScene(SceneEnum.CREATE_GAME_MENU);
+        guiView.setMainScene(SceneEnum.CREATE_GAME_MENU);
     }
 
 

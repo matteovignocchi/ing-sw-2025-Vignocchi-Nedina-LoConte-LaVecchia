@@ -1,6 +1,9 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
@@ -10,7 +13,11 @@ import it.polimi.ingsw.galaxytrucker.View.View;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.valueOf;
 
@@ -23,9 +30,8 @@ public class ClientController {
     private final VirtualView virtualClient;
     private Tile tmpTile;
     private boolean isConnected = false;
-    private int idCurrentGame;
-    private volatile boolean exitWaitingQueue = false;
-
+    private Tile[][] Dash_Matrix;
+    private GamePhase currentGamePhase;
 
 
     private static ClientController instance;
@@ -34,6 +40,20 @@ public class ClientController {
     public ClientController(View view, VirtualView virtualClient) {
         this.view = view;
         this.virtualClient = virtualClient;
+        try {
+            virtualClient.setClientController(this);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Dash_Matrix = new Tile[5][7];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Dash_Matrix[i][j] = new EmptySpace();
+            }
+        }
+
+
     }
 
     public void start() throws Exception {
@@ -45,16 +65,13 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.enterGame(gameId);
-            handleWaitForGameStart();
+            if(!waitForGameStart()) return;
+            view.inform("Game is starting");
             startGame();
         }
 
         while (isConnected) {
-            switch (view){
-                case TUIView v -> mainMenuLoop();
-                default -> {}
-            }
-
+            mainMenuLoop();
             String cmd = view.askString();
             switch (cmd) {
                 case "1" -> createNewGame();
@@ -93,10 +110,11 @@ public class ClientController {
             int choice = 0;
             while (true) {
                 printMainMenu();
-                String line = "";
+                String line;
                 switch (view) {
                     case TUIView v -> line = v.askString();
-                    default -> {}
+                    case GUIView g -> line= view.askString(); // appena implementerai in GUI, per adesso ho messo un metodo a caso
+                    default -> line = view.askString();
                 }
 
                 try {
@@ -133,23 +151,39 @@ public class ClientController {
         view.inform("Insert index:");
     }
 
+
     public void createNewGame() throws Exception {
         switch (view) {
             case TUIView v -> {
                 view.inform("Creating New Game...");
-                int gameId = virtualClient.sendGameRequest("CREATE");
+                boolean demo = askByController("Would you like a demo version?");
+                v.inform("Select a number of players between 2 and 4");
+                int numberOfPlayer ;
+                while (true) {
+                    numberOfPlayer = v.askIndex() + 1;
+                    if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
+                        break;
+                    }
+                    v.reportError("Invalid number of players. Please enter a value between 2 and 4.\n");
+                }
+
+                int gameId = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
                 if (gameId > 0) {
                     virtualClient.setGameId(gameId);
-                    v.inform("Waiting for players in lobby");
-                    handleWaitForGameStart();
+                    boolean started = waitForGameStart();
+                    if (!started) return;
+                    view.inform("Game is starting!");
                     startGame();
                 } else {
                     view.reportError("Game creation failed");
                 }
             }
             case GUIView v -> {
-                int response = virtualClient.sendGameRequest("CREATE");
-                if (response != 0) {
+                List<Object> data = v.getDataForGame();
+                boolean demo = (boolean) data.get(0);
+                int numberOfPlayer = (int) data.get(1);
+                int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
+                if (response > 0) {
                     virtualClient.setGameId(response);
                     handleWaitForGameStart();
                 }else{
@@ -160,85 +194,82 @@ public class ClientController {
         }
     }
 
+    public int printAvailableGames( Map<Integer,int[]> availableGames){
+        int choice = 0;
+        switch (view){
+            case TUIView v->{
+                v.inform("**Available Games:**");
+                v.inform("0. Return to main menu");
+                for (Integer id : availableGames.keySet()) {
+                    int[] info = availableGames.get(id);
+                    boolean isDemo = info[2] == 1;
+                    String suffix = isDemo ? " DEMO" : "";
+                    v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+                }
+                while (true) {
+                    choice = v.askIndex() + 1;
+                    if (choice == 0 || availableGames.containsKey(choice)) break;
+                    v.reportError("Invalid choice, try again.");
+                }
+            }
+            case GUIView v->{
+                choice = v.getGameChoice();
+            }
+            default -> {}
+        }
+
+        return choice;
+    }
+
     public void joinExistingGame() throws Exception {
         view.inform("Joining Existing Game...");
-        int gameId = virtualClient.sendGameRequest("JOIN");
+        int gameId = virtualClient.sendGameRequest("JOIN" , 0 , true);
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
-            handleWaitForGameStart();
+            boolean started = waitForGameStart();
+            if (!started) return;
             startGame();
-        } else if (gameId==0) {
-            mainMenuLoop();
-        } else {
-            view.reportError("Cannot join game");
         }
     }
 
+    private boolean waitForGameStart() throws Exception {
+        view.inform("Waiting for other players…");
+        virtualClient.askInformationAboutStart();
+        return true;
+    }
 
-    public void waitForGameStart() throws Exception {
-        System.out.println("Waiting for the game to start... (type 'exit' to return to the main menu)");
+
+    private boolean handleWaitForGameStart() throws Exception {
+        view.inform("Waiting for other players…");
+        view.inform("Type 'exit' to abandon the lobby and return to main menu.");
+
         while (true) {
-            if (exitWaitingQueue) {
-                mainMenuLoop();
-                return;
+            // il server ha avanzato lo stato: il gioco parte
+            if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
+                view.inform("Game is starting!");
+                return true;
             }
-            String status = virtualClient.askInformationAboutStart();
-            if (status.contains("start")) {
-                return;
+
+            String line = view.askString().trim();
+            if ("exit".equalsIgnoreCase(line)) {
+                virtualClient.leaveGame();
+                view.inform("Returned to main menu");
+                return false;
             }
-            Thread.sleep(500); // evita spam
         }
     }
 
-    public void exitQueue() {
-        exitWaitingQueue = true;
-    }
-
-    public void handleWaitForGameStart() {
-        ClientController controller = this;
-        Thread waitingThread = new Thread(() -> {
-            try {
-                controller.waitForGameStart();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        waitingThread.start();
-        Scanner scanner = new Scanner(System.in);
-        while (waitingThread.isAlive()) {
-            String input = scanner.nextLine();
-            if ("exit".equalsIgnoreCase(input.trim())) {
-                controller.exitQueue();
-                break;
-            }
-        }
-    }
 
 
     private void startGame() throws Exception {
-        view.inform("Game started");
-        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-
         while (true) {
-            GamePhase gameState = virtualClient.getGameFase();
-            if (gameState == GamePhase.EXIT) {
-                view.inform("Returned to main menù...");
+            if (currentGamePhase == GamePhase.EXIT) {
+                view.askString();
                 return;
             }
 
-            String key = null;
-            while (key == null) {
-                if (virtualClient.getGameFase() == GamePhase.EXIT) {
-                    view.inform("Returned to main menù...");
-                    return;
-                }
-                if (stdin.ready()) {
-                    key = view.sendAvailableChoices();
-                } else {
-                    Thread.sleep(100);
-                }
-            }
-
+            view.printListOfCommand();
+            String key = view.sendAvailableChoices();
             switch (key) {
                 case "getacoveredtile" -> {
                     try {
@@ -291,21 +322,18 @@ public class ClientController {
                 case "rightrotatethetile" -> rotateRight();
                 case "leftrotatethetile" -> rotateLeft();
 
-                case "takereservedtile" -> {
-                    try{
-//                        virtualClient.takeReservedTile()
-                        tmpTile = virtualClient.takeReservedTile();
-                        view.printTile(tmpTile);
-                        view.printListOfCommand();
-                    }catch (BusinessLogicException e){
-                        view.reportError(e.getMessage());
-                    }
-                }
-
                 case "logout" -> {
                     virtualClient.leaveGame();
                     view.inform("Returned to main menù...");
                     return;
+                }
+                case "takereservedtile" -> {
+                    try {
+                        tmpTile = virtualClient.takeReservedTile();
+                        view.printTile(tmpTile);
+                    } catch (BusinessLogicException e) {
+                        view.reportError(e.getMessage());
+                    }
                 }
 
                 default -> view.inform("Action not recognized");
@@ -313,79 +341,6 @@ public class ClientController {
         }
     }
 
-
-    //SOLUZIONE E PROBLEMA SECONDO ME:
-//Il problema vero è che, mentre tu sei dentro a String key = view.sendAvailableChoices();
-//sei bloccato finché l’utente non digita qualcosa, e quindi non puoi mai ripassare al controllo di if (virtualClient.getGameFase() == GamePhase.EXIT) { … }
-//La soluzione più rapida è trasformare quell’input da bloccante a un piccolo polling loop: invece di chiamare una volta sola sendAvailableChoices(),
-// fai un ciclo in cui ogni 100 ms controlli se ti è arrivato l’EXIT; solo se non c’è entri a leggere l’input.
-
-
-//    private void startGame() throws Exception {
-//        view.inform("game started");
-//        GamePhase gameState;
-//        do {
-//            String key = view.sendAvailableChoices();
-//            switch (key) {
-//                case "getacoveredtile" -> {
-//                    try {
-//                        tmpTile = virtualClient.getTileServer();
-//                        view.printTile(tmpTile);
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "getashowntile" -> {
-//                    try {
-//                        tmpTile = virtualClient.getUncoveredTile();
-//                        view.printTile(tmpTile);
-//                    } catch (BusinessLogicException | IOException | InterruptedException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                    view.printListOfCommand();
-//                }
-//                case "returnthetile" ->{
-//                    try {
-//                        virtualClient.getBackTile(tmpTile);
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "placethetile" -> virtualClient.positionTile(tmpTile);
-//                case "drawacard" -> {
-//                    try {
-//                        virtualClient.drawCard();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "spinthehourglass" -> {
-//                    try {
-//                        virtualClient.rotateGlass();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "declareready" -> {
-//                    try {
-//                        virtualClient.setReady();
-//                    }catch (BusinessLogicException e) {
-//                        view.reportError(e.getMessage());
-//                    }
-//                }
-//                case "watchadeck" -> virtualClient.lookDeck();
-//                case "watchaplayersship" -> virtualClient.lookDashBoard();
-//                case "rightrotatethetile" -> rotateRight();
-//                case "leftrotatethetile" -> rotateLeft();
-//                case "logout" -> {
-//                    virtualClient.leaveGame();
-//                    return;
-//                }
-//                default -> view.inform("Action not recognized");
-//            }
-//            gameState = virtualClient.getGameFase();
-//        } while (gameState != GamePhase.EXIT);
-//    }
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {
@@ -423,13 +378,116 @@ public class ClientController {
     public void logOutGUI() throws Exception {
         virtualClient.logOut();
     }
+    public void setCurrentTile(Tile tile) {
+        switch (currentGamePhase){
+            case TILE_MANAGEMENT -> this.setCurrentTile(tile);
+            default -> this.setTileInMatrix(tile , 2,3);
+        }    }
 
-    public void setCurrentTile(Tile tmp) {
-        this.tmpTile = tmp;
-        view.printTile(tmpTile);
+    public void setTileInMatrix(Tile tile , int a , int b) {
+        Dash_Matrix[a][b] = tile;
+    }
+
+
+    //TODO SPOSTO TUTTI I METODI CHE CHIAMAVANO DIRETTAMENTE LA VIEW QUA
+
+    public void showUpdateByController(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+        view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+    }
+
+    public void informByController(String message) {
+        view.inform(message);
+    }
+
+    public void reportErrorByController(String message) {
+        view.reportError(message);
+    }
+
+    public void printListOfTileShownByController(List<Tile> tiles) {
+        //TODO aggiungere i metodi per refactor
+        view.printPileShown(tiles);
+    }
+
+    public void printListOfTileCoveredByController() {
+        view.printPileCovered();
+    }
+
+    public void printListOfGoodsByController(List<Colour> listOfGoods) {
+        //TODO aggiungere i metodi per refactor
+        view.printListOfGoods(listOfGoods);
+    }
+
+    public void printCardByController(Card card) {
+        //TODO aggiungere i metodi per refactor
+        view.printCard(card);
+    }
+
+    public void printTileByController(Tile tile) {
+        //TODO aggiungere i metodi per refactor
+        view.printTile(tile);
+    }
+
+    public void printPlayerDashboardByController(Tile[][] dashboard){
+        //TODO aggiungere i metodi per refactor
+        view.printDashShip(dashboard);
+    }
+
+    public void printMyDashBoardByController(){
+        view.printDashShip(Dash_Matrix);
+    }
+
+    public void printDeckByController(List<Card> deck) {
+        //TODO aggiungere i metodi per refactor
+        view.printDeck(deck);
+    }
+
+    public boolean askByController(String message){
+        return view.ask(message);
+    }
+    public int askIndexByController() {
+        return view.askIndex();
+    }
+    public int[] askCoordinateByController(){
+        return view.askCoordinate();
+
+    }
+
+    public String askStringByController(){
+        return view.askString();
+    }
+
+    public void updateGameStateByController(GamePhase phase){
+        view.updateState(phase);
+        currentGamePhase = phase;
+    }
+
+    public String choocePlayerByController(){
+        return view.choosePlayer();
+    }
+
+    public void printListOfCommands(){
         view.printListOfCommand();
     }
 
-}
+    public boolean returOKAY(int a , int b){
+        return view.ReturnValidity(a,b);
+    }
+
+    public Tile getSomeTile(int a, int b){
+        return Dash_Matrix[a][b];
+    }
+
+    public void updateMapPositionByController(Map<String, Integer> Position){
+        view.updateMap(Position);
+    }
+
+    public void setIsDemoByController(Boolean isDemo){
+        view.setIsDemo(isDemo);
+    }
+
+    public void newShip(Tile[][] data){
+        Dash_Matrix = data;
+    }
+ }
 
 

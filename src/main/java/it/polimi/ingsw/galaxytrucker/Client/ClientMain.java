@@ -53,9 +53,9 @@ public class ClientMain {
                     if (protocolChoice == 1) {
                         Registry registry = LocateRegistry.getRegistry(host, 1099);
                         VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                        virtualClient = new VirtualClientRmi(server, view);
+                        virtualClient = new VirtualClientRmi(server);
                     } else {
-                        virtualClient = new VirtualClientSocket(host, port, view);
+                        virtualClient = new VirtualClientSocket(host, port);
                     }
 
                     ClientController controller = new ClientController(view, virtualClient);

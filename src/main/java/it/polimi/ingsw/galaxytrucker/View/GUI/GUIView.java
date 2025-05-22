@@ -10,6 +10,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
@@ -20,7 +21,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
-import java.net.URL;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -59,52 +57,47 @@ public class GUIView extends Application implements View {
         port = p;
     }
 
-    public GUIView(){
-
-
-    }
-
 
     @Override
     public void start(Stage stage) {
         this.mainStage = stage;
-        stage.setTitle("Welcome");
-        StackPane root = new StackPane();
-        Scene scene = new Scene(root, 400, 300);
-        stage.setScene(scene);
-        stage.show();
+        stage.setTitle("Galaxy Trucker");
 
-        nicknameFuture = new CompletableFuture<>();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.MAIN_MENU.value()));
+            Parent root = loader.load();
 
-        // Mostra il dialogo e aspetta il nickname in modo asincrono
+             MainMenuController controller = loader.getController();
+             controller.setGuiView(this);
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Dopo aver mostrato il menu, connetti e avvia il controller in background
         Platform.runLater(() -> {
-            showNicknameDialog();
-
-            nicknameFuture.thenAccept(nickname -> {
-                if (nickname == null || nickname.trim().isEmpty()) {
-                    Platform.runLater(() -> reportError("Nickname cannot be null or empty."));
-                    return;
+            try {
+                VirtualView virtualClient;
+                if (protocolChoice == 1) {
+                    Registry registry = LocateRegistry.getRegistry(host, 1099);
+                    VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
+                    virtualClient = new VirtualClientRmi(server);
+                } else {
+                    virtualClient = new VirtualClientSocket(host, port);
                 }
 
-                try {
-                    VirtualView virtualClient;
-                    if (protocolChoice == 1) {
-                        Registry registry = LocateRegistry.getRegistry(host, 1099);
-                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                        virtualClient = new VirtualClientRmi(server, this);
-                    } else {
-                        virtualClient = new VirtualClientSocket(host, port, this);
-                    }
+                ClientController controller = new ClientController(this, virtualClient);
+                this.setClientController(controller);
+                controller.start(); // Questo chiamerà loginLoop()
 
-                    virtualClient.setNickname(nickname);
-                    ClientController controller = new ClientController(this, virtualClient);
-                    this.setClientController(controller);
-                    controller.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
-                }
-            });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
+            }
         });
     }
 
@@ -197,10 +190,10 @@ public class GUIView extends Application implements View {
 
     @Override
     public String askString() {
-        if(sceneEnum == SceneEnum.NICKNAME_DIALOG){
+        if (sceneEnum == SceneEnum.NICKNAME_DIALOG) {
             nicknameFuture = new CompletableFuture<>();
+            showNicknameDialog();
 
-            Platform.runLater(this::showNicknameDialog);
             try {
                 return nicknameFuture.get();
             } catch (Exception e) {
@@ -210,6 +203,7 @@ public class GUIView extends Application implements View {
         }
         return "";
     }
+
 
     @Override
     public void reportError(String message) {
@@ -301,7 +295,7 @@ public class GUIView extends Application implements View {
     public ClientController getClientController() {
         return clientController;
     }
-    private void setSceneEnum(SceneEnum sceneEnum) {
+    public void setSceneEnum(SceneEnum sceneEnum) {
         this.sceneEnum = sceneEnum;
     }
     public void setMainScene(SceneEnum sceneName) throws IOException {
@@ -318,29 +312,24 @@ public class GUIView extends Application implements View {
             coordinateFuture.complete(new int[] {row, col});
         }
     }
-
-    private void showNicknameDialog() {
+    public void showNicknameDialog() {
         try {
-            URL fxmlLocation = getClass().getResource(SceneEnum.NICKNAME_DIALOG.value());
-            if (fxmlLocation == null) {
-                throw new IOException("FXML file not found: " + SceneEnum.NICKNAME_DIALOG.value());
-            }
-
-            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.NICKNAME_DIALOG.value()));
             Parent root = loader.load();
-            NicknameDialogController dialogController = loader.getController();
-            dialogController.setGuiView(this);
+            NicknameDialogController controller = loader.getController();
+            controller.setGuiView(this);
 
             Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initModality(Modality.APPLICATION_MODAL); // Modale
+            dialogStage.setResizable(false);
             dialogStage.setTitle("Insert your nickname");
             dialogStage.setScene(new Scene(root));
-            dialogStage.setResizable(false);
-            dialogStage.show();
+            dialogStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
 
 

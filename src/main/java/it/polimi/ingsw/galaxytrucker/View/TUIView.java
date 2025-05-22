@@ -66,13 +66,9 @@ public class TUIView implements View {
 
 
     @Override
-    public void inform(String message) {
-        System.out.println("> " + message + "\n");
-    }
+    public void inform(String message) {System.out.println("> " + message);}
     @Override
-    public void reportError(String message) {
-        System.err.print("\n[ERROR] " + message + "\n ");
-    }
+    public void reportError(String message) {System.err.print("\n[ERROR] " + message);}
     @Override
     public void updateState(GamePhase gamePhase) {
         game = gamePhase;
@@ -112,7 +108,7 @@ public class TUIView implements View {
                 break;
             }
             else {
-                reportError("The response entered is invalid. Try again: ");
+                reportError("The response entered is invalid. Try again: \n");
             }
         }
         return decision;
@@ -273,18 +269,15 @@ public class TUIView implements View {
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
             case WAITING_IN_LOBBY -> inform("Nickame : " + nickname);
-            case BOARD_SETUP -> inform(" -Nickname: "+nickname+" -Position : Too early to know where you'll finish!"+" -Credits : too rich!"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case BOARD_SETUP -> inform(" -Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case TILE_MANAGEMENT, DRAW_PHASE -> {}
-            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */" -Credits : Silvio Berlusconi"+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
-            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+ /*" -Position : "+position+*/" -Credits : "+credits+" -Engine power : "+powerEngine+" -Fire power : "+firePower+" -Purple alien : "+(purpleAlien ? "present" : "not present")+ " -Brown alien : "+(brownAlien ? "present" : "not present")+" -Number of humans : "+numberOfHuman+" -Number of energy : "+numberOfEnergy);
+            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : Silvio Berlusconi"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
+            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+ /*" -Position : "+position+*/"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
             case EXIT -> inform("Goodbye!");
         }
         printMapPosition();
         System.out.println();
-
-        printListOfCommand();
-
     }
 
     //metodo che riceve una lista, in cui prendi
@@ -633,19 +626,31 @@ public class TUIView implements View {
         }
         return listOfOptions;
     }
-    //metodo per gestire i comandi da mandare al server
+
+
     @Override
     public String sendAvailableChoices() {
-        List<String> listOfOptions = commandConstructor();
-        int tmp;
-        while(true){
-            inform("Insert the command number");
-            tmp = askIndex();
-            if (tmp<listOfOptions.size() && tmp>=0) break;
-            inform("indice sbagliato");
+        List<String> options = commandConstructor();
+
+        while (true) {
+            System.out.print("Insert index: ");
+            System.out.flush();             // forza lo sblocco del prompt
+            String line = scanner.nextLine().trim();
+            try {
+                int idx = Integer.parseInt(line) - 1;
+                if (idx >= 0 && idx < options.size()) {
+                    return options.get(idx)
+                            .toLowerCase()
+                            .replaceAll("[^a-z0-9]", "");
+                }
+            } catch (NumberFormatException ignored) { }
+            System.out.println("[ERROR] Invalid choice, try again.");
         }
-        return listOfOptions.get(tmp).toLowerCase().replaceAll("[^a-z0-9]", "");
     }
+
+
+
+
     @Override
     public void printListOfCommand(){
         List<String> listOfOptions = commandConstructor();

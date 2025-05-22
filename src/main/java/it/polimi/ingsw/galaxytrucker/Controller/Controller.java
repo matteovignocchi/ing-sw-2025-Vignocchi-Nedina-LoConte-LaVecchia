@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 
 public class Controller implements Serializable {
     private final int gameId;
-    private transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
+    public transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
     private final Map<String , Integer> playersPosition = new ConcurrentHashMap<>();
 
@@ -139,6 +139,7 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.WAITING_IN_LOBBY);
         view.updateGameState(GamePhase.WAITING_IN_LOBBY);
+//        view.setTile(p.getTile(2,3));
 
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
@@ -263,6 +264,15 @@ public class Controller implements Serializable {
         }
     }
 
+    public void sendInformTo(String nickname, String msg) {
+        try {
+            VirtualView v = getViewCheck(nickname);
+            v.inform(msg);
+        } catch (Exception e) {
+            markDisconnected(nickname);
+        }
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
@@ -277,7 +287,6 @@ public class Controller implements Serializable {
                 v.setIsDemo(isDemo);
                 v.updateGameState(GamePhase.BOARD_SETUP);
                 v.setTile(getPlayerCheck(nick).getTile(2,3));
-                v.inform("SERVER: " + "Game is starting!");
                 v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
             } catch (IOException e) {
                 markDisconnected(nick);
@@ -461,10 +470,10 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped a second time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (IOException e) {
                         markDisconnected(nickname);
                     } catch (Exception e){
@@ -476,7 +485,7 @@ public class Controller implements Serializable {
             case 2:
                 if(state == HourglassState.ONGOING){
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass: It's still running");
                     } catch (IOException e) {
                         markDisconnected(nickname);
                     } catch (Exception e){
@@ -485,10 +494,10 @@ public class Controller implements Serializable {
                     }
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped the last time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
                 } else {
                     try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass for the last time: " +
+                        getViewCheck(nickname).inform("\nSERVER: " + "You cannot flip the hourglass for the last time: " +
                                 "You are not ready");
                     } catch (IOException e) {
                         markDisconnected(nickname);
@@ -498,7 +507,7 @@ public class Controller implements Serializable {
                     }
                 }
                 break;
-            default: throw new BusinessLogicException("Impossible to flip the hourglass another time!");
+            default: throw new BusinessLogicException("\nImpossible to flip the hourglass another time!");
         }
     }
 
@@ -507,13 +516,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("SERVER: " + "First Hourglass expired");
+                broadcastInform("\nSERVER: " + "First Hourglass expired");
                 break;
             case 2:
-                broadcastInform("SERVER: " + "Second Hourglass expired");
+                broadcastInform("\nSERVER: " + "Second Hourglass expired");
                 break;
             case 3:
-                broadcastInform("SERVER: " + "Time’s up! Building phase ended.");
+                broadcastInform("\nSERVER: " + "Time’s up! Building phase ended.");
                 startFlight();
                 break;
         }
@@ -2037,15 +2046,22 @@ public class Controller implements Serializable {
         //notifyAllViews();
     }
 
-    public void setExit() throws Exception{
-        for (var entry : viewsByNickname.entrySet()) {
-            VirtualView v = entry.getValue();
+    public void setExit() {
+        // metti in EXIT tutti i player
+        playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
+
+        // notifica tutte le view dell’EXIT
+        viewsByNickname.forEach((nick, view) -> {
             try {
-                v.updateGameState(GamePhase.EXIT);
-            } catch (IOException e) {
-                markDisconnected(entry.getKey());
+                view.updateGameState(GamePhase.EXIT);
+            } catch (Exception e) {
+                // se qualche client è già caduto, marcallo disconnected
+                markDisconnected(nick);
             }
-        }
+        });
+
+        // infine avvisa il GameManager che la partita è finita
+        onGameEnd.accept(gameId);
     }
 
     /*
