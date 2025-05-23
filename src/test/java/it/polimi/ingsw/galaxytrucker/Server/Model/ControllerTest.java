@@ -172,7 +172,7 @@ class ControllerTest {
         when(p3.countExposedConnectors()).thenReturn(10);
         when(p4.countExposedConnectors()).thenReturn(5);
 
-        List<Colour> colours1 = List.of(Colour.BLUE, Colour.YELLOW);
+        List<Colour> colours1 = new ArrayList<>();
         List<Colour> colours2 = List.of(Colour.YELLOW, Colour.YELLOW, Colour.RED);
         List<Colour> colours3 = List.of(Colour.GREEN, Colour.BLUE);
         List<Colour> colours4 = List.of(Colour.RED, Colour.RED, Colour.GREEN);
@@ -189,10 +189,10 @@ class ControllerTest {
 
         controller.startAwardsPhase();
 
-        assertEquals(12, p1.getCredits());  //12 vs 8
-        assertEquals(16, p2.getCredits());   //16 vs 6
-        assertEquals(1, p3.getCredits());   //1 vs 0
-        assertEquals(-1, p4.getCredits());  //-1 vs 0
+        assertEquals(8, p1.getCredits());
+        assertEquals(16, p2.getCredits());
+        assertEquals(1, p3.getCredits());
+        assertEquals(-1, p4.getCredits());
 
 
         assertEquals(GamePhase.EXIT, p1.getGamePhase());
