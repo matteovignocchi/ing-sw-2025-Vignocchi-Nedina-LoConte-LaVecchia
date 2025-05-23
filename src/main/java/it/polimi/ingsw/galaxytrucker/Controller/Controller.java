@@ -2229,5 +2229,8 @@ public class Controller implements Serializable {
         onGameEnd.accept(gameId);
     }
 
+    public Map<String,Integer> getPlayersPosition(){
+        return playersPosition;
+    }
 }
 

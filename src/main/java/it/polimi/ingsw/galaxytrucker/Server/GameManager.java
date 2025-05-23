@@ -82,6 +82,7 @@ public class GameManager {
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
             v.setIsDemo(controller.getIsDemo());
             v.setGameId(gameId);
+            v.updateMapPosition(controller.getPlayersPosition());
             v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
             v.updateDashMatrix(dash);
             v.printPlayerDashboard(dash);
