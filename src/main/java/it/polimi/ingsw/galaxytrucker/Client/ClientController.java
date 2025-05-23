@@ -296,6 +296,9 @@ public class ClientController {
     private void startGame() throws Exception {
 
         view.inform("Game is starting, GOOD LUCK!\n");
+
+        if(view.getGamePhase() == GamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
+
         view.printListOfCommand();
         while (true) {
 

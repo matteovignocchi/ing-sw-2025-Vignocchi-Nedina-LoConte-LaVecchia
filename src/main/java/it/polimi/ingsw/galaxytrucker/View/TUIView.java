@@ -782,9 +782,9 @@ public class TUIView implements View {
         boolean tmp =  !maschera[a][b];
         if((a == 0 && b ==5)||(a==0 && b==6)) maschera[a][b] = tmp;
         maschera[a][b] = false;
-
-
     }
+
+    public GamePhase getGamePhase() {return game;}
 
 }
 

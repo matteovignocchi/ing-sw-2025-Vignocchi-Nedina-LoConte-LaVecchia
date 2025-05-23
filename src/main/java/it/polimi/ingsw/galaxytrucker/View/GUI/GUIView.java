@@ -387,5 +387,7 @@ public class GUIView extends Application implements View {
         });
     }
 
+    public GamePhase getGamePhase() { return gamePhase; }
+
 
 }
