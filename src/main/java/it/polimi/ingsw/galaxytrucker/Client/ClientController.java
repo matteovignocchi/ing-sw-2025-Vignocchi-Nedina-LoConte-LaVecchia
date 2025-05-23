@@ -17,7 +17,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static java.lang.String.valueOf;
 
@@ -242,6 +242,42 @@ public class ClientController {
     }
 
 
+    private boolean waitForFlightStart() throws Exception {
+
+        if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
+            return true;
+        }
+
+        view.inform("Waiting for other players to finish their ship…\n");
+        view.inform("Possible actions while waiting for flight:");
+        view.inform(" 1: Watch a player's ship");
+        view.inform(" 2: Logout");
+        view.inform("Insert index:");
+
+        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+        while (currentGamePhase == GamePhase.WAITING_FOR_PLAYERS) {
+            if (console.ready()) {
+                String line = console.readLine().trim();
+                switch (line) {
+                    case "1" -> virtualClient.lookDashBoard();
+                    case "2" -> {
+                        virtualClient.leaveGame();
+                        view.inform("Returned to main menu");
+                        return false;
+                    }
+                    default -> view.reportError("Invalid choice. Please enter 1 or 2.");
+                }
+            } else {
+                Thread.sleep(200);
+            }
+        }
+        System.out.println("");
+        view.inform("Flight is starting! Good luck!\n");
+        return true;
+    }
+
+
+
     private boolean handleWaitForGameStart() throws Exception {
         view.inform("Waiting for other players…");
         view.inform("Type 'exit' to abandon the lobby and return to main menu.");
@@ -282,7 +318,17 @@ public class ClientController {
                     case "placethetile"       -> virtualClient.positionTile(tmpTile);
                     case "drawacard"          -> virtualClient.drawCard();
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
-                    case "declareready"       -> virtualClient.setReady();
+                    case "declareready"       -> {
+                        virtualClient.setReady();
+                        // rimaniamo in this loop finché non cambia fase
+                        if (!waitForFlightStart()) return;
+
+                        // appena è DRAW_PHASE ristampo la lista comandi **solo per il leader**
+                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
+                            view.printListOfCommand();
+                            continue;  // ricomincia il loop con i comandi di volo
+                        }
+                    }
                     case "watchadeck"         -> virtualClient.lookDeck();
                     case "watchaplayersship"  -> virtualClient.lookDashBoard();
                     case "rightrotatethetile" -> rotateRight();
@@ -301,7 +347,9 @@ public class ClientController {
             } catch (BusinessLogicException | IOException | InterruptedException e) {
                 view.reportError(e.getMessage());
             }
-            view.printListOfCommand();
+            if (currentGamePhase != GamePhase.DRAW_PHASE) {
+                view.printListOfCommand();
+            }
         }
     }
 
