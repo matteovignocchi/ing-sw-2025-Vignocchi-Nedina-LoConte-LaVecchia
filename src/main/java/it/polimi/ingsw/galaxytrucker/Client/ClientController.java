@@ -65,7 +65,6 @@ public class ClientController {
 
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
-
             startGame();
         }
 
@@ -262,6 +261,7 @@ public class ClientController {
     }
 
     private void startGame() throws Exception {
+
         view.inform("Game is starting, GOOD LUCK!\n");
         view.printListOfCommand();
         while (true) {

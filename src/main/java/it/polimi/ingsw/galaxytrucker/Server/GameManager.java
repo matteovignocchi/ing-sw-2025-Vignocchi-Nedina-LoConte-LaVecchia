@@ -80,12 +80,18 @@ public class GameManager {
             Controller controller = getControllerCheck(gameId);
             controller.markReconnected(nickname, v);
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
+            v.setIsDemo(controller.getIsDemo());
+            v.setGameId(gameId);
+            v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
+            v.updateDashMatrix(dash);
+            v.printPlayerDashboard(dash);
+
             try {
-                v.printPlayerDashboard(dash);
+//                v.printPlayerDashboard(dash);
+                v.updateDashMatrix(dash);
             } catch (Exception e) {
 
             }
-            v.setGameId(gameId);
             return gameId;
         }
         // nick in uso ma non in partita: rifiuto

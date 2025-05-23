@@ -237,6 +237,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         while(true){
             ciccio.informByController("Choose coordinates");
             tmp = ciccio.askCoordinateByController();
+            ciccio.setTileInMatrix(tile, tmp[0], tmp[1]);
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
