@@ -85,7 +85,6 @@ public class GameManager {
             } catch (Exception e) {
 
             }
-            controller.broadcastInform("SERVER: " + nickname + " reconnected to game");
             v.setGameId(gameId);
             return gameId;
         }
