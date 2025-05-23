@@ -278,22 +278,29 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public void lookDeck() throws RemoteException{
-        ciccio.informByController("Choose deck : 1 / 2 / 3");
-        int index;
-        while(true){
-            index = askIndex();
+    public void lookDeck() throws RemoteException {
+        while (true) {
+            ciccio.informByController("Choose deck : 1 / 2 / 3");
+            int index = askIndex() + 1;
+
+            if (index < 1 || index > 3) {
+                ciccio.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
+                continue;
+            }
+
             try {
                 List<Card> deck = server.showDeck(gameId, index);
                 ciccio.printDeckByController(deck);
-                break;
+                return;
             } catch (BusinessLogicException e) {
-                ciccio.reportErrorByController("index not valid");
+                ciccio.reportErrorByController("Index not valid.");
             } catch (IOException e) {
-                ciccio.reportErrorByController("insert a number");
+                ciccio.reportErrorByController("Input error: please enter a number.");
             }
         }
     }
+
+
 
     @Override
     public void lookDashBoard() throws RemoteException{
@@ -310,13 +317,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
         ciccio.informByController("Space Ship of :" + tmp);
         ciccio.printPlayerDashboardByController(dashPlayer);
-        ciccio.printListOfCommands();
     }
 
     @Override
     public Tile takeReservedTile() throws RemoteException  , BusinessLogicException{
-        if(!ciccio.returOKAY(0,5) && !ciccio.returOKAY(0,6)) {
-            throw new BusinessLogicException("Invalid coordinates");
+        if(ciccio.returOKAY(0,5) && ciccio.returOKAY(0,6)) {
+            throw new BusinessLogicException("There is not any reserverd tile");
         }
         ciccio.printMyDashBoardByController();
         ciccio.informByController("Select a tile");

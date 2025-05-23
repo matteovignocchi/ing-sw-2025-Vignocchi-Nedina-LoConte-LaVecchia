@@ -93,14 +93,11 @@ public class ClientController {
                 view.reportError("Credential not valid, try again.");
                 continue;
             }
-
-            // Salvo il nickname sul client
             virtualClient.setNickname(username);
 
             if (res > 0) {
                 return res;
             } else {
-                // res == -2 ⇒ nuovo utente
                 view.inform("Login successful");
                 return 0;
             }
@@ -303,8 +300,10 @@ public class ClientController {
         while (true) {
 
             String key = view.sendAvailableChoices();
+            if(currentGamePhase==GamePhase.EXIT){
+                mainMenuLoop();
+            }
             try {
-                // 4) Tutte le azioni in un unico switch
                 switch (key) {
                     case "getacoveredtile"    -> {
                         tmpTile = virtualClient.getTileServer();
@@ -320,13 +319,11 @@ public class ClientController {
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
                     case "declareready"       -> {
                         virtualClient.setReady();
-                        // rimaniamo in this loop finché non cambia fase
                         if (!waitForFlightStart()) return;
 
-                        // appena è DRAW_PHASE ristampo la lista comandi **solo per il leader**
                         if (currentGamePhase == GamePhase.DRAW_PHASE) {
                             view.printListOfCommand();
-                            continue;  // ricomincia il loop con i comandi di volo
+                            continue;
                         }
                     }
                     case "watchadeck"         -> virtualClient.lookDeck();

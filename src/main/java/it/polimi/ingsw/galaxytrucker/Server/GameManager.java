@@ -60,8 +60,7 @@ public class GameManager {
         Controller controller = getControllerCheck(gameId);
         for (String other : controller.viewsByNickname.keySet()) {
             if (!other.equals(nickname)) {
-                controller.sendInformTo(other,
-                        "\n" + nickname + " abandoned: press any key to return to the main menù!");
+                controller.sendInformTo(other, nickname + " abandoned: press any key to return to the main menù!");
             }
         }
         controller.setExit();
@@ -78,11 +77,11 @@ public class GameManager {
         Integer gameId = nicknameToGameId.get(nickname);
         if (gameId != null && games.containsKey(gameId)) {
             Controller controller = getControllerCheck(gameId);
+            v.updateMapPosition(controller.getPlayersPosition());
             controller.markReconnected(nickname, v);
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
             v.setIsDemo(controller.getIsDemo());
             v.setGameId(gameId);
-            v.updateMapPosition(controller.getPlayersPosition());
             v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
             v.updateDashMatrix(dash);
             v.printPlayerDashboard(dash);

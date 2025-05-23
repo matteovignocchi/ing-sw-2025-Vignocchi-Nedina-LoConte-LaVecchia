@@ -329,8 +329,8 @@ public class TUIView implements View {
             }
             case FirstWarzoneCard c ->{
                 inform("===War Zone===\n");
-                System.out.println("-Player with less crew mates loses "+c.getDays()+"flight days\n");
-                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+"crew mates\n");
+                System.out.println("-Player with less crew mates loses "+c.getDays()+" flight days\n");
+                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+" crewmates\n");
                 System.out.println("-Player with less fire power gets: \n");
                 for(int i = 0; i < c.getShotsDirections().size(); i++){
                     System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
@@ -338,9 +338,9 @@ public class TUIView implements View {
             }
             case SecondWarzoneCard c ->{
                 inform("===War Zone===\n");
-                System.out.println("-Player with less fire power loses "+c.getDays()+"flight days\n");
-                System.out.println("-Player with less engine power loses"+c.getNumGoods()+"goods\n");
-                System.out.println("-Player with less crew mates gets: \n");
+                System.out.println("-Player with less fire power loses "+c.getDays()+" flight days\n");
+                System.out.println("-Player with less engine power loses"+c.getNumGoods()+" goods\n");
+                System.out.println("-Player with less crewmates gets: \n");
                 for(int i = 0; i < c.getShotsDirections().size(); i++){
                     System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
                 }
@@ -369,11 +369,11 @@ public class TUIView implements View {
                     System.out.println();
                 }
             }
-            case PlaugeCard c-> inform("===Plauge===\n");
+            case PlaugeCard c-> inform("===Plague===\n");
 
             case SlaversCard c->{
                 inform("===Slavers===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crew mates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crewmates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
             }
             case SmugglersCard c->{
                 inform("===Smugglers===\n");
@@ -611,8 +611,8 @@ public class TUIView implements View {
                 listOfOptions.add("Get a shown tile");
                 listOfOptions.add("Declare Ready");
                 listOfOptions.add("Watch a player's ship");
-                listOfOptions.add("Take Reserved Tile");
                 if(!isDemo){
+                    listOfOptions.add("Take Reserved Tile");
                     listOfOptions.add("Watch a deck");
                     listOfOptions.add("Spin the hourglass");
                 }
@@ -644,6 +644,7 @@ public class TUIView implements View {
                 listOfOptions.add("LogOut");
             }
             case SCORING  -> listOfOptions.add("logOut");
+            case EXIT  -> listOfOptions.add("logOut");
             default -> {}
         }
         return listOfOptions;

@@ -521,40 +521,43 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDeck() throws Exception {
         while (true) {
+            // 1) chiedi quale mazzo
             ciccio.informByController("Choose deck : 1 / 2 / 3");
-            int index = askIndex();
+            int index = askIndex() + 1;
 
+            // 2) controllo che sia nel range [1,3]
+            if (index < 1 || index > 3) {
+                ciccio.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
+                continue;   // ripeti il ciclo
+            }
+
+            // 3) se è valido, costruisci il payload e manda la richiesta
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);
             payload.add(index);
-
-            Message request = Message.request(Message.OP_LOOK_DECK, payload);
+            Message request  = Message.request(Message.OP_LOOK_DECK, payload);
             Message response = sendRequestWithResponse(request);
 
+            // 4) gestisci la risposta del server
             Object payloadResponse = response.getPayload();
-
-            switch (payloadResponse) {
-                case List<?> rawList -> {
-                    try {
-                        @SuppressWarnings("unchecked")
-                        List<Card> deck = (List<Card>) rawList;
-                        ciccio.printDeckByController(deck);
-                        return;
-                    } catch (ClassCastException e) {
-                        ciccio.reportErrorByController("Error: " + e.getMessage());
-                        return;
-                    }
-                }
-                case String error -> {
-                    ciccio.reportErrorByController("Invalid index: " + error);
-                }
-                default -> {
-                    ciccio.reportErrorByController("Unexpected value: " );
-                    return;
-                }
+            if (payloadResponse instanceof List<?> rawList) {
+                @SuppressWarnings("unchecked")
+                List<Card> deck = (List<Card>) rawList;
+                ciccio.printDeckByController(deck);
+                return;   // tutto OK, esci
             }
+            if (payloadResponse instanceof String err) {
+                ciccio.reportErrorByController("Server error: " + err);
+                // in teoria, qui non dovresti mai ricadere perché il pre-check ha già escluso
+                // gli indici invalidi, ma se il server ti manda un errore lo riporti e riprovi
+                continue;
+            }
+
+            // caso “strano” ma possibile
+            ciccio.reportErrorByController("Unexpected response from server.");
         }
     }
+
 
 
 
@@ -576,7 +579,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 case Tile[][] dashPlayer -> {
                     ciccio.informByController("Space Ship di: " + tmp);
                     ciccio.printPlayerDashboardByController(dashPlayer);
-                    ciccio.printListOfCommands();
                     return;
                 }
                 case String error -> {
@@ -677,7 +679,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
-        if(!ciccio.returOKAY(0,5) && !ciccio.returOKAY(0,6)) {
+        if(ciccio.returOKAY(0,5) && ciccio.returOKAY(0,6)) {
             throw new BusinessLogicException("There is not any reserverd tile");
         }
         ciccio.printMyDashBoardByController();
