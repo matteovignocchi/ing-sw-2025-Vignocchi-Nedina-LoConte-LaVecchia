@@ -92,7 +92,7 @@ public class TUIView implements View {
                     return key;
                 }
             }
-            inform("Please enter a nickname of some player in game");
+            reportError("Please enter a nickname of some player in game");
         }
     }
     @Override
