@@ -443,6 +443,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
             Message request = Message.request(Message.OP_POSITION_TILE, payloadGame);
             Message response = sendRequestWithResponse(request);
+            ciccio.setTileInMatrix(tile, tmp[0], tmp[1]);
+
 
             Object payload = response.getPayload();
 
