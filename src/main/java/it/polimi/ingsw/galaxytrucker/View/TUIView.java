@@ -7,6 +7,8 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TUIView implements View {
     private GamePhase game;
@@ -22,6 +24,12 @@ public class TUIView implements View {
     private static final String BROWN = "\u001B[33m";
     private static final String PEFOH = "\u001B[36m";
     private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+    private static final Map<Colour, String> ANSI_COLOR = Map.of(
+            Colour.RED,    RED,
+            Colour.GREEN,  GREEN,
+            Colour.YELLOW, YELLOW,
+            Colour.BLUE,   BLUE
+    );
 
 
     //per ora lascio il server come int
@@ -319,71 +327,190 @@ public class TUIView implements View {
 
     @Override
     public void printCard(Card card) {
-        switch (card){
-            case AbandonedShipCard c ->{
-                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
+        switch (card) {
+            case AbandonedShipCard c -> {
+                inform("=== Abandoned Ship ===");
+                inform(centerKV("Days",    String.valueOf(c.getDays()),    20));
+                inform(centerKV("Crewmates",   String.valueOf(c.getNumCrewmates()), 20));
+                inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
             }
-            case AbandonedStationCard c ->{
-                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
-                printListOfGoods(c.getStationGoods());
+            case AbandonedStationCard c -> {
+                inform("=== Abandoned Station ===");
+                inform(centerKV("Days",  String.valueOf(c.getDays()),  20));
+                inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
+                inform("List of goods: " + joinGoods(c.getStationGoods()));
             }
-            case FirstWarzoneCard c ->{
-                inform("===War Zone===\n");
-                System.out.println("-Player with less crew mates loses "+c.getDays()+" flight days\n");
-                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+" crewmates\n");
-                System.out.println("-Player with less fire power gets: \n");
-                for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+            case FirstWarzoneCard c -> {
+                inform("=== First War Zone ===");
+                printWarzoneTable(
+                        c.getShotsDirections(),
+                        c.getShotsSize(),
+                        "- Player with less crewmates lose " + c.getDays() + " days",
+                        "- Player with less engine power lose " + c.getNumCrewmates() + " crewmates"
+                );
+            }
+            case SecondWarzoneCard c -> {
+                inform("=== Second War Zone ===");
+                printWarzoneTable(
+                        c.getShotsDirections(),
+                        c.getShotsSize(),
+                        "- Player with less fire power lose " + c.getDays() + " days",
+                        "- Player with less engine power lose " + c.getNumGoods() + " goods"
+                );
+            }
+            case MeteoritesRainCard c -> {
+                inform("=== Meteorites Rain ===");
+                printAttackTable(c.getMeteorites_directions(), c.getMeteorites_size());
+            }
+            case PiratesCard c -> {
+                inform("=== Pirates ===");
+                inform(centerKV("Fire power",    String.valueOf(c.getFirePower()), 20));
+                inform(centerKV("Credits", String.valueOf(c.getCredits()),   20));
+                inform(centerKV("Days",    String.valueOf(c.getDays()),      20));
+                printAttackTable(c.getShots_directions(), c.getShots_size());
+            }
+            case SlaversCard c -> {
+                inform("=== Slavers ===");
+                inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
+                inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
+                inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
+                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+            }
+            case SmugglersCard c -> {
+                inform("=== Smugglers ===");
+                inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
+                inform(centerKV("Removed goods", String.valueOf(c.getNumRemovedGoods()), 20));
+                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+                inform("Reward goods: " + joinGoods(c.getRewardGoods()));
+            }
+            case PlanetsCard c -> {
+                inform("=== Planets ===");
+                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+                for (int i = 0; i < c.getRewardGoods().size(); i++) {
+                    inform("Planet " + (i+1) + ": " + joinGoods(c.getRewardGoods().get(i)));
                 }
             }
-            case SecondWarzoneCard c ->{
-                inform("===War Zone===\n");
-                System.out.println("-Player with less fire power loses "+c.getDays()+" flight days\n");
-                System.out.println("-Player with less engine power loses"+c.getNumGoods()+" goods\n");
-                System.out.println("-Player with less crewmates gets: \n");
-                for(int i = 0; i < c.getShotsDirections().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-                }
-            }
-            case MeteoritesRainCard c ->{
-                inform("===Meteorites Rain===\n");
-                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
-                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
-                }
-            }
-            case OpenSpaceCard c -> inform("===Open Space===\n");
-            case StardustCard c -> inform("===Stardust===\n");
-            case PiratesCard c ->{
-                inform("===Pirates===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-                for(int i = 0; i < c.getShots_directions().size(); i++){
-                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
-                }
-            }
-            case PlanetsCard c->{
-                inform("===Planets===\n");
-                System.out.println("- Days: "+c.getDays()+"\n");
-                for(int i =0; i< c.getRewardGoods().size(); i++){
-                    System.out.println("- Planet "+(i+1)+": ");
-                    printListOfGoods(c.getRewardGoods().get(i));
-                    System.out.println();
-                }
-            }
-            case PlaugeCard c-> inform("===Plague===\n");
-
-            case SlaversCard c->{
-                inform("===Slavers===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crewmates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-            }
-            case SmugglersCard c->{
-                inform("===Smugglers===\n");
-                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
-                printListOfGoods(c.getRewardGoods());
-                System.out.println("\n- Days: "+c.getDays()+"\n");
-            }
-            default -> {}
+            case PlaugeCard c -> inform("=== Plague ===");
+            case OpenSpaceCard c -> inform("=== Open Space ===");
+            case StardustCard c -> inform("=== Stardust ===");
+            default -> inform(""); //non ci arriverò mai 100%
         }
     }
+
+    /** Converte [RED, BLUE] in "RED, BLUE" */
+    private String joinGoods(List<Colour> goods) {
+        return goods.stream()
+                .map(c -> ANSI_COLOR.getOrDefault(c, "")
+                        + c.name()
+                        + RESET)
+                .collect(Collectors.joining(", "));
+    }
+
+    private void printWarzoneTable(List<Integer> dirs,
+                                   List<Boolean> sizes,
+                                   String summary1,
+                                   String summary2) {
+        inform(summary1);
+        inform(summary2);
+        printAttackTable(dirs, sizes);
+    }
+
+    private String centerKV(String key, String val, int width) {
+        String line = key + ": " + val;
+        int pad = width - line.length();
+        int padL = pad/2, padR = pad - padL;
+        return " ".repeat(Math.max(0,padL)) + line + " ".repeat(Math.max(0,padR));
+    }
+
+    private void printAttackTable(List<Integer> dirs, List<Boolean> sizes) {
+        Map<Integer,String> arrow = Map.of(0,"↑",1,"←",2,"↓",3,"→");
+        Function<Boolean,String> sizeLabel = b->b?"Big":"Small";
+
+        int shotW = 6, dirW = 10, szW = 6;
+        inform(center("Shot",shotW) + "│" + center("Direction",dirW) + "│" + center("Size",szW));
+        inform("──────┼──────────┼──────");
+        for(int i=0;i<dirs.size();i++){
+            String sh = center(String.valueOf(i+1), shotW);
+            String dr = center( arrow.getOrDefault(dirs.get(i), "?"), dirW);
+            String sz = center( sizeLabel.apply(sizes.get(i)), szW);
+            inform(sh + "│" + dr + "│" + sz);
+        }
+    }
+
+    private String center(String s, int width) {
+        int pad = width - s.length();
+        int padL = pad>0?pad/2:0, padR = pad>0?pad-padL:0;
+        return " ".repeat(padL) + s + " ".repeat(padR);
+    }
+
+
+//    @Override
+//    public void printCard(Card card) {
+//        switch (card){
+//            case AbandonedShipCard c ->{
+//                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
+//            }
+//            case AbandonedStationCard c ->{
+//                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
+//                printListOfGoods(c.getStationGoods());
+//            }
+//            case FirstWarzoneCard c ->{
+//                inform("===War Zone===\n");
+//                System.out.println("-Player with less crew mates loses "+c.getDays()+" flight days\n");
+//                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+" crewmates\n");
+//                System.out.println("-Player with less fire power gets: \n");
+//                for(int i = 0; i < c.getShotsDirections().size(); i++){
+//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+//                }
+//            }
+//            case SecondWarzoneCard c ->{
+//                inform("===War Zone===\n");
+//                System.out.println("-Player with less fire power loses "+c.getDays()+" flight days\n");
+//                System.out.println("-Player with less engine power loses"+c.getNumGoods()+" goods\n");
+//                System.out.println("-Player with less crewmates gets: \n");
+//                for(int i = 0; i < c.getShotsDirections().size(); i++){
+//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
+//                }
+//            }
+//            case MeteoritesRainCard c ->{
+//                inform("===Meteorites Rain===\n");
+//                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
+//                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
+//                }
+//            }
+//            case OpenSpaceCard c -> inform("===Open Space===\n");
+//            case StardustCard c -> inform("===Stardust===\n");
+//            case PiratesCard c ->{
+//                inform("===Pirates===\n");
+//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+//                for(int i = 0; i < c.getShots_directions().size(); i++){
+//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
+//                }
+//            }
+//            case PlanetsCard c->{
+//                inform("===Planets===\n");
+//                System.out.println("- Days: "+c.getDays()+"\n");
+//                for(int i =0; i< c.getRewardGoods().size(); i++){
+//                    System.out.println("- Planet "+(i+1)+": ");
+//                    printListOfGoods(c.getRewardGoods().get(i));
+//                    System.out.println();
+//                }
+//            }
+//            case PlaugeCard c-> inform("===Plague===\n");
+//
+//            case SlaversCard c->{
+//                inform("===Slavers===\n");
+//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crewmates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
+//            }
+//            case SmugglersCard c->{
+//                inform("===Smugglers===\n");
+//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
+//                printListOfGoods(c.getRewardGoods());
+//                System.out.println("\n- Days: "+c.getDays()+"\n");
+//            }
+//            default -> {}
+//        }
+//    }
 
 
     @Override

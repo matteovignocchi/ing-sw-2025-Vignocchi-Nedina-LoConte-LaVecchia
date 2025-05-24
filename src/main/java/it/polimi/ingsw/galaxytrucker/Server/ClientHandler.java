@@ -28,7 +28,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         this.socket = socket;
         this.gameManager = gameManager;
 
-        // APRI PRIMA L'OUTPUT, POI L'INPUT per evitare deadlock
+        // APRO PRIMA L'OUTPUT, POI L'INPUT per evitare deadlock
         this.out = new ObjectOutputStream(socket.getOutputStream());
         this.out.flush();
         this.in = new ObjectInputStream(socket.getInputStream());
