@@ -56,8 +56,16 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
             controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
+            /**/System.out.println("VISIT: Player " + nick);
+
             int x = controller.getPowerEngineForCard(p);
-            if (x == 0) p.setEliminated();
+
+            /**/System.out.println("VISIT: EnginePower for " + nick + ": " + x);
+
+            if (x == 0){
+                p.setEliminated();
+                /**/System.out.println("VISIT: Player " +nick+ " Eliminated. Flag: "+ p.isEliminated());
+            }
             else f.moveRocket(x, p);
 
             controller.changeMapPosition(nick, p);

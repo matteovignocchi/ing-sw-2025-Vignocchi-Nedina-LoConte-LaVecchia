@@ -65,7 +65,9 @@ public class Controller implements Serializable {
         }else{
             fBoard = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
-            decks = deckCreator.CreateSecondLevelDeck();
+            //TODO: commentato per debugging. ripristinare una volta finito
+            //decks = deckCreator.CreateSecondLevelDeck();
+            decks = deckCreator.CreateOpenSpaceDecks();
             deck = new Deck();
         }
         this.gameId = gameId;
@@ -730,8 +732,8 @@ public class Controller implements Serializable {
         } catch (Exception e) {
             future.cancel(true);
             markDisconnected(nick);
+            System.err.println("[ERROR] in askPlayerDecision: " + e);
             return false;
-
         } finally {
             executor.shutdownNow();
         }
@@ -1670,7 +1672,7 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         Tile[][] tmpDash = p.getDashMatrix();
         try {
-            viewsByNickname.get(nick).inform("the attack is coming from "+direction+"  on the section  "+direction2);
+            viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
             viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
             viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
         } catch (Exception e) {
@@ -1783,7 +1785,7 @@ public class Controller implements Serializable {
 
             Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
             try {
-                viewsByNickname.get(nick).inform("the attack is coming from "+direction+"on the section"+direction2);
+                viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
                 viewsByNickname.get(nick).inform("ship before the attack");
                 viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
             } catch (Exception e) {

@@ -761,10 +761,11 @@ public class TUIView implements View {
                 listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("logOut");
             }
-            case WAITING_FOR_TURN, CARD_EFFECT  -> {
+            case WAITING_FOR_TURN -> {
                 listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("LogOut");
             }
+            case CARD_EFFECT -> {}
             case DRAW_PHASE -> {
                 listOfOptions.add("Draw a card");
                 listOfOptions.add("Watch a player's ship");

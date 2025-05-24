@@ -19,7 +19,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     private String nickname;
     private int gameId = 0;
     private final CountDownLatch startLatch = new CountDownLatch(1);
-    private transient ClientController ciccio;
+    private transient ClientController clientController;
     private final VirtualServer server;
     private boolean printedWaiting = false;
     private boolean printedStarting = false;
@@ -38,7 +38,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void setClientController(ClientController clientController) {
-        this.ciccio = clientController;
+        this.clientController = clientController;
     }
 
 
@@ -46,49 +46,49 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {
-        ciccio.showUpdateByController(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
+        clientController.showUpdateByController(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
     }
 
     @Override
     public void setTile(Tile tmp){
-        ciccio.setCurrentTile(tmp);
+        clientController.setCurrentTile(tmp);
     }
     @Override
     public void inform(String message) throws RemoteException {
         System.out.print("\n");
-        ciccio.informByController(message);
+        clientController.informByController(message);
     }
     @Override
     public void reportError(String error) throws RemoteException {
-        ciccio.reportErrorByController(error);
+        clientController.reportErrorByController(error);
     }
     @Override
     public void printListOfTileCovered(List<Tile> tiles) throws RemoteException {
-        ciccio.printListOfTileCoveredByController();
+        clientController.printListOfTileCoveredByController();
     }
     @Override
     public void printListOfTileShown(List<Tile> tiles) throws RemoteException {
-        ciccio.printListOfTileShownByController(tiles);
+        clientController.printListOfTileShownByController(tiles);
     }
     @Override
     public void printListOfGoods(List<Colour> listOfGoods) {
-        ciccio.printListOfGoodsByController(listOfGoods);
+        clientController.printListOfGoodsByController(listOfGoods);
     }
     @Override
     public void printCard(Card card) throws RemoteException {
-        ciccio.printCardByController(card);
+        clientController.printCardByController(card);
     }
     @Override
     public void printTile(Tile tile) throws RemoteException {
-        ciccio.printTileByController(tile);
+        clientController.printTileByController(tile);
     }
     @Override
     public void printPlayerDashboard(Tile[][] dashboard) throws RemoteException {
-        ciccio.printPlayerDashboardByController(dashboard);
+        clientController.printPlayerDashboardByController(dashboard);
     }
     @Override
     public void printDeck(List<Card> deck) throws RemoteException {
-        ciccio.printDeckByController(deck);
+        clientController.printDeckByController(deck);
     }
 
 
@@ -96,20 +96,20 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public boolean ask(String message) throws RemoteException {
-        return ciccio.askByController(message);
+        return clientController.askByController(message);
     }
     @Override
     public int askIndex() throws RemoteException {
-        return ciccio.askIndexByController();
+        return clientController.askIndexByController();
     }
     @Override
     public int[] askCoordinate() throws RemoteException {
-        return ciccio.askCoordinateByController();
+        return clientController.askCoordinateByController();
 
     }
     @Override
     public String askString() throws RemoteException {
-        return ciccio.askStringByController();
+        return clientController.askStringByController();
     }
 
 
@@ -117,7 +117,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void updateGameState(GamePhase phase) throws RemoteException {
-        ciccio.updateGameStateByController(phase);
+        clientController.updateGameStateByController(phase);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             try{
                return server.createNewGame(isDemo , this , nickname , numberOfPlayer);
             }catch (BusinessLogicException e){
-                ciccio.reportErrorByController("Server Error"+ e.getMessage());
+                clientController.reportErrorByController("Server Error"+ e.getMessage());
             }
         }
 
@@ -162,20 +162,20 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                         try {
                             availableGames = server.requestGamesList();
                         } catch (BusinessLogicException e) {
-                            ciccio.reportErrorByController("Server error: " + e.getMessage());
+                            clientController.reportErrorByController("Server error: " + e.getMessage());
                             return -1;
                         }
                         if (availableGames.isEmpty()) {
-                            ciccio.informByController("**No available games**");
+                            clientController.informByController("**No available games**");
                             return -1;
                         }
-                        int choice = ciccio.printAvailableGames(availableGames);
+                        int choice = clientController.printAvailableGames(availableGames);
                         if (choice == 0) return 0;
                         try {
                             server.enterGame(choice, this, nickname);
                             return choice;
                         } catch (Exception e) {
-                            ciccio.reportErrorByController("Cannot join: " + e.getMessage());
+                            clientController.reportErrorByController("Cannot join: " + e.getMessage());
                             return -1;
                         }
             }
@@ -205,19 +205,19 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             throw new BusinessLogicException("Empty list");
         }
 
-        ciccio.printListOfTileShownByController(tmp);
-        ciccio.informByController("Select a tile");
+        clientController.printListOfTileShownByController(tmp);
+        clientController.informByController("Select a tile");
         int index;
         while(true){
             while (true) {
                 index = askIndex();
                 if (index >= 0 && index < tmp.size()) break;
-                ciccio.informByController("Invalid index. Try again.");
+                clientController.informByController("Invalid index. Try again.");
             }
             try {
                 return server.chooseUncoveredTile(gameId, nickname,tmp.get(index).getIdTile());
             } catch (BusinessLogicException e) {
-                ciccio.reportErrorByController("you miss " + e.getMessage() + "select new index" );
+                clientController.reportErrorByController("you miss " + e.getMessage() + "select new index" );
             }
         }
     }
@@ -232,22 +232,22 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void positionTile(Tile tile) throws RemoteException{
-        ciccio.printMyDashBoardByController();
+        clientController.printMyDashBoardByController();
         int[] tmp;
         while(true){
-            ciccio.informByController("Choose coordinates");
-            tmp = ciccio.askCoordinateByController();
-            ciccio.setTileInMatrix(tile, tmp[0], tmp[1]);
+            clientController.informByController("Choose coordinates");
+            tmp = clientController.askCoordinateByController();
+            clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
             try {
                 server.placeTile(gameId, nickname, tile, tmp);
                 break;
             } catch (BusinessLogicException e) {
-                ciccio.reportErrorByController(e.getMessage());
+                clientController.reportErrorByController(e.getMessage());
             }
         }
 //        Dash_Matrix[tmp[0]][tmp[1]] = tile;
-        ciccio.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
-        ciccio.printMyDashBoardByController();
+        clientController.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
+        clientController.printMyDashBoardByController();
     }
     @Override
     public void drawCard() throws RemoteException , BusinessLogicException {
@@ -280,22 +280,22 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void lookDeck() throws RemoteException {
         while (true) {
-            ciccio.informByController("Choose deck : 1 / 2 / 3");
+            clientController.informByController("Choose deck : 1 / 2 / 3");
             int index = askIndex() + 1;
 
             if (index < 1 || index > 3) {
-                ciccio.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
+                clientController.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
                 continue;
             }
 
             try {
                 List<Card> deck = server.showDeck(gameId, index);
-                ciccio.printDeckByController(deck);
+                clientController.printDeckByController(deck);
                 return;
             } catch (BusinessLogicException e) {
-                ciccio.reportErrorByController("Index not valid.");
+                clientController.reportErrorByController("Index not valid.");
             } catch (IOException e) {
-                ciccio.reportErrorByController("Input error: please enter a number.");
+                clientController.reportErrorByController("Input error: please enter a number.");
             }
         }
     }
@@ -307,43 +307,43 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         Tile[][] dashPlayer;
         String tmp;
         while(true){
-             tmp = ciccio.choocePlayerByController();
+             tmp = clientController.choocePlayerByController();
             try {
                 dashPlayer = server.lookAtDashBoard(gameId,tmp);
                 break;
             } catch (Exception e) {
-                ciccio.reportErrorByController("player not valid");
+                clientController.reportErrorByController("player not valid");
             }
         }
-        ciccio.informByController("Space Ship of :" + tmp);
-        ciccio.printPlayerDashboardByController(dashPlayer);
+        clientController.informByController("Space Ship of :" + tmp);
+        clientController.printPlayerDashboardByController(dashPlayer);
     }
 
     @Override
     public Tile takeReservedTile() throws RemoteException  , BusinessLogicException{
-        if(ciccio.returOKAY(0,5) && ciccio.returOKAY(0,6)) {
+        if(clientController.returOKAY(0,5) && clientController.returOKAY(0,6)) {
             throw new BusinessLogicException("There is not any reserverd tile");
         }
-        ciccio.printMyDashBoardByController();
-        ciccio.informByController("Select a tile");
+        clientController.printMyDashBoardByController();
+        clientController.informByController("Select a tile");
         int[] index;
         Tile tmpTile = null;
         while(true) {
             index = askCoordinate();
-            if(index[0]!=0 || !ciccio.returOKAY(0 , index[1])) ciccio.informByController("Invalid coordinate");
-            else if(index[1]!=5 && index[1]!=6) ciccio.informByController("Invalid coordinate");
+            if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
+            else if(index[1]!=5 && index[1]!=6) clientController.informByController("Invalid coordinate");
             else break;
         }
 //        view.inform("id+"+ Dash_Matrix[index[0]][index[1]].idTile);
             try {
 //                view.setValidity(index[0], index[1]);
-                Tile tmp = ciccio.getSomeTile(index[0], index[1]);
-                ciccio.setTileInMatrix(new EmptySpace(), index[0], index[1]);
+                Tile tmp = clientController.getSomeTile(index[0], index[1]);
+                clientController.setTileInMatrix(new EmptySpace(), index[0], index[1]);
 //                view.printDashShip(Dash_Matrix);
-                ciccio.printMyDashBoardByController();
+                clientController.printMyDashBoardByController();
                 tmpTile = server.getReservedTile(gameId,nickname,tmp.getIdTile());
             } catch (BusinessLogicException e) {
-                ciccio.reportErrorByController("you miss " + e.getMessage() + "select new command" );
+                clientController.reportErrorByController("you miss " + e.getMessage() + "select new command" );
                 throw new BusinessLogicException(e.getMessage());
             }
         return tmpTile;
@@ -361,7 +361,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         try {
             server.logOut(nickname);
         } catch (BusinessLogicException e) {
-            ciccio.reportErrorByController("Server error: " + e.getMessage());
+            clientController.reportErrorByController("Server error: " + e.getMessage());
         }
         System.out.println("Goodbye!");
         System.exit(0);
@@ -369,7 +369,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
-        ciccio.updateMapPositionByController(Position);
+        clientController.updateMapPositionByController(Position);
     }
 
     @Override
@@ -390,7 +390,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void setIsDemo(Boolean demo) throws RemoteException{
-        ciccio.setIsDemoByController(demo);
+        clientController.setIsDemoByController(demo);
     }
 
     //////////////////////////////////////////////////
@@ -401,12 +401,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             setGameId(gameId);
             //TODO: continuare come bisogna fare
         } catch (Exception e) {
-            ciccio.reportErrorByController("you miss " + e.getMessage() );
+            clientController.reportErrorByController("you miss " + e.getMessage() );
         }
     }
 
     @Override
     public void updateDashMatrix(Tile[][] data) throws RemoteException {
-        ciccio.newShip(data);
+        clientController.newShip(data);
     }
 }

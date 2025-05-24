@@ -69,4 +69,22 @@ public class DeckManager implements Serializable {
         }
         return decks;
     }
+
+    //TODO: SOLO PER DEBUGGING, ELIMINARE UNA VOLTA FINITO
+    public List<Deck> CreateOpenSpaceDecks() throws CardEffectException {
+        Card c1 = new OpenSpaceCard("1");
+        Card c2 = new OpenSpaceCard("2");
+        Card c3 = new OpenSpaceCard("3");
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
 }

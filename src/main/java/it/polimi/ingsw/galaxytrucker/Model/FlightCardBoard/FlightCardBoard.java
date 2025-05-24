@@ -264,22 +264,6 @@ public class FlightCardBoard implements Serializable {
                 }
             }
         }
-
-        Iterator<Player> iterator = orderedPlayersInFlight.iterator();
-        while(iterator.hasNext()) {
-            Player p = iterator.next();
-            boolean overlapped = false;
-            for(Player other : orderedPlayersInFlight) {
-                if(other.getId() == p.getId()) continue;
-                if(other.getLap() > p.getLap() && other.getPos() > p.getPos()){
-                    overlapped = true;
-                    break;
-                }
-            }
-            if(overlapped){
-                iterator.remove();
-            }
-        }
     }
 
     public List<Player> eliminatePlayers(){
