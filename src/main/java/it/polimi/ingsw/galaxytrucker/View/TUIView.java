@@ -330,13 +330,13 @@ public class TUIView implements View {
         switch (card) {
             case AbandonedShipCard c -> {
                 inform("=== Abandoned Ship ===");
-                inform(centerKV("Days",    String.valueOf(c.getDays()),    20));
+                inform(centerKV("Flight Days",    String.valueOf(c.getDays()),    20));
                 inform(centerKV("Crewmates",   String.valueOf(c.getNumCrewmates()), 20));
                 inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
             }
             case AbandonedStationCard c -> {
                 inform("=== Abandoned Station ===");
-                inform(centerKV("Days",  String.valueOf(c.getDays()),  20));
+                inform(centerKV("Flight Days",  String.valueOf(c.getDays()),  20));
                 inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
                 inform("List of goods: " + joinGoods(c.getStationGoods()));
             }
@@ -366,7 +366,7 @@ public class TUIView implements View {
                 inform("=== Pirates ===");
                 inform(centerKV("Fire power",    String.valueOf(c.getFirePower()), 20));
                 inform(centerKV("Credits", String.valueOf(c.getCredits()),   20));
-                inform(centerKV("Days",    String.valueOf(c.getDays()),      20));
+                inform(centerKV("Flight Days",    String.valueOf(c.getDays()),      20));
                 printAttackTable(c.getShots_directions(), c.getShots_size());
             }
             case SlaversCard c -> {
@@ -374,18 +374,18 @@ public class TUIView implements View {
                 inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
                 inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
                 inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
-                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
             }
             case SmugglersCard c -> {
                 inform("=== Smugglers ===");
                 inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
                 inform(centerKV("Removed goods", String.valueOf(c.getNumRemovedGoods()), 20));
-                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
                 inform("Reward goods: " + joinGoods(c.getRewardGoods()));
             }
             case PlanetsCard c -> {
                 inform("=== Planets ===");
-                inform(centerKV("Days", String.valueOf(c.getDays()), 20));
+                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
                 for (int i = 0; i < c.getRewardGoods().size(); i++) {
                     inform("Planet " + (i+1) + ": " + joinGoods(c.getRewardGoods().get(i)));
                 }
