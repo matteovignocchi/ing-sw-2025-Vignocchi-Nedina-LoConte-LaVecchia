@@ -27,7 +27,8 @@ import java.util.function.Consumer;
 //TODO: parser per non passare oggetti del model
 //TODO: inserire mappa virtualview-player? e usare quella al posto di getPlayer.. ogni volta? vedere alla fine.
 //TODO: creare metodi inform ecc.. che chiamano i metodi corrispondenti sulla view, inglobando i try-catch, per snellire il codice negli altri metodi
-
+//TODO: pulire il codice: quando notifyView, quando update fase.. coerenza
+//TODO: sostituire ove possibile v.inform con chiamate a inform metodo controller
 
 public class Controller implements Serializable {
     private final int gameId;
@@ -181,22 +182,36 @@ public class Controller implements Serializable {
                 .orElseThrow(() -> new BusinessLogicException("Player Not Found"));
     }
 
+    public void inform(String msg, String nick){
+        VirtualView v = viewsByNickname.get(nick);
+        try{
+            v.inform(msg);
+        } catch (IOException e){
+            markDisconnected(msg);
+        } catch(Exception e){
+            markDisconnected(msg);
+            System.err.println("[ERROR] in inform: " + e);
+        }
+    }
+
+    public void informAndNotify(String msg, String nick){
+        VirtualView v = viewsByNickname.get(nick);
+        try{
+            v.inform(msg);
+            notifyView(nick);
+        } catch (IOException e){
+            markDisconnected(msg);
+        } catch(Exception e){
+            markDisconnected(msg);
+            System.err.println("[ERROR] in inform: " + e);
+        }
+    }
 
     public void broadcastInform(String msg) {
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
             Player p = getPlayerByNickname(nickname);
-            if(p.isConnected()) {
-                VirtualView v = viewsByNickname.get(nickname);
-                try {
-                    v.inform(msg);
-                } catch (IOException e) {
-                    markDisconnected(nickname);
-                } catch (Exception e) {
-                    markDisconnected(nickname);
-                    System.err.println("[ERROR] in broadcastInform: " + e.getMessage());
-                }
-            }
+            if(p.isConnected()) inform(msg, nickname);
         }
     }
 
@@ -214,8 +229,6 @@ public class Controller implements Serializable {
             p.setConnected(false);
             broadcastInform("SERVER: " + nickname + " is disconnected");
             setTimeout();
-
-            //Capire se tenere e come gestire
             loggedInUsers.remove(nickname);
         }
     }
@@ -236,20 +249,12 @@ public class Controller implements Serializable {
 
     public void handleElimination(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
-        VirtualView v = getViewCheck(nick);
 
         //TODO: capire la fase di eliminazione
         p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
-        try{
-            v.inform("SERVER: You have been eliminated!");
-            notifyView(nick);
-        } catch (IOException e){
-            markDisconnected(nick);
-        } catch (Exception e){
-            markDisconnected(nick);
-            System.err.println("[ERROR] in handleElimination " + e.getMessage());
-        }
+        String msg = "SERVER: You have been eliminated!";
+        informAndNotify(msg, nick);
     }
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
@@ -281,24 +286,13 @@ public class Controller implements Serializable {
                         .findFirst().orElse(null);
 
                 if (winner != null) {
-                    try {
-                        viewsByNickname.get(winner).inform("SERVER: " + "You win by timeout!");
-                    } catch (Exception ignored) {}
+                    String msg = "SERVER: " + "You win by timeout!";
+                    inform(msg, winner);
                 }
                 onGameEnd.accept(gameId);
             }, 1, TimeUnit.MINUTES);
         }
     }
-
-    public void sendInformTo(String nickname, String msg) {
-        try {
-            VirtualView v = getViewCheck(nickname);
-            v.inform(msg);
-        } catch (Exception e) {
-            markDisconnected(nickname);
-        }
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE MODEL 1
@@ -472,10 +466,12 @@ public class Controller implements Serializable {
                 leader.setGamePhase(GamePhase.WAITING_FOR_TURN);
                 System.err.println("[ERROR] in activateDrawPhase:" + e.getMessage());
             }
+
         }
 
         for (String nickname : viewsByNickname.keySet()) {
             Player p = getPlayerCheck(nickname);
+            p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             if(p.isConnected() && !p.isEliminated() && !nickname.equals(leaderNick)) notifyView(nickname);
         }
     }
@@ -496,39 +492,21 @@ public class Controller implements Serializable {
                     hourglass.flip();
                     broadcastInform("SERVER: " + "Hourglass flipped a second time!");
                 } else {
-                    try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
-                    } catch (IOException e) {
-                        markDisconnected(nickname);
-                    } catch (Exception e){
-                        markDisconnected(nickname);
-                        System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
-                    }
+                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    inform(msg, nickname);
                 }
                 break;
             case 2:
                 if(state == HourglassState.ONGOING){
-                    try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass: It's still running");
-                    } catch (IOException e) {
-                        markDisconnected(nickname);
-                    } catch (Exception e){
-                        markDisconnected(nickname);
-                        System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
-                    }
+                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    inform(msg, nickname);
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
                     broadcastInform("SERVER: " + "Hourglass flipped the last time!");
                 } else {
-                    try {
-                        getViewCheck(nickname).inform("SERVER: " + "You cannot flip the hourglass for the last time: " +
-                                "You are not ready");
-                    } catch (IOException e) {
-                        markDisconnected(nickname);
-                    } catch (Exception e){
-                        markDisconnected(nickname);
-                        System.err.println("[ERROR] in activateDrawPhase: " + e.getMessage());
-                    }
+                    String msg = "SERVER: You cannot flip the hourglass for the last time: " +
+                            "You are not ready";
+                    inform(msg, nickname);
                 }
                 break;
             default: throw new BusinessLogicException("\nImpossible to flip the hourglass another time!");
@@ -552,17 +530,7 @@ public class Controller implements Serializable {
         }
     }
 
-    /*metodo per pescare una carta e attivarla:
-      1. pesco con il metodo draw (che rimuove dal deck)
-      2. inform + print card su tutte le view
-      3. chiamo activate card
-      3.1 activatecard chiama il metodo accept sulla carta che chiama il visit corretto sul visitor
-      3.2 logica della carta + ricalcolo nuove posizione ecc..
-      4. alla fine, check se deck vuoto:
-        -si, si passa alla fase di premizione (cambio fase, inform..))
-        -no, rimodifico le fasi per una nuova drawcard (assegno la fase di drawCard al leader e agli altri quella di attesa..)
-      5. update per ogni player
-   */
+    //TODO: vedere se skippabile il waiting for turn al leader
     public void drawCardManagement(String nickname) throws BusinessLogicException {
         Card card = deck.draw();
         
@@ -584,8 +552,10 @@ public class Controller implements Serializable {
             VirtualView v = entry.getValue();
             Player p = getPlayerCheck(nick);
 
+            p.setGamePhase(GamePhase.CARD_EFFECT);
             if(p.isConnected()){
                 try {
+                    v.updateGameState(GamePhase.CARD_EFFECT);
                     v.printCard(card);
                 } catch (IOException e) {
                     markDisconnected(nick);
@@ -597,26 +567,36 @@ public class Controller implements Serializable {
         }
 
         activateCard(card);
+        broadcastInform("SERVER: end of card's effect");
 
         if(deck.isEmpty() || fBoard.getOrderedPlayers().isEmpty()){
             startAwardsPhase();
         } else {
+            List<String> inFlight = playersByNickname.entrySet().stream()
+                    .filter(e -> !e.getValue().isEliminated())
+                    .map(Map.Entry::getKey)
+                    .toList();
 
-            for(Player p : playersByNickname.values()){
-                if(!p.isEliminated()){
-                    p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                    String msg = "SERVER: Do you want to abandon the flight? ";
-                    if(askPlayerDecision(msg, p)){
-                        p.setEliminated();
-                        handleElimination(p);
-                    }
+            for (int i = 0; i < inFlight.size(); i++) {
+                String nick = inFlight.get(i);
+                Player p   = playersByNickname.get(nick);
+                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+
+                String question = "SERVER: Do you want to abandon the flight? ";
+                if (askPlayerDecision(question, p)) {
+                    p.setEliminated();
+                    handleElimination(p);
+                }
+                if (i < inFlight.size() - 1) {
+                    String waitingMsg = "SERVER: Waiting for others to decide…";
+                    inform(waitingMsg, nick);
                 }
             }
             fBoard.eliminatePlayers();
-
             activateDrawPhase();
         }
     }
+
 
     //TODO: testare e capire se updatare e mettere in exit prima o dopo gli awards
     public void startAwardsPhase() throws BusinessLogicException {

@@ -54,7 +54,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             /**/System.out.println("VISIT: Player " + nick);
 
@@ -69,7 +69,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             else f.moveRocket(x, p);
 
             controller.changeMapPosition(nick, p);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }
@@ -92,14 +92,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
 
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int x = p.countExposedConnectors();
             f.moveRocket(-x, p);
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             controller.changeMapPosition(nick, p);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }
@@ -127,7 +127,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > slavers_fire_power) {
@@ -147,7 +147,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.removeCrewmates(p, card.getNumCrewmates());
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
@@ -177,7 +177,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
             nicks.add(nick);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+           // controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
         }
 
         int idx_firepower = 0;
@@ -207,7 +207,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -235,7 +235,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
             nicks.add(nick);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
         }
 
         int idx_firepower = 0;
@@ -264,7 +264,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -291,7 +291,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > smugglers_fire_power){
@@ -312,7 +312,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.removeGoods(p, card.getNumRemovedGoods());
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
@@ -337,7 +337,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
@@ -355,7 +355,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             }
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
@@ -381,7 +381,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p: players) {
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int num_crewmates = card.getNumCrewmates();
             if(controller.getNumCrew(p)>=num_crewmates){
@@ -398,7 +398,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             }
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
@@ -424,7 +424,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
             nicks.add(nick);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
         }
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
@@ -438,7 +438,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(int i = 0; i < players.size(); i++) {
             Player p = players.get(i);
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nicks.get(i), p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nicks.get(i), p, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -465,7 +465,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
 
             if(controller.getFirePowerForCard(p) > card.getFirePower()){
@@ -479,7 +479,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 }
                 //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
                 controller.changeMapPosition(nick, p);
-                controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
                 controller.updatePositionForEveryBody();
                 break;
             } else if (controller.getFirePowerForCard(p) < card.getFirePower())
@@ -496,7 +496,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 String nick = controller.getNickByPlayer(p);
                 //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             }
         }
     }
@@ -524,7 +524,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p : players){
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             String string ="SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
@@ -540,7 +540,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             }
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
@@ -560,12 +560,12 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for(Player p : players){
             String nick = controller.getNickByPlayer(p);
             //p.setGamePhase(GamePhase.CARD_EFFECT);
-            controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             controller.startPlauge(p);
 
             //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
         }
     }
 

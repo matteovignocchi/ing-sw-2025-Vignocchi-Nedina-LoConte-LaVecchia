@@ -60,7 +60,7 @@ public class GameManager {
         Controller controller = getControllerCheck(gameId);
         for (String other : controller.viewsByNickname.keySet()) {
             if (!other.equals(nickname)) {
-                controller.sendInformTo(other, nickname + " abandoned: press any key to return to the main menù!");
+                controller.inform(other, nickname + " abandoned: press any key to return to the main menù!");
             }
         }
         controller.setExit();
