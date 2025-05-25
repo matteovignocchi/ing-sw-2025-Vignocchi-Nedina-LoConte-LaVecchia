@@ -5,6 +5,9 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -14,7 +17,8 @@ public class TUIView implements View {
     private GamePhase game;
     private boolean isDemo;
     private boolean[][] maschera;
-    private Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in); //TODO: da eliminare
+    private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
@@ -70,8 +74,16 @@ public class TUIView implements View {
     }
 
 
-
-
+    private String readLine(long timeoutMs) throws InterruptedException, IOException {
+        long end = System.currentTimeMillis() + timeoutMs;
+        while (System.currentTimeMillis() < end) {
+            if (console.ready()) {
+                return console.readLine();
+            }
+            Thread.sleep(20);
+        }
+        return null;
+    }
 
     @Override
     public void inform(String message) {System.out.println("> " + message);}
@@ -103,23 +115,26 @@ public class TUIView implements View {
             reportError("Please enter a nickname of some player in game");
         }
     }
+
     @Override
     public boolean ask(String message) {
-        boolean decision = false;
-        while(true) {
-            inform(message+ "(Yes/No)");
-            String response = scanner.nextLine().trim().toLowerCase();
-            if (response.equals("yes")) {
-                decision = true;
-                break;
-            } else if (response.equals("no")) {
-                break;
+        try {
+            inform(message + " (Yes/No)");
+            while (true) {
+                String line = readLine(200);
+                if (line == null) continue;
+                line = line.trim().toLowerCase();
+                if (line.equals("yes")) return true;
+                if (line.equals("no"))  return false;
+                reportError("Invalid response, try again.");
             }
-            else {
-                reportError("The response entered is invalid. Try again: \n");
-            }
+        } catch (IOException e) {
+            reportError("I/O error: " + e.getMessage());
+            return false;  //risposta predefinita
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false; //risposta predefinita
         }
-        return decision;
     }
 
     @Override
@@ -778,9 +793,21 @@ public class TUIView implements View {
         return listOfOptions;
     }
 
-
     @Override
-    public String sendAvailableChoices() {
+    public String sendAvailableChoices() throws IOException, InterruptedException {
+        List<String> options = commandConstructor();
+        String line = readLine(200);
+        if (line == null) return null;
+        try {
+            int idx = Integer.parseInt(line.trim()) - 1;
+            if (0 <= idx && idx < options.size())
+                return options.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
+        } catch (NumberFormatException e) {
+            System.out.println("[ERROR] Invalid choice, try again.");
+        }
+        return null;
+
+        /**
         List<String> options = commandConstructor();
 
         while (true) {
@@ -797,6 +824,7 @@ public class TUIView implements View {
             } catch (NumberFormatException ignored) { }
             System.out.println("[ERROR] Invalid choice, try again.");
         }
+         */
     }
 
 
@@ -809,6 +837,7 @@ public class TUIView implements View {
         for(int i = 0 ; i < listOfOptions.size(); i++) {
             inform((i + 1) + ":" + listOfOptions.get(i));
         }
+        inform("Insert index: ");
     }
 
     @Override

@@ -299,11 +299,22 @@ public class ClientController {
 
         view.printListOfCommand();
         while (true) {
+            GamePhase temp = currentGamePhase;
+
+            if(currentGamePhase == GamePhase.CARD_EFFECT) {
+                Thread.sleep(100);
+                continue;
+            }
+
+            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //da controllare
 
             String key = view.sendAvailableChoices();
-            if(currentGamePhase==GamePhase.EXIT){
-                mainMenuLoop();
+
+            if(key == null){
+                if(temp != currentGamePhase) view.printListOfCommand();
+                continue;
             }
+
             try {
                 switch (key) {
                     case "getacoveredtile"    -> {

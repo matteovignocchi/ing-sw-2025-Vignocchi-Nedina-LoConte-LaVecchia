@@ -175,6 +175,11 @@ public class DummyView implements View {
 
     }
 
+    @Override
+    public GamePhase getGamePhase() {
+        return null;
+    }
+
     // Metodo per costruire le opzioni in base alla fase del gioco
     private List<String> commandConstructor() {
         List<String> listOfOptions = new ArrayList<>();
