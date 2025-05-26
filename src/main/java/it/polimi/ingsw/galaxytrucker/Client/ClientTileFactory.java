@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ClientTileFactory {
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public  ClientTile fromJson(String json) throws IOException {
         return mapper.readValue(json, ClientTile.class);

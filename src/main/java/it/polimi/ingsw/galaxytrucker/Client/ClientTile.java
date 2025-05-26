@@ -1,5 +1,4 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-
 import java.util.ArrayList;
 import java.util.List;
 
