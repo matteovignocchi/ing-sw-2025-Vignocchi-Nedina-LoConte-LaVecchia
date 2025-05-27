@@ -356,15 +356,17 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
         List<Tile> tmp;
         try {
-            tmp = switch (listPayload) {
-                case List<?> list -> {
+            switch (listPayload) {
+                case List<?> list:
                     @SuppressWarnings("unchecked")
                     List<Tile> casted = (List<Tile>) list;
-                    yield casted;
-                }
-                case String error -> throw new IOException("Server error: " + error);
-                default -> throw new IOException("Unexpected payload type while reading tile list.");
-            };
+                    tmp = casted;
+                    break;
+                case String error:
+                    throw new IOException("Server error: " + error);
+                default:
+                    throw new IOException("Unexpected payload type while reading tile list.");
+            }
         } catch (ClassCastException e) {
             throw new IOException("Payload type mismatch while casting tile list.", e);
         }
@@ -394,14 +396,18 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             Object tilePayload = tileResponse.getPayload();
 
             try {
-                return switch (tilePayload) {
-                    case Tile tile -> tile;
-                    case String error -> {
+                Tile selectedTile;
+                switch (tilePayload) {
+                    case Tile tile:
+                        selectedTile = tile;
+                        break;
+                    case String error:
                         clientController.reportErrorByController("You missed: " + error + ". Select a new index.");
-                        yield null;
-                    }
-                    default -> throw new IOException("Unexpected payload type when fetching tile.");
-                };
+                        continue;
+                    default:
+                        throw new IOException("Unexpected payload type when fetching tile.");
+                }
+                return selectedTile;
             } catch (ClassCastException e) {
                 throw new IOException("Payload type mismatch when fetching tile.", e);
             }
