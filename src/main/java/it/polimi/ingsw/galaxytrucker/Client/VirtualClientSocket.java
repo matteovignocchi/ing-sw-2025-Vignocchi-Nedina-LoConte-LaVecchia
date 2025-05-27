@@ -118,7 +118,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
             case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
             case Message.OP_PRINT_GOODS -> this.printListOfGoods((List<Colour>) msg.getPayload());
-            case Message.OP_PRINT_DASHBOARD -> this.printPlayerDashboard((Tile[][]) msg.getPayload());
+            case Message.OP_PRINT_DASHBOARD -> {
+                Tile[][] dash = (Tile[][]) msg.getPayload();
+                clientController.newShip(dash);
+                clientController.printPlayerDashboardByController(dash);
+            }
             case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
             case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
             case Message.OP_SET_NICKNAME -> this.setNickname((String) msg.getPayload());

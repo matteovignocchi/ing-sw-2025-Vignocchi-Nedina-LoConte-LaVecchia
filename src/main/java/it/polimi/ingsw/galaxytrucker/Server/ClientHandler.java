@@ -22,8 +22,6 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
 
-    //TODO : franci ho aggiunto un metodo che mi serve per il client in fondo
-
     public ClientHandler(Socket socket, GameManager gameManager) throws IOException {
         this.socket = socket;
         this.gameManager = gameManager;

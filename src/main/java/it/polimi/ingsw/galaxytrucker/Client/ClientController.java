@@ -91,6 +91,12 @@ public class ClientController {
                 default -> {}
             }
             String username = virtualClient.askString();
+
+            if (username == null || username.trim().isEmpty()) {
+                view.reportError(" Username cannot be empty. Please enter a valid username.");
+                continue;
+            }
+
             int res = virtualClient.sendLogin(username);
 
             if (res == -1) {

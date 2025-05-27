@@ -312,7 +312,7 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             } catch (Exception e){
                 markDisconnected(nick);
-                System.err.println("[ERROR] in startGame: " + e.getMessage());
+                System.err.println(" in startGame: " + e.getMessage());
             }
         });
 
@@ -2110,8 +2110,6 @@ public class Controller implements Serializable {
         try {
             //notifyView(id);
             viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
-        } catch (IOException e) {
-            markDisconnected(id);
         } catch (Exception e){
             markDisconnected(id);
             System.err.println("[ERROR] in checkPlayerAssembly: " + e.getMessage());
