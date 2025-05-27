@@ -26,8 +26,7 @@ public class MainMenuController extends GUIController {
         clientController = ClientController.getInstance();
         joinButton.setOnAction(event -> {
             try {
-                //TODO fare join con le scelte
-                clientController.joinExistingGame();
+                guiView.resolveMenuChoice("2");
                 joinGame();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -37,7 +36,7 @@ public class MainMenuController extends GUIController {
 
         createButton.setOnAction(event -> {
             try {
-                clientController.createNewGame();
+                guiView.resolveMenuChoice("1");
                 createGame();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -62,7 +61,7 @@ public class MainMenuController extends GUIController {
     @FXML
     public void logout(){
         try {
-            clientController.logOutGUI();
+            guiView.resolveMenuChoice("3");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

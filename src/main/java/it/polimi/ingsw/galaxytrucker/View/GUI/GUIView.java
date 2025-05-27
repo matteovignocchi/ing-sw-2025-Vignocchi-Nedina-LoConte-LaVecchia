@@ -39,7 +39,8 @@ public class GUIView extends Application implements View {
     private ClientController clientController;
     public Tile currentTile;
     public Tile[][] dashBoard;
-    public List<Object> dataForGame;
+    private CompletableFuture<List<Object>> dataForGame;
+    private CompletableFuture<String> menuChoiceFuture;
     public int gameChoice;
     private SceneEnum sceneEnum;
     private GamePhase gamePhase;
@@ -58,6 +59,7 @@ public class GUIView extends Application implements View {
     }
 
 
+
     @Override
     public void start(Stage stage) {
         this.mainStage = stage;
@@ -66,10 +68,8 @@ public class GUIView extends Application implements View {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.MAIN_MENU.value()));
             Parent root = loader.load();
-
-             MainMenuController controller = loader.getController();
-             controller.setGuiView(this);
-
+            MainMenuController controller = loader.getController();
+            controller.setGuiView(this);
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -78,8 +78,7 @@ public class GUIView extends Application implements View {
             return;
         }
 
-        // Dopo aver mostrato il menu, connetti e avvia il controller in background
-        Platform.runLater(() -> {
+        new Thread(() -> {
             try {
                 VirtualView virtualClient;
                 if (protocolChoice == 1) {
@@ -92,14 +91,24 @@ public class GUIView extends Application implements View {
 
                 ClientController controller = new ClientController(this, virtualClient);
                 this.setClientController(controller);
-                controller.start(); // Questo chiamerà loginLoop()
+
+                controller.start();
+
+                Platform.runLater(() -> {
+                    try {
+                        setMainScene(SceneEnum.MAIN_MENU);
+                    } catch (IOException e) {
+                        reportError("Failed to load main menu: " + e.getMessage());
+                    }
+                });
 
             } catch (Exception e) {
                 e.printStackTrace();
                 Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
             }
-        });
+        }).start();
     }
+
 
 
 
@@ -192,26 +201,43 @@ public class GUIView extends Application implements View {
     public String askString() {
         if (sceneEnum == SceneEnum.NICKNAME_DIALOG) {
             nicknameFuture = new CompletableFuture<>();
-            showNicknameDialog();
-
+            Platform.runLater(this::showNicknameDialog);
             try {
-                return nicknameFuture.get();
+                String nickname = nicknameFuture.get();
+
+                sceneEnum = null;
+                return nickname;
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                reportError("Can not load the nickname : " + e.getMessage());
+                return "";
+            } finally {
+                nicknameFuture = null;
+            }
+        } else if (sceneEnum == SceneEnum.MAIN_MENU) {
+            menuChoiceFuture = new CompletableFuture<>();
+            try {
+                return menuChoiceFuture.get();
             } catch (Exception e) {
                 e.printStackTrace();
                 return "";
             }
         }
+
         return "";
     }
 
 
     @Override
     public void reportError(String message) {
+        System.err.println("[GUIView] reportError: " + message);
+
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText(null);
-            alert.setContentText(message);
+            alert.setContentText(message != null && !message.isBlank() ? message : "Errore sconosciuto.");
 
             if (mainStage != null) {
                 alert.initOwner(mainStage);
@@ -312,6 +338,13 @@ public class GUIView extends Application implements View {
             coordinateFuture.complete(new int[] {row, col});
         }
     }
+
+    public void resolveMenuChoice(String choice) {
+        if (menuChoiceFuture != null && !menuChoiceFuture.isDone()) {
+            menuChoiceFuture.complete(choice);
+        }
+    }
+
     public void showNicknameDialog() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.NICKNAME_DIALOG.value()));
@@ -320,22 +353,31 @@ public class GUIView extends Application implements View {
             controller.setGuiView(this);
 
             Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL); // Modale
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(mainStage);
             dialogStage.setResizable(false);
             dialogStage.setTitle("Insert your nickname");
+
+            dialogStage.setOnCloseRequest(event -> {
+                if (nicknameFuture != null && !nicknameFuture.isDone()) {
+                    nicknameFuture.complete("");
+                }
+            });
+
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
+            if (nicknameFuture != null && !nicknameFuture.isDone()) {
+                nicknameFuture.completeExceptionally(e);
+            }
         }
     }
-
-
-
 
     public void resolveNickname(String nickname) {
         if (nicknameFuture != null && !nicknameFuture.isDone()) {
             nicknameFuture.complete(nickname);
+            nicknameFuture = null;
         }
     }
 
@@ -346,13 +388,38 @@ public class GUIView extends Application implements View {
     public int getGameChoice() {
         return gameChoice;
     }
+
     public void resolveDataGame(List<Object> dataGame) {
-        this.dataForGame = dataGame;
+        if (dataForGame != null && !dataForGame.isDone()) {
+            dataForGame.complete(dataGame);
+        }
     }
 
+
     public List<Object> getDataForGame() {
-        return dataForGame;
+        if (dataForGame == null) {
+            dataForGame = new CompletableFuture<>();
+            try {
+                Platform.runLater(() -> {
+                    try {
+                        setMainScene(SceneEnum.CREATE_GAME_MENU);
+                    } catch (IOException e) {
+                        reportError("Cannot load game creation screen: " + e.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            return dataForGame.get(); // <-- blocca finché il controller non chiama resolve
+        } catch (Exception e) {
+            reportError("Error waiting for game data: " + e.getMessage());
+            return List.of(false, 2); // fallback
+        }
     }
+
 
     public void updateAvailableGames(Map<Integer, int[]> availableGames) {
         Platform.runLater(() -> {
