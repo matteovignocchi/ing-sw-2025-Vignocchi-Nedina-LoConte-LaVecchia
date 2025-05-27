@@ -78,7 +78,6 @@ public class GUIView extends Application implements View {
             return;
         }
 
-        // Avvia il controller in un thread separato
         new Thread(() -> {
             try {
                 VirtualView virtualClient;
@@ -93,7 +92,7 @@ public class GUIView extends Application implements View {
                 ClientController controller = new ClientController(this, virtualClient);
                 this.setClientController(controller);
 
-                controller.start(); // loginLoop() verrà chiamato qui
+                controller.start();
 
                 Platform.runLater(() -> {
                     try {
@@ -205,13 +204,13 @@ public class GUIView extends Application implements View {
             Platform.runLater(this::showNicknameDialog);
             try {
                 String nickname = nicknameFuture.get();
-                System.out.println("[DEBUG] Nickname ricevuto: " + nickname);
+
                 sceneEnum = null;
                 return nickname;
             } catch (Exception e) {
-                System.err.println("[ERROR] Exception in askString:");
-                e.printStackTrace(); // STAMPA DETTAGLIATA
-                reportError("Errore nel caricamento del nickname: " + e.getMessage());
+
+                e.printStackTrace();
+                reportError("Can not load the nickname : " + e.getMessage());
                 return "";
             } finally {
                 nicknameFuture = null;

@@ -104,7 +104,7 @@ public class ClientController {
             } else {
                 view.inform("Login successful");
                 switch (view) {
-                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU); // AGGIUNTA NECESSARIA
+                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
                     default -> {}
                 }
                 return 0;
