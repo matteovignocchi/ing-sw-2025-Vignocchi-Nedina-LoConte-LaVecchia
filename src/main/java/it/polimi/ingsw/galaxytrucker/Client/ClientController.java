@@ -86,7 +86,17 @@ public class ClientController {
     private int loginLoop() throws Exception {
         while (true) {
             view.inform("Insert your username:");
+            switch (view){
+                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+                default -> {}
+            }
             String username = virtualClient.askString();
+
+            if (username == null || username.trim().isEmpty()) {
+                view.reportError(" Username cannot be empty. Please enter a valid username.");
+                continue;
+            }
+
             int res = virtualClient.sendLogin(username);
 
             if (res == -1) {
@@ -99,6 +109,10 @@ public class ClientController {
                 return res;
             } else {
                 view.inform("Login successful");
+                switch (view) {
+                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
+                    default -> {}
+                }
                 return 0;
             }
         }
@@ -110,10 +124,10 @@ public class ClientController {
             int choice = 0;
             while (true) {
                 printMainMenu();
-                String line;
+                String line = "";
                 switch (view) {
                     case TUIView v -> line = v.askString();
-                    case GUIView g -> line= view.askString(); // appena implementerai in GUI, per adesso ho messo un metodo a caso
+                    case GUIView g -> line = g.askString();
                     default -> line = view.askString();
                 }
 

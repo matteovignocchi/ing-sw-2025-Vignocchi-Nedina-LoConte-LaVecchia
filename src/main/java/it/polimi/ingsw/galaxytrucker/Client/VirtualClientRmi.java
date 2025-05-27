@@ -196,31 +196,34 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public Tile getUncoveredTile() throws BusinessLogicException ,  RemoteException {
+    public Tile getUncoveredTile() throws BusinessLogicException, RemoteException {
         List<Tile> tmp;
         try {
             tmp = server.getUncoveredTilesList(gameId, nickname);
-
         } catch (Exception e) {
-            throw new BusinessLogicException("Empty list");
+            throw new BusinessLogicException("Failed to fetch tile list: " + e.getMessage());
+        }
+        if (tmp == null || tmp.isEmpty()) {
+            throw new BusinessLogicException("The list of shown tiles is empty.");
         }
 
         clientController.printListOfTileShownByController(tmp);
         clientController.informByController("Select a tile");
-        int index;
-        while(true){
+        while (true) {
+            int index;
             while (true) {
                 index = askIndex();
                 if (index >= 0 && index < tmp.size()) break;
                 clientController.informByController("Invalid index. Try again.");
             }
             try {
-                return server.chooseUncoveredTile(gameId, nickname,tmp.get(index).getIdTile());
+                return server.chooseUncoveredTile(gameId, nickname, tmp.get(index).getIdTile());
             } catch (BusinessLogicException e) {
-                clientController.reportErrorByController("you miss " + e.getMessage() + "select new index" );
+                clientController.reportErrorByController("You missed: " + e.getMessage() + ". Select a new index.");
             }
         }
     }
+
     @Override
     public void getBackTile(Tile tile) throws RemoteException , BusinessLogicException{
             try {
