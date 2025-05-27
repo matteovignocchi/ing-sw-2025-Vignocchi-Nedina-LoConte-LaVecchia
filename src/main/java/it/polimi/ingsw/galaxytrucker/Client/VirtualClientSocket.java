@@ -118,7 +118,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_PRINT_COVERED -> this.printListOfTileCovered((List<Tile>) msg.getPayload());
             case Message.OP_PRINT_SHOWN -> this.printListOfTileShown((List<Tile>) msg.getPayload());
             case Message.OP_PRINT_GOODS -> this.printListOfGoods((List<Colour>) msg.getPayload());
-            case Message.OP_PRINT_DASHBOARD -> this.printPlayerDashboard((Tile[][]) msg.getPayload());
+            case Message.OP_PRINT_DASHBOARD -> {
+                Tile[][] dash = (Tile[][]) msg.getPayload();
+                ciccio.newShip(dash);
+                ciccio.printPlayerDashboardByController(dash);
+            }
             case Message.OP_PRINT_DECK -> this.printDeck((List<Card>) msg.getPayload());
             case Message.OP_PRINT_TILE -> this.printTile((Tile) msg.getPayload());
             case Message.OP_SET_NICKNAME -> this.setNickname((String) msg.getPayload());
@@ -521,42 +525,40 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDeck() throws Exception {
         while (true) {
-            // 1) chiedi quale mazzo
             ciccio.informByController("Choose deck : 1 / 2 / 3");
             int index = askIndex() + 1;
 
-            // 2) controllo che sia nel range [1,3]
             if (index < 1 || index > 3) {
                 ciccio.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
-                continue;   // ripeti il ciclo
+                continue;
             }
 
-            // 3) se è valido, costruisci il payload e manda la richiesta
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);
             payload.add(index);
             Message request  = Message.request(Message.OP_LOOK_DECK, payload);
             Message response = sendRequestWithResponse(request);
 
-            // 4) gestisci la risposta del server
             Object payloadResponse = response.getPayload();
-            if (payloadResponse instanceof List<?> rawList) {
+            Class<?> respClass = payloadResponse.getClass();
+
+            if (List.class.isAssignableFrom(respClass)) {
                 @SuppressWarnings("unchecked")
-                List<Card> deck = (List<Card>) rawList;
+                List<Card> deck = (List<Card>) payloadResponse;
                 ciccio.printDeckByController(deck);
-                return;   // tutto OK, esci
+                return;
             }
-            if (payloadResponse instanceof String err) {
+
+            if (String.class.equals(respClass)) {
+                String err = (String) payloadResponse;
                 ciccio.reportErrorByController("Server error: " + err);
-                // in teoria, qui non dovresti mai ricadere perché il pre-check ha già escluso
-                // gli indici invalidi, ma se il server ti manda un errore lo riporti e riprovi
                 continue;
             }
 
-            // caso “strano” ma possibile
             ciccio.reportErrorByController("Unexpected response from server.");
         }
     }
+
 
 
 
@@ -566,31 +568,33 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         while (true) {
             String tmp = ciccio.choocePlayerByController();
 
+            // se è il mio nickname, uso la dash locale
+            if (tmp.equals(this.nickname)) {
+                ciccio.informByController("Space Ship of: " + tmp);
+                ciccio.printMyDashBoardByController();
+                return;
+            }
 
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);
             payload.add(tmp);
 
-            Message request = Message.request(Message.OP_LOOK_SHIP, payload);
+            Message request  = Message.request(Message.OP_LOOK_SHIP, payload);
             Message response = sendRequestWithResponse(request);
-            Object payloadResponse = response.getPayload();
+            Object  payloadResponse = response.getPayload();
 
-            switch (payloadResponse) {
-                case Tile[][] dashPlayer -> {
-                    ciccio.informByController("Space Ship di: " + tmp);
-                    ciccio.printPlayerDashboardByController(dashPlayer);
-                    return;
-                }
-                case String error -> {
-                    ciccio.reportErrorByController("Invalid player name: " + error);
-                }
-                default -> {
-                    ciccio.reportErrorByController("Unexpected payload type: " + payloadResponse.getClass().getName());
-
-                }
+            try {
+                Tile[][] dash = (Tile[][]) payloadResponse;
+                ciccio.informByController("Space Ship of: " + tmp);
+                ciccio.printPlayerDashboardByController(dash);
+                return;
+            } catch (ClassCastException e) {
+                String err = (String) payloadResponse;
+                ciccio.reportErrorByController("Invalid player name: " + err);
             }
         }
     }
+
 
     @Override
     public void leaveGame() throws Exception {
