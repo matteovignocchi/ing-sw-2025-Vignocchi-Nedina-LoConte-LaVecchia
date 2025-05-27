@@ -5,12 +5,17 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 
 public interface View {
 
+    String askStringBlocking() throws IOException;
+    String askStringNonBlocking();
+    int askIndexBlocking() throws IOException;
+    int askIndexNonBlocking();
     void inform(String message);
     boolean ask(String message);
     int[] askCoordinate();
