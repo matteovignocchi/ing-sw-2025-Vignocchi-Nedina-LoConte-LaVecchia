@@ -74,13 +74,30 @@ public class CreateGameMenuController extends GUIController {
         fourPlayerButton.setVisible(true);
         playersQuestionText.setVisible(true);
 
-        twoPlayerButton.setOnAction(e -> player = 2);
-        threePlayerButton.setOnAction(e -> player = 3);
-        fourPlayerButton.setOnAction(e -> player = 4);
-        List<Object> dataForGame = new ArrayList<>();
-        dataForGame.add(isDemo);
-        dataForGame.add(player);
-        guiView.resolveDataGame(dataForGame);
+        twoPlayerButton.setOnAction(e -> {
+            player = 2;
+            List<Object> dataForGame = new ArrayList<>();
+            dataForGame.add(isDemo);
+            dataForGame.add(player);
+            guiView.resolveDataGame(dataForGame);
+        });
+
+        threePlayerButton.setOnAction(e -> {
+            player = 3;
+            List<Object> dataForGame = new ArrayList<>();
+            dataForGame.add(isDemo);
+            dataForGame.add(player);
+            guiView.resolveDataGame(dataForGame);
+        });
+
+        fourPlayerButton.setOnAction(e -> {
+            player = 4;
+            List<Object> dataForGame = new ArrayList<>();
+            dataForGame.add(isDemo);
+            dataForGame.add(player);
+            guiView.resolveDataGame(dataForGame);
+        });
+
     }
 
 
