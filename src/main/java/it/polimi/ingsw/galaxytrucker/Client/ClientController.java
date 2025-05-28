@@ -9,6 +9,7 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import javafx.application.Platform;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -207,32 +208,50 @@ public class ClientController {
         }
     }
 
-    public int printAvailableGames( Map<Integer,int[]> availableGames){
+    public int printAvailableGames(Map<Integer, int[]> availableGames) {
         int choice = 0;
-        switch (view){
-            case TUIView v->{
+
+        switch (view) {
+            case TUIView v -> {
                 v.inform("**Available Games:**");
                 v.inform("0. Return to main menu");
-                for (Integer id : availableGames.keySet()) {
-                    int[] info = availableGames.get(id);
+
+                for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+                    int id = entry.getKey();
+                    int[] info = entry.getValue();
                     boolean isDemo = info[2] == 1;
                     String suffix = isDemo ? " DEMO" : "";
                     v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                 }
+
                 while (true) {
                     choice = v.askIndex() + 1;
                     if (choice == 0 || availableGames.containsKey(choice)) break;
                     v.reportError("Invalid choice, try again.");
                 }
             }
-            case GUIView v->{
-                choice = v.getGameChoice();
+
+            case GUIView v -> {
+                Platform.runLater(() -> {
+                    try {
+                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
+                        v.displayAvailableGames(availableGames);
+                    } catch (IOException e) {
+                        v.reportError("Failed to open join menu: " + e.getMessage());
+                    }
+                });
+
+                choice = v.waitForGameChoice(); // blocca in attesa
             }
-            default -> {}
+
+
+            default -> {
+            }
         }
 
         return choice;
     }
+
 
     public void joinExistingGame() throws Exception {
         view.inform("Joining Existing Game...");

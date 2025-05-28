@@ -1,28 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.image.*?>
 <?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="399.0" prefWidth="399.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController">
+<AnchorPane prefHeight="900.0" prefWidth="899.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController">
+
    <children>
-      <ImageView fitHeight="407.0" fitWidth="399.0" preserveRatio="true" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="900.0" fitWidth="922.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-22.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../LobbyImage2.png" />
          </image>
       </ImageView>
 
-      <Label fx:id="titleLabel" layoutX="140.0" layoutY="75.0" prefHeight="22.0" prefWidth="117.0" styleClass="label" text="Available Games" textAlignment="CENTER" AnchorPane.leftAnchor="140.0" AnchorPane.rightAnchor="140.0" AnchorPane.topAnchor="75.0" />
+      <Label fx:id="titleLabel" layoutX="351.0" layoutY="104.0" prefHeight="49.5" prefWidth="263.0" styleClass="label" text="Available Games" textAlignment="CENTER" AnchorPane.leftAnchor="351.0" AnchorPane.topAnchor="104.0">
+         <font>
+            <Font name="System Bold" size="69.0" />
+         </font>
+      </Label>
 
-      <ListView fx:id="gameListView" layoutX="113.0" layoutY="90.0" prefHeight="181.0" prefWidth="172.0" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="115.0" AnchorPane.rightAnchor="115.0" AnchorPane.topAnchor="100.0">
+      <ListView fx:id="gameListView" layoutX="194.0" layoutY="180.0" prefHeight="450.0" prefWidth="386.0" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" AnchorPane.leftAnchor="194.0" AnchorPane.rightAnchor="194.0" AnchorPane.topAnchor="180.0">
          <styleClass>
             <String fx:value="label" />
          </styleClass>
       </ListView>
 
-      <Button fx:id="backButton" layoutX="149.5" layoutY="310.0" onAction="#back" onMouseClicked="#back" prefHeight="30.0" prefWidth="100.0" styleClass="button" text="Back" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="149.5" />
+      <Label fx:id="infoLabel" layoutX="225.0" layoutY="652.5" prefHeight="45.0" prefWidth="450.0" styleClass="label" text="" textAlignment="CENTER" AnchorPane.leftAnchor="225.0" AnchorPane.topAnchor="652.5">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+
+      <Button fx:id="joinButton" layoutX="168.75" layoutY="740.0" onAction="#joinSelectedGame" prefHeight="50.0" prefWidth="150.0" styleClass="button" text="Join" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="260.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+
+      <Button fx:id="backButton" layoutX="505.25" layoutY="740.0" onAction="#back" prefHeight="50.0" prefWidth="150.0" styleClass="button" text="Back" AnchorPane.bottomAnchor="180.0" AnchorPane.rightAnchor="260.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

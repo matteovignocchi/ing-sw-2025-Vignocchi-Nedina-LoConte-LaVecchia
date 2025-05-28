@@ -26,8 +26,8 @@ public class MainMenuController extends GUIController {
         clientController = ClientController.getInstance();
         joinButton.setOnAction(event -> {
             try {
-                guiView.resolveMenuChoice("2");
                 joinGame();
+                guiView.resolveMenuChoice("2");
             } catch (Exception e) {
                 e.printStackTrace();
                 guiView.reportError("Failed to load join game scene");
@@ -36,8 +36,8 @@ public class MainMenuController extends GUIController {
 
         createButton.setOnAction(event -> {
             try {
-                guiView.resolveMenuChoice("1");
                 createGame();
+                guiView.resolveMenuChoice("1");
             } catch (Exception e) {
                 e.printStackTrace();
                 guiView.reportError("Failed to load create game scene");
