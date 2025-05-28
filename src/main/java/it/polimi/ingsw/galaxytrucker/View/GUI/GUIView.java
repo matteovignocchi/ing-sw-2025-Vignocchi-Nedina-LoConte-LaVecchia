@@ -8,10 +8,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -330,7 +327,18 @@ public class GUIView extends Application implements View {
         Parent root = loader.load();
         Scene scene = new Scene(root);
         this.mainStage.setScene(scene);
-        loader.getController();
+        this.mainStage.centerOnScreen();
+        Object controller = loader.getController();
+        //TODO ricordarsi di mettere tutti i controller quando si scrive
+        switch (controller) {
+            case MainMenuController c -> c.setGuiView(this);
+            case CreateGameMenuController c -> c.setGuiView(this);
+            case GameListMenuController c -> c.setGuiView(this);
+            case NicknameDialogController c -> c.setGuiView(this);
+            case BuildingPhaseController c -> c.setGuiView(this);
+            case WaitingQueueController c -> c.setGuiView(this);
+            default -> {}
+        }
     }
 
     public void resolveCoordinates(int row, int col) {

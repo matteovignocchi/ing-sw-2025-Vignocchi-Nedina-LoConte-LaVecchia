@@ -1,6 +1,6 @@
 .button {
     -fx-font-family: "Impact";
-    -fx-font-size: 15px;
+    -fx-font-size: 20px;
     -fx-text-fill: #444444;
     -fx-background-color: linear-gradient(to bottom, #ffee04 0%, #ffd700 100%);
     -fx-background-insets: 1;
