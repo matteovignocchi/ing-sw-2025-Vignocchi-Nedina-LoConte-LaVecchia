@@ -85,8 +85,7 @@ public class TUIView implements View {
         return null;
     }
 
-    //TODO: ho iniziato a scrivere tutti i metodi che mi prima usavano lo scanner, alcuni vanno overridati, ma lo faremo
-    // piano piano modificando tutte le chiamate di loro competenza. Quando i vecchi metodi non avranno usages faremo l'override
+    //TODO: i vecchi metodi di richiesta vanno eliminati, anche dalla view
 
     @Override
     public String askStringBlocking() throws IOException {
@@ -102,6 +101,7 @@ public class TUIView implements View {
         }
     }
 
+    @Override
     public int[] askCoordinateBlocking() throws IOException {
         int[] coord = new int[2];
 
@@ -127,6 +127,7 @@ public class TUIView implements View {
         return coord;
     }
 
+    @Override
     public boolean askBlocking(String message) throws IOException {
         inform(message + " (yes/no)");
         while (true) {
@@ -137,6 +138,7 @@ public class TUIView implements View {
         }
     }
 
+    @Override
     public String choosePlayerBlocking() throws IOException {
         while (true) {
             inform("Write a player's nickname:");
@@ -150,11 +152,11 @@ public class TUIView implements View {
         }
     }
 
+    @Override
     public String sendAvailableChoicesBlocking() throws IOException {
         List<String> options = commandConstructor();
         while (true) {
             printListOfCommand();
-            // qui uso askIndexBlocking invece di readLine+parse
             int idx = askIndexBlocking();
             if (idx >= 0 && idx < options.size()) {
                 return options.get(idx)
@@ -179,6 +181,7 @@ public class TUIView implements View {
         catch (Exception e) { return -1; }
     }
 
+    @Override
     public String choosePlayerNonBlocking() {
         try {
             inform("Write a player's nickname:");
@@ -195,6 +198,7 @@ public class TUIView implements View {
         return "";
     }
 
+    @Override
     public int[] askCoordinateNonBlocking() {
         try {
             inform("Insert the row:");
@@ -215,7 +219,8 @@ public class TUIView implements View {
         }
     }
 
-    public boolean askNonBlocking(String message) throws InterruptedException, IOException {
+    @Override
+    public boolean askNonBlocking(String message){
         try {
             inform(message + " (yes/no)");
             String l;

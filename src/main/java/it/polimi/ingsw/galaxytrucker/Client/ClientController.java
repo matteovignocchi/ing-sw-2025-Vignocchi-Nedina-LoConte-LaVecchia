@@ -128,7 +128,7 @@ public class ClientController {
                 switch (view) {
                     case TUIView v -> line = v.askString();
                     case GUIView g -> line = g.askString();
-                    default -> line = view.askString();
+                    default -> line = readString();
                 }
 
                 try {
@@ -174,7 +174,7 @@ public class ClientController {
                 v.inform("Select a number of players between 2 and 4");
                 int numberOfPlayer ;
                 while (true) {
-                    numberOfPlayer = v.askIndex() + 1;
+                    numberOfPlayer = readIndex() + 1;
                     if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
                         break;
                     }
@@ -251,40 +251,71 @@ public class ClientController {
         return true;
     }
 
-
     private boolean waitForFlightStart() throws Exception {
+        if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) return true;
 
-        if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
-            return true;
-        }
-
-        view.inform("Waiting for other players to finish their ship…\n");
-        view.inform("Possible actions while waiting for flight:");
-        view.inform(" 1: Watch a player's ship");
-        view.inform(" 2: Logout");
+        view.inform("Waiting for other players to finish their ship…");
+        view.inform("1: Watch a player's ship");
+        view.inform("2: Logout");
         view.inform("Insert index:");
 
-        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
         while (currentGamePhase == GamePhase.WAITING_FOR_PLAYERS) {
-            if (console.ready()) {
-                String line = console.readLine().trim();
-                switch (line) {
-                    case "1" -> virtualClient.lookDashBoard();
-                    case "2" -> {
+            int choice = view.askIndexNonBlocking();
+            if (choice >= 0) {
+                switch (choice) {
+                    case 0 -> virtualClient.lookDashBoard();
+                    case 1 -> {
                         virtualClient.leaveGame();
                         view.inform("Returned to main menu");
                         return false;
                     }
-                    default -> view.reportError("Invalid choice. Please enter 1 or 2.");
+                    default -> view.reportError("Invalid choice. Enter 1 or 2.");
                 }
-            } else {
-                Thread.sleep(200);
+                view.inform("1: Watch a player's ship");
+                view.inform("2: Logout");
+                view.inform("Insert index:");
             }
+            Thread.sleep(100);
         }
-        System.out.println("");
-        view.inform("Flight is starting! Good luck!\n");
+
+        view.inform("Flight is starting! Good luck!");
         return true;
     }
+
+
+//    private boolean waitForFlightStart() throws Exception {
+//
+//        if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
+//            return true;
+//        }
+//
+//        view.inform("Waiting for other players to finish their ship…\n");
+//        view.inform("Possible actions while waiting for flight:");
+//        view.inform(" 1: Watch a player's ship");
+//        view.inform(" 2: Logout");
+//        view.inform("Insert index:");
+//
+//        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+//        while (currentGamePhase == GamePhase.WAITING_FOR_PLAYERS) {
+//            if (console.ready()) {
+//                String line = console.readLine().trim();
+//                switch (line) {
+//                    case "1" -> virtualClient.lookDashBoard();
+//                    case "2" -> {
+//                        virtualClient.leaveGame();
+//                        view.inform("Returned to main menu");
+//                        return false;
+//                    }
+//                    default -> view.reportError("Invalid choice. Please enter 1 or 2.");
+//                }
+//            } else {
+//                Thread.sleep(200);
+//            }
+//        }
+//        System.out.println("");
+//        view.inform("Flight is starting! Good luck!\n");
+//        return true;
+//    }
 
 
 
@@ -308,61 +339,42 @@ public class ClientController {
     }
 
     private void startGame() throws Exception {
-
-        if(view.getGamePhase() == GamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
-
         view.printListOfCommand();
         while (true) {
-            GamePhase temp = currentGamePhase;
-
-            if(currentGamePhase == GamePhase.CARD_EFFECT) {
+            if (currentGamePhase == GamePhase.CARD_EFFECT) {
                 Thread.sleep(100);
                 continue;
             }
-
-            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //da controllare
+            if (currentGamePhase == GamePhase.EXIT) return;
 
             String key = view.sendAvailableChoices();
-
-            if(key == null){
-                if(temp != currentGamePhase) view.printListOfCommand();
+            if (key == null) {
                 continue;
             }
 
             try {
                 switch (key) {
-                    case "getacoveredtile"    -> {
+                    case "getacoveredtile" -> {
                         tmpTile = virtualClient.getTileServer();
                         view.printTile(tmpTile);
                     }
-                    case "getashowntile"      -> {
+                    case "getashowntile"   -> {
                         tmpTile = virtualClient.getUncoveredTile();
                         view.printTile(tmpTile);
                     }
-                    case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
-                    case "placethetile"       -> virtualClient.positionTile(tmpTile);
-                    case "drawacard"          -> virtualClient.drawCard();
-                    case "spinthehourglass"   -> virtualClient.rotateGlass();
-                    case "declareready"       -> {
-                        virtualClient.setReady();
-                        if (!waitForFlightStart()) return;
-
-                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
-                            view.printListOfCommand();
-                            continue;
-                        }
+                    case "returnthetile"   -> virtualClient.getBackTile(tmpTile);
+                    case "placethetile"    -> virtualClient.positionTile(tmpTile);
+                    case "drawacard"       -> virtualClient.drawCard();
+                    case "spinthehourglass"-> virtualClient.rotateGlass();
+                    case "declareready"    -> {
+                        if (!waitForFlightStart())
+                            return;
                     }
-                    case "watchadeck"         -> virtualClient.lookDeck();
-                    case "watchaplayersship"  -> virtualClient.lookDashBoard();
-                    case "rightrotatethetile" -> rotateRight();
-                    case "leftrotatethetile"  -> rotateLeft();
-                    case "takereservedtile"   -> {
-                        tmpTile = virtualClient.takeReservedTile();
-                        view.printTile(tmpTile);
-                    }
-                    case "logout"             -> {
+                    case "watchadeck"      -> virtualClient.lookDeck();
+                    case "watchaplayersship"-> virtualClient.lookDashBoard();
+                    case "takereservedtile"-> { tmpTile = virtualClient.takeReservedTile(); view.printTile(tmpTile); }
+                    case "logout"          -> {
                         virtualClient.leaveGame();
-                        view.inform("Returned to main menu");
                         return;
                     }
                     default -> view.reportError("Action not recognized");
@@ -370,11 +382,78 @@ public class ClientController {
             } catch (BusinessLogicException | IOException | InterruptedException e) {
                 view.reportError(e.getMessage());
             }
-            if (currentGamePhase != GamePhase.DRAW_PHASE) {
-                view.printListOfCommand();
-            }
+            view.printListOfCommand();
         }
     }
+
+//    private void startGame() throws Exception {
+//
+//        if(view.getGamePhase() == GamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
+//
+//        view.printListOfCommand();
+//        while (true) {
+//            GamePhase temp = currentGamePhase;
+//
+//            if(currentGamePhase == GamePhase.CARD_EFFECT) {
+//                Thread.sleep(100);
+//                continue;
+//            }
+//
+//            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //da controllare
+//
+//            String key = view.sendAvailableChoices();
+//
+//            if(key == null){
+//                if(temp != currentGamePhase) view.printListOfCommand();
+//                continue;
+//            }
+//
+//            try {
+//                switch (key) {
+//                    case "getacoveredtile"    -> {
+//                        tmpTile = virtualClient.getTileServer();
+//                        view.printTile(tmpTile);
+//                    }
+//                    case "getashowntile"      -> {
+//                        tmpTile = virtualClient.getUncoveredTile();
+//                        view.printTile(tmpTile);
+//                    }
+//                    case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
+//                    case "placethetile"       -> virtualClient.positionTile(tmpTile);
+//                    case "drawacard"          -> virtualClient.drawCard();
+//                    case "spinthehourglass"   -> virtualClient.rotateGlass();
+//                    case "declareready"       -> {
+//                        virtualClient.setReady();
+//                        if (!waitForFlightStart()) return;
+//
+//                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
+//                            view.printListOfCommand();
+//                            continue;
+//                        }
+//                    }
+//                    case "watchadeck"         -> virtualClient.lookDeck();
+//                    case "watchaplayersship"  -> virtualClient.lookDashBoard();
+//                    case "rightrotatethetile" -> rotateRight();
+//                    case "leftrotatethetile"  -> rotateLeft();
+//                    case "takereservedtile"   -> {
+//                        tmpTile = virtualClient.takeReservedTile();
+//                        view.printTile(tmpTile);
+//                    }
+//                    case "logout"             -> {
+//                        virtualClient.leaveGame();
+//                        view.inform("Returned to main menu");
+//                        return;
+//                    }
+//                    default -> view.reportError("Action not recognized");
+//                }
+//            } catch (BusinessLogicException | IOException | InterruptedException e) {
+//                view.reportError(e.getMessage());
+//            }
+//            if (currentGamePhase != GamePhase.DRAW_PHASE) {
+//                view.printListOfCommand();
+//            }
+//        }
+//    }
 
     private void rotateRight() throws Exception {
         if (tmpTile != null) {
@@ -398,6 +477,51 @@ public class ClientController {
         }
     }
 
+    /** Polling su askStringNonBlocking() finché non ottengo qualcosa di diverso da "" */
+    private String readString() throws InterruptedException {
+        String line;
+        while ((line = view.askStringNonBlocking()).isEmpty()) {
+            Thread.sleep(100);
+        }
+        return line;
+    }
+
+    /** Polling su askIndexNonBlocking() finché non ottengo >=0 */
+    private int readIndex() throws InterruptedException {
+        int index;
+        while ((index = view.askIndexNonBlocking()) < 0) {
+            Thread.sleep(100);
+        }
+        return index;
+    }
+
+    /** Polling su askCoordinateNonBlocking() finché non ottengo !=null */
+    private int[] readCoordinate() throws InterruptedException {
+        int[] coordinate;
+        while ((coordinate = view.askCoordinateNonBlocking()) == null) {
+            Thread.sleep(100);
+        }
+        return coordinate;
+    }
+
+    /** Polling su askNonBlocking(...) finché non ottengo risposta vera o falsa */
+    private boolean readYesNo(String message) throws InterruptedException {
+        Boolean response;
+        while (true) {
+            response = view.askNonBlocking(message);
+            if (response) return true;
+            return false;
+        }
+    }
+
+    /** Polling su choosePlayerNonBlocking() finché non ottengo nickname valido */
+    private String readPlayer() throws InterruptedException, IOException {
+        String nickname;
+        while ((nickname = view.choosePlayerNonBlocking()).isEmpty()) {
+            Thread.sleep(100);
+        }
+        return nickname;
+    }
 
     ////metodi che mi servono per la gui///
 

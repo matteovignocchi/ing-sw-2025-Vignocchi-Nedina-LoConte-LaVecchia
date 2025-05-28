@@ -12,10 +12,20 @@ import java.util.Map;
 
 public interface View {
 
-    String askStringBlocking() throws IOException;
-    String askStringNonBlocking();
-    int askIndexBlocking() throws IOException;
-    int askIndexNonBlocking();
+    String   askStringBlocking()   throws IOException;
+    int      askIndexBlocking()    throws IOException;
+    int[]    askCoordinateBlocking() throws IOException;
+    boolean  askBlocking(String message) throws IOException;
+    String   sendAvailableChoicesBlocking() throws IOException;
+    public String choosePlayerBlocking() throws IOException;
+
+    String   askStringNonBlocking();
+    int      askIndexNonBlocking();
+    int[]    askCoordinateNonBlocking();
+    boolean  askNonBlocking(String message) ;
+    public String choosePlayerNonBlocking() throws IOException;
+    String sendAvailableChoices() throws Exception;
+
     void inform(String message);
     boolean ask(String message);
     int[] askCoordinate();
@@ -34,7 +44,6 @@ public interface View {
     void updateState(GamePhase gamePhase);
     void printTile(Tile tile);
     void printCard(Card card);
-    String sendAvailableChoices() throws Exception;
     void updateMap(Map<String, Integer> map);
     String choosePlayer();
     void printListOfCommand();
@@ -43,14 +52,3 @@ public interface View {
     void setValidity(int a , int b);
     GamePhase getGamePhase();
 }
-
-//public interface VirtualViewRmi extends VirtualView {
-//    @Override
-//    void showUpdate() throws RemoteException;
-//    @Override
-//    void reportError(String error) throws RemoteException;
-//    @Override
-//    void ask(String question) throws RemoteException;
-//    @Override
-//    void printPileOfTile(List<Tile> pile) throws RemoteException;
-//
