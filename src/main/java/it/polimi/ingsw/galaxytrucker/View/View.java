@@ -5,11 +5,18 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 
 public interface View {
+    String   askStringNonBlocking();
+    int      askIndexNonBlocking();
+    int[]    askCoordinateNonBlocking();
+    boolean  askNonBlocking(String message) ;
+    public String choosePlayerNonBlocking() throws IOException;
+    String sendAvailableChoices() throws Exception;
 
     void inform(String message);
     boolean ask(String message);
@@ -29,7 +36,6 @@ public interface View {
     void updateState(GamePhase gamePhase);
     void printTile(Tile tile);
     void printCard(Card card);
-    String sendAvailableChoices() throws Exception;
     void updateMap(Map<String, Integer> map);
     String choosePlayer();
     void printListOfCommand();
@@ -38,14 +44,3 @@ public interface View {
     void setValidity(int a , int b);
     GamePhase getGamePhase();
 }
-
-//public interface VirtualViewRmi extends VirtualView {
-//    @Override
-//    void showUpdate() throws RemoteException;
-//    @Override
-//    void reportError(String error) throws RemoteException;
-//    @Override
-//    void ask(String question) throws RemoteException;
-//    @Override
-//    void printPileOfTile(List<Tile> pile) throws RemoteException;
-//

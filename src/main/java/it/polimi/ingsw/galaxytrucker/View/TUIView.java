@@ -74,7 +74,7 @@ public class TUIView implements View {
     }
 
 
-    private String readLine(long timeoutMs) throws InterruptedException, IOException {
+    public String readLine(long timeoutMs) throws InterruptedException, IOException {
         long end = System.currentTimeMillis() + timeoutMs;
         while (System.currentTimeMillis() < end) {
             if (console.ready()) {
@@ -83,6 +83,73 @@ public class TUIView implements View {
             Thread.sleep(20);
         }
         return null;
+    }
+
+    @Override
+    public String askStringNonBlocking() {
+        try {
+            String line = readLine(200);
+            return (line != null) ? line.trim() : "";
+        } catch (Exception e) { return ""; }
+    }
+    @Override
+    public int askIndexNonBlocking() {
+        String s = askStringNonBlocking();
+        try { return Integer.parseInt(s) - 1; }
+        catch (Exception e) { return -1; }
+    }
+
+    @Override
+    public String choosePlayerNonBlocking() {
+        try {
+            inform("Write a player's nickname:");
+            String line = readLine(200);
+            if (line == null) return "";
+            String nick = line.trim();
+            for (String key : mapPosition.keySet()) {
+                if (key.equalsIgnoreCase(nick)) {
+                    return key;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+        }
+        return "";
+    }
+
+    @Override
+    public int[] askCoordinateNonBlocking() {
+        try {
+            inform("Insert the row:");
+            String rowLine = readLine(200);
+            if (rowLine == null) return null;
+            int r = Integer.parseInt(rowLine.trim()) - 5;
+            if (r < 0 || r >= 5) return null;
+
+            inform("Insert the column:");
+            String colLine = readLine(200);
+            if (colLine == null) return null;
+            int c = Integer.parseInt(colLine.trim()) - 4;
+            if (c < 0 || c >= 7) return null;
+
+            return new int[]{r, c};
+        } catch (IOException | InterruptedException | NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean askNonBlocking(String message){
+        try {
+            inform(message + " (yes/no)");
+            String l;
+            while ((l = readLine(200)) != null) {
+                l = l.trim().toLowerCase();
+                if (l.equals("yes")) return true;
+                if (l.equals("no"))  return false;
+            }
+        } catch (InterruptedException | IOException e) {
+        }
+        return false;
     }
 
     @Override
@@ -97,6 +164,7 @@ public class TUIView implements View {
     public void updateMap(Map<String, Integer> map) {
         mapPosition = map;
     }
+
     @Override
     public String choosePlayer(){
         for(String s : mapPosition.keySet()){
@@ -170,7 +238,7 @@ public class TUIView implements View {
             coordinate[1] = coordinate[1] - 4;
 
             return coordinate;
-        }
+    }
 
     @Override
     public int askIndex() {
@@ -185,7 +253,6 @@ public class TUIView implements View {
             }
         }
     }
-
 
     @Override
     public String askString() {
@@ -214,16 +281,6 @@ public class TUIView implements View {
 
     @Override
     public void printDashShip(Tile[][] dashboard) {
-//        if (this.maschera == null
-//                || this.maschera.length != dashboard.length
-//                || this.maschera[0].length != dashboard[0].length) {
-//            this.maschera = new boolean[ dashboard.length ][ dashboard[0].length ];
-//            // se ti serve azzerarla, fallo subito:
-//            for (int i = 0; i < maschera.length; i++) {
-//                Arrays.fill(maschera[i], false);
-//            }
-//        }
-
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
             System.out.printf("    %2d    ", col + 4);
@@ -457,75 +514,6 @@ public class TUIView implements View {
         int padL = pad>0?pad/2:0, padR = pad>0?pad-padL:0;
         return " ".repeat(padL) + s + " ".repeat(padR);
     }
-
-
-//    @Override
-//    public void printCard(Card card) {
-//        switch (card){
-//            case AbandonedShipCard c ->{
-//                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
-//            }
-//            case AbandonedStationCard c ->{
-//                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
-//                printListOfGoods(c.getStationGoods());
-//            }
-//            case FirstWarzoneCard c ->{
-//                inform("===War Zone===\n");
-//                System.out.println("-Player with less crew mates loses "+c.getDays()+" flight days\n");
-//                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+" crewmates\n");
-//                System.out.println("-Player with less fire power gets: \n");
-//                for(int i = 0; i < c.getShotsDirections().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-//                }
-//            }
-//            case SecondWarzoneCard c ->{
-//                inform("===War Zone===\n");
-//                System.out.println("-Player with less fire power loses "+c.getDays()+" flight days\n");
-//                System.out.println("-Player with less engine power loses"+c.getNumGoods()+" goods\n");
-//                System.out.println("-Player with less crewmates gets: \n");
-//                for(int i = 0; i < c.getShotsDirections().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-//                }
-//            }
-//            case MeteoritesRainCard c ->{
-//                inform("===Meteorites Rain===\n");
-//                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
-//                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
-//                }
-//            }
-//            case OpenSpaceCard c -> inform("===Open Space===\n");
-//            case StardustCard c -> inform("===Stardust===\n");
-//            case PiratesCard c ->{
-//                inform("===Pirates===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-//                for(int i = 0; i < c.getShots_directions().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
-//                }
-//            }
-//            case PlanetsCard c->{
-//                inform("===Planets===\n");
-//                System.out.println("- Days: "+c.getDays()+"\n");
-//                for(int i =0; i< c.getRewardGoods().size(); i++){
-//                    System.out.println("- Planet "+(i+1)+": ");
-//                    printListOfGoods(c.getRewardGoods().get(i));
-//                    System.out.println();
-//                }
-//            }
-//            case PlaugeCard c-> inform("===Plague===\n");
-//
-//            case SlaversCard c->{
-//                inform("===Slavers===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crewmates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-//            }
-//            case SmugglersCard c->{
-//                inform("===Smugglers===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
-//                printListOfGoods(c.getRewardGoods());
-//                System.out.println("\n- Days: "+c.getDays()+"\n");
-//            }
-//            default -> {}
-//        }
-//    }
 
 
     @Override
@@ -794,38 +782,58 @@ public class TUIView implements View {
     }
 
     @Override
-    public String sendAvailableChoices() throws IOException, InterruptedException {
+    public String sendAvailableChoices() {
         List<String> options = commandConstructor();
-        String line = readLine(200);
+        String line = null;
+        try {
+            line = readLine(200);
+        } catch (IOException | InterruptedException ignored) { }
         if (line == null) return null;
+
         try {
             int idx = Integer.parseInt(line.trim()) - 1;
-            if (0 <= idx && idx < options.size())
-                return options.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
-        } catch (NumberFormatException e) {
-            System.out.println("[ERROR] Invalid choice, try again.");
-        }
+            if (idx >= 0 && idx < options.size())
+                return options.get(idx)
+                        .toLowerCase()
+                        .replaceAll("[^a-z0-9]", "");
+        } catch (NumberFormatException ignored) { }
+        reportError("Invalid choice, try again.");
         return null;
-
-        /**
-        List<String> options = commandConstructor();
-
-        while (true) {
-            System.out.print("Insert index: ");
-            System.out.flush();             // forza lo sblocco del prompt
-            String line = scanner.nextLine().trim();
-            try {
-                int idx = Integer.parseInt(line) - 1;
-                if (idx >= 0 && idx < options.size()) {
-                    return options.get(idx)
-                            .toLowerCase()
-                            .replaceAll("[^a-z0-9]", "");
-                }
-            } catch (NumberFormatException ignored) { }
-            System.out.println("[ERROR] Invalid choice, try again.");
-        }
-         */
     }
+
+//    @Override
+//    public String sendAvailableChoices() throws IOException, InterruptedException {
+//        List<String> options = commandConstructor();
+//        String line = readLine(200);
+//        if (line == null) return null;
+//        try {
+//            int idx = Integer.parseInt(line.trim()) - 1;
+//            if (0 <= idx && idx < options.size())
+//                return options.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
+//        } catch (NumberFormatException e) {
+//            System.out.println("[ERROR] Invalid choice, try again.");
+//        }
+//        return null;
+//
+//        /**
+//        List<String> options = commandConstructor();
+//
+//        while (true) {
+//            System.out.print("Insert index: ");
+//            System.out.flush();             // forza lo sblocco del prompt
+//            String line = scanner.nextLine().trim();
+//            try {
+//                int idx = Integer.parseInt(line) - 1;
+//                if (idx >= 0 && idx < options.size()) {
+//                    return options.get(idx)
+//                            .toLowerCase()
+//                            .replaceAll("[^a-z0-9]", "");
+//                }
+//            } catch (NumberFormatException ignored) { }
+//            System.out.println("[ERROR] Invalid choice, try again.");
+//        }
+//         */
+//    }
 
 
 

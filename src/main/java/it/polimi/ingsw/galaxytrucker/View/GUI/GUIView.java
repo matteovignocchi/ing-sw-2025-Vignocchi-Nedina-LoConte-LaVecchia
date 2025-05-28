@@ -456,5 +456,19 @@ public class GUIView extends Application implements View {
 
     public GamePhase getGamePhase() { return gamePhase; }
 
+    @Override
+    public String askStringNonBlocking() { return "";}
+
+    @Override
+    public int askIndexNonBlocking() {return 0;}
+
+    @Override
+    public int[] askCoordinateNonBlocking () { return null;}
+
+    @Override
+    public boolean askNonBlocking(String message) { return false;}
+
+    @Override
+    public String choosePlayerNonBlocking() throws IOException{return "";}
 
 }
