@@ -147,7 +147,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     }
     @Override
-    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws RemoteException {
+    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws RemoteException, InterruptedException {
         if(message.contains("CREATE")){
             try{
                return server.createNewGame(isDemo , this , nickname , numberOfPlayer);

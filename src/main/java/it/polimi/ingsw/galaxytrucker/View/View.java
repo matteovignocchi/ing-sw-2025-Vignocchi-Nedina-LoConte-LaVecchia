@@ -11,14 +11,6 @@ import java.util.Map;
 
 
 public interface View {
-
-    String   askStringBlocking()   throws IOException;
-    int      askIndexBlocking()    throws IOException;
-    int[]    askCoordinateBlocking() throws IOException;
-    boolean  askBlocking(String message) throws IOException;
-    String   sendAvailableChoicesBlocking() throws IOException;
-    public String choosePlayerBlocking() throws IOException;
-
     String   askStringNonBlocking();
     int      askIndexNonBlocking();
     int[]    askCoordinateNonBlocking();

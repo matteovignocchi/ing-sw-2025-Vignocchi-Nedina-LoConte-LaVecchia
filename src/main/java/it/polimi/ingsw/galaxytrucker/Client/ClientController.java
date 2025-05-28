@@ -70,7 +70,7 @@ public class ClientController {
 
         while (isConnected) {
             mainMenuLoop();
-            String cmd = view.askString();
+            String cmd = readString();
             switch (cmd) {
                 case "1" -> createNewGame();
                 case "2" -> joinExistingGame();
@@ -90,7 +90,7 @@ public class ClientController {
                 case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
                 default -> {}
             }
-            String username = virtualClient.askString();
+            String username = readString();
 
             if (username == null || username.trim().isEmpty()) {
                 view.reportError(" Username cannot be empty. Please enter a valid username.");
@@ -126,7 +126,7 @@ public class ClientController {
                 printMainMenu();
                 String line = "";
                 switch (view) {
-                    case TUIView v -> line = v.askString();
+                    case TUIView v -> line = readString();
                     case GUIView g -> line = g.askString();
                     default -> line = readString();
                 }
@@ -170,11 +170,11 @@ public class ClientController {
         switch (view) {
             case TUIView v -> {
                 view.inform("Creating New Game...");
-                boolean demo = askByController("Would you like a demo version?");
+                boolean demo = readYesNo("Would you like a demo version?");
                 v.inform("Select a number of players between 2 and 4");
                 int numberOfPlayer ;
                 while (true) {
-                    numberOfPlayer = readIndex() + 1;
+                    numberOfPlayer = readIndex();
                     if (numberOfPlayer >= 2 && numberOfPlayer <= 4) {
                         break;
                     }
@@ -207,7 +207,7 @@ public class ClientController {
         }
     }
 
-    public int printAvailableGames( Map<Integer,int[]> availableGames){
+    public int printAvailableGames( Map<Integer,int[]> availableGames) throws InterruptedException {
         int choice = 0;
         switch (view){
             case TUIView v->{
@@ -220,7 +220,7 @@ public class ClientController {
                     v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                 }
                 while (true) {
-                    choice = v.askIndex() + 1;
+                    choice = readIndex();
                     if (choice == 0 || availableGames.containsKey(choice)) break;
                     v.reportError("Invalid choice, try again.");
                 }
@@ -477,50 +477,27 @@ public class ClientController {
         }
     }
 
-    /** Polling su askStringNonBlocking() finché non ottengo qualcosa di diverso da "" */
     private String readString() throws InterruptedException {
         String line;
-        while ((line = view.askStringNonBlocking()).isEmpty()) {
+        while ((line = view.askStringNonBlocking()).isEmpty())
             Thread.sleep(100);
-        }
         return line;
     }
 
-    /** Polling su askIndexNonBlocking() finché non ottengo >=0 */
     private int readIndex() throws InterruptedException {
-        int index;
-        while ((index = view.askIndexNonBlocking()) < 0) {
+        int idx;
+        while ((idx = view.askIndexNonBlocking()) < 0)
             Thread.sleep(100);
-        }
-        return index;
+        return idx + 1;
     }
 
-    /** Polling su askCoordinateNonBlocking() finché non ottengo !=null */
-    private int[] readCoordinate() throws InterruptedException {
-        int[] coordinate;
-        while ((coordinate = view.askCoordinateNonBlocking()) == null) {
-            Thread.sleep(100);
-        }
-        return coordinate;
-    }
-
-    /** Polling su askNonBlocking(...) finché non ottengo risposta vera o falsa */
     private boolean readYesNo(String message) throws InterruptedException {
-        Boolean response;
         while (true) {
-            response = view.askNonBlocking(message);
-            if (response) return true;
-            return false;
-        }
-    }
-
-    /** Polling su choosePlayerNonBlocking() finché non ottengo nickname valido */
-    private String readPlayer() throws InterruptedException, IOException {
-        String nickname;
-        while ((nickname = view.choosePlayerNonBlocking()).isEmpty()) {
+            Boolean resp = view.askNonBlocking(message + " (yes/no)");
+            if (resp != null)
+                return resp;
             Thread.sleep(100);
         }
-        return nickname;
     }
 
     ////metodi che mi servono per la gui///
