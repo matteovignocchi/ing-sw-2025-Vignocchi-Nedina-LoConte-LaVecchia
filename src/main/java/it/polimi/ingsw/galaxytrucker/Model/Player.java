@@ -964,5 +964,19 @@ public class Player implements Serializable {
         Collections.<Colour>sort(tmp);
         return tmp;
     }
+
+    public void resetValidity(int id){
+        Tile tmp =  getTile(0, 5);
+        Tile tmp2 = getTile(0, 6);
+        if(tmp.getIdTile() == id){
+            Dash_Matrix[0][5] = new EmptySpace();
+            validStatus[0][5] = Status.FREE;
+            return;
+        }
+        if(tmp2.getIdTile() == id){
+                Dash_Matrix[0][6] = new EmptySpace();
+                validStatus[0][6] = Status.FREE;
+            }
+    }
 }
 

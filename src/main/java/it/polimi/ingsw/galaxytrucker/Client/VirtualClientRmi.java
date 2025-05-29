@@ -333,16 +333,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         Tile tmpTile = null;
         while(true) {
             index = askCoordinate();
-            if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
-            else if(index[1]!=5 && index[1]!=6) clientController.informByController("Invalid coordinate");
+            if(index[0]!=0 || clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
             else break;
         }
-//        view.inform("id+"+ Dash_Matrix[index[0]][index[1]].idTile);
             try {
-//                view.setValidity(index[0], index[1]);
                 Tile tmp = clientController.getSomeTile(index[0], index[1]);
                 clientController.setTileInMatrix(new EmptySpace(), index[0], index[1]);
-//                view.printDashShip(Dash_Matrix);
+                clientController.resetValidityByController(index[0], index[1]);
                 clientController.printMyDashBoardByController();
                 tmpTile = server.getReservedTile(gameId,nickname,tmp.getIdTile());
             } catch (BusinessLogicException e) {

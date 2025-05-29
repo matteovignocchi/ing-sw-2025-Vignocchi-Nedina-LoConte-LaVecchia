@@ -473,4 +473,7 @@ public class GUIView extends Application implements View {
             return choice;
         }
     }
+
+    @Override
+    public void resetValidity(int a , int b) {}
 }

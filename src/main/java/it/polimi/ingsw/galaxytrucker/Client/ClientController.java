@@ -199,7 +199,7 @@ public class ClientController {
                 int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
                 if (response > 0) {
                     virtualClient.setGameId(response);
-                    handleWaitForGameStart();
+                    startGame();
                 }else{
                     v.reportError("Game creation failed");
                 }
@@ -339,7 +339,10 @@ public class ClientController {
                 continue;
             }
 
-            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //da controllare
+            if(currentGamePhase==GamePhase.EXIT){
+                mainMenuLoop();
+                break;
+            } //da controllare
 
             String key = view.sendAvailableChoices();
 
@@ -359,7 +362,9 @@ public class ClientController {
                         view.printTile(tmpTile);
                     }
                     case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
-                    case "placethetile"       -> virtualClient.positionTile(tmpTile);
+                    case "placethetile"       -> {
+                        virtualClient.positionTile(tmpTile);
+                    }
                     case "drawacard"          -> virtualClient.drawCard();
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
                     case "declareready"       -> {
@@ -442,6 +447,7 @@ public class ClientController {
 
     public void setTileInMatrix(Tile tile , int a , int b) {
         Dash_Matrix[a][b] = tile;
+        view.setValidity(a,b);
     }
 
 
@@ -543,6 +549,11 @@ public class ClientController {
 
     public void newShip(Tile[][] data){
         Dash_Matrix = data;
+    }
+    public void resetValidityByController(int a , int b){
+        if(a == 0 && (b == 5 || b ==6)){
+            view.resetValidity(a,b);
+        }
     }
  }
 

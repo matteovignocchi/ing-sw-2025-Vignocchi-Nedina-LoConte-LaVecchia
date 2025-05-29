@@ -768,6 +768,13 @@ public class TUIView implements View {
                 listOfOptions.add("Watch a player's ship");
                 listOfOptions.add("LogOut");
             }
+            case TILE_MANAGEMENT_AFTER_RESERVED -> {
+                listOfOptions.add("Place the tile");
+                listOfOptions.add("Left rotate the tile");
+                listOfOptions.add("Right rotate the tile");
+                listOfOptions.add("Watch a player's ship");
+                listOfOptions.add("LogOut");
+            }
             case WAITING_FOR_PLAYERS -> {
                 if(!isDemo) {
                     listOfOptions.add("Spin the hourglass");
@@ -936,9 +943,11 @@ public class TUIView implements View {
     }
     @Override
     public void setValidity(int a , int b){
-        boolean tmp =  !maschera[a][b];
-        if((a == 0 && b ==5)||(a==0 && b==6)) maschera[a][b] = tmp;
         maschera[a][b] = false;
+    }
+    @Override
+    public void resetValidity(int a , int b){
+        maschera[a][b] = true;
     }
 
     public GamePhase getGamePhase() {return game;}

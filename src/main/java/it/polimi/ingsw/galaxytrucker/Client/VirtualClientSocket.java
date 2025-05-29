@@ -698,8 +698,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Tile tmpTile = null;
         while(true) {
             index = askCoordinate();
-            if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
-            else if(index[1]!=5 && index[1]!=6) clientController.informByController("Invalid coordinate");
+            if(index[0]!=0 || clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
             else break;
         }
         List<Object> payload = new ArrayList<>();
@@ -708,6 +707,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         Tile tmp = clientController.getSomeTile(index[0], index[1]);
         payload.add(tmp.idTile);
         clientController.setTileInMatrix(new EmptySpace(), index[0], index[1]);
+        clientController.resetValidityByController(index[0], index[1]);
         clientController.printMyDashBoardByController();
         Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
         Message response = sendRequestWithResponse(request);

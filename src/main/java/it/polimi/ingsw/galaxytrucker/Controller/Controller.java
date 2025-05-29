@@ -383,8 +383,9 @@ public class Controller implements Serializable {
         for(Tile t : discardPile) {
             if(t.getIdTile() == id) {
                 discardPile.remove(t);
+                p.resetValidity(t.getIdTile());
                 p.setLastTile(t);
-                p.setGamePhase(GamePhase.TILE_MANAGEMENT);
+                p.setGamePhase(GamePhase.TILE_MANAGEMENT_AFTER_RESERVED);
                 notifyView(nickname);
                 return t;
             }

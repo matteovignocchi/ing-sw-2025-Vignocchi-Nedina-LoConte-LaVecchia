@@ -36,6 +36,7 @@ public interface View {
     void setIsDemo(Boolean demo);
     boolean ReturnValidity(int a , int b);
     void setValidity(int a , int b);
+    void resetValidity(int a , int b);
     GamePhase getGamePhase();
 }
 
