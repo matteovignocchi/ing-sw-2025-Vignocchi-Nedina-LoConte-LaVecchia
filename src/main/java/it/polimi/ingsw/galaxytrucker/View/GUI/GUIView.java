@@ -8,10 +8,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -48,17 +45,14 @@ public class GUIView extends Application implements View {
     private static int protocolChoice;
     private static String host;
     private static int port;
-
-
-
+    private int selectedGameId = -1;
+    private final Object lock = new Object();
 
     public static void setStartupConfig(int protocol, String h, int p) {
         protocolChoice = protocol;
         host = h;
         port = p;
     }
-
-
 
     @Override
     public void start(Stage stage) {
@@ -109,18 +103,11 @@ public class GUIView extends Application implements View {
         }).start();
     }
 
-
-
-
-
-
-
-
     @Override
     public void inform(String message) {
-        if( sceneEnum == SceneEnum.WAITING_QUEUE){
-            //TODO fare metodo che mette messaggi sullo schermo di chi si è connesso
-        } else if (sceneEnum == SceneEnum.MAIN_MENU){
+        if (sceneEnum == SceneEnum.WAITING_QUEUE) {
+            // TODO: fare metodo che mette messaggi sullo schermo di chi si è connesso
+        } else if (sceneEnum == SceneEnum.MAIN_MENU) {
 
         }
     }
@@ -169,7 +156,6 @@ public class GUIView extends Application implements View {
     @Override
     public void printDashShip(Tile[][] ship) {
         controller.setDashBoard(ship);
-
     }
 
     @Override
@@ -204,30 +190,31 @@ public class GUIView extends Application implements View {
             Platform.runLater(this::showNicknameDialog);
             try {
                 String nickname = nicknameFuture.get();
-
                 sceneEnum = null;
                 return nickname;
             } catch (Exception e) {
-
-                e.printStackTrace();
                 reportError("Can not load the nickname : " + e.getMessage());
                 return "";
             } finally {
                 nicknameFuture = null;
             }
-        } else if (sceneEnum == SceneEnum.MAIN_MENU) {
+        }
+
+        if (sceneEnum == SceneEnum.MAIN_MENU) {
             menuChoiceFuture = new CompletableFuture<>();
             try {
                 return menuChoiceFuture.get();
             } catch (Exception e) {
                 e.printStackTrace();
                 return "";
+            } finally {
+                sceneEnum = null;
+                menuChoiceFuture = null;
             }
         }
 
         return "";
     }
-
 
     @Override
     public void reportError(String message) {
@@ -247,7 +234,6 @@ public class GUIView extends Application implements View {
         });
     }
 
-
     @Override
     public void updateState(GamePhase gamePhase) {
         this.gamePhase = gamePhase;
@@ -266,8 +252,6 @@ public class GUIView extends Application implements View {
             case SCORING -> {} //lo metterò nella scena dello scoring
             case EXIT -> {} //boh ci ragioniamo
         }
-
-
     }
 
     @Override
@@ -330,7 +314,35 @@ public class GUIView extends Application implements View {
         Parent root = loader.load();
         Scene scene = new Scene(root);
         this.mainStage.setScene(scene);
-        loader.getController();
+        this.mainStage.centerOnScreen();
+        Object controller = loader.getController();
+        //TODO ricordarsi di mettere tutti i controller quando si scrive
+        switch (controller) {
+            case MainMenuController c -> {
+                c.setGuiView(this);
+                this.controller = c;
+            }
+            case CreateGameMenuController c -> {
+                c.setGuiView(this);
+                this.controller = c;
+            }
+            case GameListMenuController c -> {
+                c.setGuiView(this);
+                this.controller = c;
+            }
+            case NicknameDialogController c -> {
+                c.setGuiView(this);
+            }
+            case BuildingPhaseController c -> {
+                c.setGuiView(this);
+                this.controller = c;
+            }
+            case WaitingQueueController c ->{
+                c.setGuiView(this);
+                this.controller = c;
+            }
+            default -> {}
+        }
     }
 
     public void resolveCoordinates(int row, int col) {
@@ -341,9 +353,11 @@ public class GUIView extends Application implements View {
 
     public void resolveMenuChoice(String choice) {
         if (menuChoiceFuture != null && !menuChoiceFuture.isDone()) {
+            sceneEnum = SceneEnum.MAIN_MENU;
             menuChoiceFuture.complete(choice);
         }
     }
+
 
     public void showNicknameDialog() {
         try {
@@ -381,20 +395,12 @@ public class GUIView extends Application implements View {
         }
     }
 
-    public void resolveGameChoice(int gameChoice){
-        this.gameChoice = gameChoice;
-    }
-
-    public int getGameChoice() {
-        return gameChoice;
-    }
 
     public void resolveDataGame(List<Object> dataGame) {
         if (dataForGame != null && !dataForGame.isDone()) {
             dataForGame.complete(dataGame);
         }
     }
-
 
     public List<Object> getDataForGame() {
         if (dataForGame == null) {
@@ -413,48 +419,58 @@ public class GUIView extends Application implements View {
         }
 
         try {
-            return dataForGame.get(); // <-- blocca finché il controller non chiama resolve
+            return dataForGame.get();
         } catch (Exception e) {
             reportError("Error waiting for game data: " + e.getMessage());
-            return List.of(false, 2); // fallback
+            return List.of(false, 2);
         }
     }
 
 
-    public void updateAvailableGames(Map<Integer, int[]> availableGames) {
+    public GamePhase getGamePhase() { return gamePhase; }
+
+    public void displayAvailableGames(Map<Integer, int[]> availableGames) {
+        ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
+        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+            int id = entry.getKey();
+            int[] info = entry.getValue();
+            boolean isDemo = info[2] == 1;
+            String suffix = isDemo ? " DEMO" : "";
+            String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+            gameDescriptions.add(desc);
+        }
+
         Platform.runLater(() -> {
-            Scene currentScene = mainStage.getScene();
-            if (currentScene == null) return;
 
-            Object controller = currentScene.getUserData();
-
-            switch (controller) {
-                case GameListMenuController gameListController -> {
-                    ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
-
-                    if (availableGames == null || availableGames.isEmpty()) {
-                        gameDescriptions.add("No available games");
-                    } else {
-                        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-                            int id = entry.getKey();
-                            int[] info = entry.getValue();
-                            String description = id + ". Players in game: " + info[0] + "/" + info[1];
-                            if (info.length > 2 && info[2] == 1) {
-                                description += " DEMO";
-                            }
-                            gameDescriptions.add(description);
-                        }
-                    }
-
-                    gameListController.displayGames(gameDescriptions);
-                }
-                default -> {
-                }
+            if (controller instanceof GameListMenuController gameController) {
+                gameController.displayGames(gameDescriptions);
+            } else {
+                reportError("Controller is not GameListMenuController");
             }
         });
     }
 
-    public GamePhase getGamePhase() { return gamePhase; }
 
+    public void setSelectedGameId(int gameId) {
+        synchronized (lock) {
+            this.selectedGameId = gameId;
+            lock.notifyAll();
+        }
+    }
 
+    public int waitForGameChoice() {
+        synchronized (lock) {
+            while (selectedGameId == -1) {
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return -1;
+                }
+            }
+            int choice = selectedGameId;
+            selectedGameId = -1;
+            return choice;
+        }
+    }
 }
