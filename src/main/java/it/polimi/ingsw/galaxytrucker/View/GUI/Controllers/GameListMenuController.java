@@ -23,9 +23,13 @@ public class GameListMenuController extends GUIController {
 
     @FXML
     public void initialize() {
-        gameListView.setOnMouseClicked((MouseEvent event) -> {
-            if (event.getClickCount() == 2 && !gameListView.getSelectionModel().isEmpty()) {
-                joinSelectedGame();
+        gameListView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+
+                if (gameListView.getSelectionModel().getSelectedItem() != null) {
+                    joinSelectedGame();
+                }
+
             }
         });
 
@@ -33,7 +37,6 @@ public class GameListMenuController extends GUIController {
                 gameListView.getSelectionModel().selectedItemProperty().isNull()
         );
     }
-
     public void setGuiView(GUIView guiView) {
         this.guiView = guiView;
     }

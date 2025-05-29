@@ -54,6 +54,46 @@
     -fx-border-color: #daa520;
 }
 
+#titleLabel {
+    -fx-font-family: "Impact";
+    -fx-font-size: 40px;
+    -fx-text-fill: #444444;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-padding: 3px 8px;
+}
+
+#gameListView {
+    -fx-font-family: "Impact";
+    -fx-font-size: 20px;
+    -fx-text-fill: #444444;
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: rgba(255, 215, 0, 0.3);
+    -fx-border-width: 1px;
+}
+
+#gameListView .list-cell {
+    -fx-text-fill: #444444;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 5px 10px;
+}
+
+#gameListView .list-cell:filled:selected,
+#gameListView .list-cell:filled:selected:focused {
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+    -fx-text-fill: #222222;
+    -fx-effect: innershadow(three-pass-box, rgba(0, 0, 0, 0.1), 3, 0, 0, 1);
+}
+
+#gameListView .list-cell:filled:hover {
+    -fx-background-color: rgba(255, 215, 0, 0.1);
+
+}
+
 .anchor-pane, .vbox, .hbox, .grid-pane {
     -fx-background-color: #f5f5f5;
 }

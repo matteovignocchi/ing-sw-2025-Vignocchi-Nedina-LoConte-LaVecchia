@@ -10,11 +10,13 @@ import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
@@ -25,8 +27,13 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
 public class GUIView extends Application implements View {
     private Stage mainStage;
@@ -38,7 +45,6 @@ public class GUIView extends Application implements View {
     public Tile[][] dashBoard;
     private CompletableFuture<List<Object>> dataForGame;
     private CompletableFuture<String> menuChoiceFuture;
-    public int gameChoice;
     private SceneEnum sceneEnum;
     private GamePhase gamePhase;
     private boolean demo;
@@ -105,10 +111,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
-        if (sceneEnum == SceneEnum.WAITING_QUEUE) {
+        if (message.equals("Login successful")) {
+            showNotification("You have successfully connected!");
+        } else if (message.contains("connected")) {
+            showNotification(message);
+        } else if (sceneEnum == SceneEnum.WAITING_QUEUE) {
             // TODO: fare metodo che mette messaggi sullo schermo di chi si è connesso
         } else if (sceneEnum == SceneEnum.MAIN_MENU) {
-
+            // Gestione altri messaggi nel menu principale
         }
     }
 
@@ -297,6 +307,39 @@ public class GUIView extends Application implements View {
     @Override
     public void setValidity(int a, int b) {
 
+    }
+
+    public void showNotification(String message) {
+        Platform.runLater(() -> {
+            Stage notificationStage = new Stage();
+            notificationStage.initStyle(StageStyle.UTILITY);
+            notificationStage.initModality(Modality.NONE);
+            notificationStage.initOwner(mainStage);
+            notificationStage.setAlwaysOnTop(true);
+            notificationStage.setResizable(false);
+            notificationStage.setTitle("Notification");
+
+            Label label = new Label(message);
+            label.setStyle("-fx-padding: 10; -fx-font-size: 14;");
+            Scene scene = new Scene(new StackPane(label));
+            notificationStage.setScene(scene);
+
+            double notificationWidth = 250;
+            double notificationHeight = 80;
+            double mainX = mainStage.getX();
+            double mainY = mainStage.getY();
+            double mainWidth = mainStage.getWidth();
+            double mainHeight = mainStage.getHeight();
+
+            notificationStage.setX(mainX + mainWidth - notificationWidth - 10);
+            notificationStage.setY(mainY + mainHeight - notificationHeight - 10);
+
+            notificationStage.show();
+
+            PauseTransition delay = new PauseTransition(Duration.seconds(3));
+            delay.setOnFinished(event -> notificationStage.close());
+            delay.play();
+        });
     }
 
     public void setClientController(ClientController clientController) {
