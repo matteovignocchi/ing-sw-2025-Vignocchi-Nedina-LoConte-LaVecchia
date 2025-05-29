@@ -73,7 +73,6 @@ public class TUIView implements View {
         inform("SU stands for storage unit, when is white is the standard unit, when it is"+RED+" red"+RESET+" it is advanced, after that there is the max capacity of the unit. In each corner, there is a counter showing how many goods of that color are present.");
     }
 
-
     private String readLine(long timeoutMs) throws InterruptedException, IOException {
         long end = System.currentTimeMillis() + timeoutMs;
         while (System.currentTimeMillis() < end) {

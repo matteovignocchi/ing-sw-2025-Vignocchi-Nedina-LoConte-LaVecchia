@@ -331,6 +331,7 @@ public class ClientController {
         if(view.getGamePhase() == GamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
 
         view.printListOfCommand();
+
         while (true) {
             GamePhase temp = currentGamePhase;
 
@@ -339,7 +340,7 @@ public class ClientController {
                 continue;
             }
 
-            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //da controllare
+            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //TODO: da controllare appena arriviamo a questa fase del debugging
 
             String key = view.sendAvailableChoices();
 

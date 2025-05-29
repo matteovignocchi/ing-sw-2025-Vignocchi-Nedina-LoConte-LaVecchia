@@ -707,8 +707,8 @@ public class Controller implements Serializable {
 
         } catch (TimeoutException te) {
             future.cancel(true);
+            inform("SERVER: TimeOut", nick);
             return false;
-
         } catch (Exception e) {
             future.cancel(true);
             markDisconnected(nick);
