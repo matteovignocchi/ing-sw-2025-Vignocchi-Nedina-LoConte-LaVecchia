@@ -103,4 +103,5 @@ public interface VirtualView extends Remote {
 
     void setClientController(ClientController clientController) throws Exception;
 
+    boolean askWithTimeout(String question) throws Exception;
 }

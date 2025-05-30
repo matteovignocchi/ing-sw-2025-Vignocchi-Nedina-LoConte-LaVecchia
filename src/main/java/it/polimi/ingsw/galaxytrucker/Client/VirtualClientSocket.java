@@ -322,8 +322,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
 
-
-
     /// METODI CHE CHIAMO SUL SERVER DURANTE LA PARTITA ///
 
     @Override
@@ -574,7 +572,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDashBoard() throws Exception {
         while (true) {
-            String tmp = clientController.choocePlayerByController();
+            String tmp = clientController.choosePlayerByController();
 
 
             List<Object> payload = new ArrayList<>();
@@ -647,6 +645,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }
+
+    //TODO: scrivere
+    @Override
+    public boolean askWithTimeout(String question) {return false;}
 
 
 

@@ -692,31 +692,42 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    //TODO: aspettare risposta del floris per gestione eccezioni più robusta, così comunque ok
     public boolean askPlayerDecision(String question, Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
 
         if (!p.isConnected()) return false;
 
+        /*
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<Boolean> future = executor.submit(() -> v.ask(question));
-
+        Boolean ans = false;
         try {
-            return future.get(TIME_OUT, TimeUnit.SECONDS);
+            ans = future.get(TIME_OUT, TimeUnit.SECONDS);
 
         } catch (TimeoutException te) {
             future.cancel(true);
             inform("SERVER: TimeOut", nick);
-            return false;
         } catch (Exception e) {
             future.cancel(true);
             markDisconnected(nick);
             System.err.println("[ERROR] in askPlayerDecision: " + e);
-            return false;
         } finally {
             executor.shutdownNow();
         }
+        return ans;
+        */
+
+        try {
+            return v.askWithTimeout(question);
+        } catch (IOException e) {
+            markDisconnected(nick);
+        } catch(Exception e){
+            markDisconnected(nick);
+            System.err.println("Error in askPlayerDecision");
+        }
+        return false;
+
     }
 
     public int[] askPlayerCoordinates (Player p) throws BusinessLogicException {

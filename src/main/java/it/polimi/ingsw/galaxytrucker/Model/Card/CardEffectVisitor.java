@@ -58,10 +58,16 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             int x = controller.getPowerEngineForCard(p);
 
-            if(controller.askPlayerDecision("SERVER: Prova metodi callback: ", p)) x = 100;
-            else x = 1;
-
-            /**/ System.out.println("Player "+ nick + " x = " + x);
+            if(controller.askPlayerDecision("SERVER: Prova metodi callback: ", p)){
+                x = 2;
+                String msg = "SERVER: il tuo x vale " + x;
+                controller.inform(msg, nick);
+            }
+            else{
+                x = 1;
+                String msg = "SERVER: il tuo x vale " + x;
+                controller.inform(msg, nick);
+            }
 
             if (x == 0) p.setEliminated();
             else f.moveRocket(x, p);

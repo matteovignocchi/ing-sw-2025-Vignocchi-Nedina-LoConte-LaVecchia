@@ -34,6 +34,7 @@ public class TUIView implements View {
             Colour.YELLOW, YELLOW,
             Colour.BLUE,   BLUE
     );
+    private long TIME_OUT = 30000;
 
 
     //per ora lascio il server come int
@@ -119,7 +120,7 @@ public class TUIView implements View {
     public boolean ask(String message) {
         try {
             inform(message + " (Yes/No)");
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 String line = readLine(200);
                 if (line == null) continue;
                 line = line.trim().toLowerCase();
@@ -129,12 +130,33 @@ public class TUIView implements View {
             }
         } catch (IOException e) {
             reportError("I/O error: " + e.getMessage());
-            return false;  //risposta predefinita
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return false; //risposta predefinita
         }
+        return false; //risposta predefinita
     }
+
+
+    public boolean askWithTimeout(String message) {
+        long end = System.currentTimeMillis() + TIME_OUT;
+        try{
+            inform(message + " (Yes/No)");
+            while (System.currentTimeMillis() < end) {
+                String line = readLine(200);
+                if (line == null) continue;
+                line = line.trim().toLowerCase();
+                if (line.equals("yes")) return true;
+                if (line.equals("no"))  return false;
+                reportError("Invalid response, try again.");
+            }
+        } catch (IOException e) {
+            reportError("I/O error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return false; //risposta predefinita
+    }
+
 
     @Override
     public int[] askCoordinate() {

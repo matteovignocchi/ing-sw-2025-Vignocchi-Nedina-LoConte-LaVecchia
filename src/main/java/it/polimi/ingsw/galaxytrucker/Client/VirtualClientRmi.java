@@ -41,6 +41,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         this.clientController = clientController;
     }
 
+    @Override
+    public boolean askWithTimeout(String question) throws RemoteException{
+        return clientController.askWithTimeoutByController(question);
+    }
+
+
 
     /// METODI PER PRINTARE A CLIENT ///
 
@@ -310,7 +316,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         Tile[][] dashPlayer;
         String tmp;
         while(true){
-             tmp = clientController.choocePlayerByController();
+             tmp = clientController.choosePlayerByController();
             try {
                 dashPlayer = server.lookAtDashBoard(gameId,tmp);
                 break;

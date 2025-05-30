@@ -14,11 +14,8 @@ import javafx.application.Platform;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.*;
 
 import static java.lang.String.valueOf;
 
@@ -501,6 +498,9 @@ public class ClientController {
     public boolean askByController(String message){
         return view.ask(message);
     }
+
+    public boolean askWithTimeoutByController(String message){return view.askWithTimeout(message);}
+
     public int askIndexByController() {
         return view.askIndex();
     }
@@ -518,7 +518,7 @@ public class ClientController {
         currentGamePhase = phase;
     }
 
-    public String choocePlayerByController(){
+    public String choosePlayerByController(){
         return view.choosePlayer();
     }
 

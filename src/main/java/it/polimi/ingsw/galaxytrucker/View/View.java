@@ -37,6 +37,8 @@ public interface View {
     boolean ReturnValidity(int a , int b);
     void setValidity(int a , int b);
     GamePhase getGamePhase();
+
+    boolean askWithTimeout(String message);
 }
 
 //public interface VirtualViewRmi extends VirtualView {
