@@ -54,26 +54,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int x = controller.getPowerEngineForCard(p);
 
-            if(controller.askPlayerDecision("SERVER: Prova metodi callback: ", p)){
-                x = 2;
-                String msg = "SERVER: il tuo x vale " + x;
-                controller.inform(msg, nick);
-            }
-            else{
-                x = 1;
-                String msg = "SERVER: il tuo x vale " + x;
-                controller.inform(msg, nick);
-            }
-
             if (x == 0) p.setEliminated();
-            else f.moveRocket(x, p);
+            else{
+                String msg = "SERVER: Your engine power is "+ x +". You move forward by those spaces.";
+                controller.inform(msg, nick);
+                f.moveRocket(x, p);
+            }
 
             controller.changeMapPosition(nick, p);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }
