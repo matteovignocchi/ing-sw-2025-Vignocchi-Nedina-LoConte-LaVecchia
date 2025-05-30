@@ -106,6 +106,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             }
     } catch (IOException e) {
             this.reportError(": " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -231,7 +233,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         return clientController.askByController(message);
     }
     @Override
-    public int askIndex(){
+    public int askIndex() throws IOException, InterruptedException {
         return clientController.askIndexByController();
     }
     @Override
@@ -573,7 +575,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void lookDashBoard() throws Exception {
         while (true) {
             String tmp = clientController.choosePlayerByController();
-
+            if(tmp == null) continue;
 
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);

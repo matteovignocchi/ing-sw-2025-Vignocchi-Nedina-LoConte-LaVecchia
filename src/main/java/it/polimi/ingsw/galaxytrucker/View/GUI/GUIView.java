@@ -135,7 +135,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public int askIndex() {
+    public Integer askIndex() {
         return 0;
     }
 

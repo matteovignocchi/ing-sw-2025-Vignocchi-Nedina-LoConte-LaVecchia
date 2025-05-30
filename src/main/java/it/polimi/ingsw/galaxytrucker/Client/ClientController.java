@@ -205,7 +205,7 @@ public class ClientController {
         }
     }
 
-    public int printAvailableGames(Map<Integer, int[]> availableGames) {
+    public int printAvailableGames(Map<Integer, int[]> availableGames) throws IOException, InterruptedException {
         int choice = 0;
 
         switch (view) {
@@ -502,7 +502,7 @@ public class ClientController {
 
     public boolean askWithTimeoutByController(String message){return view.ask(message);}
 
-    public int askIndexByController() {
+    public int askIndexByController() throws IOException, InterruptedException {
         return view.askIndex();
     }
     public int[] askCoordinateByController(){
@@ -519,7 +519,7 @@ public class ClientController {
         currentGamePhase = phase;
     }
 
-    public String choosePlayerByController(){
+    public String choosePlayerByController() throws IOException, InterruptedException {
         return view.choosePlayer();
     }
 

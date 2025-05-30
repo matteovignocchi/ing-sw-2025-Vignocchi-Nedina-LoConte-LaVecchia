@@ -96,23 +96,45 @@ public class TUIView implements View {
     public void updateMap(Map<String, Integer> map) {
         mapPosition = map;
     }
+
+
+//    @Override
+//    public String choosePlayer(){
+//        for(String s : mapPosition.keySet()){
+//            System.out.println(s + "- " + mapPosition.get(s));
+//        }
+//        System.out.println();
+//        String nickname;
+//        while(true){
+//            inform("Selecet nickname of the player");
+//            nickname = askString();
+//            for (String key : mapPosition.keySet()) {
+//                if (key.equalsIgnoreCase(nickname)) {
+//                    return key;
+//                }
+//            }
+//            reportError("Please enter a nickname of some player in game");
+//        }
+//    }
+
     @Override
-    public String choosePlayer(){
-        for(String s : mapPosition.keySet()){
-            System.out.println(s + ": " + mapPosition.get(s));
-        }
-        System.out.println();
-        String nickname;
-        while(true){
-            inform("Selecet nickname of the player");
-            nickname = askString();
-            for (String key : mapPosition.keySet()) {
-                if (key.equalsIgnoreCase(nickname)) {
-                    return key;
-                }
+    public String choosePlayer() throws IOException, InterruptedException {
+        System.out.println("\nPlayers in game:");
+        mapPosition.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(e -> System.out.printf("  %d - %s%n", e.getValue(), e.getKey()));
+        inform("Select nickname of the player:");
+
+        String line = readLine(200);
+        if (line == null) { return null; }
+        String nickname = line.trim();
+        for (String key : mapPosition.keySet()) {
+            if (key.equalsIgnoreCase(nickname)) {
+                return key;
             }
-            reportError("Please enter a nickname of some player in game");
         }
+        reportError("Please enter a valid nickname from the list");
+        return null;
     }
 
 //metodo ask senza timoeut
@@ -221,16 +243,16 @@ public class TUIView implements View {
 
 
     @Override
-    public int askIndex() {
-        while (true) {
-            inform("Insert index:");
-            String line = askString();
-            try {
-                int value = Integer.parseInt(line.trim());
-                return value - 1;
-            } catch (NumberFormatException e) {
-                reportError("Invalid input. Please enter a number.");
-            }
+    public Integer askIndex() throws IOException, InterruptedException {
+        inform("Insert index:");
+        String line = readLine(200);
+        if (line == null) return null;
+        try {
+            int value = Integer.parseInt(line.trim());
+            return value - 1;
+        } catch (NumberFormatException e) {
+            reportError("Invalid input. Please enter a number.");
+            return null;
         }
     }
 
@@ -238,14 +260,11 @@ public class TUIView implements View {
     @Override
     public String askString() {
         try {
-            String line;
-            while ((line = readLine(200)) == null || line.isEmpty()) {
-
-            }
-            return line.trim();
+            String line = readLine(200);
+            return (line != null && !line.isEmpty()) ? line.trim() : null;
         } catch (IOException|InterruptedException e) {
             Thread.currentThread().interrupt();
-            return "";
+            return null;
         }
     }
 
@@ -271,16 +290,6 @@ public class TUIView implements View {
 
     @Override
     public void printDashShip(Tile[][] dashboard) {
-//        if (this.maschera == null
-//                || this.maschera.length != dashboard.length
-//                || this.maschera[0].length != dashboard[0].length) {
-//            this.maschera = new boolean[ dashboard.length ][ dashboard[0].length ];
-//            // se ti serve azzerarla, fallo subito:
-//            for (int i = 0; i < maschera.length; i++) {
-//                Arrays.fill(maschera[i], false);
-//            }
-//        }
-
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
             System.out.printf("    %2d    ", col + 4);

@@ -105,7 +105,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return clientController.askByController(message);
     }
     @Override
-    public int askIndex() throws RemoteException {
+    public int askIndex() throws IOException, InterruptedException {
         return clientController.askIndexByController();
     }
     @Override
@@ -153,7 +153,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     }
     @Override
-    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws RemoteException {
+    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws IOException, InterruptedException {
         if(message.contains("CREATE")){
             try{
                return server.createNewGame(isDemo , this , nickname , numberOfPlayer);
@@ -202,7 +202,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public Tile getUncoveredTile() throws BusinessLogicException, RemoteException {
+    public Tile getUncoveredTile() throws BusinessLogicException, IOException, InterruptedException {
         List<Tile> tmp;
         try {
             tmp = server.getUncoveredTilesList(gameId, nickname);
@@ -287,7 +287,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public void lookDeck() throws RemoteException {
+    public void lookDeck() throws IOException, InterruptedException {
         while (true) {
             clientController.informByController("Choose deck : 1 / 2 / 3");
             int index = askIndex() + 1;
@@ -312,11 +312,12 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
 
     @Override
-    public void lookDashBoard() throws RemoteException{
+    public void lookDashBoard() throws IOException, InterruptedException {
         Tile[][] dashPlayer;
         String tmp;
         while(true){
-             tmp = clientController.choosePlayerByController();
+            tmp = clientController.choosePlayerByController();
+            if(tmp == null) continue;
             try {
                 dashPlayer = server.lookAtDashBoard(gameId,tmp);
                 break;
