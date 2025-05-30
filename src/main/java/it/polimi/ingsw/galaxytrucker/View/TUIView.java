@@ -18,6 +18,7 @@ public class TUIView implements View {
     private boolean isDemo;
     private boolean[][] maschera;
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+    private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
@@ -119,12 +120,6 @@ public class TUIView implements View {
 
     @Override
     public String choosePlayer() throws IOException, InterruptedException {
-        System.out.println("\nPlayers in game:");
-        mapPosition.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .forEach(e -> System.out.printf("  %d - %s%n", e.getValue(), e.getKey()));
-        inform("Select nickname of the player:");
-
         String line = readLine(200);
         if (line == null) { return null; }
         String nickname = line.trim();
@@ -242,8 +237,7 @@ public class TUIView implements View {
     }
 
 
-    @Override
-    public Integer askIndex() throws IOException, InterruptedException {
+    public Integer askIndexNoBlocking() throws IOException, InterruptedException {
         inform("Insert index:");
         String line = readLine(200);
         if (line == null) return null;
@@ -256,16 +250,24 @@ public class TUIView implements View {
         }
     }
 
+    @Override
+    public int askIndex() {
+        while (true) {
+            inform("Insert index:");
+            String line = askString();
+            try {
+                int value = Integer.parseInt(line.trim());
+                return value - 1;
+            } catch (NumberFormatException e) {
+                reportError("Invalid input. Please enter a number.");
+            }
+        }
+    }
+
 
     @Override
     public String askString() {
-        try {
-            String line = readLine(200);
-            return (line != null && !line.isEmpty()) ? line.trim() : null;
-        } catch (IOException|InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
-        }
+        return scanner.nextLine();
     }
 
 
@@ -356,6 +358,7 @@ public class TUIView implements View {
     }
 
     //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
+    @Override
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()

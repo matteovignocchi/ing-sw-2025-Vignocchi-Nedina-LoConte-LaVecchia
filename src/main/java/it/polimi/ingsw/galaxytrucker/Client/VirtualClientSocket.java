@@ -573,7 +573,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void lookDashBoard() throws Exception {
+        clientController.printMapPositionByController();
+        clientController.informByController("Select nickname of the player:");
+        GamePhase Phase = clientController.getGamePhaseByController();
         while (true) {
+
+            if (clientController.getGamePhaseByController() != Phase) {
+                return;
+            }
+
             String tmp = clientController.choosePlayerByController();
             if(tmp == null) continue;
 

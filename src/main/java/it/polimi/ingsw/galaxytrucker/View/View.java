@@ -15,7 +15,7 @@ public interface View {
     void inform(String message);
     boolean ask(String message);
     int[] askCoordinate();
-    Integer askIndex() throws IOException, InterruptedException;
+    int askIndex() throws IOException, InterruptedException;
     void setInt();
     void start();
     void printListOfGoods(List<Colour> Goods);
@@ -38,6 +38,7 @@ public interface View {
     boolean ReturnValidity(int a , int b);
     void setValidity(int a , int b);
     GamePhase getGamePhase();
+    void printMapPosition();
 }
 
 //public interface VirtualViewRmi extends VirtualView {

@@ -205,7 +205,7 @@ public class ClientController {
         }
     }
 
-    public int printAvailableGames(Map<Integer, int[]> availableGames) throws IOException, InterruptedException {
+    public int printAvailableGames(Map<Integer, int[]> availableGames) {
         int choice = 0;
 
         switch (view) {
@@ -546,6 +546,10 @@ public class ClientController {
     public void newShip(Tile[][] data){
         Dash_Matrix = data;
     }
+
+    public void printMapPositionByController() { view.printMapPosition();}
+
+    public GamePhase getGamePhaseByController() { return view.getGamePhase();}
  }
 
 

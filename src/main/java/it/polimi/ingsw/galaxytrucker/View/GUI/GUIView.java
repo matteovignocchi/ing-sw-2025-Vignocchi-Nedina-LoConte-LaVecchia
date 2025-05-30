@@ -135,7 +135,10 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public Integer askIndex() {
+    public void printMapPosition() {}
+
+    @Override
+    public int askIndex() {
         return 0;
     }
 

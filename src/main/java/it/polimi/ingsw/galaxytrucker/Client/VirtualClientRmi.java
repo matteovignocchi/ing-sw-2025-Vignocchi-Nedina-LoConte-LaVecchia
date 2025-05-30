@@ -315,7 +315,15 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     public void lookDashBoard() throws IOException, InterruptedException {
         Tile[][] dashPlayer;
         String tmp;
+        clientController.printMapPositionByController();
+        clientController.informByController("Select nickname of the player:");
+        GamePhase Phase = clientController.getGamePhaseByController();
         while(true){
+
+            if (clientController.getGamePhaseByController() != Phase) {
+                return;
+            }
+
             tmp = clientController.choosePlayerByController();
             if(tmp == null) continue;
             try {
