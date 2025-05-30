@@ -267,7 +267,7 @@ public class ClientController {
         return true;
     }
 
-
+    /**
     private boolean waitForFlightStart() throws Exception {
 
         if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
@@ -301,7 +301,7 @@ public class ClientController {
         view.inform("Flight is starting! Good luck!\n");
         return true;
     }
-
+     */
 
 
     private boolean handleWaitForGameStart() throws Exception {
@@ -362,12 +362,13 @@ public class ClientController {
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
                     case "declareready"       -> {
                         virtualClient.setReady();
+                        /**
                         if (!waitForFlightStart()) return;
-
                         if (currentGamePhase == GamePhase.DRAW_PHASE) {
                             view.printListOfCommand();
                             continue;
                         }
+                         */
                     }
                     case "watchadeck"         -> virtualClient.lookDeck();
                     case "watchaplayersship"  -> virtualClient.lookDashBoard();
@@ -387,9 +388,9 @@ public class ClientController {
             } catch (BusinessLogicException | IOException | InterruptedException e) {
                 view.reportError(e.getMessage());
             }
-            if (currentGamePhase != GamePhase.DRAW_PHASE) {
-                view.printListOfCommand();
-            }
+
+            //if (currentGamePhase != GamePhase.DRAW_PHASE)
+            view.printListOfCommand();
         }
     }
 
