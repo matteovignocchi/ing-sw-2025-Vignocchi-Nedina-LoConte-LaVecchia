@@ -17,7 +17,6 @@ public class TUIView implements View {
     private GamePhase game;
     private boolean isDemo;
     private boolean[][] maschera;
-    private Scanner scanner = new Scanner(System.in); //TODO: da eliminare
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
@@ -34,7 +33,7 @@ public class TUIView implements View {
             Colour.YELLOW, YELLOW,
             Colour.BLUE,   BLUE
     );
-    private long TIME_OUT = 30000;
+    private static final long TIME_OUT = 30000;
 
 
     //per ora lascio il server come int
@@ -116,28 +115,29 @@ public class TUIView implements View {
         }
     }
 
+//metodo ask senza timoeut
+//    @Override
+//    public boolean ask(String message) {
+//        try {
+//            inform(message + " (Yes/No)");
+//            while (!Thread.currentThread().isInterrupted()) {
+//                String line = readLine(200);
+//                if (line == null) continue;
+//                line = line.trim().toLowerCase();
+//                if (line.equals("yes")) return true;
+//                if (line.equals("no"))  return false;
+//                reportError("Invalid response, try again.");
+//            }
+//        } catch (IOException e) {
+//            reportError("I/O error: " + e.getMessage());
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
+//        return false; //risposta predefinita
+//    }
+
     @Override
     public boolean ask(String message) {
-        try {
-            inform(message + " (Yes/No)");
-            while (!Thread.currentThread().isInterrupted()) {
-                String line = readLine(200);
-                if (line == null) continue;
-                line = line.trim().toLowerCase();
-                if (line.equals("yes")) return true;
-                if (line.equals("no"))  return false;
-                reportError("Invalid response, try again.");
-            }
-        } catch (IOException e) {
-            reportError("I/O error: " + e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return false; //risposta predefinita
-    }
-
-
-    public boolean askWithTimeout(String message) {
         long end = System.currentTimeMillis() + TIME_OUT;
         try{
             inform(message + " (Yes/No)");
@@ -154,44 +154,71 @@ public class TUIView implements View {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        return false; //risposta predefinita
+        return false;
     }
 
 
+//    @Override
+//    public int[] askCoordinate() {
+//        int[] coordinate = new int[2];
+//
+//        while (true) {
+//            inform("Insert the row:");
+//            try {
+//                coordinate[0] = Integer.parseInt(askString());
+//            } catch (InputMismatchException e) {
+//                inform("Invalid input. Please enter a number for the row.");
+//                Integer.parseInt(askString());
+//            }
+//            if(coordinate[0] >=5 && coordinate[0] <=9) break;
+//            else inform("Invalid input. Please enter a number for the row.");
+//        }
+//        while (true) {
+//            inform("Insert the column:");
+//            try {
+//                coordinate[1] = Integer.parseInt(askString());
+//            } catch (InputMismatchException e) {
+//                inform("Invalid input. Please enter a number for the column.");
+//                Integer.parseInt(askString());
+//            }
+//            if(coordinate[1] >=4 && coordinate[1] <=10) break;
+//            else inform("Invalid input. Please enter a number for the column.");
+//        }
+//        coordinate[0] = coordinate[0] - 5;
+//        coordinate[1] = coordinate[1] - 4;
+//        return coordinate;
+//    }
+
     @Override
     public int[] askCoordinate() {
-            int[] coordinate = new int[2];
-
-                while (true) {
-                    inform("Insert the row:");
-                    try {
-                        coordinate[0] = scanner.nextInt();
-                        scanner.nextLine(); // consuma il newline
-                    } catch (InputMismatchException e) {
-                        inform("Invalid input. Please enter a number for the row.");
-                        scanner.nextLine(); // consuma l'input errato
-                    }
-
-                    if(coordinate[0] >=5 && coordinate[0] <=9) break;
-                    else inform("Invalid input. Please enter a number for the row.");
+        int[] coordinate = new int[2];
+        while (true) {
+            inform("Insert the row:");
+            String row = askString();
+            try {
+                int r = Integer.parseInt(row.trim());
+                if (r >= 5 && r <= 9) {
+                    coordinate[0] = r - 5;
+                    break;
                 }
-            while (true) {
-                inform("Insert the column:");
-                try {
-                    coordinate[1] = scanner.nextInt();
-                    scanner.nextLine(); // consuma il newline
-                } catch (InputMismatchException e) {
-                    inform("Invalid input. Please enter a number for the column.");
-                    scanner.nextLine(); // consuma l'input errato
-                }
-                if(coordinate[1] >=4 && coordinate[1] <=10) break;
-                else inform("Invalid input. Please enter a number for the column.");
-            }
-            coordinate[0] = coordinate[0] - 5;
-            coordinate[1] = coordinate[1] - 4;
-
-            return coordinate;
+            } catch (NumberFormatException ignored) { }
+            reportError("Invalid row. Please enter a valid number");
         }
+        while (true) {
+            inform("Insert the column (4–10):");
+            String col = askString();
+            try {
+                int c = Integer.parseInt(col.trim());
+                if (c >= 4 && c <= 10) {
+                    coordinate[1] = c - 4;
+                    break;
+                }
+            } catch (NumberFormatException ignored) { }
+            reportError("Invalid coloumn. Please enter a valid number");
+        }
+        return coordinate;
+    }
+
 
     @Override
     public int askIndex() {
@@ -210,7 +237,16 @@ public class TUIView implements View {
 
     @Override
     public String askString() {
-        return scanner.nextLine();
+        try {
+            String line;
+            while ((line = readLine(200)) == null || line.isEmpty()) {
+
+            }
+            return line.trim();
+        } catch (IOException|InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "";
+        }
     }
 
 
