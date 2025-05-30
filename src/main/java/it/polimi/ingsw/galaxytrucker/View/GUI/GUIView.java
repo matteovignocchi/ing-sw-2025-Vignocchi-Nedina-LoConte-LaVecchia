@@ -429,13 +429,6 @@ public class GUIView extends Application implements View {
 
     public GamePhase getGamePhase() { return gamePhase; }
 
-    //TODO: scrivere
-    @Override
-    public boolean askWithTimeout(String message) {
-        return false;
-    }
-
-
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
         for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {

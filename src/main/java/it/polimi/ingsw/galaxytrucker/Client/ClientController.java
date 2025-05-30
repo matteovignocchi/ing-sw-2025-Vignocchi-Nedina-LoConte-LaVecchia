@@ -500,7 +500,7 @@ public class ClientController {
         return view.ask(message);
     }
 
-    public boolean askWithTimeoutByController(String message){return view.askWithTimeout(message);}
+    public boolean askWithTimeoutByController(String message){return view.ask(message);}
 
     public int askIndexByController() {
         return view.askIndex();
