@@ -164,26 +164,26 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
         if(message.contains("JOIN")){
             while (true){
-                        Map<Integer,int[]> availableGames;
-                        try {
-                            availableGames = server.requestGamesList();
-                        } catch (BusinessLogicException e) {
-                            clientController.reportErrorByController("Server error: " + e.getMessage());
-                            return -1;
-                        }
-                        if (availableGames.isEmpty()) {
-                            clientController.informByController("**No available games**");
-                            return -1;
-                        }
-                        int choice = clientController.printAvailableGames(availableGames);
-                        if (choice == 0) return 0;
-                        try {
-                            server.enterGame(choice, this, nickname);
-                            return choice;
-                        } catch (Exception e) {
-                            clientController.reportErrorByController("Cannot join: " + e.getMessage());
-                            return -1;
-                        }
+                Map<Integer,int[]> availableGames;
+                try {
+                    availableGames = server.requestGamesList();
+                } catch (BusinessLogicException e) {
+                    clientController.reportErrorByController("Server error: " + e.getMessage());
+                    return -1;
+                }
+                if (availableGames.isEmpty()) {
+                    clientController.informByController("**No available games**");
+                    return -1;
+                }
+                int choice = clientController.printAvailableGames(availableGames);
+                if (choice == 0) return 0;
+                try {
+                    server.enterGame(choice, this, nickname);
+                    return choice;
+                } catch (Exception e) {
+                    clientController.reportErrorByController("Cannot join: " + e.getMessage());
+                    return -1;
+                }
             }
         }
         return 0;
@@ -243,19 +243,17 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         clientController.printMyDashBoardByController();
-        int[] tmp;
         clientController.informByController("Choose coordinate!");
+        int[] tmp;
         tmp = clientController.askCoordinateByController();
         if(tmp == null) { return; }
         clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
         try {
             server.placeTile(gameId, nickname, tile, tmp);
-            return;
         } catch (BusinessLogicException e) {
             clientController.reportErrorByController(e.getMessage());
+            return;
         }
-//      Dash_Matrix[tmp[0]][tmp[1]] = tile;
-        clientController.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
         clientController.printMyDashBoardByController();
     }
 
