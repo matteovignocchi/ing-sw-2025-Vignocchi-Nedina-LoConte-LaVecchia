@@ -16,7 +16,7 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void inform(String message) throws Exception {}
     @Override public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) throws RemoteException {}
     @Override public void reportError(String error) throws Exception {}
-    @Override public boolean ask(String message) throws Exception { return false; }
+    @Override public Boolean ask(String message) throws Exception { return false; }
     @Override public void printCard(Card card) throws Exception {}
     @Override public void printListOfTileCovered(List<Tile> tiles) throws Exception {}
     @Override public void printListOfTileShown(List<Tile> tiles) throws Exception {}
@@ -29,7 +29,7 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void setTile(Tile tile) throws Exception {}
 
     @Override public void leaveGame() throws Exception{}
-    @Override public int askIndex() throws Exception { return 0; }
+    @Override public Integer askIndex() throws Exception { return 0; }
     @Override public String askString() throws Exception { return null; }
     @Override public int[] askCoordinate() throws Exception { return null; }
 

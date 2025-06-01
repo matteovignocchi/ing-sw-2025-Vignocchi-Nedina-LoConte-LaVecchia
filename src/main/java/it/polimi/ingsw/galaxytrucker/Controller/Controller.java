@@ -719,7 +719,7 @@ public class Controller implements Serializable {
         */
 
         try {
-            return v.ask(question);
+            return v.askWithTimeout(question);
         } catch (IOException e) {
             markDisconnected(nick);
         } catch(Exception e){

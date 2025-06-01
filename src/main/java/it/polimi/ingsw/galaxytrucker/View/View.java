@@ -13,9 +13,9 @@ import java.util.Map;
 public interface View {
 
     void inform(String message);
-    boolean ask(String message);
-    int[] askCoordinate();
-    int askIndex() throws IOException, InterruptedException;
+    Boolean ask(String message);
+    int[] askCoordinate() throws IOException, InterruptedException;
+    Integer askIndex() throws IOException, InterruptedException;
     void setInt();
     void start();
     void printListOfGoods(List<Colour> Goods);
@@ -39,6 +39,7 @@ public interface View {
     void setValidity(int a , int b);
     GamePhase getGamePhase();
     void printMapPosition();
+    boolean askWithTimeout(String message);
 }
 
 //public interface VirtualViewRmi extends VirtualView {
