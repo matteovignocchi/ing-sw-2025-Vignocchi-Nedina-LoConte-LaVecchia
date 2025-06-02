@@ -19,14 +19,10 @@ import java.util.function.Consumer;
 //TODO: corner-case: crash in startGame
 //TODO: corner-case: crash del leader quando deve pescare
 
-//TODO: verificare che tutti i metodi invocati sulla view vanno e vengono invocati correttamente anche per socket
-//TODO: inserire i timeout in tutti i metodi che mettono in attesa il server. Creare nuovi metodi inform, ecc.. nel controller? se si, come integrare
-// nei metodi sostituendoli alla perfezione ai precedenti?
-//TODO: discorso gestione disconnessioni nei metodi di oleg. disconnetto e poi continuo con esecuzione, o devo returnare. (mandare mail).
-//TODO: gestione degli askPlayerDecision, askPlayerIndex ecc.. nei metodi di oleg
-//TODO: parser per non passare oggetti del model
+//TODO: discorso gestione disconnessioni nei metodi di oleg. compilazione automatica? è gestita o da gestire? vedere come fare
+//TODO: gestione degli askPlayerDecision, askPlayerIndex ecc.. nei metodi di oleg (sostituire e gestire le chiamate ai metodi
+// che mettono in attesa il server con quelli con i timeout)
 //TODO: inserire mappa virtualview-player? e usare quella al posto di getPlayer.. ogni volta? vedere alla fine.
-//TODO: creare metodi inform ecc.. che chiamano i metodi corrispondenti sulla view, inglobando i try-catch, per snellire il codice negli altri metodi
 //TODO: pulire il codice: quando notifyView, quando update fase.. coerenza
 //TODO: sostituire ove possibile v.inform con chiamate a inform metodo controller
 
