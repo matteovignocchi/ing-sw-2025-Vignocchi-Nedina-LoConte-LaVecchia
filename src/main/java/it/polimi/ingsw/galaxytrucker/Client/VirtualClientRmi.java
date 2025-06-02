@@ -101,11 +101,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     /// METODI PER CHIEDERE COSE AL CLIENT DA PARTE DAL SERVER ///
 
     @Override
-    public boolean ask(String message) throws RemoteException {
+    public Boolean ask(String message) throws RemoteException {
         return clientController.askByController(message);
     }
     @Override
-    public int askIndex() throws RemoteException {
+    public Integer askIndex() throws IOException, InterruptedException {
         return clientController.askIndexByController();
     }
     @Override
@@ -153,7 +153,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     }
     @Override
-    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws RemoteException {
+    public int sendGameRequest(String message , int numberOfPlayer , Boolean isDemo) throws IOException, InterruptedException {
         if(message.contains("CREATE")){
             try{
                return server.createNewGame(isDemo , this , nickname , numberOfPlayer);
@@ -164,26 +164,26 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
         if(message.contains("JOIN")){
             while (true){
-                        Map<Integer,int[]> availableGames;
-                        try {
-                            availableGames = server.requestGamesList();
-                        } catch (BusinessLogicException e) {
-                            clientController.reportErrorByController("Server error: " + e.getMessage());
-                            return -1;
-                        }
-                        if (availableGames.isEmpty()) {
-                            clientController.informByController("**No available games**");
-                            return -1;
-                        }
-                        int choice = clientController.printAvailableGames(availableGames);
-                        if (choice == 0) return 0;
-                        try {
-                            server.enterGame(choice, this, nickname);
-                            return choice;
-                        } catch (Exception e) {
-                            clientController.reportErrorByController("Cannot join: " + e.getMessage());
-                            return -1;
-                        }
+                Map<Integer,int[]> availableGames;
+                try {
+                    availableGames = server.requestGamesList();
+                } catch (BusinessLogicException e) {
+                    clientController.reportErrorByController("Server error: " + e.getMessage());
+                    return -1;
+                }
+                if (availableGames.isEmpty()) {
+                    clientController.informByController("**No available games**");
+                    return -1;
+                }
+                int choice = clientController.printAvailableGames(availableGames);
+                if (choice == 0) return 0;
+                try {
+                    server.enterGame(choice, this, nickname);
+                    return choice;
+                } catch (Exception e) {
+                    clientController.reportErrorByController("Cannot join: " + e.getMessage());
+                    return -1;
+                }
             }
         }
         return 0;
@@ -202,7 +202,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public Tile getUncoveredTile() throws BusinessLogicException, RemoteException {
+    public Tile getUncoveredTile() throws BusinessLogicException, IOException, InterruptedException {
         List<Tile> tmp;
         try {
             tmp = server.getUncoveredTilesList(gameId, nickname);
@@ -216,16 +216,17 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         clientController.printListOfTileShownByController(tmp);
         clientController.informByController("Select a tile");
         while (true) {
-            int index;
-            while (true) {
-                index = askIndex();
-                if (index >= 0 && index < tmp.size()) break;
+            Integer indexObj = askIndex();
+            if(indexObj == null) { return null; }
+            int index = indexObj;
+            if (index >= 0 && index < tmp.size()) {
+                try {
+                    return server.chooseUncoveredTile(gameId, nickname, tmp.get(index).getIdTile());
+                } catch (BusinessLogicException e) {
+                    clientController.reportErrorByController("You missed: " + e.getMessage() + ". Select a new index.");
+                }
+            } else {
                 clientController.informByController("Invalid index. Try again.");
-            }
-            try {
-                return server.chooseUncoveredTile(gameId, nickname, tmp.get(index).getIdTile());
-            } catch (BusinessLogicException e) {
-                clientController.reportErrorByController("You missed: " + e.getMessage() + ". Select a new index.");
             }
         }
     }
@@ -242,22 +243,20 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void positionTile(Tile tile) throws RemoteException{
         clientController.printMyDashBoardByController();
+        clientController.informByController("Choose coordinate!");
         int[] tmp;
-        while(true){
-            clientController.informByController("Choose coordinates");
-            tmp = clientController.askCoordinateByController();
-            clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
-            try {
-                server.placeTile(gameId, nickname, tile, tmp);
-                break;
-            } catch (BusinessLogicException e) {
-                clientController.reportErrorByController(e.getMessage());
-            }
+        tmp = clientController.askCoordinateByController();
+        if(tmp == null) { return; }
+        clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
+        try {
+            server.placeTile(gameId, nickname, tile, tmp);
+        } catch (BusinessLogicException e) {
+            clientController.reportErrorByController(e.getMessage());
+            return;
         }
-//        Dash_Matrix[tmp[0]][tmp[1]] = tile;
-        clientController.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
         clientController.printMyDashBoardByController();
     }
+
     @Override
     public void drawCard() throws RemoteException , BusinessLogicException {
             try {
@@ -287,11 +286,13 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 
     @Override
-    public void lookDeck() throws RemoteException {
+    public void lookDeck() throws IOException, InterruptedException {
         while (true) {
             clientController.informByController("Choose deck : 1 / 2 / 3");
-            int index = askIndex() + 1;
+            Integer indexObj = askIndex();
+            if(indexObj == null) { return; }
 
+            int index = indexObj + 1;
             if (index < 1 || index > 3) {
                 clientController.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
                 continue;
@@ -312,17 +313,18 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
 
     @Override
-    public void lookDashBoard() throws RemoteException{
-        Tile[][] dashPlayer;
+    public void lookDashBoard() throws IOException, InterruptedException {
         String tmp;
-        while(true){
-             tmp = clientController.choosePlayerByController();
-            try {
-                dashPlayer = server.lookAtDashBoard(gameId,tmp);
-                break;
-            } catch (Exception e) {
-                clientController.reportErrorByController("player not valid");
-            }
+
+        tmp = clientController.choosePlayerByController();
+        if(tmp == null) return;
+
+        Tile[][] dashPlayer;
+        try {
+            dashPlayer = server.lookAtDashBoard(gameId,tmp);
+        } catch (Exception e) {
+            clientController.reportErrorByController("player not valid");
+            return;
         }
         clientController.informByController("Space Ship of :" + tmp);
         clientController.printPlayerDashboardByController(dashPlayer);
@@ -338,7 +340,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         int[] index;
         Tile tmpTile = null;
         while(true) {
-            index = askCoordinate();
+            index = clientController.askCoordinateByController();
+            if (index == null) {return null;}
             if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
             else if(index[1]!=5 && index[1]!=6) clientController.informByController("Invalid coordinate");
             else break;

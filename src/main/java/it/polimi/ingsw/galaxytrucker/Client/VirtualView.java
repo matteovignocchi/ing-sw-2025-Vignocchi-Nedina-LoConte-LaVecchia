@@ -20,7 +20,7 @@ public interface VirtualView extends Remote {
 
     void reportError(String error) throws Exception;
 
-    boolean ask(String message) throws Exception;
+    Boolean ask(String message) throws Exception;
 
     void printCard(Card card) throws Exception;
 
@@ -41,7 +41,8 @@ public interface VirtualView extends Remote {
     void setGameId(int gameId) throws RemoteException;
 
     /// METODI PER RICHIEDERE COSE ///
-    int askIndex() throws Exception;
+
+    Integer askIndex() throws Exception;
 
     String askString() throws Exception;
 

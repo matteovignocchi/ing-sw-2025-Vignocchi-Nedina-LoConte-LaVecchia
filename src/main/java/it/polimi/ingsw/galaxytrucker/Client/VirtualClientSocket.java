@@ -82,30 +82,36 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             switch (operation) {
                 case Message.OP_INDEX -> {
                     this.inform((String) msg.getPayload());
-                    int index = this.askIndex();
+                    Integer index = clientController.askIndexByController();
+                    if(index == null) { return; }
                     Message response = Message.response(index, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_COORDINATE -> {
                     this.inform((String) msg.getPayload());
-                    int[] coordinate = this.askCoordinate();
+                    int[] coordinate = clientController.askCoordinateByController();
+                    if (coordinate == null) { return; }
                     Message response = Message.response(coordinate, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_STRING-> {
                     this.inform((String) msg.getPayload());
                     String answer = this.askString();
+                    if(answer == null) { return; }
                     Message response = Message.response(answer, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_ASK -> {
-                    boolean decision = this.ask((String)msg.getPayload());
+                    Boolean decision = this.ask((String)msg.getPayload());
+                    if(decision == null) { return; }
                     Message response = Message.response(decision, msg.getRequestId());
                     sendRequest(response);
                 }
             }
     } catch (IOException e) {
             this.reportError(": " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -227,11 +233,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     /// METODI PER CHIEDERE AL CLIENT DA PARTE DEL SERVER ///
 
     @Override
-    public boolean ask(String message){
+    public Boolean ask(String message){
         return clientController.askByController(message);
     }
     @Override
-    public int askIndex(){
+    public Integer askIndex() throws IOException, InterruptedException {
         return clientController.askIndexByController();
     }
     @Override
@@ -377,11 +383,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         clientController.informByController("Select a tile");
 
         while (true) {
-            int index;
-            while (true) {
-                index = askIndex();
-                if (index >= 0 && index < tmp.size()) break;
+            Integer indexObj = askIndex();
+            if(indexObj == null) {return null;}
+
+            int index = indexObj;
+            if (index >= 0 && index < tmp.size()) {
                 clientController.informByController("Invalid index. Try again.");
+                continue;
             }
 
             List<Object> tileRequestPayload = new ArrayList<>();
@@ -438,33 +446,30 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void positionTile(Tile tile) throws Exception {
         clientController.printMyDashBoardByController();
         int[] tmp;
+        clientController.informByController("Choose coordinate!");
+        tmp = clientController.askCoordinateByController();
+        if(tmp == null) return;
 
-        while (true) {
-            clientController.informByController("Choose coordiante");
-            tmp = clientController.askCoordinateByController();
+        List<Object> payloadGame = new ArrayList<>();
+        payloadGame.add(gameId);
+        payloadGame.add(nickname);
+        payloadGame.add(tile);
+        payloadGame.add(tmp);
 
-            List<Object> payloadGame = new ArrayList<>();
-            payloadGame.add(gameId);
-            payloadGame.add(nickname);
-            payloadGame.add(tile);
-            payloadGame.add(tmp);
-
-            Message request = Message.request(Message.OP_POSITION_TILE, payloadGame);
-            Message response = sendRequestWithResponse(request);
-            clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
+        Message request = Message.request(Message.OP_POSITION_TILE, payloadGame);
+        Message response = sendRequestWithResponse(request);
+        clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
 
 
-            Object payload = response.getPayload();
+        Object payload = response.getPayload();
 
-            switch (payload) {
-                case String p when p.equals("OK") -> {}
-                case String error -> {
-                    clientController.reportErrorByController("Errorr from server: " + error);
-                    continue;
-                }
-                default -> throw new IOException("Unexptected payload: ");
+        switch (payload) {
+            case String p when p.equals("OK") -> {}
+            case String error -> {
+                clientController.reportErrorByController("Error from server: " + error);
+                return;
             }
-            break;
+            default -> throw new IOException("Unexpected payload: ");
         }
         clientController.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
         clientController.printMyDashBoardByController();
@@ -529,39 +534,33 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void lookDeck() throws Exception {
         while (true) {
-            // 1) chiedi quale mazzo
             clientController.informByController("Choose deck : 1 / 2 / 3");
-            int index = askIndex() + 1;
+            Integer indexObj = askIndex();
+            if(indexObj == null) { return; }
 
-            // 2) controllo che sia nel range [1,3]
+            int index = indexObj + 1;
             if (index < 1 || index > 3) {
                 clientController.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
-                continue;   // ripeti il ciclo
+                continue;
             }
 
-            // 3) se è valido, costruisci il payload e manda la richiesta
             List<Object> payload = new ArrayList<>();
             payload.add(gameId);
             payload.add(index);
             Message request  = Message.request(Message.OP_LOOK_DECK, payload);
             Message response = sendRequestWithResponse(request);
 
-            // 4) gestisci la risposta del server
             Object payloadResponse = response.getPayload();
             if (payloadResponse instanceof List<?> rawList) {
                 @SuppressWarnings("unchecked")
                 List<Card> deck = (List<Card>) rawList;
                 clientController.printDeckByController(deck);
-                return;   // tutto OK, esci
+                return;
             }
             if (payloadResponse instanceof String err) {
                 clientController.reportErrorByController("Server error: " + err);
-                // in teoria, qui non dovresti mai ricadere perché il pre-check ha già escluso
-                // gli indici invalidi, ma se il server ti manda un errore lo riporti e riprovi
                 continue;
             }
-
-            // caso “strano” ma possibile
             clientController.reportErrorByController("Unexpected response from server.");
         }
     }
@@ -571,33 +570,30 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void lookDashBoard() throws Exception {
-        while (true) {
-            String tmp = clientController.choosePlayerByController();
+        String tmp = clientController.choosePlayerByController();
+        if(tmp == null) return;
 
+        List<Object> payload = new ArrayList<>();
+        payload.add(gameId);
+        payload.add(tmp);
 
-            List<Object> payload = new ArrayList<>();
-            payload.add(gameId);
-            payload.add(tmp);
+        Message request = Message.request(Message.OP_LOOK_SHIP, payload);
+        Message response = sendRequestWithResponse(request);
+        Object payloadResponse = response.getPayload();
 
-            Message request = Message.request(Message.OP_LOOK_SHIP, payload);
-            Message response = sendRequestWithResponse(request);
-            Object payloadResponse = response.getPayload();
-
-            switch (payloadResponse) {
-                case Tile[][] dashPlayer -> {
-                    clientController.informByController("Space Ship di: " + tmp);
-                    clientController.printPlayerDashboardByController(dashPlayer);
-                    return;
-                }
-                case String error -> {
-                    clientController.reportErrorByController("Invalid player name: " + error);
-                }
-                default -> {
-                    clientController.reportErrorByController("Unexpected payload type: " + payloadResponse.getClass().getName());
-
-                }
+        switch (payloadResponse) {
+            case Tile[][] dashPlayer -> {
+                clientController.informByController("Space Ship di: " + tmp);
+                clientController.printPlayerDashboardByController(dashPlayer);
+            }
+            case String error -> {
+                clientController.reportErrorByController("Invalid player name: " + error);
+            }
+            default -> {
+                clientController.reportErrorByController("Unexpected payload type: " + payloadResponse.getClass().getName());
             }
         }
+
     }
 
     @Override
@@ -689,6 +685,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     }
 
+    //TODO: quando il metodo cambierà per l'aggiornamento fatto da oleg ricordati di gestire bene la situazione!
     @Override
     public Tile takeReservedTile() throws IOException, BusinessLogicException, InterruptedException {
         if(clientController.returOKAY(0,5) && clientController.returOKAY(0,6)) {
@@ -699,9 +696,9 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         int[] index;
         Tile tmpTile = null;
         while(true) {
-            index = askCoordinate();
-            if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
-            else if(index[1]!=5 && index[1]!=6) clientController.informByController("Invalid coordinate");
+            index = clientController.askCoordinateByController();
+            if (index == null) {return null;}
+            if(index[0]!=0 || clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
             else break;
         }
         List<Object> payload = new ArrayList<>();

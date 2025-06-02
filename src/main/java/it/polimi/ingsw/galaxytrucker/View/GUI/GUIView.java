@@ -113,12 +113,15 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public boolean ask(String message) {
+    public Boolean ask(String message) {
         return false;
     }
 
     @Override
-    public int[] askCoordinate() {
+    public boolean askWithTimeout(String message) {return false;}
+
+    @Override
+    public int[] askCoordinate() throws IOException, InterruptedException {
         coordinateFuture = new CompletableFuture<>();
 
         Platform.runLater(() -> {
@@ -135,7 +138,10 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public int askIndex() {
+    public void printMapPosition() {}
+
+    @Override
+    public Integer askIndex() {
         return 0;
     }
 

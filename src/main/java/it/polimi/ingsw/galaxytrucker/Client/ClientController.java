@@ -11,9 +11,7 @@ import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Platform;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -309,7 +307,6 @@ public class ClientController {
         view.inform("Type 'exit' to abandon the lobby and return to main menu.");
 
         while (true) {
-            // il server ha avanzato lo stato: il gioco parte
             if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
                 return true;
             }
@@ -354,7 +351,9 @@ public class ClientController {
                     }
                     case "getashowntile"      -> {
                         tmpTile = virtualClient.getUncoveredTile();
-                        view.printTile(tmpTile);
+                        if(tmpTile != null) {
+                            view.printTile(tmpTile);
+                        }
                     }
                     case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
                     case "placethetile"       -> virtualClient.positionTile(tmpTile);
@@ -376,7 +375,9 @@ public class ClientController {
                     case "leftrotatethetile"  -> rotateLeft();
                     case "takereservedtile"   -> {
                         tmpTile = virtualClient.takeReservedTile();
-                        view.printTile(tmpTile);
+                        if(tmpTile != null) {
+                            view.printTile(tmpTile);
+                        }
                     }
                     case "logout"             -> {
                         virtualClient.leaveGame();
@@ -399,7 +400,6 @@ public class ClientController {
             tmpTile.rotateRight();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
-            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }
@@ -410,7 +410,6 @@ public class ClientController {
             tmpTile.rotateLeft();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
-            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }
@@ -496,17 +495,23 @@ public class ClientController {
         view.printDeck(deck);
     }
 
-    public boolean askByController(String message){
+    public Boolean askByController(String message){
         return view.ask(message);
     }
 
-    public boolean askWithTimeoutByController(String message){return view.ask(message);}
+    public boolean askWithTimeoutByController(String message){return view.askWithTimeout(message);}
 
-    public int askIndexByController() {
+    public Integer askIndexByController() throws IOException, InterruptedException {
         return view.askIndex();
     }
     public int[] askCoordinateByController(){
-        return view.askCoordinate();
+        try {
+            return view.askCoordinate();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -519,7 +524,7 @@ public class ClientController {
         currentGamePhase = phase;
     }
 
-    public String choosePlayerByController(){
+    public String choosePlayerByController() throws IOException, InterruptedException {
         return view.choosePlayer();
     }
 
@@ -546,6 +551,10 @@ public class ClientController {
     public void newShip(Tile[][] data){
         Dash_Matrix = data;
     }
+
+    public void printMapPositionByController() { view.printMapPosition();}
+
+    public GamePhase getGamePhaseByController() { return view.getGamePhase();}
  }
 
 
