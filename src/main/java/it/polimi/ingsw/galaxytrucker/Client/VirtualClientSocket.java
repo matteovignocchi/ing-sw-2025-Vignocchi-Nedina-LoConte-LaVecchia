@@ -314,16 +314,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public int sendLogin(String username) throws IOException, InterruptedException {
+    public int sendLogin(String username) throws IOException, InterruptedException, BusinessLogicException{
         if(username == null || username.trim().isEmpty()){
            throw new IllegalArgumentException("Username cannot be null or empty");
         }
         Message msg = sendRequestWithResponse(Message.request(Message.OP_LOGIN, username));
-        Integer resp = (Integer) msg.getPayload();
+        Object resp = msg.getPayload();
         try {
-            return resp;
+            return (Integer) resp;
         } catch (ClassCastException e) {
-            throw new IOException("Login: unexpected payload from server: " + resp.getClass().getName(), e);
+            try {
+                String err = (String) resp;
+                throw new BusinessLogicException(err);
+            } catch (ClassCastException e2) {
+                throw new IOException("Login: unexpected payload from server: " + resp.getClass().getName());
+            }
         }
     }
 

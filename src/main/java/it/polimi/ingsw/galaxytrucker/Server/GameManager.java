@@ -3,6 +3,7 @@ import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
+import it.polimi.ingsw.galaxytrucker.Model.Player;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 import java.io.*;
 import java.nio.file.Files;
@@ -71,12 +72,16 @@ public class GameManager {
     public synchronized int login(String nickname, VirtualView v) throws Exception {
         // caso nuovo utente
         if (loggedInUsers.add(nickname)) {
-            return -2;
+            return 0;
         }
         // caso reconnect
         Integer gameId = nicknameToGameId.get(nickname);
         if (gameId != null && games.containsKey(gameId)) {
             Controller controller = getControllerCheck(gameId);
+            Player player = controller.getPlayerCheck(nickname);
+            if(player.isConnected()){
+                throw new BusinessLogicException("Nickname already in use!");
+            }
             v.updateMapPosition(controller.getPlayersPosition());
             controller.markReconnected(nickname, v);
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
@@ -85,16 +90,14 @@ public class GameManager {
             v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
             v.updateDashMatrix(dash);
             v.printPlayerDashboard(dash);
-
-            try {
-//                v.printPlayerDashboard(dash);
-                v.updateDashMatrix(dash);
-            } catch (Exception e) {
-
-            }
+//
+//            try {
+//                v.updateDashMatrix(dash);
+//            } catch (Exception e) {
+//
+//            }
             return gameId;
         }
-        // nick in uso ma non in partita: rifiuto
         throw new BusinessLogicException("Nickname already used: " + nickname);
     }
 

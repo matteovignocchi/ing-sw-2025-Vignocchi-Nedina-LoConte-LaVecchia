@@ -93,7 +93,13 @@ public class ClientController {
                 continue;
             }
 
-            int res = virtualClient.sendLogin(username);
+            int res;
+            try {
+                res = virtualClient.sendLogin(username);
+            } catch (BusinessLogicException ex) {
+                view.reportError(ex.getMessage());
+                continue;
+            }
 
             if (res == -1) {
                 view.reportError("Credential not valid, try again.");
