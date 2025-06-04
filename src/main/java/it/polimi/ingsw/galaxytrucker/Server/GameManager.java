@@ -90,12 +90,12 @@ public class GameManager {
             v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
             v.updateDashMatrix(dash);
             v.printPlayerDashboard(dash);
-//
-//            try {
-//                v.updateDashMatrix(dash);
-//            } catch (Exception e) {
-//
-//            }
+
+            try {
+                v.updateDashMatrix(dash);
+            } catch (Exception e) {
+
+            }
             return gameId;
         }
         throw new BusinessLogicException("Nickname already used: " + nickname);
