@@ -178,7 +178,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void inform(String message){
-        System.out.print("\n");
         clientController.informByController(message);
     }
 

@@ -61,7 +61,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
     @Override
     public void inform(String message) throws RemoteException {
-        System.out.print("\n");
         clientController.informByController(message);
     }
     @Override
