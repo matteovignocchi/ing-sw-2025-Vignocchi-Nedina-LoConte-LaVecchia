@@ -59,11 +59,7 @@ public class GameManager {
 
     public synchronized void quitGame(int gameId, String nickname) throws Exception {
         Controller controller = getControllerCheck(gameId);
-        for (String other : controller.viewsByNickname.keySet()) {
-            if (!other.equals(nickname)) {
-                controller.inform(other, nickname + " abandoned: press any key to return to the main menù!");
-            }
-        }
+        controller.broadcastInform(nickname + " has abandoned: the game ends for everyone!\n");
         controller.setExit();
         removeGame(gameId);
     }

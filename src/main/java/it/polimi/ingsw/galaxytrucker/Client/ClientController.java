@@ -340,8 +340,6 @@ public class ClientController {
                 continue;
             }
 
-            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //TODO: da controllare appena arriviamo a questa fase del debugging
-
             String key = view.sendAvailableChoices();
 
             if(key == null){

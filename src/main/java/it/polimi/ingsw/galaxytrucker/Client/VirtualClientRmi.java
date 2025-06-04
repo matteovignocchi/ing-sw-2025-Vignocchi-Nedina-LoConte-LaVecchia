@@ -363,7 +363,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void leaveGame() throws RemoteException, BusinessLogicException {
         if (gameId != 0) {
-            server.LeaveGame(gameId, nickname);
+            try {
+                server.LeaveGame(gameId, nickname);
+            } catch (BusinessLogicException e) {
+            }
+            // In ogni caso, setto gameId = 0 per rimandare il client al main menu.
             gameId = 0;
         }
     }
