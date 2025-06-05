@@ -1,13 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Server;
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 import java.util.Map;
 
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
@@ -82,21 +79,21 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public Tile getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+    public String getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty");}
 
         return handleGameManagerCall("getCoveredTile", () -> gameManager.getCoveredTile(gameId, nickname));
     }
 
     @Override
-    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+    public String getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
 
         return handleGameManagerCall("getUncoveredTilesList", () -> gameManager.getUncoveredTilesList(gameId, nickname));
     }
 
     @Override
-    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
+    public String chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
         if (idTile < 0) { throw new RemoteException("Tile must be greater than 0"); }
 
@@ -104,7 +101,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void dropTile(int gameId, String nickname, Tile tile) throws RemoteException, BusinessLogicException {
+    public void dropTile(int gameId, String nickname, String tile) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
         if (tile == null) { throw new RemoteException("Tile cannot be null"); }
 
@@ -115,7 +112,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws RemoteException, BusinessLogicException {
+    public void placeTile(int gameId, String nickname, String tile, int[] cord) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
         if (tile == null) { throw new RemoteException("Tile cannot be null"); }
         if (cord == null || cord.length != 2 || cord[0] < 0 || cord[1] < 0) { throw new RemoteException("Invalid parameters"); }
@@ -148,7 +145,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
 
     //valori possibili per showDeck: 0,1,2,
     @Override
-    public List<Card> showDeck(int gameId, int idxDeck) throws RemoteException, BusinessLogicException {
+    public String showDeck(int gameId, int idxDeck) throws RemoteException, BusinessLogicException {
         return handleGameManagerCall("showDeck", () -> gameManager.showDeck(gameId, idxDeck));
     }
 
@@ -158,7 +155,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public Tile[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
+    public String[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
         return handleGameManagerCall("lookDashBoard", () -> gameManager.lookAtDashBoard(nickname, gameId));
@@ -189,7 +186,7 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     @Override
-    public Tile getReservedTile(int gameId, String nickname , int id) throws RemoteException, BusinessLogicException {
+    public String getReservedTile(int gameId, String nickname , int id) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
 
         return handleGameManagerCall("getReservedTile", () -> gameManager.getReservedTile(gameId, nickname, id));

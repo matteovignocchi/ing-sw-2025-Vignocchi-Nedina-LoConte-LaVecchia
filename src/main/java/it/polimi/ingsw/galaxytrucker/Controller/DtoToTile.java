@@ -1,7 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-import it.polimi.ingsw.galaxytrucker.TileDTO;
+import it.polimi.ingsw.galaxytrucker.DtoConvention.TileDTO;
 
 public class DtoToTile {
     public Tile fromDTO(TileDTO dto) {

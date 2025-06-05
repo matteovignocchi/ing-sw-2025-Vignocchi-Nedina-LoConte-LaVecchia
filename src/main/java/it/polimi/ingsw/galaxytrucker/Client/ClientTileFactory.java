@@ -2,11 +2,9 @@ package it.polimi.ingsw.galaxytrucker.Client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.TileDTO;
+import it.polimi.ingsw.galaxytrucker.DtoConvention.TileDTO;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,6 +42,7 @@ public class ClientTileFactory {
         dto.goods = tile.goods;
         dto.tokens = tile.tokens;
         dto.protectedCorners = tile.protectedCorners;
+        dto.capacity = tile.capacity;
         return dto;
     }
 

@@ -2,9 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-
-import java.io.Serializable;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 
 /**
  * Card interface that represents a generic adventure card in the game.

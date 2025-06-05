@@ -82,4 +82,8 @@ public class Shield extends Tile implements Serializable {
     public int getProtectedCorner(int x) {
         return protectedCorners[x];
     }
+
+    public void setProtectedCorner(int x, int y) {
+        protectedCorners[x] = y;
+    }
 }

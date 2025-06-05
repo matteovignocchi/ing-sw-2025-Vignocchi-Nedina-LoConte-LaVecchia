@@ -1,5 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.TileDTO;
+import it.polimi.ingsw.galaxytrucker.DtoConvention.TileDTO;
 
 public class TileConverter {
     public static TileDTO toDTO(ClientTile tile) {

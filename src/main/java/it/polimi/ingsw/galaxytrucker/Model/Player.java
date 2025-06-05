@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 //import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
 

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker;
+package it.polimi.ingsw.galaxytrucker.Exception;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker;
+package it.polimi.ingsw.galaxytrucker.DtoConvention;
 
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 

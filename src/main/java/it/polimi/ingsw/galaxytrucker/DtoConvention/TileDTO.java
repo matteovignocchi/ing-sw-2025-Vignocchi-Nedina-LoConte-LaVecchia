@@ -1,4 +1,4 @@
-package it.polimi.ingsw.galaxytrucker;
+package it.polimi.ingsw.galaxytrucker.DtoConvention;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ public class TileDTO {
     public boolean idDouble;
     public int max;
     public boolean advance;
+    public int capacity;
     public String human;
     public List<String> goods = new ArrayList<>();
     public List<String> tokens = new ArrayList<>();

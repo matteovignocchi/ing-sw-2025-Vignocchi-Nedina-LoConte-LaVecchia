@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 
 /**
  *Custom exception that handles anomalous behaviors in cards.

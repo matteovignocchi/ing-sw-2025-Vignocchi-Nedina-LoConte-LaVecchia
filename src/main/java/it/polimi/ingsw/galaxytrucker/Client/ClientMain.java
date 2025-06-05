@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+//import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
@@ -61,7 +61,7 @@ public class ClientMain {
                     ClientController controller = new ClientController(view, virtualClient);
 
                     switch (view) {
-                        case GUIView gui -> gui.setClientController(controller);
+//                        case GUIView gui -> gui.setClientController(controller);
                         default -> {
                         }
                     }
@@ -74,13 +74,13 @@ public class ClientMain {
                     scanner.close();
                 }
             }
-            case 2 -> {
-                GUIView.setStartupConfig(protocolChoice, host, port);
-                System.out.println("Launching GUI...");
-                Application.launch(GUIView.class);
-                System.out.println("GUI closed.");
-
-            }
+//            case 2 -> {
+//                GUIView.setStartupConfig(protocolChoice, host, port);
+//                System.out.println("Launching GUI...");
+//                Application.launch(GUIView.class);
+//                System.out.println("GUI closed.");
+//
+//            }
         }
     }
 

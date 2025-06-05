@@ -1,12 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
-import it.polimi.ingsw.galaxytrucker.Client.ClientController;
-import it.polimi.ingsw.galaxytrucker.Client.VirtualClientRmi;
-import it.polimi.ingsw.galaxytrucker.Client.VirtualClientSocket;
-import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -16,7 +9,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
@@ -30,7 +22,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -41,12 +32,12 @@ public class GUIView extends Application implements View {
     private CompletableFuture<int[]> coordinateFuture;
     private CompletableFuture<String> nicknameFuture;
     private ClientController clientController;
-    public Tile currentTile;
-    public Tile[][] dashBoard;
+    public ClientTile currentTile;
+    public ClientTile[][] dashBoard;
     private CompletableFuture<List<Object>> dataForGame;
     private CompletableFuture<String> menuChoiceFuture;
     private SceneEnum sceneEnum;
-    private GamePhase gamePhase;
+    private ClientGamePhase gamePhase;
     private boolean demo;
     private static int protocolChoice;
     private static String host;
@@ -159,12 +150,12 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void printListOfGoods(List<Colour> Goods) {
+    public void printListOfGoods(List<String> Goods) {
 
     }
 
     @Override
-    public void printDashShip(Tile[][] ship) {
+    public void printDashShip(ClientTile[][] ship) {
         controller.setDashBoard(ship);
     }
 
@@ -174,12 +165,12 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void printNewFase(GamePhase gamePhase) {
+    public void printNewFase(String gamePhase) {
 
     }
 
     @Override
-    public void printDeck(List<Card> deck) {
+    public void printDeck(List<ClientCard> deck) {
 
     }
 
@@ -189,7 +180,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void printPileShown(List<Tile> tiles) {
+    public void printPileShown(List<ClientTile> tiles) {
 
     }
 
@@ -245,7 +236,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void updateState(GamePhase gamePhase) {
+    public void updateState(ClientGamePhase gamePhase) {
         this.gamePhase = gamePhase;
         switch (gamePhase){
             case WAITING_IN_LOBBY -> sceneEnum = SceneEnum.WAITING_QUEUE;
@@ -265,12 +256,12 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void printTile(Tile tile) {
+    public void printTile(ClientTile tile) {
         this.currentTile = tile;
     }
 
     @Override
-    public void printCard(Card card) {
+    public void printCard(ClientCard card) {
 
     }
 
@@ -470,7 +461,7 @@ public class GUIView extends Application implements View {
     }
 
 
-    public GamePhase getGamePhase() { return gamePhase; }
+    public ClientGamePhase getGamePhase() { return gamePhase; }
 
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameDescriptions = FXCollections.observableArrayList();

@@ -2,7 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.galaxytrucker.CardDTO;
+import it.polimi.ingsw.galaxytrucker.DtoConvention.CardDTO;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 

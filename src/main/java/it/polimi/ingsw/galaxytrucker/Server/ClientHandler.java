@@ -1,9 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Server;
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.Message;
 import it.polimi.ingsw.galaxytrucker.Client.UpdateViewRequest;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
 
@@ -170,7 +169,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
-        Tile tile = (Tile) payload.get(2);
+        String tile = (String) payload.get(2);
         gameManager.dropTile(gameId, nick, tile);
         return "OK";
     }
@@ -180,7 +179,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
         String nick = (String) payload.get(1);
-        Tile tile = (Tile) payload.get(2);
+        String tile = (String) payload.get(2);
         int[] coordinate = (int[]) payload.get(3);
         gameManager.placeTile(gameId, nick, tile, coordinate);
         return "OK";
@@ -259,7 +258,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void updateGameState(GamePhase fase) throws IOException {
+    public void updateGameState(String fase) throws IOException {
         out.writeObject(Message.update(Message.OP_GAME_PHASE, fase));
         out.flush();
     }
@@ -295,43 +294,43 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void printCard(Card card) throws IOException {
+    public void printCard(String card) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_CARD, card));
         out.flush();
     }
 
     @Override
-    public void printListOfTileCovered(List<Tile> tiles) throws IOException {
+    public void printListOfTileCovered(String tiles) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_COVERED, tiles));
         out.flush();
     }
 
     @Override
-    public void printListOfTileShown(List<Tile> tiles) throws IOException {
+    public void printListOfTileShown(String tiles) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_SHOWN, tiles));
         out.flush();
     }
 
     @Override
-    public void printListOfGoods(List<Colour> goods) throws IOException {
+    public void printListOfGoods(List<String> goods) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_GOODS, goods));
         out.flush();
     }
 
     @Override
-    public void printPlayerDashboard(Tile[][] dashboard) throws IOException {
+    public void printPlayerDashboard(String[][] dashboard) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_DASHBOARD, dashboard));
         out.flush();
     }
 
     @Override
-    public void printDeck(List<Card> deck) throws IOException {
+    public void printDeck(String deck) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_DECK, deck));
         out.flush();
     }
 
     @Override
-    public void printTile(Tile tile) throws IOException {
+    public void printTile(String tile) throws IOException {
         out.writeObject(Message.update(Message.OP_PRINT_TILE, tile));
         out.flush();
     }
@@ -365,7 +364,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void setTile(Tile tile) throws IOException {
+    public void setTile(String tile) throws IOException {
         out.writeObject(Message.update(Message.OP_SET_CENTRAL_TILE, tile));
         out.flush();
     }
@@ -377,7 +376,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void updateDashMatrix(Tile[][] data) throws Exception {
+    public void updateDashMatrix(String[][] data) throws Exception {
         out.writeObject(Message.update(Message.OP_UPDATE_DA, data));
         out.flush();
     }

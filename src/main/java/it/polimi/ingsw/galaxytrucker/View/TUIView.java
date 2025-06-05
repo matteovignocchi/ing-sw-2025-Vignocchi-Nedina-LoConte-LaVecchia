@@ -1,9 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.View;
 
-import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.*;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
+import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
+import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
+import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TUIView implements View {
-    private GamePhase game;
+    private ClientGamePhase game;
     private boolean isDemo;
     private boolean[][] maschera;
     private Scanner scanner = new Scanner(System.in); //TODO: da eliminare
@@ -28,11 +27,11 @@ public class TUIView implements View {
     private static final String BROWN = "\u001B[33m";
     private static final String PEFOH = "\u001B[36m";
     private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
-    private static final Map<Colour, String> ANSI_COLOR = Map.of(
-            Colour.RED,    RED,
-            Colour.GREEN,  GREEN,
-            Colour.YELLOW, YELLOW,
-            Colour.BLUE,   BLUE
+    private static final Map<String, String> ANSI_COLOR = Map.of(
+            "RED",    RED,
+            "GREEN",  GREEN,
+            "YELLOW", YELLOW,
+            "BLUE",   BLUE
     );
 
 
@@ -90,7 +89,7 @@ public class TUIView implements View {
     @Override
     public void reportError(String message) {System.out.println(RED+ "\n[ERROR] " + message + RESET);}
     @Override
-    public void updateState(GamePhase gamePhase) {
+    public void updateState(ClientGamePhase gamePhase) {
         game = gamePhase;
     }
     @Override
@@ -199,9 +198,9 @@ public class TUIView implements View {
     }
 
     @Override
-    public void printListOfGoods(List<Colour> Goods) {
+    public void printListOfGoods(List<String> Goods) {
         inform("List of goods: ");
-        for(Colour colour : Goods) {
+        for(String colour : Goods) {
             switch (colour){
                 case BLUE -> System.out.println(BLUE+"Blue "+RESET);
                 case RED -> System.out.println(RED+"Red "+RESET);
@@ -213,7 +212,7 @@ public class TUIView implements View {
 
 
     @Override
-    public void printDashShip(Tile[][] dashboard) {
+    public void printDashShip(ClientTile[][] dashboard) {
 //        if (this.maschera == null
 //                || this.maschera.length != dashboard.length
 //                || this.maschera[0].length != dashboard[0].length) {
@@ -236,11 +235,11 @@ public class TUIView implements View {
             StringBuilder bot = new StringBuilder("    ");
 
             for (int col = 0; col < 7; col++) {
-                Tile tile = dashboard[row][col];
+                ClientTile tile = dashboard[row][col];
 
                 border.append("+---------");
-                switch (tile) {
-                    case EmptySpace x -> {
+                switch (tile.type) {
+                    case "EMPTYSPACE"  -> {
                         if (!maschera[row][col]) {
                             String block = "█████████"; // 9 caratteri pieni
                             top.append("|").append(block);
@@ -313,7 +312,7 @@ public class TUIView implements View {
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
-            case WAITING_IN_LOBBY -> inform("Nickame : " + nickname);
+            case WAITING_IN_LOBBY  -> inform("Nickame : " + nickname);
             case BOARD_SETUP -> inform(" -Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case TILE_MANAGEMENT, DRAW_PHASE -> {}
             case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
@@ -327,96 +326,96 @@ public class TUIView implements View {
 
     //metodo che riceve una lista, in cui prendi
     @Override
-    public void printNewFase(GamePhase gamePhase) {
+    public void printNewFase(String gamePhase) {
 
     }
 
     @Override
-    public void printDeck(List<Card> deck) {
+    public void printDeck(List<ClientCard> deck) {
         inform("Deck: ");
-        for(Card card : deck) {
+        for(ClientCard card : deck) {
             printCard(card);
             System.out.println();
         }
     }
 
     @Override
-    public void printCard(Card card) {
-        switch (card) {
-            case AbandonedShipCard c -> {
+    public void printCard(ClientCard card) {
+        switch (card.type.toUpperCase()) {
+            case "ABANDONEDSHIPCARD"  -> {
                 inform("=== Abandoned Ship ===");
-                inform(centerKV("Flight Days",    String.valueOf(c.getDays()),    20));
-                inform(centerKV("Crewmates",   String.valueOf(c.getNumCrewmates()), 20));
-                inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
+                inform(centerKV("Flight Days",    String.valueOf(card.days),    20));
+                inform(centerKV("Crewmates",   String.valueOf(card.numCrewmates), 20));
+                inform(centerKV("Credits", String.valueOf(card.credits), 20));
             }
-            case AbandonedStationCard c -> {
+            case "ABANDONEDSTATIONCARD" -> {
                 inform("=== Abandoned Station ===");
-                inform(centerKV("Flight Days",  String.valueOf(c.getDays()),  20));
-                inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
-                inform("List of goods: " + joinGoods(c.getStationGoods()));
+                inform(centerKV("Flight Days",  String.valueOf(card.days),  20));
+                inform(centerKV("Crewmates", String.valueOf(card.numCrewmates), 20));
+                inform("List of goods: " + joinGoods(card.stationGoods));
             }
-            case FirstWarzoneCard c -> {
+            case "FIRWARZONECARD"  -> {
                 inform("=== First War Zone ===");
                 printWarzoneTable(
-                        c.getShotsDirections(),
-                        c.getShotsSize(),
-                        "- Player with less crewmates lose " + c.getDays() + " days",
-                        "- Player with less engine power lose " + c.getNumCrewmates() + " crewmates"
+                        card.directions,
+                        card.sizes,
+                        "- Player with less crewmates lose " + card.days + " days",
+                        "- Player with less engine power lose " + card.numCrewmates + " crewmates"
                 );
             }
-            case SecondWarzoneCard c -> {
+            case "SECONDWARZONECARD"  -> {
                 inform("=== Second War Zone ===");
                 printWarzoneTable(
-                        c.getShotsDirections(),
-                        c.getShotsSize(),
-                        "- Player with less fire power lose " + c.getDays() + " days",
-                        "- Player with less engine power lose " + c.getNumGoods() + " goods"
+                        card.directions,
+                        card.sizes,
+                        "- Player with less fire power lose " + card.days + " days",
+                        "- Player with less engine power lose " + card.numCrewmates + " goods"
                 );
             }
-            case MeteoritesRainCard c -> {
+            case "METEORITESRAINCARD"  -> {
                 inform("=== Meteorites Rain ===");
-                printAttackTable(c.getMeteorites_directions(), c.getMeteorites_size());
+                printAttackTable(card.directions, card.sizes);
             }
-            case PiratesCard c -> {
+            case "PIRATESCARD"  -> {
                 inform("=== Pirates ===");
-                inform(centerKV("Fire power",    String.valueOf(c.getFirePower()), 20));
-                inform(centerKV("Credits", String.valueOf(c.getCredits()),   20));
-                inform(centerKV("Flight Days",    String.valueOf(c.getDays()),      20));
-                printAttackTable(c.getShots_directions(), c.getShots_size());
+                inform(centerKV("Fire power",    String.valueOf(card.firePower), 20));
+                inform(centerKV("Credits", String.valueOf(card.credits),   20));
+                inform(centerKV("Flight Days",    String.valueOf(card.days),      20));
+                printAttackTable(card.directions, card.sizes);
             }
-            case SlaversCard c -> {
+            case "SLAVERSCARD"  -> {
                 inform("=== Slavers ===");
-                inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
-                inform(centerKV("Crewmates", String.valueOf(c.getNumCrewmates()), 20));
-                inform(centerKV("Credits", String.valueOf(c.getCredits()), 20));
-                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
+                inform(centerKV("Fire power", String.valueOf(card.firePower), 20));
+                inform(centerKV("Crewmates", String.valueOf(card.numCrewmates), 20));
+                inform(centerKV("Credits", String.valueOf(card.credits), 20));
+                inform(centerKV("Flight Days", String.valueOf(card.days), 20));
             }
-            case SmugglersCard c -> {
+            case "SMUGGLERSCARD"  -> {
                 inform("=== Smugglers ===");
-                inform(centerKV("Fire power", String.valueOf(c.getFirePower()), 20));
-                inform(centerKV("Removed goods", String.valueOf(c.getNumRemovedGoods()), 20));
-                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
-                inform("Reward goods: " + joinGoods(c.getRewardGoods()));
+                inform(centerKV("Fire power", String.valueOf(card.firePower), 20));
+                inform(centerKV("Removed goods", String.valueOf(card.rewardGoods), 20));
+                inform(centerKV("Flight Days", String.valueOf(card.days), 20));
+                inform("Reward goods: " + joinGoods(card.rewardGoods));
             }
-            case PlanetsCard c -> {
+            case "PLANETSCARD"  -> {
                 inform("=== Planets ===");
-                inform(centerKV("Flight Days", String.valueOf(c.getDays()), 20));
-                for (int i = 0; i < c.getRewardGoods().size(); i++) {
-                    inform("Planet " + (i+1) + ": " + joinGoods(c.getRewardGoods().get(i)));
+                inform(centerKV("Flight Days", String.valueOf(card.days), 20));
+                for (int i = 0; i < card.rewardGoodsList.size(); i++) {
+                    inform("Planet " + (i+1) + ": " + joinGoods(card.rewardGoodsList.get(i)));
                 }
             }
-            case PlaugeCard c -> inform("=== Plague ===");
-            case OpenSpaceCard c -> inform("=== Open Space ===");
-            case StardustCard c -> inform("=== Stardust ===");
+            case "PLAUGECARD" -> inform("=== Plague ===");
+            case "OPENSPACECARD"  -> inform("=== Open Space ===");
+            case "STARDUSTCARD"  -> inform("=== Stardust ===");
             default -> inform(""); //non ci arriverò mai 100%
         }
     }
 
     /** Converte [RED, BLUE] in "RED, BLUE" */
-    private String joinGoods(List<Colour> goods) {
+    private String joinGoods(List<String> goods) {
         return goods.stream()
                 .map(c -> ANSI_COLOR.getOrDefault(c, "")
-                        + c.name()
+                        + c
                         + RESET)
                 .collect(Collectors.joining(", "));
     }
@@ -529,7 +528,7 @@ public class TUIView implements View {
 
 
     @Override
-    public void printTile(Tile tile) {
+    public void printTile(ClientTile tile) {
         StringBuilder top = new StringBuilder();
         StringBuilder mid = new StringBuilder();
         StringBuilder bot = new StringBuilder();
@@ -589,7 +588,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public void printPileShown(List<Tile> tiles) {
+    public void printPileShown(List<ClientTile> tiles) {
         StringBuilder top = new StringBuilder();
         StringBuilder mid = new StringBuilder();
         StringBuilder bot = new StringBuilder();
@@ -597,7 +596,7 @@ public class TUIView implements View {
         int size = tiles.size();
 
         for (int i = 0; i < size; i++) {
-            Tile tile = tiles.get(i);
+            ClientTile tile = tiles.get(i);
             String[] rendered = renderTile(tile);
 
 
@@ -627,28 +626,28 @@ public class TUIView implements View {
     }
 
 
-    private String getTileContent (Tile tile){
-        switch(tile){
-            case EmptySpace x ->{ return "   ";}
-            case EnergyCell x ->{ return "EC"+GREEN+x.getCapacity()+RESET;}
-            case Engine x ->{ return "ENG";}
-            case Cannon x ->{ return "CAN";}
-            case HousingUnit x ->{
-                if(x.getType() == Human.HUMAN){
-                    return "HU"+x.returnLenght();
-                }else if(x.getType() == Human.BROWN_ALIEN){
-                    return BROWN+"HU"+RESET+x.returnLenght()+" ";
-                }else if(x.getType() == Human.PURPLE_ALIEN){
-                    return PURPLE+"HU"+RESET+x.returnLenght()+" ";
+    private String getTileContent (ClientTile tile){
+        switch(tile.type.trim().toUpperCase()){
+            case "EMPTYSPACE"  ->{ return "   ";}
+            case "ENERGYCELL"  ->{ return "EC"+GREEN+tile.capacity+RESET;}
+            case "ENGINE"  ->{ return "ENG";}
+            case "CANNON"  ->{ return "CAN";}
+            case "HOUSINGUNIT"  ->{
+                if(tile.human.equals("HUMAN")){
+                    return "HU"+tile.tokens.size();
+                }else if(tile.human.equals("BROWN_ALIEN")){
+                    return BROWN+"HU"+tile.tokens.size()+RESET+" ";
+                }else if(tile.human.equals("PURPLE_ALIEN")){
+                    return PURPLE+"HU"+tile.tokens.size()+RESET+" ";
                 }
             }
-            case MultiJoint x ->{return "MTJ";}
-            case Shield x ->{return "SHL";}
-            case StorageUnit x -> {
-                if(x.isAdvanced()){
-                    return RED+"SU"+RESET+PEFOH+x.getMax()+RESET;
+            case "MULTIJOINT"  ->{return "MTJ";}
+            case "SHIELD" ->{return "SHL";}
+            case "STORAGEUNIT"  -> {
+                if(tile.advance){
+                    return RED+"SU"+RESET+PEFOH+tile.max+RESET;
                 }
-                return "SU"+PEFOH+x.getMax()+RESET;
+                return "SU"+PEFOH+tile.max+RESET;
             }
             default -> throw new IllegalStateException("Unexpected value: " + tile);
         }
@@ -658,75 +657,75 @@ public class TUIView implements View {
 
 
 
-    private String[] renderTile(Tile tile) {
+    private String[] renderTile(ClientTile tile) {
         String[] out = new String[3];
-        int a = tile.controlCorners(0);
-        int b = tile.controlCorners(1);
-        int c = tile.controlCorners(2);
-        int d = tile.controlCorners(3);
+        int a = tile.a;
+        int b = tile.b;
+        int c = tile.c;
+        int d = tile.d;
         String label = getTileContent(tile);
-        switch (tile){
-            case EmptySpace x -> {
+        switch (tile.type.trim().toUpperCase()){
+            case "EMPTYSPACE"  -> {
                 out[0] = String.format("         ");
                 out[1] = String.format("         ");
                 out[2] = String.format("         ");
             }
-            case Engine x -> {
+            case "ENGINE" -> {
                 out[0] = String.format("    %d    ", a);
                 out[1] = String.format("%d  %-4s %d",d,label,b);
                 out[2] = String.format("    %d    ", c);
             }
-            case Cannon x -> {
+            case "MULTIJOINT" -> {
                 out[0] = String.format("    %d    ", a);
                 out[1] = String.format("%d  %-4s %d",d,label,b);
                 out[2] = String.format("    %d    ", c);
             }
-            case EnergyCell x ->{
+            case "CANNON" -> {
+                out[0] = String.format("    %d    ", a);
+                out[1] = String.format("%d  %-4s %d",d,label,b);
+                out[2] = String.format("    %d    ", c);
+            }
+            case "ENERGYCELL"  ->{
                 out[0] = String.format("    %d    ", a);
                 out[1] = String.format("%d  %-4s  %d",d,label,b);
                 out[2] = String.format("    %d    ", c);
             }
-            case MultiJoint x ->{
+            case "HOUSINGUNIT"  ->{
                 out[0] = String.format("    %d    ", a);
                 out[1] = String.format("%d  %-4s %d",d,label,b);
                 out[2] = String.format("    %d    ", c);
             }
-            case HousingUnit x ->{
-                out[0] = String.format("    %d    ", a);
-                out[1] = String.format("%d  %-4s %d",d,label,b);
-                out[2] = String.format("    %d    ", c);
-            }
-            case Shield x ->{
-                if(x.getProtectedCorner(0)==8 && x.getProtectedCorner(1)==8){
+            case "SHIELD" ->{
+                if(tile.protectedCorners.get(0) == 8 && tile.protectedCorners.get(1) == 8 ){
                     out[0] = String.format("    %s%d%s    ",GREEN, a, RESET);
                     out[1] = String.format("%d  %-4s %s%d%s",d,label,GREEN,b,RESET);
                     out[2] = String.format("    %d    ", c);
-                }else if(x.getProtectedCorner(1)==8 && x.getProtectedCorner(2)==8){
+                }else if(tile.protectedCorners.get(1) == 8 && tile.protectedCorners.get(2) == 8){
                     out[0] = String.format("    %d    ", a);
                     out[1] = String.format("%d  %-4s %s%d%s",d,label,GREEN,b,RESET);
                     out[2] = String.format("    %s%d%s    ", GREEN,c,RESET);
-                }else if(x.getProtectedCorner(2)==8 && x.getProtectedCorner(3)==8){
+                }else if(tile.protectedCorners.get(2) == 8 && tile.protectedCorners.get(3) == 8){
                     out[0] = String.format("    %d    ", a);
                     out[1] = String.format("%s%d%s  %-4s %d",GREEN,d,RESET,label,b);
                     out[2] = String.format("    %s%d%s    ", GREEN,c,RESET);
-                }else if(x.getProtectedCorner(3)==8 && x.getProtectedCorner(0)==8){
+                }else if(tile.protectedCorners.get(3) == 8 && tile.protectedCorners.get(0) == 8){
                     out[0] = String.format("    %s%d%s    ",GREEN, a, RESET);
                     out[1] = String.format("%s%d%s  %-4s %d",GREEN,d,RESET,label,b);
                     out[2] = String.format("    %d    ", c);
                 }
             }
-            case StorageUnit x ->{
-                List<Colour> listOfGoods = x.getListOfGoods();
+            case "STORAGEUNIT"  ->{
+                List<String> listOfGoods = tile.goods;
                 int green = 0;
                 int red = 0;
                 int yellow = 0;
                 int blue = 0;
-                for (Colour good : listOfGoods) {
+                for (String good : listOfGoods) {
                     switch (good) {
-                        case RED -> red++;
-                        case YELLOW -> yellow++;
-                        case GREEN -> green++;
-                        case BLUE -> blue++;
+                        case "RED" -> red++;
+                        case "YELLOW" -> yellow++;
+                        case "GREEN" -> green++;
+                        case "BLUE" -> blue++;
                     }
                 }
                 out[0] = String.format("%s%d%s   %d   %s%d%s",RED,red,RESET, a,YELLOW,yellow,RESET);
@@ -950,7 +949,7 @@ public class TUIView implements View {
         maschera[a][b] = true;
     }
 
-    public GamePhase getGamePhase() {return game;}
+    public ClientGamePhase getGamePhase() {return game;}
 
 }
 

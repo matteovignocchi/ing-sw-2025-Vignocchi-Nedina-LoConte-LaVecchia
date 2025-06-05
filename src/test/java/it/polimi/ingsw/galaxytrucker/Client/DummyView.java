@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.GamePhase;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
@@ -176,7 +176,7 @@ public class DummyView implements View {
     }
 
     @Override
-    public GamePhase getGamePhase() {
+    public ClientGamePhase getGamePhase() {
         return null;
     }
 

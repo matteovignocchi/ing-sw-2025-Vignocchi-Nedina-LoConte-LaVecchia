@@ -1,6 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 
 /**
  * This interface follows the Visitor design pattern, allowing new operations to be performed on

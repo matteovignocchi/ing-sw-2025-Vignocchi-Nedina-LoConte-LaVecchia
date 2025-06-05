@@ -1,9 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 
 import java.io.Serializable;
-import java.security.SecureRandomParameters;
 import java.util.ArrayList;
 import java.util.List;
 /**

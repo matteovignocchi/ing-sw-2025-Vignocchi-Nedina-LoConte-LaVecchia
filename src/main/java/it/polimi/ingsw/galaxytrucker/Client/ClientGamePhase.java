@@ -1,5 +1,6 @@
-package it.polimi.ingsw.galaxytrucker;
-public enum GamePhase {
+package it.polimi.ingsw.galaxytrucker.Client;
+
+public enum ClientGamePhase {
     WAITING_IN_LOBBY,
     BOARD_SETUP,
     TILE_MANAGEMENT,
@@ -11,3 +12,4 @@ public enum GamePhase {
     SCORING ,
     EXIT,
 }
+

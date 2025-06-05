@@ -1,6 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
-
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -38,7 +37,7 @@ public class BuildingPhaseController extends GUIController {
         rotateLeftBtn.setDisable(true);
         rotateRightBtn.setDisable(true);
 
-        dashBoard = new Tile[5][7];
+        dashBoard = new ClientTile[5][7];
     }
 
     @FXML
@@ -57,7 +56,7 @@ public class BuildingPhaseController extends GUIController {
         }
     }
 
-    public void setCurrentTile(Tile tile) {
+    public void setCurrentTile(ClientTile tile) {
         this.currentTile = tile;
         this.rotationAngle = 0;
 
@@ -99,7 +98,7 @@ public class BuildingPhaseController extends GUIController {
     private void createDraggableTileView() {
         if (currentTile == null) return;
 
-        Image tileImage = Tile.loadImageById(currentTile.getIdTile());
+        Image tileImage = ClientTile.loadImageById(currentTile.id);
         draggedTileView = new ImageView(tileImage);
         draggedTileView.setFitWidth(50);
         draggedTileView.setFitHeight(50);
@@ -150,7 +149,7 @@ public class BuildingPhaseController extends GUIController {
     private void placeTileOnGrid(int row, int col) {
         if (getNodeAt(gameGrid, col, row) != null) return;
 
-        ImageView tileView = new ImageView(Tile.loadImageById(currentTile.getIdTile()));
+        ImageView tileView = new ImageView(ClientTile.loadImageById(currentTile.id));
         tileView.setFitWidth(gameGrid.getWidth() / gameGrid.getColumnConstraints().size());
         tileView.setFitHeight(gameGrid.getHeight() / gameGrid.getRowConstraints().size());
         tileView.setRotate(rotationAngle);

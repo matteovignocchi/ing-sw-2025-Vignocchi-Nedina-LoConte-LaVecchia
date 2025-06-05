@@ -1,5 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
@@ -82,13 +82,13 @@ public class GameManager {
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
             v.setIsDemo(controller.getIsDemo());
             v.setGameId(gameId);
-            v.updateGameState(controller.getPlayerCheck(nickname).getGamePhase());
-            v.updateDashMatrix(dash);
-            v.printPlayerDashboard(dash);
+            v.updateGameState(controller.getGamePhase(nickname));
+            v.updateDashMatrix(controller.getDashJson(nickname));
+            v.printPlayerDashboard(controller.getDashJson(nickname));
 
             try {
 //                v.printPlayerDashboard(dash);
-                v.updateDashMatrix(dash);
+                v.updateDashMatrix(controller.getDashJson(nickname));
             } catch (Exception e) {
 
             }
@@ -112,34 +112,34 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE CONTROLLER/////////////////////////////////////////////////
 
-    public Tile getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
+    public String getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
-            Tile t = controller.getCoveredTile(nickname);
+            String t = controller.getCoveredTile(nickname);
             safeSave(gameId, controller);
             return t;
         }
     }
 
-    public List<Tile> getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
+    public String getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
-            List<Tile> uncoveredTiles = controller.getShownTiles();
+            String uncoveredTiles = controller.jsongetShownTiles();
             if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
             return uncoveredTiles;
         }
     }
 
-    public Tile chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
+    public String chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
-            Tile t = controller.chooseUncoveredTile(nickname, idTile);
+            String t = controller.chooseUncoveredTile(nickname, idTile);
             safeSave(gameId, controller);
             return t;
         }
     }
 
-    public void dropTile (int gameId, String nickname, Tile tile) throws BusinessLogicException {
+    public void dropTile (int gameId, String nickname, String tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
             controller.dropTile(nickname, tile);
@@ -147,7 +147,7 @@ public class GameManager {
         }
     }
 
-    public void placeTile(int gameId, String nickname, Tile tile, int[] cord) throws BusinessLogicException {
+    public void placeTile(int gameId, String nickname, String tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
             controller.placeTile(nickname, tile, cord);
@@ -155,9 +155,9 @@ public class GameManager {
         }
     }
 
-    public Tile getReservedTile(int gameId, String nickname , int id) throws BusinessLogicException {
+    public String getReservedTile(int gameId, String nickname , int id) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
-        Tile t;
+        String t;
         synchronized (controller) {
             t = controller.getReservedTile(nickname, id);
             safeSave(gameId, controller);
@@ -181,7 +181,7 @@ public class GameManager {
         }
     }
 
-    public List<Card> showDeck(int gameId, int idxDeck) throws BusinessLogicException {
+    public String showDeck(int gameId, int idxDeck) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
             return controller.showDeck(idxDeck);
@@ -196,7 +196,7 @@ public class GameManager {
         }
     }
 
-    public Tile[][] lookAtDashBoard(String nickname, int gameId) throws BusinessLogicException {
+    public String[][] lookAtDashBoard(String nickname, int gameId) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
             return controller.lookAtDashBoard(nickname);

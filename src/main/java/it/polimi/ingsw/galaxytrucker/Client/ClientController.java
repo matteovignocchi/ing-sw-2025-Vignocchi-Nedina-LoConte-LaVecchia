@@ -1,12 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
-import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
+
+
+//import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+//import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Platform;
@@ -14,11 +12,8 @@ import javafx.application.Platform;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.concurrent.*;
 
 import static java.lang.String.valueOf;
 
@@ -29,10 +24,19 @@ import static java.lang.String.valueOf;
 public class ClientController {
     private final View view;
     private final VirtualView virtualClient;
-    private Tile tmpTile;
+    private ClientTile tmpTile;
+    private List<ClientTile> tmpList;
     private boolean isConnected = false;
-    private Tile[][] Dash_Matrix;
-    private GamePhase currentGamePhase;
+    private ClientTile[][] Dash_Matrix;
+    private ClientGamePhase currentGamePhase;
+
+
+    //Cose per il refactor dei json
+    private final ClientTileFactory clientTileFactory;
+    private final ClientCardFactory clientCardFactory;
+    private final ClientEnumFactory clientEnumFactory;
+
+    public String json = "boh";
 
 
     private static ClientController instance;
@@ -41,16 +45,22 @@ public class ClientController {
     public ClientController(View view, VirtualView virtualClient) {
         this.view = view;
         this.virtualClient = virtualClient;
+        tmpTile = new ClientTile();
+        this.clientTileFactory = new ClientTileFactory();
+        this.clientCardFactory = new ClientCardFactory();
+        this.clientEnumFactory = new ClientEnumFactory();
         try {
             virtualClient.setClientController(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        Dash_Matrix = new Tile[5][7];
+        Dash_Matrix = new ClientTile[5][7];
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
-                Dash_Matrix[i][j] = new EmptySpace();
+                ClientTile tile = new ClientTile();
+                tile.type = "EMPTYSPACE";
+                Dash_Matrix[i][j] = tile;
             }
         }
 
@@ -88,7 +98,7 @@ public class ClientController {
         while (true) {
             view.inform("Insert your username:");
             switch (view){
-                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+//                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
                 default -> {}
             }
             String username = virtualClient.askString();
@@ -111,7 +121,7 @@ public class ClientController {
             } else {
                 view.inform("Login successful");
                 switch (view) {
-                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
+//                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
                     default -> {}
                 }
                 return 0;
@@ -128,7 +138,7 @@ public class ClientController {
                 String line = "";
                 switch (view) {
                     case TUIView v -> line = v.askString();
-                    case GUIView g -> line = g.askString();
+//                    case GUIView g -> line = g.askString();
                     default -> line = view.askString();
                 }
 
@@ -192,18 +202,18 @@ public class ClientController {
                     view.reportError("Game creation failed");
                 }
             }
-            case GUIView v -> {
-                List<Object> data = v.getDataForGame();
-                boolean demo = (boolean) data.get(0);
-                int numberOfPlayer = (int) data.get(1);
-                int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
-                if (response > 0) {
-                    virtualClient.setGameId(response);
-                    startGame();
-                }else{
-                    v.reportError("Game creation failed");
-                }
-            }
+//            case GUIView v -> {
+//                List<Object> data = v.getDataForGame();
+//                boolean demo = (boolean) data.get(0);
+//                int numberOfPlayer = (int) data.get(1);
+//                int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
+//                if (response > 0) {
+//                    virtualClient.setGameId(response);
+//                    startGame();
+//                }else{
+//                    v.reportError("Game creation failed");
+//                }
+//            }
             default -> {}
         }
     }
@@ -231,18 +241,18 @@ public class ClientController {
                 }
             }
 
-            case GUIView v -> {
-                Platform.runLater(() -> {
-                    try {
-                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
-                        v.displayAvailableGames(availableGames);
-                    } catch (IOException e) {
-                        v.reportError("Failed to open join menu: " + e.getMessage());
-                    }
-                });
-
-                choice = v.waitForGameChoice(); // blocca in attesa
-            }
+//            case GUIView v -> {
+//                Platform.runLater(() -> {
+//                    try {
+//                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
+//                        v.displayAvailableGames(availableGames);
+//                    } catch (IOException e) {
+//                        v.reportError("Failed to open join menu: " + e.getMessage());
+//                    }
+//                });
+//
+//                choice = v.waitForGameChoice(); // blocca in attesa
+//            }
 
 
             default -> {
@@ -255,7 +265,7 @@ public class ClientController {
 
     public void joinExistingGame() throws Exception {
         view.inform("Joining Existing Game...");
-        int gameId = virtualClient.sendGameRequest("JOIN" , 0 , true);
+        int gameId = sendGameRequestFromController("JOIN" , 0 , true);
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
             boolean started = waitForGameStart();
@@ -270,10 +280,14 @@ public class ClientController {
         return true;
     }
 
+    public int sendGameRequestFromController(String msg , int numberOfPlayer , boolean isDemo) throws Exception {
+         return virtualClient.sendGameRequest(msg , numberOfPlayer , isDemo);
+    }
+
 
     private boolean waitForFlightStart() throws Exception {
 
-        if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
+        if (currentGamePhase == ClientGamePhase.WAITING_FOR_PLAYERS) {
             return true;
         }
 
@@ -284,7 +298,7 @@ public class ClientController {
         view.inform("Insert index:");
 
         BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-        while (currentGamePhase == GamePhase.WAITING_FOR_PLAYERS) {
+        while (currentGamePhase == ClientGamePhase.WAITING_FOR_PLAYERS) {
             if (console.ready()) {
                 String line = console.readLine().trim();
                 switch (line) {
@@ -313,7 +327,7 @@ public class ClientController {
 
         while (true) {
             // il server ha avanzato lo stato: il gioco parte
-            if (currentGamePhase != GamePhase.WAITING_FOR_PLAYERS) {
+            if (currentGamePhase != ClientGamePhase.WAITING_FOR_PLAYERS) {
                 return true;
             }
 
@@ -328,18 +342,19 @@ public class ClientController {
 
     private void startGame() throws Exception {
 
-        if(view.getGamePhase() == GamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
+        if(view.getGamePhase() == ClientGamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
 
         view.printListOfCommand();
         while (true) {
-            GamePhase temp = currentGamePhase;
 
-            if(currentGamePhase == GamePhase.CARD_EFFECT) {
+            ClientGamePhase temp = currentGamePhase;
+
+            if(currentGamePhase == ClientGamePhase.CARD_EFFECT) {
                 Thread.sleep(100);
                 continue;
             }
 
-            if(currentGamePhase==GamePhase.EXIT){
+            if(currentGamePhase == ClientGamePhase.EXIT){
                 mainMenuLoop();
                 break;
             } //da controllare
@@ -354,16 +369,33 @@ public class ClientController {
             try {
                 switch (key) {
                     case "getacoveredtile"    -> {
-                        tmpTile = virtualClient.getTileServer();
+
+                        tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
                         view.printTile(tmpTile);
+                        view.printListOfCommand();
+
+
                     }
                     case "getashowntile"      -> {
-                        tmpTile = virtualClient.getUncoveredTile();
+
+                        tmpTile = clientTileFactory.fromJson(virtualClient.getUncoveredTile());
+
+
                         view.printTile(tmpTile);
+                        view.printListOfCommand();
+
                     }
-                    case "returnthetile"      -> virtualClient.getBackTile(tmpTile);
+                    case "returnthetile"      -> {
+
+                        virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
+                        view.printListOfCommand();
+
+
+                    }
                     case "placethetile"       -> {
-                        virtualClient.positionTile(tmpTile);
+                        virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+                        view.printListOfCommand();
+
                     }
                     case "drawacard"          -> virtualClient.drawCard();
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
@@ -371,7 +403,7 @@ public class ClientController {
                         virtualClient.setReady();
                         if (!waitForFlightStart()) return;
 
-                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
+                        if (currentGamePhase == ClientGamePhase.CARD_EFFECT) {
                             view.printListOfCommand();
                             continue;
                         }
@@ -381,7 +413,8 @@ public class ClientController {
                     case "rightrotatethetile" -> rotateRight();
                     case "leftrotatethetile"  -> rotateLeft();
                     case "takereservedtile"   -> {
-                        tmpTile = virtualClient.takeReservedTile();
+
+                        tmpTile = clientTileFactory.fromJson(virtualClient.takeReservedTile());
                         view.printTile(tmpTile);
                     }
                     case "logout"             -> {
@@ -394,7 +427,7 @@ public class ClientController {
             } catch (BusinessLogicException | IOException | InterruptedException e) {
                 view.reportError(e.getMessage());
             }
-            if (currentGamePhase != GamePhase.DRAW_PHASE) {
+            if (currentGamePhase == ClientGamePhase.CARD_EFFECT) {
                 view.printListOfCommand();
             }
         }
@@ -437,17 +470,32 @@ public class ClientController {
         virtualClient.logOut();
     }
 
-    public void setCurrentTile(Tile tile) {
-        if (currentGamePhase == GamePhase.TILE_MANAGEMENT) {
-            this.tmpTile = tile;
+    public void setCurrentTile(String jsonTile) {
+        if (currentGamePhase == ClientGamePhase.TILE_MANAGEMENT) {
+            try {
+                this.tmpTile = clientTileFactory.fromJson(jsonTile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } else {
-            this.setTileInMatrix(tile, 2, 3);
+                this.setTileInMatrix(jsonTile, 2, 3);
         }
     }
 
-    public void setTileInMatrix(Tile tile , int a , int b) {
-        Dash_Matrix[a][b] = tile;
-        view.setValidity(a,b);
+    public void setTileInMatrix(String jsonTile , int a , int b) {
+        if (jsonTile.equals("PIEDINIPRADELLA")) {
+            ClientTile tmpEmpty = new ClientTile();
+            tmpEmpty.type = "EMPTYSPACE";
+            Dash_Matrix[a][b] = tmpEmpty;
+        } else {
+
+            try {
+                Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
+            } catch (IOException e) {
+                view.reportError(e.getMessage());
+            }
+            view.setValidity(a, b);
+        }
     }
 
 
@@ -465,42 +513,70 @@ public class ClientController {
         view.reportError(message);
     }
 
-    public void printListOfTileShownByController(List<Tile> tiles) {
+    public int printListOfTileShownByController(String jsonTiles){
         //TODO aggiungere i metodi per refactor
-        view.printPileShown(tiles);
+
+        try {
+            tmpList = clientTileFactory.fromJsonList(jsonTiles);
+            view.printPileShown(tmpList);
+            return tmpList.size();
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
+        return 0;
+    }
+
+    public int clientTileFromList(int index){
+        return tmpList.get(index).id;
     }
 
     public void printListOfTileCoveredByController() {
         view.printPileCovered();
     }
 
-    public void printListOfGoodsByController(List<Colour> listOfGoods) {
+    public void printListOfGoodsByController(List<String> listOfGoods) {
         //TODO aggiungere i metodi per refactor
         view.printListOfGoods(listOfGoods);
     }
 
-    public void printCardByController(Card card) {
+    public void printCardByController(String jsonCard){
         //TODO aggiungere i metodi per refactor
-        view.printCard(card);
+        try {
+            view.printCard(clientCardFactory.fromJson(jsonCard));
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
     }
 
-    public void printTileByController(Tile tile) {
+    public void printTileByController(String jsonTile){
         //TODO aggiungere i metodi per refactor
-        view.printTile(tile);
+        try {
+            view.printTile(clientTileFactory.fromJson(jsonTile));
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
     }
 
-    public void printPlayerDashboardByController(Tile[][] dashboard){
+    public void printPlayerDashboardByController(String[][] jsonDashboard){
         //TODO aggiungere i metodi per refactor
-        view.printDashShip(dashboard);
+        try {
+            view.printDashShip(clientTileFactory.fromJsonMatrix(jsonDashboard));
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
     }
 
     public void printMyDashBoardByController(){
         view.printDashShip(Dash_Matrix);
     }
 
-    public void printDeckByController(List<Card> deck) {
+    public void printDeckByController( String jsonDeck) {
         //TODO aggiungere i metodi per refactor
-        view.printDeck(deck);
+        try {
+            view.printDeck(clientCardFactory.fromJsonList(jsonDeck));
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
     }
 
     public boolean askByController(String message){
@@ -518,9 +594,13 @@ public class ClientController {
         return view.askString();
     }
 
-    public void updateGameStateByController(GamePhase phase){
-        view.updateState(phase);
-        currentGamePhase = phase;
+    public void updateGameStateByController(String phase){
+
+        ClientGamePhase gamePhase = clientEnumFactory.describeGamePhase(phase);
+        view.updateState(gamePhase);
+
+
+        currentGamePhase = gamePhase;
     }
 
     public String choocePlayerByController(){
@@ -535,8 +615,13 @@ public class ClientController {
         return view.ReturnValidity(a,b);
     }
 
-    public Tile getSomeTile(int a, int b){
-        return Dash_Matrix[a][b];
+    public String getSomeTile(int a, int b){
+        try {
+            return clientTileFactory.toJson(Dash_Matrix[a][b]);
+        } catch (JsonProcessingException e) {
+            view.reportError(e.getMessage());
+        }
+        return null;
     }
 
     public void updateMapPositionByController(Map<String, Integer> Position){
@@ -547,14 +632,25 @@ public class ClientController {
         view.setIsDemo(isDemo);
     }
 
-    public void newShip(Tile[][] data){
-        Dash_Matrix = data;
+    public void newShip(String[][] jsonData){
+        try {
+            Dash_Matrix = clientTileFactory.fromJsonMatrix(jsonData);
+        } catch (IOException e) {
+            view.reportError(e.getMessage());
+        }
     }
     public void resetValidityByController(int a , int b){
         if(a == 0 && (b == 5 || b ==6)){
             view.resetValidity(a,b);
         }
     }
+
+    public int returnIdOfTile(int a , int b){
+        return Dash_Matrix[a][b].id;
+    }
+
+
+
  }
 
 

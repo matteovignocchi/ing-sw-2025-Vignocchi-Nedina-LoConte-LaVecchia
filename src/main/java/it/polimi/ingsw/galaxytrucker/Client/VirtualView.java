@@ -1,10 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-import it.polimi.ingsw.galaxytrucker.View.View;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -22,19 +19,19 @@ public interface VirtualView extends Remote {
 
     boolean ask(String message) throws Exception;
 
-    void printCard(Card card) throws Exception;
+    void printCard(String card) throws Exception;
 
-    void printListOfTileCovered(List<Tile> tiles) throws Exception;
+    void printListOfTileCovered(String tiles) throws Exception;
 
-    void printListOfTileShown(List<Tile> tiles) throws Exception;
+    void printListOfTileShown(String tiles) throws Exception;
 
-    void printPlayerDashboard(Tile[][] dashboard) throws Exception;
+    void printPlayerDashboard(String[][] dashboard) throws Exception;
 
-    void printListOfGoods(List<Colour> listOfGoods) throws Exception;
+    void printListOfGoods(List<String> listOfGoods) throws Exception;
 
-    void printTile(Tile tile) throws Exception;
+    void printTile(String tile) throws Exception;
 
-    void printDeck(List<Card> deck) throws Exception;
+    void printDeck(String deck) throws Exception;
 
 //    void setView(View view) throws Exception;
 
@@ -48,7 +45,7 @@ public interface VirtualView extends Remote {
     int[] askCoordinate() throws Exception;
 
     /// METODI PER AVERE INFORMAZIONI SULLO STATO DEL GIOCO///
-    void updateGameState(GamePhase fase) throws Exception;
+    void updateGameState(String fase) throws Exception;
 
     void startMach() throws Exception;
 
@@ -56,18 +53,18 @@ public interface VirtualView extends Remote {
 
     int sendGameRequest(String message ,int numberOfPlayer , Boolean isdemo) throws Exception;
 
-    GamePhase getCurrentGameState() throws Exception;
-
-    GamePhase getGameFase() throws Exception;
+//    GamePhase getCurrentGameState() throws Exception;
+//
+//    GamePhase getGameFase() throws Exception;
 
     /// METODI CHE CHIAMO DIRETTAMENTE AL SERVER ///
-    Tile getTileServer() throws Exception;
+    String getTileServer() throws Exception;
 
-    Tile getUncoveredTile() throws Exception;
+    String getUncoveredTile() throws Exception;
 
-    void getBackTile(Tile tile) throws Exception;
+    void getBackTile(String tile) throws Exception;
 
-    void positionTile(Tile tile) throws Exception;
+    void positionTile(String tile) throws Exception;
 
     void drawCard() throws Exception;
 
@@ -89,7 +86,7 @@ public interface VirtualView extends Remote {
 
     String askInformationAboutStart() throws Exception;
 
-    void setTile(Tile tile) throws Exception;
+    void setTile(String jsonTile) throws Exception;
 
     void setIsDemo(Boolean demo) throws Exception;
 
@@ -97,9 +94,9 @@ public interface VirtualView extends Remote {
 
     void leaveGame() throws Exception;
 
-    Tile takeReservedTile() throws Exception;
+    String takeReservedTile() throws Exception;
 
-    void updateDashMatrix(Tile[][] data) throws Exception;
+    void updateDashMatrix(String[][] data) throws Exception;
 
     void setClientController(ClientController clientController) throws Exception;
 

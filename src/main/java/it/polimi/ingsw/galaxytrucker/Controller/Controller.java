@@ -1,7 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
 
-import it.polimi.ingsw.galaxytrucker.BusinessLogicException;
-import it.polimi.ingsw.galaxytrucker.GamePhase;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.Model.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
@@ -57,6 +58,10 @@ public class Controller implements Serializable {
     private TileParserLoader pileMaker = new TileParserLoader();
     private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
+    private CardSerializer cardSerializer;
+    private TileSerializer tileSerializer;
+    private EnumSerializer enumSerializer;
+
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
         if(isDemo) {
@@ -68,9 +73,12 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateSecondLevelDeck();
             deck = new Deck();
         }
+        this.cardSerializer = new CardSerializer();
+        this.tileSerializer = new TileSerializer();
+        this.enumSerializer = new EnumSerializer();
         this.gameId = gameId;
         this.onGameEnd = onGameEnd;
         this.hourglass = new Hourglass(h -> {
@@ -97,7 +105,7 @@ public class Controller implements Serializable {
         VirtualView v = viewsByNickname.get(nickname);
         Player p      = playersByNickname.get(nickname);
         try {
-            v.updateGameState(p.getGamePhase());
+            v.updateGameState(enumSerializer.serializeGamePhase(p.getGamePhase()));
             v.showUpdate(
                     nickname,
                     getFirePower(p),
@@ -109,7 +117,10 @@ public class Controller implements Serializable {
                     p.getTotalHuman(),
                     p.getTotalEnergy()
             );
-            if(getPlayerCheck(nickname).getGamePhase()==GamePhase.TILE_MANAGEMENT) v.setTile(p.getLastTile());
+            if(getPlayerCheck(nickname).getGamePhase()==GamePhase.TILE_MANAGEMENT) {
+
+                String json = tileSerializer.toJson(p.getLastTile());
+                v.setTile(json);}
         } catch (IOException e) {
             markDisconnected(nickname);
         } catch (Exception e) {
@@ -142,9 +153,9 @@ public class Controller implements Serializable {
         p.setConnected(true);
 
         p.setGamePhase(GamePhase.WAITING_IN_LOBBY);
-        view.updateGameState(GamePhase.WAITING_IN_LOBBY);
-//        view.setTile(p.getTile(2,3));
-
+        view.setIsDemo(isDemo);
+        view.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_IN_LOBBY));
+        view.setTile(tileSerializer.toJson(p.getTile(2,3)));
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
         playersPosition.put(nickname, p.getId());
@@ -305,9 +316,9 @@ public class Controller implements Serializable {
             try {
                 v.updateMapPosition(playersPosition);
                 v.setIsDemo(isDemo);
-                v.updateGameState(GamePhase.BOARD_SETUP);
-                v.setTile(getPlayerCheck(nick).getTile(2,3));
-                v.printPlayerDashboard(getPlayerCheck(nick).getDashMatrix());
+                v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.BOARD_SETUP));
+                v.setTile(tileSerializer.toJson(getPlayerCheck(nick).getTile(2,3)));
+                v.printPlayerDashboard(tileSerializer.toJsonMatrix(getPlayerCheck(nick).getDashMatrix()));
             } catch (IOException e) {
                 markDisconnected(nick);
             } catch (Exception e){
@@ -331,7 +342,7 @@ public class Controller implements Serializable {
         if (!isDemo) startHourglass();
     }
 
-    public Tile getCoveredTile(String nickname) throws BusinessLogicException {
+    public String getCoveredTile(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         int size = getPileOfTile().size();
@@ -341,12 +352,21 @@ public class Controller implements Serializable {
         p.setLastTile(t);
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
+        try {
+            viewsByNickname.get(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.TILE_MANAGEMENT));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         notifyView(nickname);
 
-        return t;
+        try {
+            return tileSerializer.toJson(t);
+        } catch (JsonProcessingException e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
     }
 
-    public Tile chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
+    public String chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
         if(opt.isEmpty()) throw new BusinessLogicException("Tile already taken");
@@ -358,25 +378,42 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
-        return t;
+        try {
+            return tileSerializer.toJson(t);
+        } catch (JsonProcessingException e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
     }
 
-    public void dropTile (String nickname, Tile tile) throws BusinessLogicException {
+    public void dropTile (String nickname, String tile) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
-        addToShownTile(tile);
+        try {
+            addToShownTile(tileSerializer.fromJson(tile));
+        } catch (JsonProcessingException e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
+        p.setGamePhase(GamePhase.BOARD_SETUP);
+        try {
+            viewsByNickname.get(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.BOARD_SETUP));
+        } catch (Exception e) {
+            System.err.println("dropTile: " + e.getMessage());
+        }
+        notifyView(nickname);
+    }
+
+    public void placeTile(String nickname, String tile, int[] cord) throws BusinessLogicException {
+        Player p = getPlayerCheck(nickname);
+        try {
+            p.addTile(cord[0], cord[1], tileSerializer.fromJson(tile));
+        } catch (JsonProcessingException e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
         p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
 
-    public void placeTile(String nickname, Tile tile, int[] cord) throws BusinessLogicException {
-        Player p = getPlayerCheck(nickname);
-        p.addTile(cord[0], cord[1], tile);
-        p.setGamePhase(GamePhase.BOARD_SETUP);
-        notifyView(nickname);
-    }
-
-    public Tile getReservedTile(String nickname , int id) throws BusinessLogicException {
+    public String getReservedTile(String nickname , int id) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         List<Tile> discardPile = p.getTilesInDiscardPile();
@@ -387,7 +424,11 @@ public class Controller implements Serializable {
                 p.setLastTile(t);
                 p.setGamePhase(GamePhase.TILE_MANAGEMENT_AFTER_RESERVED);
                 notifyView(nickname);
-                return t;
+                try {
+                    return tileSerializer.toJson(t);
+                } catch (JsonProcessingException e) {
+                    throw new BusinessLogicException(e.getMessage());
+                }
             }
         }
         throw new BusinessLogicException("Tile not found");
@@ -538,7 +579,7 @@ public class Controller implements Serializable {
         Player drawer = getPlayerCheck(nickname);
         drawer.setGamePhase(GamePhase.WAITING_FOR_TURN);
         try{
-            getViewCheck(nickname).updateGameState(GamePhase.WAITING_FOR_TURN);
+            getViewCheck(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
         } catch (IOException e){
             markDisconnected(nickname);
         } catch (Exception e){
@@ -556,8 +597,8 @@ public class Controller implements Serializable {
             p.setGamePhase(GamePhase.CARD_EFFECT);
             if(p.isConnected()){
                 try {
-                    v.updateGameState(GamePhase.CARD_EFFECT);
-                    v.printCard(card);
+                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
+                    v.printCard(cardSerializer.toJSON(card));
                 } catch (IOException e) {
                     markDisconnected(nick);
                 } catch (Exception e){
@@ -680,13 +721,22 @@ public class Controller implements Serializable {
         onGameEnd.accept(this.gameId);
     }
 
-    public List<Card> showDeck (int idxDeck){
-        return new ArrayList<>(decks.get(idxDeck).getCards());
+    public String showDeck (int idxDeck){
+        try {
+            return cardSerializer.toJsonList(new ArrayList<>(decks.get(idxDeck).getCards()));
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in showDeck: " + e.getMessage());
+        }
+        return null;
     }
 
-    public Tile[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
+    public String[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
-        return p.getDashMatrix();
+        try {
+            return tileSerializer.toJsonMatrix(p.getDashMatrix());
+        } catch (JsonProcessingException e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -791,6 +841,14 @@ public class Controller implements Serializable {
 
     public List<Tile> getShownTiles(){
         return shownTile;
+    }
+    public String jsongetShownTiles(){
+        try {
+            return tileSerializer.toJsonList(shownTile);
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in jsongetShownTiles: " + e);
+        }
+        return null;
     }
 
     public Tile getTile(int index) {
@@ -990,7 +1048,7 @@ public class Controller implements Serializable {
                 }
             }
             try {
-                viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
             } catch (Exception e) {
                 markDisconnected(nick);
             }
@@ -1200,7 +1258,7 @@ public class Controller implements Serializable {
 
                 }
                 try {
-                    viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                    viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
                 } catch (Exception e) {
                     markDisconnected(nick);
                 }
@@ -1262,7 +1320,7 @@ public class Controller implements Serializable {
 
                     }
                     try {
-                        viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                        viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
                     } catch (Exception e) {
                         markDisconnected(nick);
                     }
@@ -1282,7 +1340,7 @@ public class Controller implements Serializable {
             }
         }
         try {
-            viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+            viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
         } catch (Exception e) {
             markDisconnected(nick);
         }
@@ -1301,10 +1359,10 @@ public class Controller implements Serializable {
             markDisconnected(nick);
             System.err.println("[ERROR] in addGoods: " + e.getMessage());
         }
-        while (list.size() != 0 && flag == true) {
+        while (!list.isEmpty() && flag) {
             try {
                 x.inform("SERVER: " + "seleziona una Housing unit");
-                x.printPlayerDashboard(p.getDashMatrix());
+                x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
             } catch (IOException e) {
                 markDisconnected(nick);
             } catch (Exception e){
@@ -1322,7 +1380,7 @@ public class Controller implements Serializable {
                 case StorageUnit c -> {
                     if(c.isFull()){
                         try {
-                            x.printListOfGoods(c.getListOfGoods());
+                            x.printListOfGoods(enumSerializer.serializeColoursList(c.getListOfGoods()));
                         } catch (Exception e) {
                             markDisconnected(nick);
                             throw new RuntimeException(e);
@@ -1467,7 +1525,7 @@ public class Controller implements Serializable {
                             }else{
                                 try{
                                     x.inform("SERVER: " + "seleziona una housing unit valida");
-                                    x.printPlayerDashboard(p.getDashMatrix());
+                                    x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                                 } catch (IOException e) {
                                     markDisconnected(nick);
                                 } catch (Exception e){
@@ -1479,7 +1537,7 @@ public class Controller implements Serializable {
                         default -> {
                             try {
                                 x.inform("SERVER: " + "seleziona una abitazione valida");
-                                x.printPlayerDashboard(p.getDashMatrix());
+                                x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                             } catch (IOException e) {
                                 markDisconnected(nick);
                             } catch (Exception e){
@@ -1489,7 +1547,7 @@ public class Controller implements Serializable {
                         }
                     }
                     try {
-                        viewsByNickname.get(nick).printPlayerDashboard(playersByNickname.get(nick).getDashMatrix());
+                        viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
                     } catch (Exception e) {
                         markDisconnected(nick);
                     }
@@ -1655,7 +1713,7 @@ public class Controller implements Serializable {
         try {
             viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
             viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
-            viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
+            viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
         } catch (Exception e) {
             markDisconnected(nick);
         }
@@ -1716,7 +1774,7 @@ public class Controller implements Serializable {
         Player p = getPlayerByNickname(Nickname);
         if(Arrays.deepEquals(tmpDash, p.getDashMatrix())){
             try {
-                viewsByNickname.get(Nickname).printPlayerDashboard(p.getDashMatrix());
+                viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                 viewsByNickname.get(Nickname).inform("safe");
             } catch (Exception e) {
                 markDisconnected(Nickname);
@@ -1725,7 +1783,7 @@ public class Controller implements Serializable {
             p.removeFrom0(dir2);
             askStartHousingForControl(Nickname);
             try {
-                viewsByNickname.get(Nickname).printPlayerDashboard(p.getDashMatrix());
+                viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1768,7 +1826,7 @@ public class Controller implements Serializable {
             try {
                 viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
                 viewsByNickname.get(nick).inform("ship before the attack");
-                viewsByNickname.get(nick).printPlayerDashboard(tmpDash);
+                viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
             } catch (Exception e) {
                 markDisconnected(nick);
             }
@@ -2110,7 +2168,7 @@ public class Controller implements Serializable {
         playersByNickname.get(id).controlAssembly(x,y);
         try {
             //notifyView(id);
-            viewsByNickname.get(id).printPlayerDashboard(playersByNickname.get(id).getDashMatrix());
+            viewsByNickname.get(id).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(id).getDashMatrix()));
         } catch (Exception e){
             markDisconnected(id);
             System.err.println("[ERROR] in checkPlayerAssembly: " + e.getMessage());
@@ -2160,7 +2218,7 @@ public class Controller implements Serializable {
     public void changePhaseFromCard(String nick, Player p, GamePhase tmp){
         if(p.isConnected()){
             try {
-                viewsByNickname.get(nick).updateGameState(tmp);
+                viewsByNickname.get(nick).updateGameState(enumSerializer.serializeGamePhase(tmp));
                 //notifyView(nick);
             } catch (IOException e) {
                 markDisconnected(nick);
@@ -2197,7 +2255,7 @@ public class Controller implements Serializable {
 
         viewsByNickname.forEach((nick, view) -> {
             try {
-                view.updateGameState(GamePhase.EXIT);
+                view.updateGameState(enumSerializer.serializeGamePhase(GamePhase.EXIT));
             } catch (Exception e) {
                 markDisconnected(nick);
             }
@@ -2208,5 +2266,25 @@ public class Controller implements Serializable {
     public Map<String,Integer> getPlayersPosition(){
         return playersPosition;
     }
+
+    public String getGamePhase(String nick){
+        try {
+            return enumSerializer.serializeGamePhase(playersByNickname.get(nick).getGamePhase());
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in serializeGamePhase: " + e.getMessage());
+        }
+        return "EXIT";
+    }
+
+    public String[][] getDashJson(String nick){
+        try {
+            return tileSerializer.toJsonMatrix( playersByNickname.get(nick).getDashMatrix());
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in serializeDashMatrix: " + e.getMessage());
+        }
+        return null;
+    }
+
+
 }
 
