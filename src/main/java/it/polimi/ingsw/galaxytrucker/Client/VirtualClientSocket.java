@@ -609,21 +609,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 Object payload = resp.getPayload();
                 String s;
                 try {
-                // Tentiamo di convertire il payload in stringa:
                     s = (String) payload;
                 } catch (ClassCastException e) {
-                    // Se non è nemmeno una stringa valida, lo ignoriamo.
                     s = "";
                 }
                 if (!"OK".equals(s)) {
-                    // Il server ha mandato un messaggio di errore come "Game not found".
-                 // Lo ignoriamo completamente, senza lanciare eccezioni.
                 }
             } catch (IOException e) {
-                // Qui intercetto qualunque IOException (ad es. "Error from server: Game not found").
-               // Lo ignoro, e vado avanti verso il menu principale.
             }
-            // 3) In ogni caso, resettare gameId = 0, così il client torna al main menu.
             gameId = 0;
         }
     }

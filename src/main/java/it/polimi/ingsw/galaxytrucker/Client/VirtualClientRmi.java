@@ -366,7 +366,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
                 server.LeaveGame(gameId, nickname);
             } catch (BusinessLogicException e) {
             }
-            // In ogni caso, setto gameId = 0 per rimandare il client al main menu.
             gameId = 0;
         }
     }

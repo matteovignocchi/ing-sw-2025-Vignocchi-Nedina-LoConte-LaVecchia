@@ -59,18 +59,20 @@ public class GameManager {
 
     public synchronized void quitGame(int gameId, String nickname) throws Exception {
         Controller controller = getControllerCheck(gameId);
-        controller.broadcastInform(nickname + " has abandoned: the game ends for everyone!\n");
+        String Message = "\u001B[31m" + nickname + " has abandoned: the game ends for everyone!" + "\u001B[0m";
+        controller.broadcastInform(Message);
+
+        for (String otherNick : controller.viewsByNickname.keySet()) {
+            nicknameToGameId.remove(otherNick);
+            loggedInUsers.remove(otherNick);
+        }
+
         controller.setExit();
         removeGame(gameId);
     }
 
     //TODO: deve mandare businesslogicException, ma inform e setGameId mandano exception generica
     public synchronized int login(String nickname, VirtualView v) throws Exception {
-        // caso nuovo utente
-        if (loggedInUsers.add(nickname)) {
-            return 0;
-        }
-        // caso reconnect
         Integer gameId = nicknameToGameId.get(nickname);
         if (gameId != null && games.containsKey(gameId)) {
             Controller controller = getControllerCheck(gameId);
@@ -78,6 +80,7 @@ public class GameManager {
             if(player.isConnected()){
                 throw new BusinessLogicException("Nickname already in use!");
             }
+            loggedInUsers.add(nickname);//todo:ci va?
             v.updateMapPosition(controller.getPlayersPosition());
             controller.markReconnected(nickname, v);
             Tile[][] dash = controller.getPlayerCheck(nickname).getDashMatrix();
@@ -94,6 +97,11 @@ public class GameManager {
             }
             return gameId;
         }
+
+        if (loggedInUsers.add(nickname)) {
+            return 0;
+        }
+
         throw new BusinessLogicException("Nickname already used: " + nickname);
     }
 
@@ -297,7 +305,7 @@ public class GameManager {
 
     ////////////////////////////////////////////////GESTIONE UTILITA'///////////////////////////////////////////////////
 
-    private Controller getControllerCheck(int gameId) throws BusinessLogicException {
+    public Controller getControllerCheck(int gameId) throws BusinessLogicException {
         Controller controller = games.get(gameId);
         if (controller == null) throw new BusinessLogicException("Game not found");
         return controller;
