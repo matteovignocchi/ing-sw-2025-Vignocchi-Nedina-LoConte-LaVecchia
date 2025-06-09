@@ -9,7 +9,6 @@ import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Platform;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -108,7 +107,13 @@ public class ClientController {
                 continue;
             }
 
-            int res = virtualClient.sendLogin(username);
+            int res;
+            try {
+                res = virtualClient.sendLogin(username);
+            } catch (BusinessLogicException ex) {
+                view.reportError(ex.getMessage());
+                continue;
+            }
 
             if (res == -1) {
                 view.reportError("Credential not valid, try again.");
@@ -285,6 +290,7 @@ public class ClientController {
     }
 
 
+    /**
     private boolean waitForFlightStart() throws Exception {
 
         if (currentGamePhase == ClientGamePhase.WAITING_FOR_PLAYERS) {
@@ -318,7 +324,7 @@ public class ClientController {
         view.inform("Flight is starting! Good luck!\n");
         return true;
     }
-
+     */
 
 
     private boolean handleWaitForGameStart() throws Exception {
@@ -326,7 +332,6 @@ public class ClientController {
         view.inform("Type 'exit' to abandon the lobby and return to main menu.");
 
         while (true) {
-            // il server ha avanzato lo stato: il gioco parte
             if (currentGamePhase != ClientGamePhase.WAITING_FOR_PLAYERS) {
                 return true;
             }
@@ -345,19 +350,14 @@ public class ClientController {
         if(view.getGamePhase() == ClientGamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
 
         view.printListOfCommand();
-        while (true) {
 
+        while (true) {
             ClientGamePhase temp = currentGamePhase;
 
-            if(currentGamePhase == ClientGamePhase.CARD_EFFECT) {
+            if(temp ==ClientGamePhase.CARD_EFFECT) {
                 Thread.sleep(100);
                 continue;
             }
-
-            if(currentGamePhase == ClientGamePhase.EXIT){
-                mainMenuLoop();
-                break;
-            } //da controllare
 
             String key = view.sendAvailableChoices();
 
@@ -372,50 +372,36 @@ public class ClientController {
 
                         tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
                         view.printTile(tmpTile);
-                        view.printListOfCommand();
-
-
                     }
                     case "getashowntile"      -> {
-
                         tmpTile = clientTileFactory.fromJson(virtualClient.getUncoveredTile());
-
-
-                        view.printTile(tmpTile);
-                        view.printListOfCommand();
-
+                        if(tmpTile != null) {
+                            view.printTile(tmpTile);
+                        }
                     }
-                    case "returnthetile"      -> {
-
-                        virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
-                        view.printListOfCommand();
-
-
-                    }
-                    case "placethetile"       -> {
-                        virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
-                        view.printListOfCommand();
-
-                    }
+                    case "returnthetile"      -> virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
+                    case "placethetile"       -> virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
                     case "drawacard"          -> virtualClient.drawCard();
                     case "spinthehourglass"   -> virtualClient.rotateGlass();
                     case "declareready"       -> {
                         virtualClient.setReady();
+                        /**
                         if (!waitForFlightStart()) return;
-
-                        if (currentGamePhase == ClientGamePhase.CARD_EFFECT) {
+                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
                             view.printListOfCommand();
                             continue;
                         }
+                         */
                     }
                     case "watchadeck"         -> virtualClient.lookDeck();
                     case "watchaplayersship"  -> virtualClient.lookDashBoard();
                     case "rightrotatethetile" -> rotateRight();
                     case "leftrotatethetile"  -> rotateLeft();
                     case "takereservedtile"   -> {
-
                         tmpTile = clientTileFactory.fromJson(virtualClient.takeReservedTile());
-                        view.printTile(tmpTile);
+                        if(tmpTile != null) {
+                            view.printTile(tmpTile);
+                        }
                     }
                     case "logout"             -> {
                         virtualClient.leaveGame();
@@ -427,9 +413,9 @@ public class ClientController {
             } catch (BusinessLogicException | IOException | InterruptedException e) {
                 view.reportError(e.getMessage());
             }
-            if (currentGamePhase == ClientGamePhase.CARD_EFFECT) {
-                view.printListOfCommand();
-            }
+
+            //if (currentGamePhase != ClientGamePhase.DRAW_PHASE)
+            view.printListOfCommand();
         }
     }
 
@@ -438,7 +424,6 @@ public class ClientController {
             tmpTile.rotateRight();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
-            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }
@@ -449,7 +434,6 @@ public class ClientController {
             tmpTile.rotateLeft();
             view.inform("Rotated tile");
             view.printTile(tmpTile);
-            view.printListOfCommand();
         } else {
             view.reportError("No tile selected to rotate");
         }
@@ -579,14 +563,23 @@ public class ClientController {
         }
     }
 
-    public boolean askByController(String message){
+    public Boolean askByController(String message){
         return view.ask(message);
     }
-    public int askIndexByController() {
+
+    public boolean askWithTimeoutByController(String message){return view.askWithTimeout(message);}
+
+    public Integer askIndexByController() throws IOException, InterruptedException {
         return view.askIndex();
     }
     public int[] askCoordinateByController(){
-        return view.askCoordinate();
+        try {
+            return view.askCoordinate();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -603,7 +596,7 @@ public class ClientController {
         currentGamePhase = gamePhase;
     }
 
-    public String choocePlayerByController(){
+    public String choosePlayerByController() throws IOException, InterruptedException {
         return view.choosePlayer();
     }
 
@@ -644,6 +637,10 @@ public class ClientController {
             view.resetValidity(a,b);
         }
     }
+
+    public void printMapPositionByController() { view.printMapPosition();}
+
+    public ClientGamePhase getGamePhaseByController() { return view.getGamePhase();}
 
     public int returnIdOfTile(int a , int b){
         return Dash_Matrix[a][b].id;

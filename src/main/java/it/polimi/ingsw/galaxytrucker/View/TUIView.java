@@ -16,8 +16,8 @@ public class TUIView implements View {
     private ClientGamePhase game;
     private boolean isDemo;
     private boolean[][] maschera;
-    private Scanner scanner = new Scanner(System.in); //TODO: da eliminare
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+    private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
@@ -33,6 +33,7 @@ public class TUIView implements View {
             "YELLOW", YELLOW,
             "BLUE",   BLUE
     );
+    private static final long TIME_OUT = 30000;
 
 
     //per ora lascio il server come int
@@ -72,7 +73,6 @@ public class TUIView implements View {
         inform("SU stands for storage unit, when is white is the standard unit, when it is"+RED+" red"+RESET+" it is advanced, after that there is the max capacity of the unit. In each corner, there is a counter showing how many goods of that color are present.");
     }
 
-
     private String readLine(long timeoutMs) throws InterruptedException, IOException {
         long end = System.currentTimeMillis() + timeoutMs;
         while (System.currentTimeMillis() < end) {
@@ -87,7 +87,7 @@ public class TUIView implements View {
     @Override
     public void inform(String message) {System.out.println("> " + message);}
     @Override
-    public void reportError(String message) {System.out.println(RED+ "\n[ERROR] " + message + RESET);}
+    public void reportError(String message) {System.out.println(RED+ "[ERROR] " + message + RESET);}
     @Override
     public void updateState(ClientGamePhase gamePhase) {
         game = gamePhase;
@@ -96,30 +96,77 @@ public class TUIView implements View {
     public void updateMap(Map<String, Integer> map) {
         mapPosition = map;
     }
+
     @Override
-    public String choosePlayer(){
-        for(String s : mapPosition.keySet()){
-            System.out.println(s + ": " + mapPosition.get(s));
-        }
-        System.out.println();
-        String nickname;
-        while(true){
-            inform("Selecet nickname of the player");
-            nickname = askString();
+    public String choosePlayer() throws IOException, InterruptedException {
+        ClientGamePhase originalPhase = getGamePhase();
+
+        System.out.println("\nPlayers in game:");
+        mapPosition.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(entry -> {
+                    int pos = entry.getValue();
+                    String nick = entry.getKey();
+                    inform(String.format("  %d - %s", pos, nick));
+                });
+        inform("Select nickname of the player:");
+
+        while(true) {
+            String line = readLine(200);
+            if (line == null) {
+                if (getGamePhase() != originalPhase) {
+                    return null;
+                }
+                continue;
+            }
+            String nickname = line.trim();
+
+            if (nickname.isEmpty()) {
+                reportError("Please enter a valid nickname from the list");
+                continue;
+            }
+
             for (String key : mapPosition.keySet()) {
                 if (key.equalsIgnoreCase(nickname)) {
                     return key;
                 }
             }
-            reportError("Please enter a nickname of some player in game");
+            reportError("Please enter a valid nickname from the list");
         }
     }
 
     @Override
-    public boolean ask(String message) {
+    public Boolean ask(String message) {
+        ClientGamePhase originalPhase = getGamePhase();
+        inform(message + " (Yes/No)");
         try {
-            inform(message + " (Yes/No)");
             while (true) {
+                String line = readLine(200);
+                if (line == null) {
+                    if(getGamePhase() != originalPhase){
+                        return null;
+                    }
+                    continue;
+                }
+                line = line.trim().toLowerCase();
+                if (line.equals("yes")) return Boolean.TRUE;
+                if (line.equals("no")) return Boolean.FALSE;
+                reportError("Invalid response, try again.");
+            }
+        } catch (IOException e) {
+            reportError("I/O error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return Boolean.FALSE;
+    }
+
+    @Override
+    public boolean askWithTimeout(String message) {
+        long end = System.currentTimeMillis() + TIME_OUT;
+        try{
+            inform(message + " (Yes/No)");
+            while (System.currentTimeMillis() < end) {
                 String line = readLine(200);
                 if (line == null) continue;
                 line = line.trim().toLowerCase();
@@ -129,73 +176,109 @@ public class TUIView implements View {
             }
         } catch (IOException e) {
             reportError("I/O error: " + e.getMessage());
-            return false;  //risposta predefinita
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return false; //risposta predefinita
         }
+        return false;
     }
 
     @Override
-    public int[] askCoordinate() {
-            int[] coordinate = new int[2];
+    public int[] askCoordinate() throws IOException, InterruptedException{
+        int[] coordinate = new int[2];
+        ClientGamePhase originalPhase = getGamePhase();
 
-                while (true) {
-                    inform("Insert the row:");
-                    try {
-                        coordinate[0] = scanner.nextInt();
-                        scanner.nextLine(); // consuma il newline
-                    } catch (InputMismatchException e) {
-                        inform("Invalid input. Please enter a number for the row.");
-                        scanner.nextLine(); // consuma l'input errato
-                    }
-
-                    if(coordinate[0] >=5 && coordinate[0] <=9) break;
-                    else inform("Invalid input. Please enter a number for the row.");
-                }
-            while (true) {
-                inform("Insert the column:");
-                try {
-                    coordinate[1] = scanner.nextInt();
-                    scanner.nextLine(); // consuma il newline
-                } catch (InputMismatchException e) {
-                    inform("Invalid input. Please enter a number for the column.");
-                    scanner.nextLine(); // consuma l'input errato
-                }
-                if(coordinate[1] >=4 && coordinate[1] <=10) break;
-                else inform("Invalid input. Please enter a number for the column.");
-            }
-            coordinate[0] = coordinate[0] - 5;
-            coordinate[1] = coordinate[1] - 4;
-
-            return coordinate;
-        }
-
-    @Override
-    public int askIndex() {
+        inform("Insert the row:");
         while (true) {
-            inform("Insert index:");
-            String line = askString();
-            try {
-                int value = Integer.parseInt(line.trim());
-                return value - 1;
-            } catch (NumberFormatException e) {
-                reportError("Invalid input. Please enter a number.");
+            String row = readLine(200);
+            if (row == null) {
+                if(getGamePhase() != originalPhase) {
+                    return null;
+                } else {
+                    continue;
+                }
             }
+            try {
+                coordinate[0] = Integer.parseInt(row.trim());
+            } catch (NumberFormatException e) {
+                reportError("Invalid input. Please enter a number for the row.");
+                continue;
+            }
+            if(coordinate[0] >=5 && coordinate[0] <=9) break;
+            else reportError("Invalid input. Please enter a valid number for the row.");
         }
+
+        inform("Insert the column:");
+        while (true) {
+            String col = readLine(200);
+            if (col == null) {
+                if(getGamePhase() != originalPhase) {
+                    return null;
+                } else {
+                    continue;
+                }
+            }
+            try {
+                coordinate[1] = Integer.parseInt(col.trim());
+            } catch (NumberFormatException e) {
+                reportError("Invalid input. Please enter a number for the column.");
+                continue;
+            }
+            if(coordinate[1] >=4 && coordinate[1] <=10) break;
+            else reportError("Invalid input. Please enter a valid number for the column.");
+        }
+        coordinate[0] = coordinate[0] - 5;
+        coordinate[1] = coordinate[1] - 4;
+        return coordinate;
     }
 
+    @Override
+    public Integer askIndex() {
+        ClientGamePhase originalPhase = getGamePhase();
+        inform("Insert index:");
+        try {
+            while (true) {
+                String line = readLine(200);
+                if (line == null) {
+                    if (getGamePhase() != originalPhase) {
+                        return null;
+                    }
+                    continue;
+                }
+                try {
+                    int value = Integer.parseInt(line.trim());
+                    return value - 1;
+                } catch (NumberFormatException e) {
+                    reportError("Invalid input. Please enter a number.");
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
 
     @Override
     public String askString() {
-        return scanner.nextLine();
+        ClientGamePhase originalPhase = getGamePhase();
+        try{
+            while(true){
+                String line = readLine(200);
+                if(line == null){
+                    if(getGamePhase() != originalPhase){
+                        return null;
+                    }
+                    continue;
+                }
+                return line.trim();
+            }
+        }catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
     }
-
 
     @Override
-    public void setInt() {
-
-    }
+    public void setInt() {}
 
     @Override
     public void printListOfGoods(List<String> Goods) {
@@ -210,19 +293,8 @@ public class TUIView implements View {
         }
     }
 
-
     @Override
     public void printDashShip(ClientTile[][] dashboard) {
-//        if (this.maschera == null
-//                || this.maschera.length != dashboard.length
-//                || this.maschera[0].length != dashboard[0].length) {
-//            this.maschera = new boolean[ dashboard.length ][ dashboard[0].length ];
-//            // se ti serve azzerarla, fallo subito:
-//            for (int i = 0; i < maschera.length; i++) {
-//                Arrays.fill(maschera[i], false);
-//            }
-//        }
-
         System.out.print("    ");
         for (int col = 0; col < 7; col++) {
             System.out.printf("    %2d    ", col + 4);
@@ -289,6 +361,7 @@ public class TUIView implements View {
     }
 
     //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
+    @Override
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()
@@ -457,76 +530,6 @@ public class TUIView implements View {
         return " ".repeat(padL) + s + " ".repeat(padR);
     }
 
-
-//    @Override
-//    public void printCard(Card card) {
-//        switch (card){
-//            case AbandonedShipCard c ->{
-//                inform("===Abandoned Ship===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-Credits: "+c.getCredits());
-//            }
-//            case AbandonedStationCard c ->{
-//                inform("===Abandoned Station===\n"+"-Days: "+c.getDays()+"\n-Crew mates: "+c.getNumCrewmates()+"\n-");
-//                printListOfGoods(c.getStationGoods());
-//            }
-//            case FirstWarzoneCard c ->{
-//                inform("===War Zone===\n");
-//                System.out.println("-Player with less crew mates loses "+c.getDays()+" flight days\n");
-//                System.out.println("-Player with less engine power loses "+c.getNumCrewmates()+" crewmates\n");
-//                System.out.println("-Player with less fire power gets: \n");
-//                for(int i = 0; i < c.getShotsDirections().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-//                }
-//            }
-//            case SecondWarzoneCard c ->{
-//                inform("===War Zone===\n");
-//                System.out.println("-Player with less fire power loses "+c.getDays()+" flight days\n");
-//                System.out.println("-Player with less engine power loses"+c.getNumGoods()+" goods\n");
-//                System.out.println("-Player with less crewmates gets: \n");
-//                for(int i = 0; i < c.getShotsDirections().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShotsDirections().get(i)+",Size "+c.getShotsSize().get(i)+"\n");
-//                }
-//            }
-//            case MeteoritesRainCard c ->{
-//                inform("===Meteorites Rain===\n");
-//                for(int i = 0; i < c.getMeteorites_directions().size(); i++){
-//                    System.out.println("- Meteorite "+(i+1)+": Direction "+c.getMeteorites_directions().get(i)+",Size "+c.getMeteorites_size().get(i)+"\n");
-//                }
-//            }
-//            case OpenSpaceCard c -> inform("===Open Space===\n");
-//            case StardustCard c -> inform("===Stardust===\n");
-//            case PiratesCard c ->{
-//                inform("===Pirates===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-//                for(int i = 0; i < c.getShots_directions().size(); i++){
-//                    System.out.println("- Cannon shot "+(i+1)+": Direction "+c.getShots_directions().get(i)+",Size "+c.getShots_size().get(i)+"\n");
-//                }
-//            }
-//            case PlanetsCard c->{
-//                inform("===Planets===\n");
-//                System.out.println("- Days: "+c.getDays()+"\n");
-//                for(int i =0; i< c.getRewardGoods().size(); i++){
-//                    System.out.println("- Planet "+(i+1)+": ");
-//                    printListOfGoods(c.getRewardGoods().get(i));
-//                    System.out.println();
-//                }
-//            }
-//            case PlaugeCard c-> inform("===Plague===\n");
-//
-//            case SlaversCard c->{
-//                inform("===Slavers===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Crewmates: "+c.getNumCrewmates()+"\n"+"- Credits: "+c.getCredits()+"\n"+"- Days: "+c.getDays()+"\n");
-//            }
-//            case SmugglersCard c->{
-//                inform("===Smugglers===\n");
-//                System.out.println("- Fire power: "+c.getFirePower()+"\n"+"- Goods: "+c.getNumRemovedGoods()+"\n-");
-//                printListOfGoods(c.getRewardGoods());
-//                System.out.println("\n- Days: "+c.getDays()+"\n");
-//            }
-//            default -> {}
-//        }
-//    }
-
-
     @Override
     public void printTile(ClientTile tile) {
         StringBuilder top = new StringBuilder();
@@ -621,8 +624,6 @@ public class TUIView implements View {
                 bot.setLength(0);
             }
         }
-
-
     }
 
 
@@ -738,8 +739,6 @@ public class TUIView implements View {
 
     }
 
-
-
     /// ///// DA QUI IN BASSO LAVORO IO ///////
 
     private List<String> commandConstructor(){
@@ -832,9 +831,6 @@ public class TUIView implements View {
         }
          */
     }
-
-
-
 
     @Override
     public void printListOfCommand(){

@@ -380,5 +380,11 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         out.writeObject(Message.update(Message.OP_UPDATE_DA, data));
         out.flush();
     }
+
+    @Override
+    public boolean askWithTimeout(String question) {
+        return false;
+    }
+
 }
 

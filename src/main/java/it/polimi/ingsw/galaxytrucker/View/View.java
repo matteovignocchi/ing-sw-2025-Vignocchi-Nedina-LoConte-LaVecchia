@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +12,9 @@ import java.util.Map;
 public interface View {
 
     void inform(String message);
-    boolean ask(String message);
-    int[] askCoordinate();
-    int askIndex();
+    Boolean ask(String message);
+    int[] askCoordinate() throws IOException, InterruptedException;
+    Integer askIndex() throws IOException, InterruptedException;
     void setInt();
     void start();
     void printListOfGoods(List<String> Goods);
@@ -30,13 +31,15 @@ public interface View {
     void printCard(ClientCard card);
     String sendAvailableChoices() throws Exception;
     void updateMap(Map<String, Integer> map);
-    String choosePlayer();
+    String choosePlayer() throws IOException, InterruptedException;
     void printListOfCommand();
     void setIsDemo(Boolean demo);
     boolean ReturnValidity(int a , int b);
     void setValidity(int a , int b);
     void resetValidity(int a , int b);
     ClientGamePhase getGamePhase();
+    void printMapPosition();
+    boolean askWithTimeout(String message);
 }
 
 //public interface VirtualViewRmi extends VirtualView {
