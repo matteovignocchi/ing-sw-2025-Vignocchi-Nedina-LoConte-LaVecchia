@@ -248,7 +248,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             clientController.reportErrorByController(e.getMessage());
             return;
         }
-        clientController.setTileInMatrix(jsonTile , tmp[0] ,  tmp[1]);//TODO:potrebbe essere ridondante
+//        clientController.setTileInMatrix(jsonTile , tmp[0] ,  tmp[1]);//TODO:potrebbe essere ridondante
         clientController.printMyDashBoardByController();
     }
 
