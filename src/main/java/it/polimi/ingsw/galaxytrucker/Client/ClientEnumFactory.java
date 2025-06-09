@@ -25,7 +25,6 @@ public class ClientEnumFactory {
             String clean = mapper.readValue(jsonString, String.class);  // rimuove le virgolette
             return ClientGamePhase.valueOf(clean.toUpperCase());
         } catch (Exception e) {
-            System.err.println("Errore nella deserializzazione GamePhase: " + e.getMessage());
             return ClientGamePhase.EXIT; // valore di fallback o lancia eccezione se preferisci
         }
     }

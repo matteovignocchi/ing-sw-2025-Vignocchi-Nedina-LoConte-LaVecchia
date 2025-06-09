@@ -3,8 +3,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 
 
-//import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
-//import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Platform;
@@ -97,7 +97,7 @@ public class ClientController {
         while (true) {
             view.inform("Insert your username:");
             switch (view){
-//                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
                 default -> {}
             }
             String username = virtualClient.askString();
@@ -126,7 +126,7 @@ public class ClientController {
             } else {
                 view.inform("Login successful");
                 switch (view) {
-//                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
+                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
                     default -> {}
                 }
                 return 0;
@@ -143,7 +143,7 @@ public class ClientController {
                 String line = "";
                 switch (view) {
                     case TUIView v -> line = v.askString();
-//                    case GUIView g -> line = g.askString();
+                    case GUIView g -> line = g.askString();
                     default -> line = view.askString();
                 }
 
@@ -207,18 +207,18 @@ public class ClientController {
                     view.reportError("Game creation failed");
                 }
             }
-//            case GUIView v -> {
-//                List<Object> data = v.getDataForGame();
-//                boolean demo = (boolean) data.get(0);
-//                int numberOfPlayer = (int) data.get(1);
-//                int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
-//                if (response > 0) {
-//                    virtualClient.setGameId(response);
-//                    startGame();
-//                }else{
-//                    v.reportError("Game creation failed");
-//                }
-//            }
+            case GUIView v -> {
+                List<Object> data = v.getDataForGame();
+                boolean demo = (boolean) data.get(0);
+                int numberOfPlayer = (int) data.get(1);
+                int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
+                if (response > 0) {
+                    virtualClient.setGameId(response);
+                    startGame();
+                }else{
+                    v.reportError("Game creation failed");
+                }
+            }
             default -> {}
         }
     }
@@ -246,18 +246,18 @@ public class ClientController {
                 }
             }
 
-//            case GUIView v -> {
-//                Platform.runLater(() -> {
-//                    try {
-//                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
-//                        v.displayAvailableGames(availableGames);
-//                    } catch (IOException e) {
-//                        v.reportError("Failed to open join menu: " + e.getMessage());
-//                    }
-//                });
-//
-//                choice = v.waitForGameChoice(); // blocca in attesa
-//            }
+            case GUIView v -> {
+                Platform.runLater(() -> {
+                    try {
+                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
+                        v.displayAvailableGames(availableGames);
+                    } catch (IOException e) {
+                        v.reportError("Failed to open join menu: " + e.getMessage());
+                    }
+                });
+
+                choice = v.waitForGameChoice(); // blocca in attesa
+            }
 
 
             default -> {
@@ -345,7 +345,7 @@ public class ClientController {
         }
     }
 
-    private void startGame() throws Exception {
+    private void startGame(){
 
         if(view.getGamePhase() == ClientGamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
 
@@ -355,65 +355,142 @@ public class ClientController {
             ClientGamePhase temp = currentGamePhase;
 
             if(temp ==ClientGamePhase.CARD_EFFECT) {
-                Thread.sleep(100);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    view.reportError("Error in sleep");
+                }
                 continue;
             }
 
-            String key = view.sendAvailableChoices();
+            String key = null;
+            try {
+                key = view.sendAvailableChoices();
+            } catch (Exception e) {
+                view.reportError(e.getMessage());
+            }
 
             if(key == null){
                 if(temp != currentGamePhase) view.printListOfCommand();
                 continue;
             }
-
-            try {
                 switch (key) {
-                    case "getacoveredtile"    -> {
+                    case "getacoveredtile" -> {
 
-                        tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
+                        try {
+                            tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
                         view.printTile(tmpTile);
                     }
-                    case "getashowntile"      -> {
-                        tmpTile = clientTileFactory.fromJson(virtualClient.getUncoveredTile());
-                        if(tmpTile != null) {
-                            view.printTile(tmpTile);
+                    case "getashowntile" -> {
+                        String piedino = "PIEDONIPRADELLA";
+                        try {
+                            piedino = virtualClient.getUncoveredTile();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                        if(!piedino.equals("PIEDONIPRADELLA")){
+                            try {
+                                tmpTile = clientTileFactory.fromJson(piedino);
+                                view.printTile(tmpTile);
+                            } catch (IOException e) {
+                                view.reportError(e.getMessage());
+                            }
                         }
                     }
-                    case "returnthetile"      -> virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
-                    case "placethetile"       -> virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
-                    case "drawacard"          -> virtualClient.drawCard();
-                    case "spinthehourglass"   -> virtualClient.rotateGlass();
-                    case "declareready"       -> {
-                        virtualClient.setReady();
-                        /**
-                        if (!waitForFlightStart()) return;
-                        if (currentGamePhase == GamePhase.DRAW_PHASE) {
-                            view.printListOfCommand();
-                            continue;
+                    case "returnthetile" -> {
+                        try {
+                            virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
                         }
+                    }
+                    case "placethetile" -> {
+                        try {
+                            virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+                        } catch (Exception e) {
+                            view.reportError("Invalid position");
+                        }
+                    }
+                    case "drawacard" -> {
+                        try {
+                            virtualClient.drawCard();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "spinthehourglass" -> {
+                        try {
+                            virtualClient.rotateGlass();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "declareready" -> {
+                        try {
+                            virtualClient.setReady();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                        /**
+                         if (!waitForFlightStart()) return;
+                         if (currentGamePhase == GamePhase.DRAW_PHASE) {
+                         view.printListOfCommand();
+                         continue;
+                         }
                          */
                     }
-                    case "watchadeck"         -> virtualClient.lookDeck();
-                    case "watchaplayersship"  -> virtualClient.lookDashBoard();
-                    case "rightrotatethetile" -> rotateRight();
-                    case "leftrotatethetile"  -> rotateLeft();
-                    case "takereservedtile"   -> {
-                        tmpTile = clientTileFactory.fromJson(virtualClient.takeReservedTile());
-                        if(tmpTile != null) {
+                    case "watchadeck" -> {
+                        try {
+                            virtualClient.lookDeck();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "watchaplayersship" -> {
+                        try {
+                            virtualClient.lookDashBoard();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "rightrotatethetile" -> {
+                        try {
+                            rotateRight();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "leftrotatethetile" -> {
+                        try {
+                            rotateLeft();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                    }
+                    case "takereservedtile" -> {
+                        try {
+                            tmpTile = clientTileFactory.fromJson(virtualClient.takeReservedTile());
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
+                        if (tmpTile != null) {
                             view.printTile(tmpTile);
                         }
                     }
-                    case "logout"             -> {
-                        virtualClient.leaveGame();
+                    case "logout" -> {
+                        try {
+                            virtualClient.leaveGame();
+                        } catch (Exception e) {
+                            view.reportError(e.getMessage());
+                        }
                         view.inform("Returned to main menu");
                         return;
                     }
                     default -> view.reportError("Action not recognized");
                 }
-            } catch (BusinessLogicException | IOException | InterruptedException e) {
-                view.reportError(e.getMessage());
-            }
-
             //if (currentGamePhase != ClientGamePhase.DRAW_PHASE)
             view.printListOfCommand();
         }
@@ -474,7 +551,11 @@ public class ClientController {
         } else {
 
             try {
-                Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
+                if(view.ReturnValidity(a,b)) Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
+                else {
+                    view.reportError("Invalid position");
+                    return;
+                }
             } catch (IOException e) {
                 view.reportError(e.getMessage());
             }

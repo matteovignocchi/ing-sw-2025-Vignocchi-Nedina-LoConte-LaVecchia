@@ -855,6 +855,7 @@ public class Controller implements Serializable {
     }
     public String jsongetShownTiles(){
         try {
+            if(shownTile.isEmpty()) return "PIEDONIPRADELLA";
             return tileSerializer.toJsonList(shownTile);
         } catch (JsonProcessingException e) {
             System.err.println("[ERROR] in jsongetShownTiles: " + e);

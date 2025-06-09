@@ -347,11 +347,12 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
 
     @Override
-    public String getUncoveredTile() throws IOException, InterruptedException {
+    public String getUncoveredTile() throws BusinessLogicException, IOException, InterruptedException {
         List<Object> payloadGame = new ArrayList<>();
         payloadGame.add(gameId);
         payloadGame.add(nickname);
 
+        // Richiesta lista tile scoperte
         Message listRequest = Message.request(Message.OP_GET_UNCOVERED_LIST, payloadGame);
         Message listResponse = sendRequestWithResponse(listRequest);
         Object listPayload = listResponse.getPayload();
@@ -360,12 +361,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         try {
             switch (listPayload) {
                 case String list:
-                    @SuppressWarnings("unchecked")
-                    String casted = (String) list;
-                    tmp = casted;
+                    tmp = list;
                     break;
-//                case String error:
-//                    throw new IOException("Server error: " + error);
                 default:
                     throw new IOException("Unexpected payload type while reading tile list.");
             }
@@ -373,51 +370,50 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             throw new IOException("Payload type mismatch while casting tile list.", e);
         }
 
-        if (tmp.isEmpty()) {
-            throw new IOException("The list of shown tiles is empty.");
+        if (tmp == null || tmp.equals("PIEDONIPRADELLA")) {
+            throw new BusinessLogicException("The list of shown tiles is empty.");
         }
 
-        clientController.printListOfTileShownByController(tmp);
-        clientController.informByController("Select a tile");
         int size = clientController.printListOfTileShownByController(tmp);
+        clientController.informByController("Select a tile");
 
         while (true) {
             Integer indexObj = askIndex();
-            if(indexObj == null) {return null;}
-
-            int index = indexObj;
-            if (index >= 0 && index <size) {
-                clientController.informByController("Invalid index. Try again.");
-                continue;
+            if (indexObj == null) {
+                return null;
             }
 
-            List<Object> tileRequestPayload = new ArrayList<>();
-            tileRequestPayload.add(gameId);
-            tileRequestPayload.add(nickname);
-            tileRequestPayload.add(clientController.clientTileFromList(index));
+            int index = indexObj;
+            if (index >= 0 && index < size) {
+                List<Object> tileRequestPayload = new ArrayList<>();
+                tileRequestPayload.add(gameId);
+                tileRequestPayload.add(nickname);
+                tileRequestPayload.add(clientController.clientTileFromList(index));
 
-            Message tileRequest = Message.request(Message.OP_GET_UNCOVERED, tileRequestPayload);
-            Message tileResponse = sendRequestWithResponse(tileRequest);
-            Object tilePayload = tileResponse.getPayload();
+                Message tileRequest = Message.request(Message.OP_GET_UNCOVERED, tileRequestPayload);
+                Message tileResponse = sendRequestWithResponse(tileRequest);
+                Object tilePayload = tileResponse.getPayload();
 
-            try {
-                String selectedTile;
-                switch (tilePayload) {
-                    case String tile:
-                        selectedTile = tile;
-                        break;
-//                    case String error:
-//                        clientController.reportErrorByController("You missed: " + error + ". Select a new index.");
-//                        continue;
-                    default:
-                        throw new IOException("Unexpected payload type when fetching tile.");
+                try {
+                    switch (tilePayload) {
+                        case String tile -> {
+                            if (tile.equals("PIEDONIPRADELLA")) {
+                                clientController.reportErrorByController("You missed: " + tile + ". Select a new index.");
+                                continue;
+                            }
+                            return tile;
+                        }
+                        default -> throw new IOException("Unexpected payload type when fetching tile.");
+                    }
+                } catch (ClassCastException e) {
+                    throw new IOException("Payload type mismatch when fetching tile.", e);
                 }
-                return selectedTile;
-            } catch (ClassCastException e) {
-                throw new IOException("Payload type mismatch when fetching tile.", e);
+            } else {
+                clientController.informByController("Invalid index. Try again.");
             }
         }
     }
+
 
 
     @Override

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class TUIView implements View {
     private ClientGamePhase game;
     private boolean isDemo;
-    private boolean[][] maschera;
+    private Boolean[][] maschera;
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
@@ -312,7 +312,7 @@ public class TUIView implements View {
                 border.append("+---------");
                 switch (tile.type) {
                     case "EMPTYSPACE"  -> {
-                        if (!maschera[row][col]) {
+                        if (maschera[row][col] == null) {
                             String block = "█████████"; // 9 caratteri pieni
                             top.append("|").append(block);
                             mid.append("|").append(block);
@@ -807,6 +807,7 @@ public class TUIView implements View {
             int idx = Integer.parseInt(line.trim()) - 1;
             if (0 <= idx && idx < options.size())
                 return options.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
+            else throw new IOException("Choose a valid command");
         } catch (NumberFormatException e) {
             System.out.println("[ERROR] Invalid choice, try again.");
         }
@@ -844,66 +845,66 @@ public class TUIView implements View {
 
     @Override
     public void setIsDemo(Boolean demo) {
-        boolean[][] validStatus = new boolean[5][7];
+        Boolean[][] validStatus = new Boolean[5][7];
         this.isDemo = demo;
         if (isDemo) {
             //first row
-            validStatus[0][0]  = false;
-            validStatus[0][1]  = false;
-            validStatus[0][2]  = false;
+            validStatus[0][0]  = null;
+            validStatus[0][1]  = null;
+            validStatus[0][2]  = null;
             validStatus[0][3]  = true;
-            validStatus[0][4]  = false;
-            validStatus[0][5]  = false;
-            validStatus[0][6]  = false;
+            validStatus[0][4]  = null;
+            validStatus[0][5]  = null;
+            validStatus[0][6]  = null;
             //second row
-            validStatus[1][0]  = false;
-            validStatus[1][1]  = false;
+            validStatus[1][0]  = null;
+            validStatus[1][1]  = null;
             validStatus[1][2]  = true;
             validStatus[1][3]  = true;
             validStatus[1][4]  = true;
-            validStatus[1][5]  = false;
-            validStatus[1][6]  = false;
+            validStatus[1][5]  = null;
+            validStatus[1][6]  = null;
             //third row
-            validStatus[2][0]  = false;
+            validStatus[2][0]  = null;
             validStatus[2][1]  = true;
             validStatus[2][2]  = true;
             validStatus[2][3]  = true;
             validStatus[2][4]  = true;
             validStatus[2][5]  = true;
-            validStatus[2][6]  =false;
+            validStatus[2][6]  =null;
             //fourth row
-            validStatus[3][0]  = false;
+            validStatus[3][0]  = null;
             validStatus[3][1]  = true;
             validStatus[3][2]  = true;
             validStatus[3][3]  = true;
             validStatus[3][4]  = true;
             validStatus[3][5]  = true;
-            validStatus[3][6]  = false;
+            validStatus[3][6]  = null;
             //fifth row
-            validStatus[4][0]  = false;
+            validStatus[4][0]  = null;
             validStatus[4][1]  = true;
             validStatus[4][2]  = true;
-            validStatus[4][3]  = false;
+            validStatus[4][3]  = null;
             validStatus[4][4]  = true;
             validStatus[4][5]  = true;
-            validStatus[4][6]  = false;
+            validStatus[4][6]  = null;
         } else {
             //first row
-            validStatus[0][0]  = false;
-            validStatus[0][1]  = false;
+            validStatus[0][0]  = null;
+            validStatus[0][1]  = null;
             validStatus[0][2]  = true;
-            validStatus[0][3]  = false;
+            validStatus[0][3]  = null;
             validStatus[0][4]  = true;
             validStatus[0][5]  = true;
             validStatus[0][6]  = true;
             //second row
-            validStatus[1][0]  = false;
+            validStatus[1][0]  = null;
             validStatus[1][1]  = true;
             validStatus[1][2]  = true;
             validStatus[1][3]  = true;
             validStatus[1][4]  = true;
             validStatus[1][5]  = true;
-            validStatus[1][6]  = false;
+            validStatus[1][6]  = null;
             //third row
             validStatus[2][0]  = true;
             validStatus[2][1]  = true;
@@ -924,7 +925,7 @@ public class TUIView implements View {
             validStatus[4][0]  = true;
             validStatus[4][1]  = true;
             validStatus[4][2]  = true;
-            validStatus[4][3]  = false;
+            validStatus[4][3]  = null;
             validStatus[4][4]  = true;
             validStatus[4][5]  = true;
             validStatus[4][6]  = true;

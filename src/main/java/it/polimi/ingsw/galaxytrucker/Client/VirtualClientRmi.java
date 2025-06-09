@@ -203,7 +203,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         } catch (Exception e) {
             throw new BusinessLogicException("Failed to fetch tile list: " + e.getMessage());
         }
-        if (tmp == null || tmp.isEmpty()){
+        if (tmp == null || tmp.equals("PIEDONIPRADELLA")) {
             throw new BusinessLogicException("The list of shown tiles is empty.");
         }
 
@@ -337,7 +337,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         while(true) {
             index = clientController.askCoordinateByController();
             if (index == null) {return null;}
-            if(index[0]!=0 || !clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
+            if(index[0]!=0 || clientController.returOKAY(0 , index[1])) clientController.informByController("Invalid coordinate");
             else break;
         }
             try {
