@@ -196,7 +196,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
 //assicurarsi che funziona
     @Override
-    public String getUncoveredTile() throws BusinessLogicException, RemoteException {
+    public String getUncoveredTile() throws BusinessLogicException, IOException, InterruptedException {
         String tmp;
         try {
             tmp = server.getUncoveredTilesList(gameId, nickname);

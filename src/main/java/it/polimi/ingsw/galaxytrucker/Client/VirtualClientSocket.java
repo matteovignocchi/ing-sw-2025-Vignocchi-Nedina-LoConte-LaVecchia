@@ -569,9 +569,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         }
     }
 
-
-
-
     @Override
     public void lookDashBoard() throws Exception {
         String tmp = clientController.choosePlayerByController();
@@ -599,8 +596,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
             }
         }
-
-    }
 
     @Override
     public void leaveGame() throws Exception {
