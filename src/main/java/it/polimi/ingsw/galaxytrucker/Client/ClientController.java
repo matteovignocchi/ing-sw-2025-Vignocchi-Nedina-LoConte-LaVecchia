@@ -225,7 +225,6 @@ public class ClientController {
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
         int choice = 0;
-
         switch (view) {
             case TUIView v -> {
                 v.inform("**Available Games:**");
@@ -247,6 +246,7 @@ public class ClientController {
             }
 
             case GUIView v -> {
+
                 Platform.runLater(() -> {
                     try {
                         v.setMainScene(SceneEnum.JOIN_GAME_MENU);
@@ -255,11 +255,8 @@ public class ClientController {
                         v.reportError("Failed to open join menu: " + e.getMessage());
                     }
                 });
-
-                choice = v.waitForGameChoice(); // blocca in attesa
+                choice = v.waitForGameChoice();
             }
-
-
             default -> {
             }
         }
@@ -280,7 +277,7 @@ public class ClientController {
     }
 
     private boolean waitForGameStart() throws Exception {
-        view.inform("Waiting for other players…");
+        view.inform("Waiting for other players...");
         virtualClient.askInformationAboutStart();
         return true;
     }
