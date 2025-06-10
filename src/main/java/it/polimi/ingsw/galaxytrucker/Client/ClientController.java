@@ -93,7 +93,13 @@ public class ClientController {
                 continue;
             }
 
-            int res = virtualClient.sendLogin(username);
+            int res;
+            try {
+                res = virtualClient.sendLogin(username);
+            } catch (BusinessLogicException ex) {
+                view.reportError(ex.getMessage());
+                continue;
+            }
 
             if (res == -1) {
                 view.reportError("Credential not valid, try again.");
@@ -333,8 +339,6 @@ public class ClientController {
                 Thread.sleep(100);
                 continue;
             }
-
-            if(currentGamePhase==GamePhase.EXIT) mainMenuLoop(); //TODO: da controllare appena arriviamo a questa fase del debugging
 
             String key = view.sendAvailableChoices();
 
