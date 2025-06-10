@@ -52,6 +52,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(OpenSpaceCard card) throws BusinessLogicException {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
+        /**
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
@@ -63,6 +64,29 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.inform(msg, nick);
                 f.moveRocket(x, p);
             }
+
+            controller.changeMapPosition(nick, p);
+            controller.updatePositionForEveryBody();
+        } */
+
+        for (Player p : players) {
+            String nick = controller.getNickByPlayer(p);
+
+            int x = controller.getPowerEngineForCard(p);
+
+            if(controller.askPlayerDecision("SERVER: Prova metodi callback. Inserisci yes per muoverti di 2, false di 1: ", p)){
+                x = 2;
+                String msg = "SERVER: Ti muovi di " + x;
+                controller.inform(msg, nick);
+            }
+            else{
+                x = 1;
+                String msg = "SERVER: Ti muovi di " + x;
+                controller.inform(msg, nick);
+            }
+
+            if (x == 0) p.setEliminated();
+            else f.moveRocket(x, p);
 
             controller.changeMapPosition(nick, p);
             controller.updatePositionForEveryBody();
