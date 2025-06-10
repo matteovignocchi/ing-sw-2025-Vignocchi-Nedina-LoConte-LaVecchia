@@ -2227,6 +2227,7 @@ public class Controller implements Serializable {
 
     //metodi da inserire nel card visitor per gestione tui
 
+    /**
     public void changePhaseFromCard(String nick, Player p, GamePhase tmp){
         if(p.isConnected()){
             try {
@@ -2240,6 +2241,7 @@ public class Controller implements Serializable {
             }
         }
     }
+     */
 
     public void changeMapPosition(String nick, Player p) throws BusinessLogicException {
         playersPosition.put(nick, p.getPos());
