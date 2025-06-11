@@ -17,6 +17,7 @@ public class HousingUnit extends Tile implements Serializable {
     private int max;
     private Human isAlien;
     private boolean isConnected = false;
+    private Human typeOfConnections ;
     /**
      * the values are standard, and they are given when the game starts from the application
      * @param a
@@ -31,6 +32,11 @@ public class HousingUnit extends Tile implements Serializable {
         corners[2]=c;
         corners[3]=d;
         this.isAlien=isAlien;
+        switch (isAlien){
+            case HUMAN -> typeOfConnections=Human.PRADELLA;
+            case PURPLE_ALIEN -> typeOfConnections=Human.PURPLE_ALIEN;
+            case BROWN_ALIEN -> typeOfConnections=Human.BROWN_ALIEN;
+        }
         idTile = id;
         if(isAlien!=Human.HUMAN) max=1;
         else max=2;
@@ -102,5 +108,12 @@ public class HousingUnit extends Tile implements Serializable {
 
     public List<Human> getListOfToken(){
         return listOfToken;
+    }
+
+    public void setTypeOfConnections(Human typeOfConnections){
+        this.typeOfConnections=typeOfConnections;
+    }
+    public Human getTypeOfConnections(){
+        return typeOfConnections;
     }
 }

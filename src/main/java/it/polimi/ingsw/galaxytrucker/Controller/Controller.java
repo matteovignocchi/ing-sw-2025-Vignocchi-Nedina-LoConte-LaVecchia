@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateStardustDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -106,6 +106,7 @@ public class Controller implements Serializable {
         Player p      = playersByNickname.get(nickname);
         try {
             v.updateGameState(enumSerializer.serializeGamePhase(p.getGamePhase()));
+            v.updateMapPosition(playersPosition);
             v.showUpdate(
                     nickname,
                     getFirePower(p),
@@ -158,7 +159,7 @@ public class Controller implements Serializable {
         view.setTile(tileSerializer.toJson(p.getTile(2,3)));
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
-        playersPosition.put(nickname, p.getId());
+        playersPosition.put(nickname, p.getPos());
 
         broadcastInform( nickname + "  joined");
     }
@@ -441,6 +442,8 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
 
+        playersPosition.put(nickname, p.getPos());
+
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
             return;
@@ -470,9 +473,9 @@ public class Controller implements Serializable {
         broadcastInform("SERVER: " + "Flight started!");
         playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
 
+        for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
         addHuman();
 
-        for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
 
         //notifyAllViews();
 
@@ -787,6 +790,7 @@ public class Controller implements Serializable {
 
         if(!p.isConnected()) return null;
 
+        /**
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<int[]> future = executor.submit(v::askCoordinate);
 
@@ -808,6 +812,19 @@ public class Controller implements Serializable {
         } finally {
             executor.shutdownNow();
         }
+         */
+
+        try {
+            int[] c =  v.askCoordsWithTimeout();
+            if(c==null) System.out.println("CORDINATE NULLE");
+            return c;
+        } catch (IOException e) {
+            markDisconnected(nick);
+        } catch(Exception e){
+            markDisconnected(nick);
+            System.err.println("Error in askPlayerDecision");
+        }
+        return null;
     }
 
     public int askPlayerIndex (Player p) throws BusinessLogicException {
@@ -963,7 +980,7 @@ public class Controller implements Serializable {
                 Tile y = p.getTile(i, j);
                 boolean var;
                 switch (y) {
-                    case Engine c -> {
+                    case Cannon c -> {
                         var = c.isDouble();
                         if (var) {
                             boolean activate = manageEnergyCell(nick);
@@ -996,7 +1013,7 @@ public class Controller implements Serializable {
                 Tile y = p.getTile(i, j);
                 boolean var;
                 switch (y) {
-                    case Engine c -> {
+                    case Cannon c -> {
                         var = c.isDouble();
                         if (var) {
                             if (c.controlCorners(0) != 5) tmp = tmp + 1;
@@ -1459,49 +1476,68 @@ public class Controller implements Serializable {
 
     public void addHuman() throws BusinessLogicException {
         for (Player p : playersByNickname.values()) {
+            String tmpNick = getNickByPlayer(p);
+            VirtualView x = viewsByNickname.get(tmpNick);
+            try {
+                x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
+            } catch (Exception e) {
+                throw new BusinessLogicException("[ERROR] in addHuman: " + e.getMessage());
+            }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
-                    switch (t){
+                    switch (t) {
                         case HousingUnit h -> {
-                            Human tmp = h.getType();
-                            switch (tmp){
-                                case HUMAN -> {
-                                    Human tmp2 = Human.HUMAN;
-                                    for(int z = 0; z<2 ; z++) h.addHuman(tmp2);}
-                                case PURPLE_ALIEN -> {
-                                    try {
-                                        if(askPlayerDecision("alien",p)){
-                                            Human tmp2 = Human.PURPLE_ALIEN;
-                                            h.addHuman(tmp2);
-                                        }else{
-                                            Human tmp2 = Human.HUMAN;
-                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
-                                        }
-                                    } catch (BusinessLogicException e) {
-                                        throw new RuntimeException(e);
+                            Human tmp = h.getTypeOfConnections();
+                            if (h.getType() == Human.HUMAN){
+                                switch (tmp) {
+                                    case PRADELLA -> {
+                                        Human tmp2 = Human.HUMAN;
+                                        for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
+                                    case PURPLE_ALIEN -> {
+                                        try {
+                                            if (askPlayerDecision("alien", p)) {
+                                                Human tmp2 = Human.PURPLE_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setPurpleAlien();
 
-                                }
-                                case BROWN_ALIEN -> {
-                                    try {
-                                        if(askPlayerDecision("alien",p)){
-                                            Human tmp2 = Human.BROWN_ALIEN;
-                                            h.addHuman(tmp2);
-                                        }else{
-                                            Human tmp2 = Human.HUMAN;
-                                            for(int z = 0 ; z<2 ; z++) h.addHuman(tmp2);
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
                                         }
-                                    } catch (BusinessLogicException e) {
-                                        throw new RuntimeException(e);
+
+                                    }
+                                    case BROWN_ALIEN -> {
+                                        try {
+                                            if (askPlayerDecision("alien", p)) {
+                                                Human tmp2 = Human.BROWN_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setBrownAlien();
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
+                                        }
                                     }
                                 }
-                            }
                         }
+                    }
                         default -> {}
                     }
                 }
-            }            //in tutte le abitazioni normali metto 2 human
+            }
+            try {
+                x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
+            } catch (Exception e) {
+                throw new BusinessLogicException("[ERROR] in addHuman: " + e.getMessage());
+            }
+            //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
         }
@@ -1697,89 +1733,127 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
+//    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
+//
+//
+//        String direction = "";
+//        int direction2 = dir2;
+//        switch (dir) {
+//            case 0 -> {
+//                direction = "Nord";
+//                direction2 = dir2+4;
+//            }
+//            case 1 -> {
+//                direction = "East";
+//                direction2 = dir2+5;
+//            }
+//            case 2 -> {
+//                direction = "South";
+//                direction2 = dir2+4;
+//            }
+//            case 3 -> {
+//                direction = "West";
+//                direction2 = dir2+5;
+//            }
+//        }
+//        String nick = getNickByPlayer(p);
+//        Tile[][] tmpDash = p.getDashMatrix();
+//        try {
+//            viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
+//            viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
+//            viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
+//        } catch (Exception e) {
+//            markDisconnected(nick);
+//        }
+//        if (dir == 0) {
+//            if (dir2 > 3 && dir2 < 11) {
+//                if (type || (!isProtected(nick, dir) && !type)) {
+//                    scriptOfDefence(nick , tmpDash , dir2);
+//                } else {
+//                    try {
+//                        viewsByNickname.get(nick).inform("you are safe");
+//                    } catch (Exception e) {
+//                        markDisconnected(nick);
+//                    }
+//                }
+//            }
+//        } else if (dir == 2) {
+//            if (dir2 > 3 && dir2 < 11) {
+//                if (type || (!isProtected(nick, dir) && !type)) {
+//                    scriptOfDefence(nick , tmpDash , dir2);
+//                } else {
+//                    try {
+//                        viewsByNickname.get(nick).inform("you are safe");
+//                    } catch (Exception e) {
+//                        markDisconnected(nick);
+//                    }
+//                }
+//            }
+//        } else if (dir == 1) {
+//            if (dir2 > 4 && dir2 < 10) {
+//                if (type || (!isProtected(nick, dir) && !type)) {
+//                    scriptOfDefence(nick , tmpDash , dir2);
+//                } else {
+//                    try {
+//                        viewsByNickname.get(nick).inform("you are safe");
+//                    } catch (Exception e) {
+//                        markDisconnected(nick);
+//                    }
+//                }
+//            }
+//        } else if (dir == 3) {
+//            if (dir2 > 4 && dir2 < 10) {
+//                if (type || (!isProtected(nick, dir) && !type)) {
+//                    scriptOfDefence(nick , tmpDash , dir2);
+//                } else {
+//                    try {
+//                        viewsByNickname.get(nick).inform("you are safe");
+//                    } catch (Exception e) {
+//                        markDisconnected(nick);
+//                    }
+//                }
+//            }
+//        }
+//
+//    }
     public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
-
-
-        String direction = "";
-        int direction2 = dir2;
-        switch (dir) {
-            case 0 -> {
-                direction = "Nord";
-                direction2 = dir2+4;
-            }
-            case 1 -> {
-                direction = "East";
-                direction2 = dir2+5;
-            }
-            case 2 -> {
-                direction = "South";
-                direction2 = dir2+4;
-            }
-            case 3 -> {
-                direction = "West";
-                direction2 = dir2+5;
-            }
-        }
+        String[] directions = {"Nord", "East", "South", "West"};
+        int adjustedDir2 = (dir == 0 || dir == 2) ? dir2 + 4 : dir2 + 5;
+        String direction = directions[dir];
         String nick = getNickByPlayer(p);
         Tile[][] tmpDash = p.getDashMatrix();
+
         try {
-            viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
-            viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
+            viewsByNickname.get(nick).inform("The attack is coming from " + direction + " on section " + adjustedDir2);
+            viewsByNickname.get(nick).inform("SHIP BEFORE THE ATTACK");
             viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
         } catch (Exception e) {
             markDisconnected(nick);
-        }
-        if (dir == 0) {
-            if (dir2 > 3 && dir2 < 11) {
-                if (type || (!isProtected(nick, dir) && !type)) {
-                    scriptOfDefence(nick , tmpDash , dir2);
-                } else {
-                    try {
-                        viewsByNickname.get(nick).inform("you are safe");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                    }
-                }
-            }
-        } else if (dir == 2) {
-            if (dir2 > 3 && dir2 < 11) {
-                if (type || (!isProtected(nick, dir) && !type)) {
-                    scriptOfDefence(nick , tmpDash , dir2);
-                } else {
-                    try {
-                        viewsByNickname.get(nick).inform("you are safe");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                    }
-                }
-            }
-        } else if (dir == 1) {
-            if (dir2 > 4 && dir2 < 10) {
-                if (type || (!isProtected(nick, dir) && !type)) {
-                    scriptOfDefence(nick , tmpDash , dir2);
-                } else {
-                    try {
-                        viewsByNickname.get(nick).inform("you are safe");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                    }
-                }
-            }
-        } else if (dir == 3) {
-            if (dir2 > 4 && dir2 < 10) {
-                if (type || (!isProtected(nick, dir) && !type)) {
-                    scriptOfDefence(nick , tmpDash , dir2);
-                } else {
-                    try {
-                        viewsByNickname.get(nick).inform("you are safe");
-                    } catch (Exception e) {
-                        markDisconnected(nick);
-                    }
-                }
-            }
+            return;
         }
 
+        if (isHitZone(dir, dir2)) {
+            if (type || !isProtected(nick, dir)) {
+                scriptOfDefence(nick, tmpDash, dir2);
+            } else {
+                try {
+                    viewsByNickname.get(nick).inform("You are safe");
+                } catch (Exception e) {
+                    markDisconnected(nick);
+                }
+            }
+        }
     }
+
+    private boolean isHitZone(int dir, int dir2) {
+        return switch (dir) {
+            case 0, 2 -> dir2 > 3 && dir2 < 11;
+            case 1, 3 -> dir2 > 4 && dir2 < 10;
+            default -> false;
+        };
+    }
+
+
 
 
     private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2) throws BusinessLogicException {
@@ -1924,28 +1998,13 @@ public class Controller implements Serializable {
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
-        int[] coordinates = new int[2];
-        boolean exits = false;
+        int[] coordinates;
+        boolean exit = false;
 
-//        boolean use = false;
-//        try {
-//            use = askPlayerDecision("vuoi usare una batteria?",player);
-//        } catch (Exception e) {
-//            markDisconnected(nick);
-//            throw new RuntimeException(e);
-//        }
         if (!askPlayerDecision("SERVER: " + "Do you want to use a battery?", player)) {
             return false;
         } else {
-            while (!exits) {
-                /*
-                try {
-                    coordinate = x.askCoordinate();
-                } catch (Exception e) {
-                    markDisconnected(nick);
-                    throw new RuntimeException(e);
-                }
-                 */
+            while (!exit) {
                 coordinates = askPlayerCoordinates(player);
                 if(coordinates == null) return false;
 
@@ -1954,16 +2013,7 @@ public class Controller implements Serializable {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
                         if (capacity == 0) {
-                            /*
-                            try {
-                                if (!x.ask("Vuoi selezionare un'altra cella?")) {
-                                    return false;
-                                }
-                            } catch (Exception e) {
-                                markDisconnected(nick);
-                                throw new RuntimeException(e);
-                            }
-                             */
+                            inform("SERVER: You have already used all the batteries for this cell", nick);
                             if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
                                 return false;
                         } else {
@@ -1972,30 +2022,12 @@ public class Controller implements Serializable {
                         }
                     }
                     default -> {
-                        try{
-                            x.inform("Cella non valida");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in menageEnegryCell: " + e.getMessage());
-                        }
-                        /*
-                        try {
-                            if (!x.ask("vuoi selezionare un'altra cella?")) {
-                                exits = true;
-                            }
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                            throw new RuntimeException(e);
-                        }
-                        */
+                        inform("SERVER: Not valid cell", nick);
                         if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                            exits = true;
+                            exit = true;
                     }
                 }
             }
-
             return false;
         }
     }
