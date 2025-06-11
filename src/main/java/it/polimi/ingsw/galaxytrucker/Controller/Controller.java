@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateStardustDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -790,6 +790,7 @@ public class Controller implements Serializable {
 
         if(!p.isConnected()) return null;
 
+        /**
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<int[]> future = executor.submit(v::askCoordinate);
 
@@ -811,6 +812,19 @@ public class Controller implements Serializable {
         } finally {
             executor.shutdownNow();
         }
+         */
+
+        try {
+            int[] c =  v.askCoordsWithTimeout();
+            if(c==null) System.out.println("CORDINATE NULLE");
+            return c;
+        } catch (IOException e) {
+            markDisconnected(nick);
+        } catch(Exception e){
+            markDisconnected(nick);
+            System.err.println("Error in askPlayerDecision");
+        }
+        return null;
     }
 
     public int askPlayerIndex (Player p) throws BusinessLogicException {
@@ -1984,28 +1998,13 @@ public class Controller implements Serializable {
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
-        int[] coordinates = new int[2];
-        boolean exits = false;
+        int[] coordinates;
+        boolean exit = false;
 
-//        boolean use = false;
-//        try {
-//            use = askPlayerDecision("vuoi usare una batteria?",player);
-//        } catch (Exception e) {
-//            markDisconnected(nick);
-//            throw new RuntimeException(e);
-//        }
         if (!askPlayerDecision("SERVER: " + "Do you want to use a battery?", player)) {
             return false;
         } else {
-            while (!exits) {
-                /*
-                try {
-                    coordinate = x.askCoordinate();
-                } catch (Exception e) {
-                    markDisconnected(nick);
-                    throw new RuntimeException(e);
-                }
-                 */
+            while (!exit) {
                 coordinates = askPlayerCoordinates(player);
                 if(coordinates == null) return false;
 
@@ -2014,16 +2013,7 @@ public class Controller implements Serializable {
                     case EnergyCell c -> {
                         int capacity = c.getCapacity();
                         if (capacity == 0) {
-                            /*
-                            try {
-                                if (!x.ask("Vuoi selezionare un'altra cella?")) {
-                                    return false;
-                                }
-                            } catch (Exception e) {
-                                markDisconnected(nick);
-                                throw new RuntimeException(e);
-                            }
-                             */
+                            inform("SERVER: You have already used all the batteries for this cell", nick);
                             if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
                                 return false;
                         } else {
@@ -2032,30 +2022,12 @@ public class Controller implements Serializable {
                         }
                     }
                     default -> {
-                        try{
-                            x.inform("Cella non valida");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in menageEnegryCell: " + e.getMessage());
-                        }
-                        /*
-                        try {
-                            if (!x.ask("vuoi selezionare un'altra cella?")) {
-                                exits = true;
-                            }
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                            throw new RuntimeException(e);
-                        }
-                        */
+                        inform("SERVER: Not valid cell", nick);
                         if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                            exits = true;
+                            exit = true;
                     }
                 }
             }
-
             return false;
         }
     }

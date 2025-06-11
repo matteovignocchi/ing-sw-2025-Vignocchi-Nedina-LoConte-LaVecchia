@@ -16,7 +16,7 @@ import java.util.*;
 public class Player implements Serializable {
     //Beginning
     private final int id;
-    private boolean connected = true;
+    private boolean connected;
     private int credits;
     //Ship building
     private int idPhoto;
@@ -46,6 +46,7 @@ public class Player implements Serializable {
         this.lap = 0;
         this.position = 0;
         this.isEliminated = false;
+        this.connected = true;
         this.discardPile = new ArrayList<Tile>();
         this.isdemo = isDemo;
         credits = 0;

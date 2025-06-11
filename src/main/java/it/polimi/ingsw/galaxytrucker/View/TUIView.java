@@ -183,6 +183,66 @@ public class TUIView implements View {
     }
 
     @Override
+    public int[] askCoordinatesWithTimeout(){
+        long end = System.currentTimeMillis() + TIME_OUT;
+        int flag = 0;
+        int[] coordinates = new int [2];
+
+        try{
+            inform("Insert the row: ");
+            while(System.currentTimeMillis() < end){
+                if(flag == 0){
+                    String row = readLine(200);
+                    if(row == null) continue;
+                    try {
+                        int num = Integer.parseInt(row.trim());
+                        if(num < 5 || num > 9){
+                            reportError("Invalid input. Please enter a valid number for the row.");
+                            continue;
+                        }
+                        coordinates[0] = num;
+                        flag = 1;
+                    } catch (NumberFormatException e) {
+                        reportError("Invalid input. Please enter a number for the row.");
+                        continue;
+                    }
+                } else if (flag == 2){
+                  String column = readLine(200);
+                  if(column == null) continue;
+                  try{
+                      int num = Integer.parseInt(column.trim());
+                      if(num < 4 || num > 10){
+                          reportError("Invalid input. Please enter a valid number for the row.");
+                          continue;
+                      }
+                      coordinates[1] = num;
+                      flag = 3;
+                      break;
+                  } catch (NumberFormatException e) {
+                      reportError("Invalid input. Please enter a number for the column.");
+                      continue;
+                  }
+                } else {
+                    inform("Insert the column: ");
+                    flag = 2;
+                }
+            }
+
+            if(flag==3) {
+                coordinates[0] = coordinates[0] - 5;
+                coordinates[1] = coordinates[1] - 4;
+                return coordinates;
+            }
+
+        } catch (IOException e) {
+            reportError("I/O error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
+    }
+
+    @Override
     public int[] askCoordinate() throws IOException, InterruptedException{
         int[] coordinate = new int[2];
         ClientGamePhase originalPhase = getGamePhase();

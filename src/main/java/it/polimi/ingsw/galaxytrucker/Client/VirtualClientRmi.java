@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import java.io.IOException;
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -40,6 +39,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return clientController.askWithTimeoutByController(question);
     }
 
+    @Override
+    public int[] askCoordsWithTimeout() throws RemoteException{
+        return clientController.askCoordinatesWithTimeoutByController();
+    }
 
 
     /// METODI PER PRINTARE A CLIENT ///
@@ -245,10 +248,9 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         try {
             server.placeTile(gameId, nickname, jsonTile, tmp);
         } catch (BusinessLogicException e) {
-            clientController.reportErrorByController(e.getMessage());
             return;
         }
-//        clientController.setTileInMatrix(jsonTile , tmp[0] ,  tmp[1]);//TODO:potrebbe essere ridondante
+//      clientController.setTileInMatrix(jsonTile , tmp[0] ,  tmp[1]);//TODO:potrebbe essere ridondante
         clientController.printMyDashBoardByController();
     }
 

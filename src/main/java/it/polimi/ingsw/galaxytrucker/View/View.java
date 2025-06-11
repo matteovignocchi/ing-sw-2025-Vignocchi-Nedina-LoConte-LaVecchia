@@ -40,6 +40,8 @@ public interface View {
     ClientGamePhase getGamePhase();
     void printMapPosition();
     boolean askWithTimeout(String message);
+
+    int[] askCoordinatesWithTimeout();
 }
 
 //public interface VirtualViewRmi extends VirtualView {

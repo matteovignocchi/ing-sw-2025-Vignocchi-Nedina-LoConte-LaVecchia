@@ -407,8 +407,10 @@ public class ClientController {
                     case "placethetile" -> {
                         try {
                             virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+                        } catch (BusinessLogicException e) {
+                            view.reportError("Invalid position. Try again");
                         } catch (Exception e) {
-                            view.reportError("Invalid position");
+                            view.reportError(e.getMessage());
                         }
                     }
                     case "drawacard" -> {
@@ -652,6 +654,10 @@ public class ClientController {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public int[] askCoordinatesWithTimeoutByController(){
+        return view.askCoordinatesWithTimeout();
     }
 
     public String askStringByController(){

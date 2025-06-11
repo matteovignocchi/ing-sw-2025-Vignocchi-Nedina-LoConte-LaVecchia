@@ -113,13 +113,21 @@ public class GUIView extends Application implements View {
         }
     }
 
+    //TODO: da scrivere
     @Override
     public Boolean ask(String message) {
         return false;
     }
 
+    //TODO: da scrivere
     @Override
     public boolean askWithTimeout(String message) {return false;}
+
+    //TODO: da scrivere
+    @Override
+    public int[] askCoordinatesWithTimeout() {
+        return new int[0];
+    }
 
     @Override
     public int[] askCoordinate() throws IOException, InterruptedException {
