@@ -60,12 +60,6 @@ public class ClientMain {
 
                     ClientController controller = new ClientController(view, virtualClient);
 
-                    switch (view) {
-                        case GUIView gui -> gui.setClientController(controller);
-                        default -> {
-                        }
-                    }
-
                     controller.start();
                 } catch (Exception e) {
                     System.err.println("error: " + e.getMessage());

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.shape.*?>
 <?import java.net.*?>
 <?import javafx.scene.image.*?>
 <?import java.lang.*?>
@@ -11,39 +12,37 @@
 <AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController">
    <children>
       <ComboBox prefWidth="150.0" />
-      <ImageView fitHeight="400.0" fitWidth="601.0" layoutX="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <GridPane fx:id="gameGrid" layoutX="481.0" layoutY="434.0" prefHeight="189.0" prefWidth="319.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="95.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="95.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="51.580535888671875" minHeight="10.0" prefHeight="51.580535888671875" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="44.778533935546875" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="38.882965087890625" minHeight="10.0" prefHeight="38.882965087890625" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="43.493621826171875" minHeight="10.0" prefHeight="36.7149658203125" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="52.2850341796875" minHeight="10.0" prefHeight="52.2850341796875" vgrow="SOMETIMES" />
+        </rowConstraints>
+      </GridPane>
+      <ImageView fitHeight="720.0" fitWidth="1280.0" layoutX="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../Background_image_game.jpg" />
          </image>
       </ImageView>
-      <StackPane prefHeight="150.0" prefWidth="200.0" AnchorPane.leftAnchor="141.0" AnchorPane.rightAnchor="141.0" AnchorPane.topAnchor="140.0">
-         <children>
-            <GridPane fx:id="gameGrid">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="95.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="95.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="110.0" />
-              </columnConstraints>
-              <rowConstraints>
-                  <RowConstraints maxHeight="51.580535888671875" minHeight="10.0" prefHeight="51.580535888671875" vgrow="SOMETIMES" />
-                  <RowConstraints maxHeight="44.778533935546875" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="38.882965087890625" minHeight="10.0" prefHeight="38.882965087890625" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="43.493621826171875" minHeight="10.0" prefHeight="36.7149658203125" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="52.2850341796875" minHeight="10.0" prefHeight="52.2850341796875" vgrow="SOMETIMES" />
-              </rowConstraints>
-            </GridPane>
-            <ImageView fitHeight="235.0" fitWidth="318.0" preserveRatio="true">
-               <image>
-                  <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
-               </image>
-            </ImageView>
-         </children>
-      </StackPane>
-      <HBox disable="true" prefHeight="20.0" prefWidth="600.0" styleClass="top-bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      <ImageView fitHeight="640.0" fitWidth="528.0" layoutX="413.0" layoutY="270.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="376.0" AnchorPane.rightAnchor="376.0">
+         <image>
+            <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
+         </image>
+      </ImageView>
+      <HBox disable="true" prefHeight="20.0" prefWidth="600.0" styleClass="top-bar" AnchorPane.leftAnchor="436.0" AnchorPane.rightAnchor="436.0" AnchorPane.topAnchor="0.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="469.0" layoutX="64.0" layoutY="79.0" stroke="BLACK" strokeType="INSIDE" width="256.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" layoutX="541.0" layoutY="69.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
    </children>
    <stylesheets>
       <URL value="@css/TopBar.css" />
