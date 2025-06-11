@@ -11,7 +11,7 @@ public class ClientCardFactory {
         return mapper.readValue(json, ClientCard.class);
     }
 
-    public static List<ClientCard> fromJsonList(String jsonArray) throws IOException {
+    public List<ClientCard> fromJsonList(String jsonArray) throws IOException {
         return Arrays.asList(mapper.readValue(jsonArray, ClientCard[].class));
     }
 
