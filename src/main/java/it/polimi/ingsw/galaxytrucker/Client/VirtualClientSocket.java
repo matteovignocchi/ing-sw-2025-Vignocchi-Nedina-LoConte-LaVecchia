@@ -647,9 +647,15 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }
+
     @Override
     public boolean askWithTimeout(String question) {
         return clientController.askWithTimeoutByController(question);
+    }
+
+    @Override
+    public int[] askCoordsWithTimeout() throws Exception {
+        return clientController.askCoordinatesWithTimeoutByController();
     }
 
     @Override

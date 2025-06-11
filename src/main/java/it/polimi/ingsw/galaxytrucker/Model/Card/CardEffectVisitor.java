@@ -112,15 +112,10 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             Player p = players.get(i);
             String nick = controller.getNickByPlayer(p);
 
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
-
             int x = p.countExposedConnectors();
             f.moveRocket(-x, p);
 
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             controller.changeMapPosition(nick, p);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
     }

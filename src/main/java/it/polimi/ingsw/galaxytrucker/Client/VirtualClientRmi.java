@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import java.io.IOException;
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
@@ -40,6 +39,10 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return clientController.askWithTimeoutByController(question);
     }
 
+    @Override
+    public int[] askCoordsWithTimeout() throws RemoteException{
+        return clientController.askCoordinatesWithTimeoutByController();
+    }
 
 
     /// METODI PER PRINTARE A CLIENT ///

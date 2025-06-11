@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateStardustDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -752,26 +752,6 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) return false;
 
-        /*
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Boolean> future = executor.submit(() -> v.ask(question));
-        Boolean ans = false;
-        try {
-            ans = future.get(TIME_OUT, TimeUnit.SECONDS);
-
-        } catch (TimeoutException te) {
-            future.cancel(true);
-            inform("SERVER: TimeOut", nick);
-        } catch (Exception e) {
-            future.cancel(true);
-            markDisconnected(nick);
-            System.err.println("[ERROR] in askPlayerDecision: " + e);
-        } finally {
-            executor.shutdownNow();
-        }
-        return ans;
-        */
-
         try {
             return v.askWithTimeout(question);
         } catch (IOException e) {
@@ -781,7 +761,6 @@ public class Controller implements Serializable {
             System.err.println("Error in askPlayerDecision");
         }
         return false;
-
     }
 
     public int[] askPlayerCoordinates (Player p) throws BusinessLogicException {
@@ -790,6 +769,7 @@ public class Controller implements Serializable {
 
         if(!p.isConnected()) return null;
 
+        /**
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<int[]> future = executor.submit(v::askCoordinate);
 
@@ -811,6 +791,19 @@ public class Controller implements Serializable {
         } finally {
             executor.shutdownNow();
         }
+         */
+
+        try {
+            int[] c =  v.askCoordsWithTimeout();
+            if(c==null) System.out.println("CORDINATE NULLE");
+            return c;
+        } catch (IOException e) {
+            markDisconnected(nick);
+        } catch(Exception e){
+            markDisconnected(nick);
+            System.err.println("Error in askPlayerDecision");
+        }
+        return null;
     }
 
     public int askPlayerIndex (Player p) throws BusinessLogicException {
@@ -1474,7 +1467,7 @@ public class Controller implements Serializable {
                                     for(int z = 0; z<2 ; z++) h.addHuman(tmp2);}
                                 case PURPLE_ALIEN -> {
                                     try {
-                                        if(askPlayerDecision("alien",p)){
+                                        if(askPlayerDecision("Do you want to ",p)){
                                             Human tmp2 = Human.PURPLE_ALIEN;
                                             h.addHuman(tmp2);
                                         }else{

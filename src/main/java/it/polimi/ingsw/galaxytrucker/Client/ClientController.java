@@ -656,6 +656,10 @@ public class ClientController {
 
     }
 
+    public int[] askCoordinatesWithTimeoutByController(){
+        return view.askCoordinatesWithTimeout();
+    }
+
     public String askStringByController(){
         return view.askString();
     }

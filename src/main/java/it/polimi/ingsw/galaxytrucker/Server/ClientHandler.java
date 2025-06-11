@@ -396,6 +396,12 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         return (Boolean) resp.getPayload();
     }
 
+    //TODO: fare
+    @Override
+    public int[] askCoordsWithTimeout() throws Exception {
+        return new int[0];
+    }
+
     @Override
     public Boolean ask(String question) throws IOException {
         // identico a askWithTimeout
