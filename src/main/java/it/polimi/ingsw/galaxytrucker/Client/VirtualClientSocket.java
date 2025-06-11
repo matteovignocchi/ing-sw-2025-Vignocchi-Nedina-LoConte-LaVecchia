@@ -76,14 +76,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             switch (operation) {
                 case Message.OP_INDEX -> {
                     this.inform((String) msg.getPayload());
-                    Integer index = clientController.askIndexByController();
+                    Integer index = this.askIndex();
                     if(index == null) { return; }
                     Message response = Message.response(index, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_COORDINATE -> {
                     this.inform((String) msg.getPayload());
-                    int[] coordinate = clientController.askCoordinateByController();
+                    int[] coordinate = this.askCoordinate();
                     if (coordinate == null) { return; }
                     Message response = Message.response(coordinate, msg.getRequestId());
                     sendRequest(response);
@@ -101,10 +101,23 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     Message response = Message.response(decision, msg.getRequestId());
                     sendRequest(response);
                 }
+                case Message.OP_ASK_TO -> {
+                    Boolean decision = this.askWithTimeout((String)msg.getPayload());
+                    if(decision == null) { return; }
+                    Message response = Message.response(decision, msg.getRequestId());
+                    sendRequest(response);
+                }
+                case Message.OP_COORDINATE_TO -> {
+                    this.inform((String) msg.getPayload());
+                    int[] coordinate = this.askCoordsWithTimeout();
+                    if (coordinate == null) { return; }
+                    Message response = Message.response(coordinate, msg.getRequestId());
+                    sendRequest(response);
+                }
             }
     } catch (IOException e) {
             this.reportError(": " + e.getMessage());
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
