@@ -647,12 +647,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     public void setClientController(ClientController clientController) {
         this.clientController = clientController;
     }
-
-    //TODO: scrivere
     @Override
-    public boolean askWithTimeout(String question) {return false;}
-
-
+    public boolean askWithTimeout(String question) {
+        return clientController.askWithTimeoutByController(question);
+    }
 
     @Override
     public String askInformationAboutStart() throws Exception {

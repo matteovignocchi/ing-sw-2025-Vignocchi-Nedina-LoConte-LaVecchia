@@ -25,11 +25,9 @@ public class GameListMenuController extends GUIController {
     public void initialize() {
         gameListView.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-
                 if (gameListView.getSelectionModel().getSelectedItem() != null) {
                     joinSelectedGame();
                 }
-
             }
         });
 
@@ -79,3 +77,4 @@ public class GameListMenuController extends GUIController {
         }
     }
 }
+//TODO fare un modo tale che quando vado indietro, mando la choice a "0" al virtual client

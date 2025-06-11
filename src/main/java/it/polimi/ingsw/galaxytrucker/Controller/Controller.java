@@ -106,6 +106,7 @@ public class Controller implements Serializable {
         Player p      = playersByNickname.get(nickname);
         try {
             v.updateGameState(enumSerializer.serializeGamePhase(p.getGamePhase()));
+            v.updateMapPosition(playersPosition);
             v.showUpdate(
                     nickname,
                     getFirePower(p),
@@ -158,7 +159,7 @@ public class Controller implements Serializable {
         view.setTile(tileSerializer.toJson(p.getTile(2,3)));
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
-        playersPosition.put(nickname, p.getId());
+        playersPosition.put(nickname, p.getPos());
 
         broadcastInform( nickname + "  joined");
     }
@@ -440,6 +441,8 @@ public class Controller implements Serializable {
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
 
         p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
+
+        playersPosition.put(nickname, p.getPos());
 
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();

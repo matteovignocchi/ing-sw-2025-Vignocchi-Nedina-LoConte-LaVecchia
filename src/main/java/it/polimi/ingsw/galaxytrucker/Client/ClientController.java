@@ -225,7 +225,6 @@ public class ClientController {
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
         int choice = 0;
-
         switch (view) {
             case TUIView v -> {
                 v.inform("**Available Games:**");
@@ -247,6 +246,7 @@ public class ClientController {
             }
 
             case GUIView v -> {
+
                 Platform.runLater(() -> {
                     try {
                         v.setMainScene(SceneEnum.JOIN_GAME_MENU);
@@ -255,11 +255,8 @@ public class ClientController {
                         v.reportError("Failed to open join menu: " + e.getMessage());
                     }
                 });
-
-                choice = v.waitForGameChoice(); // blocca in attesa
+                choice = v.waitForGameChoice();
             }
-
-
             default -> {
             }
         }
@@ -280,7 +277,7 @@ public class ClientController {
     }
 
     private boolean waitForGameStart() throws Exception {
-        view.inform("Waiting for other players…");
+        view.inform("Waiting for other players...");
         virtualClient.askInformationAboutStart();
         return true;
     }
@@ -566,7 +563,6 @@ public class ClientController {
     }
 
 
-    //TODO SPOSTO TUTTI I METODI CHE CHIAMAVANO DIRETTAMENTE LA VIEW QUA
 
     public void showUpdateByController(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         view.updateView(nickname,firePower,powerEngine,credits,purpleAline,brownAlien,numberOfHuman,numberOfEnergy);
@@ -581,7 +577,6 @@ public class ClientController {
     }
 
     public int printListOfTileShownByController(String jsonTiles){
-        //TODO aggiungere i metodi per refactor
 
         try {
             tmpList = clientTileFactory.fromJsonList(jsonTiles);
@@ -602,12 +597,10 @@ public class ClientController {
     }
 
     public void printListOfGoodsByController(List<String> listOfGoods) {
-        //TODO aggiungere i metodi per refactor
         view.printListOfGoods(listOfGoods);
     }
 
     public void printCardByController(String jsonCard){
-        //TODO aggiungere i metodi per refactor
         try {
             view.printCard(clientCardFactory.fromJson(jsonCard));
         } catch (IOException e) {
@@ -616,7 +609,6 @@ public class ClientController {
     }
 
     public void printTileByController(String jsonTile){
-        //TODO aggiungere i metodi per refactor
         try {
             view.printTile(clientTileFactory.fromJson(jsonTile));
         } catch (IOException e) {
@@ -625,7 +617,6 @@ public class ClientController {
     }
 
     public void printPlayerDashboardByController(String[][] jsonDashboard){
-        //TODO aggiungere i metodi per refactor
         try {
             view.printDashShip(clientTileFactory.fromJsonMatrix(jsonDashboard));
         } catch (IOException e) {
@@ -638,7 +629,6 @@ public class ClientController {
     }
 
     public void printDeckByController( String jsonDeck) {
-        //TODO aggiungere i metodi per refactor
         try {
             view.printDeck(clientCardFactory.fromJsonList(jsonDeck));
         } catch (IOException e) {

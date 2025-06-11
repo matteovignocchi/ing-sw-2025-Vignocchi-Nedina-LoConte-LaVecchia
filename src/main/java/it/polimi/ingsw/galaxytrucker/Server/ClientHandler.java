@@ -382,9 +382,81 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public boolean askWithTimeout(String question) {
-        return false;
+    public boolean askWithTimeout(String question) throws IOException {
+        Message req = Message.request(Message.OP_ASK, question);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_ASK", e);
+        }
+        return (Boolean) resp.getPayload();
     }
+
+    @Override
+    public Boolean ask(String question) throws IOException {
+        // identico a askWithTimeout
+        Message req = Message.request(Message.OP_ASK, question);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_ASK", e);
+        }
+        return (Boolean) resp.getPayload();
+    }
+
+    @Override
+    public Integer askIndex() throws IOException {
+        Message req = Message.request(Message.OP_INDEX, null);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_INDEX", e);
+        }
+        return (Integer) resp.getPayload();
+    }
+
+    @Override
+    public int[] askCoordinate() throws IOException {
+        Message req = Message.request(Message.OP_COORDINATE, null);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_COORDINATE", e);
+        }
+        return (int[]) resp.getPayload();
+    }
+
+    @Override
+    public String askString() throws IOException {
+        Message req = Message.request(Message.OP_STRING, null);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_STRING", e);
+        }
+        return (String) resp.getPayload();
+    }
+
 
 }
 

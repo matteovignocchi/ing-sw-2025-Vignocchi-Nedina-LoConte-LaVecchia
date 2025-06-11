@@ -387,7 +387,8 @@ public class TUIView implements View {
         switch(game){
             case WAITING_IN_LOBBY  -> inform("Nickame : " + nickname);
             case BOARD_SETUP -> inform(" -Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
-            case TILE_MANAGEMENT, DRAW_PHASE -> {}
+            case TILE_MANAGEMENT -> {}
+            case DRAW_PHASE -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+ /*" -Position : "+position+*/"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy : "+numberOfEnergy);
             case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
@@ -809,7 +810,7 @@ public class TUIView implements View {
                 return options.get(idx).toLowerCase().replaceAll("[^a-z0-9]", "");
             else throw new IOException("Choose a valid command");
         } catch (NumberFormatException e) {
-            System.out.println("[ERROR] Invalid choice, try again.");
+            reportError("Invalid choice, try again.");
         }
         return null;
 
