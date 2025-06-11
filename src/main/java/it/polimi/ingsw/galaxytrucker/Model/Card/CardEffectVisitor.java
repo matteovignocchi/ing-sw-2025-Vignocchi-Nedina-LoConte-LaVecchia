@@ -58,9 +58,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
          if (x == 0) p.setEliminated();
          else{
-         String msg = "SERVER: Your engine power is "+ x +". You move forward by those spaces.";
-         controller.inform(msg, nick);
-         f.moveRocket(x, p);
+             String msg = "SERVER: Your engine power is "+ x +". You move forward by those spaces.";
+             controller.inform(msg, nick);
+             f.moveRocket(x, p);
          }
 
          controller.changeMapPosition(nick, p);
@@ -113,6 +113,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
 
             int x = p.countExposedConnectors();
+
+            String msg = "SERVER: You have "+x+" exposed connectors. You move back by those spaces";
+            controller.inform(msg, nick);
             f.moveRocket(-x, p);
 
             controller.changeMapPosition(nick, p);
