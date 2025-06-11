@@ -852,12 +852,11 @@ public class Player implements Serializable {
         int[] dx = {-1, 0, 1, 0};
         int[] dy = {0, 1, 0, -1};
         int[] opp = {2, 3, 0, 1};
-
+        validStatus[2][3] = Status.USED;
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 7; y++) {
                 Status tmp = validStatus[x][y];
-                if ((tmp != Status.USED) && ((x != 2) || (y != 3))) continue;
-
+                if (tmp != Status.USED) continue;
                 for (int d = 0; d < 4; d++) {
                     int a = Dash_Matrix[x][y].controlCorners(d);
 
@@ -875,6 +874,7 @@ public class Player implements Serializable {
                 }
             }
         }
+        validStatus[2][3] = Status.BLOCK;
 
         return count;
     }
