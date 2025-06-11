@@ -145,28 +145,46 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+
+            /**/controller.inform("SERVER: potenza di fuoco avversaria: "+ slavers_fire_power, nick);
 
             double player_fire_power = controller.getFirePowerForCard(p);
+
             if(player_fire_power > slavers_fire_power) {
                 int credits = card.getCredits();
                 int days = card.getDays();
-                String string = String.format("SERVER: Do you want to redeem %d credits and lose %d flight days?",
+                String string = String.format("SERVER: You have defeated the slavers. Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
 
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
+
+                    /**/controller.inform("SERVER: Crediti prima: "+p.getCredits(), nick);
+
                     p.addCredits(credits);
+
+                    /**/controller.inform("SERVER: Crediti dopo: "+p.getCredits(), nick);
+
                 }
                 controller.changeMapPosition(nick, p);
                 controller.updatePositionForEveryBody();
                 exit = true;
-            } else if (player_fire_power < slavers_fire_power)
+
+            } else if (player_fire_power < slavers_fire_power) {
+                int lostCrewmates = card.getNumCrewmates();
+                String msg = "SERVER: You have been defeated by Slavers. You'll lose "+lostCrewmates+" crewmates";
+                controller.inform(msg, nick);
+
+                /**/controller.inform("SERVER: crewmates prima "+p.getTotalHuman(), nick);
+
                 controller.removeCrewmates(p, card.getNumCrewmates());
 
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                /**/controller.inform("SERVER: crewmates dopo "+p.getTotalHuman(), nick);
+
+            } else {
+                String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens";
+                controller.inform(msg, nick);
+            }
 
             if(exit) break;
         }
