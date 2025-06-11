@@ -410,8 +410,10 @@ public class ClientController {
                     case "placethetile" -> {
                         try {
                             virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+                        } catch (BusinessLogicException e) {
+                            view.reportError("Invalid position. Try again");
                         } catch (Exception e) {
-                            view.reportError("Invalid position");
+                            view.reportError(e.getMessage());
                         }
                     }
                     case "drawacard" -> {

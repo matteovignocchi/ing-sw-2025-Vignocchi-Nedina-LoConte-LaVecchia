@@ -52,19 +52,36 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if(card == null) throw new InvalidCardException("Card cannot be null");
 
         for (Player p : players) {
+         String nick = controller.getNickByPlayer(p);
+
+         int x = controller.getPowerEngineForCard(p);
+
+         if (x == 0) p.setEliminated();
+         else{
+         String msg = "SERVER: Your engine power is "+ x +". You move forward by those spaces.";
+         controller.inform(msg, nick);
+         f.moveRocket(x, p);
+         }
+
+         controller.changeMapPosition(nick, p);
+         controller.updatePositionForEveryBody();
+         }
+
+        /**
+        for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
             //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             int x = controller.getPowerEngineForCard(p);
 
-            if(controller.askPlayerDecision("SERVER: Prova metodi callback: ", p)){
+            if(controller.askPlayerDecision("SERVER: Prova metodi callback. Inserire yes per muoversi di 2, no di 1: ", p)){
                 x = 2;
-                String msg = "SERVER: il tuo x vale " + x;
+                String msg = "SERVER: ti muovi di  " + x;
                 controller.inform(msg, nick);
             }
             else{
                 x = 1;
-                String msg = "SERVER: il tuo x vale " + x;
+                String msg = "SERVER: ti muovi di " + x;
                 controller.inform(msg, nick);
             }
 
@@ -75,6 +92,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             controller.updatePositionForEveryBody();
         }
+         */
     }
 
     /**
