@@ -402,6 +402,12 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         return new int[0];
     }
 
+    //TODO: da fare
+    @Override
+    public Integer askIndexWithTimeout() throws Exception {
+        return 0;
+    }
+
     @Override
     public Boolean ask(String question) throws IOException {
         // identico a askWithTimeout

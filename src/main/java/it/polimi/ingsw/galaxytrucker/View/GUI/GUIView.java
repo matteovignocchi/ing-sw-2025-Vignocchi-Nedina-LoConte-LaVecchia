@@ -121,6 +121,12 @@ public class GUIView extends Application implements View {
 
     //TODO: da scrivere
     @Override
+    public Integer askIndexWithTimeout() {
+        return 0;
+    }
+
+    //TODO: da scrivere
+    @Override
     public boolean askWithTimeout(String message) {return false;}
 
     //TODO: da scrivere
