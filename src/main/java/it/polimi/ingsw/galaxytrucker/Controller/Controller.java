@@ -1044,10 +1044,81 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
+    //TODO questi tre sono i metodi per la autoCommand che mi permettono di eseguire i controlli automatici , vanno inserii nei casi di disconnessione
+
+
+    public void autoCommandForRemoveGoods(Player p, int numOfGoods) throws BusinessLogicException {
+        int flag = numOfGoods;
+        if (flag<= 0) return;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile tmpTile = p.getTile(i, j);
+                switch (tmpTile){
+                    case StorageUnit c -> {
+                        if(c.getListOfGoods().isEmpty()) continue;
+                        else {
+                            for(int z=0 ; z<c.getListOfGoods().size() ; z++) {
+                                c.removeGood(0);
+                                flag--;
+                            }
+                        }
+                    }
+                    default -> {}
+                }
+                if(flag<=0) return;
+            }
+        }
+    }
+
+    public void autoCommandForRemovePlayers(Player p, int num) throws BusinessLogicException {
+        int flag = num;
+        if (flag<= 0) return;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile tmpTile = p.getTile(i, j);
+                switch (tmpTile){
+                    case HousingUnit h -> {
+                        if(h.getListOfToken().isEmpty()) continue;
+                        else {
+                            for(int z=0 ; z<h.getListOfToken().size() ; z++) {
+                                h.removeHumans(0);
+                                flag--;
+                            }
+                        }
+                    }
+                    default -> {}
+                }
+                if(flag<=0) return;
+            }
+        }
+    }
+    public void autoCommandForBattery(Player p, int num) throws BusinessLogicException {
+        int flag = num;
+        if (flag<= 0) return;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile tmpTile = p.getTile(i, j);
+                switch (tmpTile){
+                    case EnergyCell e -> {
+                        if(e.getCapacity() == 0) continue;
+                        else {
+                            for(int z=0 ; z<e.getCapacity() ; z++) {
+                                e.useBattery();
+                                flag--;
+                            }
+                        }
+                    }
+                    default -> {}
+                }
+                if(flag<=0) return;
+            }
+        }
+    }
+
+
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
-
         int totalEnergy = getTotalEnergy(p);
         int totalGood = getTotalGood(p);
 
@@ -1065,6 +1136,10 @@ public class Controller implements Serializable {
             }
         }
         if(num == totalGood){
+            if(!p.isConnected()) {
+                autoCommandForRemoveGoods(p, totalGood);
+                return;
+            }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
                     Tile y = p.getTile(i, j);
@@ -1083,6 +1158,10 @@ public class Controller implements Serializable {
             }
         }
         if(num < totalGood){
+            if(!p.isConnected()) {
+                autoCommandForRemoveGoods(p, totalGood);
+                return;
+            }
             while(num != 0){
                 if(r != 0){
                     if(p.isConnected()){
@@ -1294,6 +1373,11 @@ public class Controller implements Serializable {
             }
         }
         if(num > totalGood){
+            if(!p.isConnected()) {
+                autoCommandForRemoveGoods(p, totalGood);
+                autoCommandForBattery(p, num-totalGood);
+                return;
+            }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
                     Tile y = p.getTile(i, j);
@@ -1379,7 +1463,7 @@ public class Controller implements Serializable {
         boolean flag = true;
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
-
+        scriptOfAddGoods(p, list);
         try {
             if(!x.ask("SERVER: " + "vuoi aggiungere un goods?")) flag=false;
         } catch (IOException e) {
@@ -1390,7 +1474,7 @@ public class Controller implements Serializable {
         }
         while (!list.isEmpty() && flag) {
             try {
-                x.inform("SERVER: " + "seleziona una Housing unit");
+                x.inform("SERVER: " + "seleziona una Storage unit");
                 x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
             } catch (IOException e) {
                 markDisconnected(nick);
@@ -1448,7 +1532,17 @@ public class Controller implements Serializable {
                         markDisconnected(nick);
                         throw new RuntimeException(e);
                     }
-                    c.addGood(list.get(tmpint-1));
+                    if(list.get(tmpint - 1) == Colour.RED){
+                        if(c.isAdvanced()) c.addGood(list.get(tmpint-1));
+                        else {
+                            try {
+                                x.inform("Non puoi inserire merce rossa in uno non advance");
+                            } catch (Exception e) {
+                                markDisconnected(nick);
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }else c.addGood(list.get(tmpint-1));
                 }
                 default -> {
                     try {
@@ -1472,6 +1566,184 @@ public class Controller implements Serializable {
                 System.err.println("[ERROR] in addGoods: " + e.getMessage());
             }
         }
+    }
+
+
+    public void scriptOfAddGoods(Player p, List<Colour> list) throws BusinessLogicException {
+        String nick = getNickByPlayer(p);
+        VirtualView x = viewsByNickname.get(nick);
+        int tmp = 0;
+        try {
+            x.inform(" SELECT 1 for aggiungi direttamente ; 2 for Ridistribuisci la merce ; 3 for Elimina della merce");
+            tmp = x.askIndex();
+        } catch (Exception e) {
+            markDisconnected(nick);
+            throw new RuntimeException(e);
+        }
+        switch (tmp){
+            case 1 -> {
+                return;
+            }
+            case 2 -> {
+                caseRedistribution(p,x ,list , nick);
+            }
+            case 3 -> {
+                caseRemove(p,x,nick);
+            }
+        }
+    }
+
+    public void caseRedistribution(Player p , VirtualView v , List<Colour> list , String nick) throws BusinessLogicException {
+        try {
+            v.inform("this is the list that you can add");
+        } catch (Exception e) {
+            markDisconnected(nick);
+            throw new RuntimeException(e);
+        }
+        try {
+            v.printListOfGoods(enumSerializer.serializeColoursList(list));
+        } catch (Exception e) {
+            throw new BusinessLogicException(e.getMessage());
+        }
+        int[] coordinates;
+        boolean exit = false;
+            while (!exit) {
+
+                try {
+                    coordinates = v.askCoordinate();
+                } catch (Exception e) {
+                    markDisconnected(nick);
+                    throw new RuntimeException(e);
+                }
+
+                Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+                switch (tmp2) {
+                    case StorageUnit c -> {
+                        List<Colour> tmplist = c.getListOfGoods();
+                        try {
+                            v.printListOfGoods(enumSerializer.serializeColoursList(tmplist));
+                        } catch (Exception e) {
+                            throw new BusinessLogicException(e.getMessage());
+                        }
+                        int tmpint = 0;
+                        try {
+                            v.inform("select the one that you want to change");
+                            tmpint = v.askIndex();
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        Colour tmpColor = c.getListOfGoods().get(tmpint);
+                        c.removeGood(tmpint);
+                        selectStorageUnitForAdd(v, p ,tmpColor , nick);
+                    }
+                    default -> {
+                        try {
+                            v.inform("SERVER: Not valid cell");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage?", p))
+                            exit = true;
+                    }
+                }
+            }
+
+    }
+    public void selectStorageUnitForAdd(VirtualView v, Player p , Colour color , String nick) throws BusinessLogicException {
+        int[] coordinates;
+        boolean exit = false;
+        while (!exit) {
+            try {
+                coordinates = v.askCoordinate();
+            } catch (Exception e) {
+                markDisconnected(nick);
+                throw new RuntimeException(e);
+            }
+            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+            switch (tmp2) {
+                case StorageUnit c -> {
+                    if(c.isFull()) {
+                        try {
+                            v.inform("this one is full");
+                        } catch (Exception e) {
+                            markDisconnected(nick);
+                            throw new RuntimeException(e);
+                        }
+                        continue;
+                    }
+                    if(color == Colour.RED) {
+                        if(c.isAdvanced()) {
+                            c.addGood(color);
+                            exit = true;
+                        }
+                        else {
+                            try {
+                                v.inform("Select one that can contain it");
+                            } catch (Exception e) {
+                                markDisconnected(nick);
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }else {
+                        c.addGood(color);
+                    exit = true;}
+                }
+                default -> {
+                    try {
+                        v.inform("SERVER: Not valid cell");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                        throw new RuntimeException(e);
+                    }
+                    if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage? , if not you will loose the goods", p))
+                        exit = true;
+                }
+            }
+        }
+    }
+    public void caseRemove(Player p , VirtualView v , String nick) throws BusinessLogicException {        int[] coordinates;
+        boolean exit = false;
+        while (!exit) {
+            try {
+                coordinates = v.askCoordinate();
+            } catch (Exception e) {
+                markDisconnected(nick);
+                throw new RuntimeException(e);
+            }
+            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+            switch (tmp2) {
+                case StorageUnit c -> {
+                    List<Colour> tmplist = c.getListOfGoods();
+                    try {
+                        v.printListOfGoods(enumSerializer.serializeColoursList(tmplist));
+                    } catch (Exception e) {
+                        throw new BusinessLogicException(e.getMessage());
+                    }
+                    int tmpint;
+                    try {
+                        v.inform("select the one that you want to remove");
+                        tmpint = v.askIndex();
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                        throw new RuntimeException(e);
+                    }
+                    c.removeGood(tmpint);
+                }
+                default -> {
+                    try {
+                        v.inform("SERVER: Not valid cell");
+                    } catch (Exception e) {
+                        markDisconnected(nick);
+                        throw new RuntimeException(e);
+                    }
+                    if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage?", p))
+                        exit = true;
+                }
+            }
+        }
+
     }
 
     public void addHuman() throws BusinessLogicException {
@@ -1546,15 +1818,25 @@ public class Controller implements Serializable {
         }
     }
 
+
+
+
+
+
     public void removeCrewmates(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
+
 
         int totalCrew = getNumCrew(p);
         if (num >= totalCrew) {
             p.setEliminated();
             inform("SERVER: You lost all your crewmates", nick);
         } else {
+            if(!p.isConnected()){
+                autoCommandForRemovePlayers(p, num);
+                return;
+            }
             while (num > 0) {
                 if(p.isConnected()){
                     try {
