@@ -554,12 +554,14 @@ public class Player implements Serializable {
 
 
     private boolean connected(int i, int j) {
-
-        if(i == 0 || j == 0) return false;
-        if(i == 3 || j == 3 ) return true;
-        return  i == j;
+        if(i != j){
+            if(i == 0 || j == 0) return false;
+            if(i == 3 || j == 3 ) return true;
+        }
+        return true;
 
     }
+
     private boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
