@@ -149,8 +149,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            /**/controller.inform("SERVER: potenza di fuoco avversaria: "+ slavers_fire_power, nick);
-
             double player_fire_power = controller.getFirePowerForCard(p);
 
             if(player_fire_power > slavers_fire_power) {
@@ -161,14 +159,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
-
-                    /**/controller.inform("SERVER: Crediti prima: "+p.getCredits(), nick);
-
                     p.addCredits(credits);
-
-                    /**/controller.inform("SERVER: Crediti dopo: "+p.getCredits(), nick);
-
                 }
+
                 controller.changeMapPosition(nick, p);
                 controller.updatePositionForEveryBody();
                 controller.broadcastInform("SERVER: Slavers defeated by "+nick+"!");
@@ -179,11 +172,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 String msg = "SERVER: You have been defeated by Slavers. You'll lose "+lostCrewmates+" crewmates";
                 controller.inform(msg, nick);
 
-                /**/controller.inform("SERVER: crewmates prima "+p.getTotalHuman(), nick);
-
                 controller.removeCrewmates(p, card.getNumCrewmates());
-
-                /**/controller.inform("SERVER: crewmates dopo "+p.getTotalHuman(), nick);
 
             } else {
                 String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens";
@@ -377,8 +366,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
 
@@ -394,9 +381,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.updatePositionForEveryBody();
                 exit = true;
             }
-
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }
