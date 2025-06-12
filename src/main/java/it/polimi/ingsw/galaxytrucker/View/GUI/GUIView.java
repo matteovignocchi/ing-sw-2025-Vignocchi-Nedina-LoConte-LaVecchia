@@ -486,11 +486,12 @@ public class GUIView extends Application implements View {
         }
     }
 
-
     public ClientGamePhase getGamePhase() { return gamePhase; }
 
+    @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
+
         for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
             int id = entry.getKey();
             int[] info = entry.getValue();
@@ -501,14 +502,18 @@ public class GUIView extends Application implements View {
         }
 
         Platform.runLater(() -> {
-
-            if (controller instanceof GameListMenuController gameController) {
-                gameController.displayGames(gameDescriptions);
+            if (controller != null) {
+                try {
+                    ((GameListMenuController) controller).displayGames(gameDescriptions);
+                } catch (ClassCastException e) {
+                    reportError("Controller is not GameListMenuController");
+                }
             } else {
-                reportError("Controller is not GameListMenuController");
+                reportError("Controller is null");
             }
         });
     }
+
 
 
     public void setSelectedGameId(int gameId) {
