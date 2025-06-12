@@ -1074,5 +1074,23 @@ public class Player implements Serializable {
                 validStatus[0][6] = Status.FREE;
             }
     }
+
+
+    //TODO: metodo di debug, eliminare poi
+
+    public List<Colour> getTotalGoodList() {
+        List<Colour> list = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case StorageUnit c  -> list.addAll(c.getListOfGoods());
+                    default -> {}
+                }
+            }
+        }
+        return list;
+    }
 }
 

@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateSlaversDecks();
+            decks = deckCreator.CreateSmugglersDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -590,7 +590,7 @@ public class Controller implements Serializable {
             System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
         }
 
-        broadcastInform("SERVER: " + "Card drawn!");
+        broadcastInform("\nSERVER: " + "Card drawn!");
 
         for(Map.Entry<String, VirtualView> entry :viewsByNickname.entrySet()){
             String nick = entry.getKey();
