@@ -672,6 +672,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
+    public Integer askIndexWithTimeout() throws Exception {
+        return clientController.askIndexWithTimeoutByController();
+    }
+
+    @Override
     public String askInformationAboutStart() throws Exception {
         startLatch.await();
         return "start";

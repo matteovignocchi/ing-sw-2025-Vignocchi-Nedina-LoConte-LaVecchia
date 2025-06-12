@@ -243,6 +243,29 @@ public class TUIView implements View {
     }
 
     @Override
+    public Integer askIndexWithTimeout() {
+        long end = System.currentTimeMillis() + TIME_OUT;
+        try{
+            inform("Insert index: ");
+            while (System.currentTimeMillis() < end) {
+                String line = readLine(200);
+                if (line == null) continue;
+                try{
+                    int idx = Integer.parseInt(line.trim());
+                    return idx - 1;
+                } catch (NumberFormatException e) {
+                    reportError("Invalid input. Please enter a valid index.");
+                }
+            }
+        } catch (IOException e) {
+            reportError("I/O error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
+    }
+
+    @Override
     public int[] askCoordinate() throws IOException, InterruptedException{
         int[] coordinate = new int[2];
         ClientGamePhase originalPhase = getGamePhase();

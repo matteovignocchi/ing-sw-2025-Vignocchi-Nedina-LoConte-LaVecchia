@@ -44,6 +44,11 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         return clientController.askCoordinatesWithTimeoutByController();
     }
 
+    @Override
+    public Integer askIndexWithTimeout() throws RemoteException{
+        return clientController.askIndexWithTimeoutByController();
+    }
+
 
     /// METODI PER PRINTARE A CLIENT ///
 

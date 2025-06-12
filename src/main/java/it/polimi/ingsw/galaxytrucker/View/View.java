@@ -40,6 +40,7 @@ public interface View {
     ClientGamePhase getGamePhase();
     void printMapPosition();
     boolean askWithTimeout(String message);
+    Integer askIndexWithTimeout();
 
     int[] askCoordinatesWithTimeout();
     void displayAvailableGames(Map<Integer, int[]> availableGames);

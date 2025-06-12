@@ -623,6 +623,11 @@ public class ClientController {
     public Integer askIndexByController() throws IOException, InterruptedException {
         return view.askIndex();
     }
+
+    public Integer askIndexWithTimeoutByController() {
+        return view.askIndexWithTimeout();
+    }
+
     public int[] askCoordinateByController(){
         try {
             return view.askCoordinate();

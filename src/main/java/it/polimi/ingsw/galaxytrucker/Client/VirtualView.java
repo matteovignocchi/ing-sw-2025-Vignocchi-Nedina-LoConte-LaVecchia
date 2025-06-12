@@ -104,4 +104,6 @@ public interface VirtualView extends Remote {
     boolean askWithTimeout(String question) throws Exception;
 
     int[] askCoordsWithTimeout() throws Exception;
+
+    Integer askIndexWithTimeout() throws Exception;
 }

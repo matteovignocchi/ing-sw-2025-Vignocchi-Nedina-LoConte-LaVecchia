@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateSmugglersDecks();
+            decks = deckCreator.CreatePlaugeDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -827,12 +827,13 @@ public class Controller implements Serializable {
         return null;
     }
 
-    public int askPlayerIndex (Player p) throws BusinessLogicException {
+    public Integer askPlayerIndex (Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
 
         if(!p.isConnected()) return 0;
 
+        /**
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<Integer> future = executor.submit(v::askIndex);
 
@@ -851,6 +852,17 @@ public class Controller implements Serializable {
         } finally {
             executor.shutdownNow();
         }
+         */
+
+        try {
+            return v.askIndexWithTimeout();
+        } catch (IOException e) {
+            markDisconnected(nick);
+        } catch(Exception e){
+            markDisconnected(nick);
+            System.err.println("Error in askPlayerIndex");
+        }
+        return null;
     }
 
 
@@ -1635,7 +1647,7 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
 
-        int firstNumber = getNumCrew(p);
+        int num = getNumCrew(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -1664,7 +1676,7 @@ public class Controller implements Serializable {
                     }
                 }
             }
-            if (tmp == firstNumber) {
+            if (tmp == num) {
                 p.setEliminated();
             }
         }
