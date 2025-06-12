@@ -60,7 +60,7 @@ public class GameListMenuController extends GUIController {
         }
 
         try {
-            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim());
+            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) -1;
             guiView.setSelectedGameId(gameId);
         } catch (NumberFormatException e) {
             showInfo("Invalid game selection.");

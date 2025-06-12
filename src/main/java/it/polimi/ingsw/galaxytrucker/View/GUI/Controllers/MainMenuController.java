@@ -49,7 +49,6 @@ public class MainMenuController extends GUIController {
 
         @FXML
         private void joinGame() throws IOException {
-            System.out.println("mciahfoiuebuirnfoieanufienoaifneaiu");
             guiView.setMainScene(SceneEnum.JOIN_GAME_MENU);
         }
 

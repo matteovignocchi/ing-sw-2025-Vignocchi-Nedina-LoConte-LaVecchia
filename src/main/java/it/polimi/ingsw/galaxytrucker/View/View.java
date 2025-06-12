@@ -34,7 +34,7 @@ public interface View {
     String choosePlayer() throws IOException, InterruptedException;
     void printListOfCommand();
     void setIsDemo(Boolean demo);
-    boolean ReturnValidity(int a , int b);
+    boolean returnValidity(int a , int b);
     void setValidity(int a , int b);
     void resetValidity(int a , int b);
     ClientGamePhase getGamePhase();
@@ -44,6 +44,8 @@ public interface View {
 
     int[] askCoordinatesWithTimeout();
     void displayAvailableGames(Map<Integer, int[]> availableGames);
+    void setTile(ClientTile tile, int row, int col);
+    void setCurrentTile(ClientTile tile);
 }
 
 //public interface VirtualViewRmi extends VirtualView {
