@@ -995,6 +995,16 @@ public class TUIView implements View {
 
     }
     @Override
+    public void displayAvailableGames (Map<Integer, int[]> availableGames) {
+        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+            int id = entry.getKey();
+            int[] info = entry.getValue();
+            boolean isDemo = info[2] == 1;
+            String suffix = isDemo ? " DEMO" : "";
+            this.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
+        }
+    }
+    @Override
     public boolean ReturnValidity(int a , int b){
         return maschera[a][b];
     }
