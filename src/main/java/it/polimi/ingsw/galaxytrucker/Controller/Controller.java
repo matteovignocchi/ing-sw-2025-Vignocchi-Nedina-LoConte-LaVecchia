@@ -1485,6 +1485,7 @@ public class Controller implements Serializable {
             }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
+                    if(i == 2 && j == 3) continue;
                     Tile t = p.getTile(i, j);
                     switch (t) {
                         case HousingUnit h -> {
