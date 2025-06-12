@@ -151,6 +151,9 @@ public class GUIView extends Application implements View {
 
     @Override
     public Integer askIndex() {
+        if(sceneEnum == SceneEnum.JOIN_GAME_MENU) {
+            return waitForGameChoice();
+        }
         return 0;
     }
 
@@ -200,6 +203,15 @@ public class GUIView extends Application implements View {
 
     @Override
     public String askString() {
+        while (sceneEnum != SceneEnum.MAIN_MENU && sceneEnum != SceneEnum.NICKNAME_DIALOG) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "";
+            }
+        }
+
         if (sceneEnum == SceneEnum.NICKNAME_DIALOG) {
             nicknameFuture = new CompletableFuture<>();
             Platform.runLater(this::showNicknameDialog);
@@ -239,7 +251,7 @@ public class GUIView extends Application implements View {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText(null);
-            alert.setContentText(message != null && !message.isBlank() ? message : "Errore sconosciuto.");
+            alert.setContentText(message != null && !message.isBlank() ? message : "Error.");
 
             if (mainStage != null) {
                 alert.initOwner(mainStage);
@@ -521,6 +533,7 @@ public class GUIView extends Application implements View {
             return choice;
         }
     }
+
 
     @Override
     public void resetValidity(int a , int b) {}
