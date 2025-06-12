@@ -42,6 +42,7 @@ public interface View {
     boolean askWithTimeout(String message);
 
     int[] askCoordinatesWithTimeout();
+    void displayAvailableGames(Map<Integer, int[]> availableGames);
 }
 
 //public interface VirtualViewRmi extends VirtualView {

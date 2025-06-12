@@ -223,31 +223,13 @@ public class ClientController {
     }
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
-        int choice = 0;
-
+        int choice;
         view.inform("**Available Games:**");
         view.inform("0. Return to main menu");
-
-        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-            int id = entry.getKey();
-            int[] info = entry.getValue();
-            boolean isDemo = info[2] == 1;
-            switch(view){
-                case TUIView v -> {
-                    String suffix = isDemo ? " DEMO" : "";
-                    v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
-                }
-                case GUIView v -> {
-                    Platform.runLater(() -> {
-                        v.displayAvailableGames(availableGames);
-                    });
-                }
-                default -> {}
-
-            }
-            while (true) {
+        view.displayAvailableGames(availableGames);
+        while (true) {
                 try {
-                    choice = view.askIndex();
+                    choice = view.askIndex() + 1;
                 } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -256,15 +238,10 @@ public class ClientController {
                 }
                 view.reportError("Invalid choice, try again.");
             }
-        }
         return choice;
     }
 
 
-//            case GUIView v -> {
-//
-//                Platform.runLater(() -> {
-//                    v.displayAvailableGames(availableGames);
 
     public void joinExistingGame() throws Exception {
         view.inform("Joining Existing Game...");

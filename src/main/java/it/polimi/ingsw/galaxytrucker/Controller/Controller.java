@@ -73,7 +73,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateSlaversDecks();
+            decks = deckCreator.CreateSmugglersDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -590,7 +590,7 @@ public class Controller implements Serializable {
             System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
         }
 
-        broadcastInform("SERVER: " + "Card drawn!");
+        broadcastInform("\nSERVER: " + "Card drawn!");
 
         for(Map.Entry<String, VirtualView> entry :viewsByNickname.entrySet()){
             String nick = entry.getKey();
@@ -1761,7 +1761,6 @@ public class Controller implements Serializable {
             }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
-                    if(i == 2 && j == 3) continue;
                     Tile t = p.getTile(i, j);
                     switch (t) {
                         case HousingUnit h -> {
@@ -1773,6 +1772,7 @@ public class Controller implements Serializable {
                                         for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
                                     case PURPLE_ALIEN -> {
+                                        if(i == 2 && j == 3) continue;
                                         try {
                                             String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
                                                     "next to the purple alien module?";
@@ -1790,6 +1790,7 @@ public class Controller implements Serializable {
 
                                     }
                                     case BROWN_ALIEN -> {
+                                        if(i == 2 && j == 3) continue;
                                         try {
                                             String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
                                                     "next to the brown alien module?";
@@ -1848,6 +1849,7 @@ public class Controller implements Serializable {
                         System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
                     }
                     int[] vari = askPlayerCoordinates(p);
+                    //TODO: gestire caso scadenza timeout (il client non risponde in tempo, askPlayerCoordinates ritorna null)
                     Tile y = p.getTile(vari[0], vari[1]);
                     switch (y){
                         case HousingUnit h -> {

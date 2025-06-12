@@ -561,6 +561,7 @@ public class Player implements Serializable {
         return true;
 
     }
+
     private boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
@@ -1072,6 +1073,24 @@ public class Player implements Serializable {
                 Dash_Matrix[0][6] = new EmptySpace();
                 validStatus[0][6] = Status.FREE;
             }
+    }
+
+
+    //TODO: metodo di debug, eliminare poi
+
+    public List<Colour> getTotalGoodList() {
+        List<Colour> list = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile y = getTile(i, j);
+                switch (y) {
+                    case StorageUnit c  -> list.addAll(c.getListOfGoods());
+                    default -> {}
+                }
+            }
+        }
+        return list;
     }
 }
 

@@ -149,8 +149,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            /**/controller.inform("SERVER: potenza di fuoco avversaria: "+ slavers_fire_power, nick);
-
             double player_fire_power = controller.getFirePowerForCard(p);
 
             if(player_fire_power > slavers_fire_power) {
@@ -161,14 +159,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
-
-                    /**/controller.inform("SERVER: Crediti prima: "+p.getCredits(), nick);
-
                     p.addCredits(credits);
-
-                    /**/controller.inform("SERVER: Crediti dopo: "+p.getCredits(), nick);
-
                 }
+
                 controller.changeMapPosition(nick, p);
                 controller.updatePositionForEveryBody();
                 controller.broadcastInform("SERVER: Slavers defeated by "+nick+"!");
@@ -176,17 +169,15 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             } else if (player_fire_power < slavers_fire_power) {
                 int lostCrewmates = card.getNumCrewmates();
-                String msg = "SERVER: You have been defeated by Slavers. You'll lose "+lostCrewmates+" crewmates";
+                String msg = "SERVER: You have been defeated by Slavers. You'll lose "+lostCrewmates+" crewmates\n" +
+                        "SERVER: Checking other players";
                 controller.inform(msg, nick);
-
-                /**/controller.inform("SERVER: crewmates prima "+p.getTotalHuman(), nick);
 
                 controller.removeCrewmates(p, card.getNumCrewmates());
 
-                /**/controller.inform("SERVER: crewmates dopo "+p.getTotalHuman(), nick);
-
             } else {
-                String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens";
+                String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" +
+                        "SERVER: Checking other players";
                 controller.inform(msg, nick);
             }
 
@@ -331,8 +322,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         double smugglers_fire_power = card.getFirePower();
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
             double player_fire_power = controller.getFirePowerForCard(p);
             if(player_fire_power > smugglers_fire_power){
@@ -344,16 +333,34 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 if(controller.askPlayerDecision(string, p)){
                     f.moveRocket(-days, p);
+
+                    /**/ controller.inform("SERVER: Lista di merci prima: "+p.getTotalGoodList(), nick);
+
                     controller.addGoods(p, card.getRewardGoods());
+
+                    /**/ controller.inform("SERVER: Lista di merci dopo: "+p.getTotalGoodList(), nick);
+
+                    controller.broadcastInform("SERVER: Smugglers defeated by "+nick+"!");
+                    controller.changeMapPosition(nick, p);
+                    controller.updatePositionForEveryBody();
                 }
-                controller.changeMapPosition(nick, p);
-                controller.updatePositionForEveryBody();
                 exit = true;
-            } else if (player_fire_power < smugglers_fire_power)
+            } else if (player_fire_power < smugglers_fire_power){
+                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated";
+                controller.inform(msg, nick);
+
+                /**/ controller.inform("SERVER: Lista di merci prima: "+p.getTotalGoodList(), nick);
+
                 controller.removeGoods(p, card.getNumRemovedGoods());
 
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                /**/ controller.inform("SERVER: Lista di merci dopo: "+p.getTotalGoodList(), nick);
+
+                controller.inform("SERVER: Checking other players", nick);
+
+            } else{
+                controller.inform("You have the same firepower as the slavers. Draw, nothing happens\n" +
+                        "SERVER: Checking other players", nick);
+            }
 
             if(exit) break;
         }
@@ -377,26 +384,24 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for(Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
-            String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
+            int credits = card.getCredits();
+            int days = card.getDays();
+            int num_crewmates = card.getNumCrewmates();
+            String string = "SERVER: Do you want to redeem "+credits+" credits and lose "+num_crewmates+" crewmates and "
+                    +days+" flight days?";
 
             if (controller.askPlayerDecision(string, p)) {
-                int days = card.getDays();
                 f.moveRocket(-days, p);
-                int credits = card.getCredits();
                 p.addCredits(credits);
-                int num_crewmates = card.getNumCrewmates();
                 controller.removeCrewmates(p, num_crewmates);
 
                 controller.changeMapPosition(nick, p);
                 controller.updatePositionForEveryBody();
                 exit = true;
+            } else {
+                if(players.indexOf(p) != players.size()-1) controller.inform("SERVER: Asking other players", nick);
             }
-
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
 
             if(exit) break;
         }

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -107,9 +109,52 @@ public class DeckManager implements Serializable {
     }
 
     public List<Deck> CreateSlaversDecks() throws CardEffectException {
-        Card c1 = new SlaversCard("1", 3, 5, 3, 2);
-        Card c2 = new SlaversCard("2", 3, 5, 3, 2);
-        Card c3 = new SlaversCard("3", 3, 5, 3, 2);
+        Card c1 = new SlaversCard("1", 13, 5, 2, 1);
+        Card c2 = new SlaversCard("2", 13, 5, 2, 1);
+        Card c3 = new SlaversCard("3", 13, 5, 2, 1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateAbandonedShipDecks() throws CardEffectException {
+        Card c1 = new AbandonedShipCard("1", 3, 6, 2);
+        Card c2 = new AbandonedShipCard("2", 3, 6, 2);
+        Card c3 = new AbandonedShipCard("3", 3, 6, 2);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateSmugglersDecks() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.BLUE);
+        list2.add(Colour.RED);
+        list2.add(Colour.GREEN);
+        list2.add(Colour.GREEN);
+        Card c1 = new SmugglersCard("1", 4, 1, 3, list1);
+        Card c2 = new SmugglersCard("1", 4, 1, 3, list2);
+        Card c3 = new SmugglersCard("1", 4, 1, 3, list2);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
