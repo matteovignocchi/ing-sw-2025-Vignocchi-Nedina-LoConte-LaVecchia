@@ -42,7 +42,7 @@ public class GUIView extends Application implements View {
     private static int protocolChoice;
     private static String host;
     private static int port;
-    private int selectedGameId = -1;
+    private int selectedGameId;
     private final Object lock = new Object();
 
     public static void setStartupConfig(int protocol, String h, int p) {
@@ -151,10 +151,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public Integer askIndex() {
-        if(sceneEnum == SceneEnum.JOIN_GAME_MENU) {
-            return waitForGameChoice();
+        Integer choice = -1;
+        switch (sceneEnum) {
+            case JOIN_GAME_MENU -> {
+                choice = waitForGameChoice();
+            }
+            default -> {}
         }
-        return 0;
+        return choice;
     }
 
     @Override
@@ -217,7 +221,6 @@ public class GUIView extends Application implements View {
             Platform.runLater(this::showNicknameDialog);
             try {
                 String nickname = nicknameFuture.get();
-                sceneEnum = null;
                 return nickname;
             } catch (Exception e) {
                 reportError("Can not load the nickname : " + e.getMessage());
@@ -235,7 +238,6 @@ public class GUIView extends Application implements View {
                 e.printStackTrace();
                 return "";
             } finally {
-                sceneEnum = null;
                 menuChoiceFuture = null;
             }
         }
@@ -370,9 +372,11 @@ public class GUIView extends Application implements View {
     }
     public void setMainScene(SceneEnum sceneName) throws IOException {
         setSceneEnum(sceneName);
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName.value()));
         Parent root = loader.load();
         Scene scene = new Scene(root);
+
         this.mainStage.setScene(scene);
         this.mainStage.centerOnScreen();
         Object controller = loader.getController();
@@ -490,18 +494,18 @@ public class GUIView extends Application implements View {
 
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
-        ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
-
-        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-            int id = entry.getKey();
-            int[] info = entry.getValue();
-            boolean isDemo = info[2] == 1;
-            String suffix = isDemo ? " DEMO" : "";
-            String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
-            gameDescriptions.add(desc);
-        }
-
         Platform.runLater(() -> {
+            ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
+
+            for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+                int id = entry.getKey();
+                int[] info = entry.getValue();
+                boolean isDemo = info[2] == 1;
+                String suffix = isDemo ? " DEMO" : "";
+                String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+                gameDescriptions.add(desc);
+            }
+
             if (controller != null) {
                 try {
                     ((GameListMenuController) controller).displayGames(gameDescriptions);
@@ -512,32 +516,35 @@ public class GUIView extends Application implements View {
                 reportError("Controller is null");
             }
         });
+
     }
 
 
 
-    public void setSelectedGameId(int gameId) {
+    public void setSelectedGameId(Integer gameId) {
         synchronized (lock) {
             this.selectedGameId = gameId;
             lock.notifyAll();
         }
     }
 
-    public int waitForGameChoice() {
+    public Integer waitForGameChoice() {
         synchronized (lock) {
-            while (selectedGameId == -1) {
-                try {
+
+            selectedGameId = -10;
+
+            try {
+                while (selectedGameId == -10) {
                     lock.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return -1;
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
             }
-            int choice = selectedGameId;
-            selectedGameId = -1;
-            return choice;
+            return selectedGameId;
         }
     }
+
 
 
     @Override
