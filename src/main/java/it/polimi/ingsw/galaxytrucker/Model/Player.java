@@ -561,6 +561,7 @@ public class Player implements Serializable {
         return true;
 
     }
+
     private boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
