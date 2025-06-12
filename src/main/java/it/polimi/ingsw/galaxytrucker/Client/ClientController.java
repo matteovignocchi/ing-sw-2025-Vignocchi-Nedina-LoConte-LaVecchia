@@ -137,28 +137,26 @@ public class ClientController {
 
     private void mainMenuLoop() throws Exception {
         while (isConnected) {
-            int choice = 0;
-            while (true) {
-                printMainMenu();
-                String line = "";
-                switch (view) {
-                    case TUIView v -> line = v.askString();
-                    case GUIView g -> line = g.askString();
-                    default -> line = view.askString();
-                }
+            printMainMenu();
 
-                try {
-                    choice = Integer.parseInt(line);
-                } catch (NumberFormatException e) {
-                    view.reportError("Invalid input. Please enter a number between 1 and 3.\n");
-                    continue;
-                }
+            String line;
+            switch (view) {
+                case TUIView v -> line = v.askString();
+                case GUIView g -> line = g.askString();
+                default -> line = view.askString();
+            }
 
-                if (choice < 1 || choice > 3) {
-                    view.reportError("Invalid choice. Please enter a number between 1 and 3.\n");
-                    continue;
-                }
-                break;
+            int choice;
+            try {
+                choice = Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                view.reportError("Invalid input. Please enter a number between 1 and 3.\n");
+                continue;
+            }
+
+            if (choice < 1 || choice > 3) {
+                view.reportError("Invalid choice. Please enter a number between 1 and 3.\n");
+                continue;
             }
 
             switch (choice) {
@@ -172,6 +170,7 @@ public class ClientController {
             }
         }
     }
+
 
     private void printMainMenu() {
         view.inform("-----MENU-----");
@@ -225,45 +224,47 @@ public class ClientController {
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
         int choice = 0;
-        switch (view) {
-            case TUIView v -> {
-                v.inform("**Available Games:**");
-                v.inform("0. Return to main menu");
 
-                for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-                    int id = entry.getKey();
-                    int[] info = entry.getValue();
-                    boolean isDemo = info[2] == 1;
+        view.inform("**Available Games:**");
+        view.inform("0. Return to main menu");
+
+        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+            int id = entry.getKey();
+            int[] info = entry.getValue();
+            boolean isDemo = info[2] == 1;
+            switch(view){
+                case TUIView v -> {
                     String suffix = isDemo ? " DEMO" : "";
                     v.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
                 }
-
-                while (true) {
-                    choice = v.askIndex() + 1;
-                    if (choice == 0 || availableGames.containsKey(choice)) break;
-                    v.reportError("Invalid choice, try again.");
-                }
-            }
-
-            case GUIView v -> {
-
-                Platform.runLater(() -> {
-                    try {
-                        v.setMainScene(SceneEnum.JOIN_GAME_MENU);
+                case GUIView v -> {
+                    Platform.runLater(() -> {
                         v.displayAvailableGames(availableGames);
-                    } catch (IOException e) {
-                        v.reportError("Failed to open join menu: " + e.getMessage());
-                    }
-                });
-                choice = v.waitForGameChoice();
+                    });
+                }
+                default -> {}
+
             }
-            default -> {
+            while (true) {
+                try {
+                    choice = view.askIndex();
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if (choice == 0 || availableGames.containsKey(choice)) {
+                    break;
+                }
+                view.reportError("Invalid choice, try again.");
             }
         }
-
         return choice;
     }
 
+
+//            case GUIView v -> {
+//
+//                Platform.runLater(() -> {
+//                    v.displayAvailableGames(availableGames);
 
     public void joinExistingGame() throws Exception {
         view.inform("Joining Existing Game...");
