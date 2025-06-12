@@ -229,7 +229,7 @@ public class ClientController {
         view.displayAvailableGames(availableGames);
         while (true) {
                 try {
-                    choice = view.askIndex();
+                    choice = view.askIndex() + 1;
                 } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
