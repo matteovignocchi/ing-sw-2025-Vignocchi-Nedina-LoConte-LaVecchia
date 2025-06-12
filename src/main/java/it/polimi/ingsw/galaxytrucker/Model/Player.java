@@ -257,6 +257,8 @@ public class Player implements Serializable {
     }
 
     public int getTotalHuman(){
+        if(isEliminated) return 0;
+
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -595,7 +597,6 @@ public class Player implements Serializable {
             if(tmp) flag = true;
         }
         controlOfConnection();
-
     }
 
     public boolean controlAssembly2(int xx, int yy) throws BusinessLogicException {

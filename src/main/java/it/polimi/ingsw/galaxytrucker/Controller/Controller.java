@@ -471,11 +471,11 @@ public class Controller implements Serializable {
         }
 
         broadcastInform("SERVER: " + "Flight started!");
-        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
 
         for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
         addHuman();
 
+        playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
 
         //notifyAllViews();
 
@@ -1478,10 +1478,14 @@ public class Controller implements Serializable {
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
+            p.setGamePhase(GamePhase.CARD_EFFECT);
             try {
                 x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
+            } catch (IOException e) {
+                markDisconnected(tmpNick);
             } catch (Exception e) {
-                throw new BusinessLogicException("[ERROR] in addHuman: " + e.getMessage());
+                markDisconnected(tmpNick);
+                System.err.println("[ERROR] in notifyView: " + e.getMessage());
             }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
@@ -1497,11 +1501,12 @@ public class Controller implements Serializable {
                                     }
                                     case PURPLE_ALIEN -> {
                                         try {
-                                            if (askPlayerDecision("alien", p)) {
+                                            String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
+                                                    "next to the purple alien module?";
+                                            if (askPlayerDecision(msg, p)) {
                                                 Human tmp2 = Human.PURPLE_ALIEN;
                                                 h.addHuman(tmp2);
                                                 p.setPurpleAlien();
-
                                             } else {
                                                 Human tmp2 = Human.HUMAN;
                                                 for (int z = 0; z < 2; z++) h.addHuman(tmp2);
@@ -1513,7 +1518,9 @@ public class Controller implements Serializable {
                                     }
                                     case BROWN_ALIEN -> {
                                         try {
-                                            if (askPlayerDecision("alien", p)) {
+                                            String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
+                                                    "next to the brown alien module?";
+                                            if (askPlayerDecision(msg, p)) {
                                                 Human tmp2 = Human.BROWN_ALIEN;
                                                 h.addHuman(tmp2);
                                                 p.setBrownAlien();
@@ -1532,11 +1539,6 @@ public class Controller implements Serializable {
                     }
                 }
             }
-            try {
-                x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-            } catch (Exception e) {
-                throw new BusinessLogicException("[ERROR] in addHuman: " + e.getMessage());
-            }
             //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
@@ -1550,11 +1552,12 @@ public class Controller implements Serializable {
         int totalCrew = getNumCrew(p);
         if (num >= totalCrew) {
             p.setEliminated();
+            inform("SERVER: You lost all your crewmates", nick);
         } else {
             while (num > 0) {
                 if(p.isConnected()){
                     try {
-                        x.inform("SERVER: " + "seleziona un Housing unit");
+                        x.inform("SERVER: Select an Housing unit");
                     } catch (IOException e) {
                         markDisconnected(nick);
                     } catch (Exception e){
@@ -1572,8 +1575,8 @@ public class Controller implements Serializable {
                                 num--;
                             }else{
                                 try{
-                                    x.inform("SERVER: " + "seleziona una housing unit valida");
-                                    x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
+                                    x.inform("SERVER: Select a valid housing unit");
+                                    //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                                 } catch (IOException e) {
                                     markDisconnected(nick);
                                 } catch (Exception e){
@@ -1584,8 +1587,8 @@ public class Controller implements Serializable {
                         }
                         default -> {
                             try {
-                                x.inform("SERVER: " + "seleziona una abitazione valida");
-                                x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
+                                x.inform("SERVER:  Select a valid housing unit");
+                                //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                             } catch (IOException e) {
                                 markDisconnected(nick);
                             } catch (Exception e){
@@ -1594,10 +1597,14 @@ public class Controller implements Serializable {
                             }
                         }
                     }
+
                     try {
                         viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(playersByNickname.get(nick).getDashMatrix()));
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         markDisconnected(nick);
+                    } catch (Exception e){
+                        markDisconnected(nick);
+                        System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
                     }
                 }else{
                     Tile[][] tmpDash = p.getDashMatrix();
@@ -1621,7 +1628,6 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: il metodo non deve lanciare la exception generica
     public void startPlauge(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);

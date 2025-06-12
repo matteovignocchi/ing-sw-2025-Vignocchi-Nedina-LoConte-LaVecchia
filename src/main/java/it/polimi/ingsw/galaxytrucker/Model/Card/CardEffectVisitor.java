@@ -56,7 +56,10 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
          int x = controller.getPowerEngineForCard(p);
 
-         if (x == 0) p.setEliminated();
+         if (x == 0) {
+             p.setEliminated();
+             controller.inform("SERVER: Your engine power is 0", nick);
+         }
          else{
              String msg = "SERVER: Your engine power is "+ x +". You move forward by those spaces.";
              controller.inform(msg, nick);
@@ -168,6 +171,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 }
                 controller.changeMapPosition(nick, p);
                 controller.updatePositionForEveryBody();
+                controller.broadcastInform("SERVER: Slavers defeated by "+nick+"!");
                 exit = true;
 
             } else if (player_fire_power < slavers_fire_power) {
