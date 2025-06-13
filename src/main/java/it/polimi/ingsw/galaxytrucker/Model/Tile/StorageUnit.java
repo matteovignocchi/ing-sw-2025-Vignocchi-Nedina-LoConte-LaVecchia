@@ -57,16 +57,15 @@ public class StorageUnit extends Tile implements Serializable {
     public List<Colour> getListOfGoods(){
         return listOfGoods;
     }
-    /**
-     * the method remove a good choose by the player from the storage
-     * @param index it's the index of the cell from the player want to remove
-     * @throws InvalidIndex if there is no good or there is empty
-     */
-    public void removeGood(int index) throws InvalidIndex {
+
+
+    public Colour removeGood(int index) throws InvalidIndex {
         if (listOfGoods.get(index) == null || listOfGoods.isEmpty()) {
             throw new InvalidIndex("The cell of the storage doesn't contains a Good");
         }
-        listOfGoods.remove(listOfGoods.get(index));
+        Colour good = listOfGoods.get(index);
+        listOfGoods.remove(good);
+        return good;
     }
 
     /**
