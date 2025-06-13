@@ -60,7 +60,7 @@ public class GameListMenuController extends GUIController {
         }
 
         try {
-            int gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim());
+            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) -1;
             guiView.setSelectedGameId(gameId);
         } catch (NumberFormatException e) {
             showInfo("Invalid game selection.");
@@ -70,24 +70,11 @@ public class GameListMenuController extends GUIController {
     @FXML
     public void back() {
         try {
-            Platform.runLater(() -> {
-                try {
-                    guiView.setSelectedGameId(0);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-           Platform.runLater(() -> {
-               try {
-                   guiView.setMainScene(SceneEnum.MAIN_MENU);
-               } catch (IOException e) {
-                   throw new RuntimeException(e);
-               }
-           });
-        } catch (Exception e) {
+            guiView.setSelectedGameId(-1);
+            guiView.setMainScene(SceneEnum.MAIN_MENU);
+        } catch (IOException e) {
             showInfo("Error returning to main menu.");
             e.printStackTrace();
         }
     }
 }
-//TODO fare un modo tale che quando vado indietro, mando la choice a "0" al virtual client

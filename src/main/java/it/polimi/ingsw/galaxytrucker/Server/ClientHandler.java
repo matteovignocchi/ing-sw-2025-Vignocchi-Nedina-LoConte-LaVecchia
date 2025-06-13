@@ -64,6 +64,19 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             String op = req.getOperation();
             Object p  = req.getPayload();
 
+            if (Message.OP_COORDINATE_TO.equals(op)) {
+                int[] coords = askCoordsWithTimeout();
+                return wrap(req, coords);
+            }
+            if (Message.OP_ASK_TO.equals(op)) {
+                boolean yesNo = askWithTimeout((String) p);
+                return wrap(req, yesNo);
+            }
+            if (Message.OP_INDEX_TO.equals(op)) {
+                Integer idx = askIndexWithTimeout();
+                return wrap(req, idx);
+            }
+
             return switch (op) {
                 case Message.OP_GET_RESERVED_TILE  -> wrap(req, handleGetReservedTile(p));
                 case Message.OP_LEAVE_GAME         -> wrap(req, handleLeaveGame(p));
@@ -383,7 +396,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public boolean askWithTimeout(String question) throws IOException {
-        Message req = Message.request(Message.OP_ASK, question);
+        Message req = Message.request(Message.OP_ASK_TO, question);
         out.writeObject(req);
         out.flush();
 
@@ -391,16 +404,41 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         try {
             resp = (Message) in.readObject();
         } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_ASK", e);
+            throw new IOException("Invalid response for OP_ASK_TIMEOUT", e);
         }
         return (Boolean) resp.getPayload();
     }
 
-    //TODO: fare
     @Override
-    public int[] askCoordsWithTimeout() throws Exception {
-        return new int[0];
+    public int[] askCoordsWithTimeout() throws IOException {
+        Message req = Message.request(Message.OP_COORDINATE_TO, null);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_COORDS_TIMEOUT", e);
+        }
+        return (int[]) resp.getPayload();
     }
+
+    @Override
+    public Integer askIndexWithTimeout() throws IOException {
+        Message req = Message.request(Message.OP_INDEX_TO, null);
+        out.writeObject(req);
+        out.flush();
+
+        Message resp;
+        try {
+            resp = (Message) in.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Invalid response for OP_INDEX_TIMEOUT", e);
+        }
+        return (Integer) resp.getPayload();
+    }
+
 
     @Override
     public Boolean ask(String question) throws IOException {

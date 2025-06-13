@@ -114,6 +114,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     Message response = Message.response(coordinate, msg.getRequestId());
                     sendRequest(response);
                 }
+                case Message.OP_INDEX_TO -> {
+                    this.inform((String) msg.getPayload());
+                    Integer answer = clientController.askIndexWithTimeoutByController();
+                    sendRequest(Message.response(answer, msg.getRequestId()));
+                }
             }
     } catch (IOException e) {
             this.reportError(": " + e.getMessage());
@@ -669,6 +674,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public int[] askCoordsWithTimeout() throws Exception {
         return clientController.askCoordinatesWithTimeoutByController();
+    }
+
+    @Override
+    public Integer askIndexWithTimeout() throws Exception {
+        return clientController.askIndexWithTimeoutByController();
     }
 
     @Override
