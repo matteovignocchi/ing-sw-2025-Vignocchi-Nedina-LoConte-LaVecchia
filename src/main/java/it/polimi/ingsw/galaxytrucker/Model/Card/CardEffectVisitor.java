@@ -334,12 +334,12 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     f.moveRocket(-days, p);
 
                     /**/
-                    controller.inform("SERVER: Lista di merci prima: " + p.getTotalGoodList(), nick);
+                    controller.inform("SERVER: Lista di merci prima: " + p.getTotalListOfGood(), nick);
 
                     controller.addGoods(p, card.getRewardGoods());
 
                     /**/
-                    controller.inform("SERVER: Lista di merci dopo: " + p.getTotalGoodList(), nick);
+                    controller.inform("SERVER: Lista di merci dopo: " + p.getTotalListOfGood(), nick);
 
                     controller.broadcastInform("SERVER: Smugglers defeated by " + nick + "!");
                     controller.changeMapPosition(nick, p);
@@ -351,12 +351,12 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.inform(msg, nick);
 
                 /**/
-                controller.inform("SERVER: Lista di merci prima: " + p.getTotalGoodList(), nick);
+                controller.inform("SERVER: Lista di merci prima: " + p.getTotalListOfGood(), nick);
 
                 controller.removeGoods(p, card.getNumRemovedGoods());
 
                 /**/
-                controller.inform("SERVER: Lista di merci dopo: " + p.getTotalGoodList(), nick);
+                controller.inform("SERVER: Lista di merci dopo: " + p.getTotalListOfGood(), nick);
 
                 controller.inform("SERVER: Checking other players", nick);
 
@@ -429,25 +429,33 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
-
             int num_crewmates = card.getNumCrewmates();
+            int days = card.getDays();
+
             if (controller.getNumCrew(p) >= num_crewmates) {
-                String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
+                String string = "SERVER: Do you want to redeem the card's reward goods and lose "+days+" flight days?";
 
                 if (controller.askPlayerDecision(string, p)) {
-                    int days = card.getDays();
                     f.moveRocket(-days, p);
-                    controller.addGoods(p, card.getStationGoods());
-                }
-                controller.changeMapPosition(nick, p);
-                controller.updatePositionForEveryBody();
-                exit = true;
-            }
 
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+                    /**/controller.inform("SERVER: Goods prima ", nick);
+                    /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
+
+                    controller.addGoods(p, card.getStationGoods());
+
+                    /**/controller.inform("SERVER: Goods prima ", nick);
+                    /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
+
+                    controller.changeMapPosition(nick, p);
+                    controller.updatePositionForEveryBody();
+                    exit = true;
+                } else {
+                    if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players", nick);
+                }
+            } else {
+                controller.inform("SERVER: You don't have enough crewmates to be able to redeem the card's reward", nick);
+                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players", nick);
+            }
 
             if (exit) break;
         }
