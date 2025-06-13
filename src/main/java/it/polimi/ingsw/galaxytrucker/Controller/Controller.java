@@ -1624,11 +1624,16 @@ public class Controller implements Serializable {
 
                     inform("SERVER: Select the index of the good you want to rearrange", nick);
                     int tmpint = askPlayerIndex(p);
+                    if(!c.getListOfGoods().isEmpty()){
+                        Colour tmpColor = c.getListOfGoods().get(tmpint);
+                        c.removeGood(tmpint);
+                        selectStorageUnitForAdd(v, p, tmpColor, nick);
+                        printPlayerDashboard(v, p, nick);
+                    }else {
+                        inform("SERVER: Empty list of goods", nick);
+                    }
 
-                    Colour tmpColor = c.getListOfGoods().get(tmpint);
-                    c.removeGood(tmpint);
-                    selectStorageUnitForAdd(v, p, tmpColor, nick);
-                    printPlayerDashboard(v, p, nick);
+
                 }
                 default -> inform("SERVER: Not valid cell", nick);
             }
@@ -1683,15 +1688,17 @@ public class Controller implements Serializable {
             Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
             switch (tmp2) {
                 case StorageUnit c -> {
-                    List<Colour> tmplist = c.getListOfGoods();
-                    printListOfGoods(tmplist, nick);
+                    if(!c.getListOfGoods().isEmpty()) {
+                        List<Colour> tmplist = c.getListOfGoods();
+                        printListOfGoods(tmplist, nick);
+                        inform("SERVER: Select the index of the good you want to trash", nick);
+                        int tmpint = askPlayerIndex(p);
+                        c.removeGood(tmpint);
+                        printPlayerDashboard(v, p, nick);
+                    }else{
+                        inform("SERVER: Empty list of goods", nick);
+                    }
 
-                    inform("SERVER: Select the index of the good you want to trash", nick);
-                    int tmpint = askPlayerIndex(p);
-
-                    c.removeGood(tmpint);
-
-                    printPlayerDashboard(v, p, nick);
                 }
                 default -> inform("SERVER: Not valid cell", nick);
             }
@@ -1725,6 +1732,7 @@ public class Controller implements Serializable {
                                         for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
                                     case PURPLE_ALIEN -> {
+                                        if(p.presenceBrownAlien()) continue;
                                         if(i == 2 && j == 3) continue;
                                         try {
                                             String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
@@ -1743,6 +1751,7 @@ public class Controller implements Serializable {
 
                                     }
                                     case BROWN_ALIEN -> {
+                                        if(p.presenceBrownAlien()) continue;
                                         if(i == 2 && j == 3) continue;
                                         try {
                                             String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
@@ -1862,39 +1871,31 @@ public class Controller implements Serializable {
     public void startPlauge(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
-
-        int num = getNumCrew(p);
+        System.out.println("[SERVER: Starting plauge " + nick + "]");
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
-                switch (y) {
-                    case HousingUnit c -> {
-                        if (c.isConnected()) {
-                            int index;
-                            try {
-                                if(p.isConnected()){
-                                    index = askPlayerIndex(p);
-                                }else{
-                                    index = 0;
-                                }
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
+                Human tmpHuman;
+                switch (y){
+                    case HousingUnit h -> {
+                        if(h.isConnected() && !h.getListOfToken().isEmpty()){
+                            tmpHuman = h.getListOfToken().getFirst();
+                            h.removeHumans(0);
+                            System.out.println("[SERVER plauge nick" + 1 + "]");
+                            switch (tmpHuman){
+                                case BROWN_ALIEN -> p.setBrownAlien();
+                                case PURPLE_ALIEN ->  p.setPurpleAlien();
+                                default -> {}
                             }
-                            int x = c.removeHumans(index);
-                            tmp++;
-                            if (x == 2) p.setBrownAlien();
-                            if (x == 3) p.setPurpleAlien();
                         }
-
                     }
-                    default -> {
-                    }
+                    default ->{}
                 }
             }
-            if (tmp == num) {
-                p.setEliminated();
-            }
+            tmp = getNumCrew(p);
+            if(tmp ==  0) p.setEliminated();
+
         }
     }
 

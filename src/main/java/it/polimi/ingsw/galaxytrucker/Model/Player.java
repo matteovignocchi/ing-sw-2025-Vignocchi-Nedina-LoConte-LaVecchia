@@ -497,8 +497,10 @@ public class Player implements Serializable {
                             switch (nearTmp){
                                 case HousingUnit e1-> {
                                    if(e1.getType() != Human.HUMAN){
-                                       e.setConnected(true);
                                        e.setTypeOfConnections(e1.getType());
+                                   }else {
+                                       e.setTypeOfConnections(Human.PRADELLA);
+                                       e1.setConnected(true);
                                    }
                                 }
                                 default -> {}
@@ -553,14 +555,37 @@ public class Player implements Serializable {
 
 
 
-    private boolean connected(int i, int j) {
-        if(i != j){
-            if(i == 0 || j == 0) return false;
-            if(i == 3 || j == 3 ) return true;
-        }
-        return true;
-
+    private boolean connected(int a, int b) {
+        if (a == 0 || b == 0) return false; // ignora
+        if (a == b) return true;
+        if (a == 3 || b == 3) return true;  // 3 è universale
+        return false;
     }
+
+
+    private boolean hasBadConnection(int x, int y) {
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
+        int[] opp = {2, 3, 0, 1};
+
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (isOutOfBounds(nx, ny)) continue;
+            if (validStatus[nx][ny] == Status.FREE) continue;
+
+            int currentSide = Dash_Matrix[x][y].controlCorners(i);
+            int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+            if (currentSide == 0 || nearSide == 0) continue;
+
+            if (!connected(currentSide, nearSide) && currentSide != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
     private boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
@@ -629,6 +654,7 @@ public class Player implements Serializable {
                 if(validStatus[nx][ny] == Status.FREE) continue;
                 int currentSide = Dash_Matrix[x][y].controlCorners(i);
                 int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+                if (currentSide == 0 || nearSide == 0) continue;
                 if(connected(currentSide,nearSide)){
                     queue.add(new int[] {nx,ny});
                     visited[nx][ny] = true;
