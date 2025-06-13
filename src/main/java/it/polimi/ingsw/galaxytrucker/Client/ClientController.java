@@ -323,7 +323,6 @@ public class ClientController {
     private void startGame(){
 
         if(view.getGamePhase() == ClientGamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
-
         view.printListOfCommand();
         switch (view){
             case TUIView v -> {
@@ -469,8 +468,9 @@ public class ClientController {
                         }
                         default -> view.reportError("Action not recognized");
                     }
-                    //if (currentGamePhase != ClientGamePhase.DRAW_PHASE)
-                    view.printListOfCommand();
+                    if (currentGamePhase != ClientGamePhase.CARD_EFFECT){
+                        view.printListOfCommand();
+                    }
                 }
             }
             case GUIView ignored ->{

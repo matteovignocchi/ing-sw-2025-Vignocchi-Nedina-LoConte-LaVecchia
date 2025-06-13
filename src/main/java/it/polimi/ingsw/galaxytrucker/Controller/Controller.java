@@ -643,7 +643,7 @@ public class Controller implements Serializable {
             for (int i = 0; i < inFlight.size(); i++) {
                 String nick = inFlight.get(i);
                 Player p   = playersByNickname.get(nick);
-                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
                 String question = "SERVER: Do you want to abandon the flight? ";
                 if (askPlayerDecision(question, p)) {
@@ -653,6 +653,16 @@ public class Controller implements Serializable {
                 if (i < inFlight.size() - 1) {
                     String waitingMsg = "SERVER: Waiting for others to decide…";
                     inform(waitingMsg, nick);
+                }
+
+                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                try {
+                    VirtualView v = viewsByNickname.get(nick);
+                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
+                } catch (IOException ex) {
+                    markDisconnected(nick);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
             fBoard.eliminatePlayers();
