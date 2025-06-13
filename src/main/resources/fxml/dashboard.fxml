@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
+
+
+<AnchorPane fx:id="dashPane" xmlns:fx="http://javafx.com/fxml" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.DashboardController"
+            prefWidth="800" prefHeight="600">
+
+<!--    &lt;!&ndash; Navi posizionate (puoi spostarle a piacere) &ndash;&gt;-->
+<!--    <ImageView fx:id="ship1" fitWidth="40" fitHeight="40" layoutX="100" layoutY="200" visible="false" />-->
+<!--    <ImageView fx:id="ship2" fitWidth="40" fitHeight="40" layoutX="140" layoutY="200" visible="false" />-->
+<!--    <ImageView fx:id="ship3" fitWidth="40" fitHeight="40" layoutX="180" layoutY="200" visible="false" />-->
+<!--    <ImageView fx:id="ship4" fitWidth="40" fitHeight="40" layoutX="220" layoutY="200" visible="false" />-->
+
+<!--    &lt;!&ndash; Menu a tendina per visualizzare i parametri delle navi &ndash;&gt;-->
+<!--    <Accordion fx:id="accordion" layoutX="500" layoutY="50" prefWidth="280" prefHeight="400">-->
+<!--        <TitledPane fx:id="shipPane1" text="Nave 1">-->
+<!--            <VBox spacing="8" padding="10">-->
+<!--                <Label fx:id="speedLabel1" text="Speed: -" />-->
+<!--                <Label fx:id="pointsLabel1" text="Points: -" />-->
+<!--                <Label fx:id="cargoLabel1" text="Cargo: -" />-->
+<!--                <Label fx:id="damageLabel1" text="Damage: -" />-->
+<!--            </VBox>-->
+<!--        </TitledPane>-->
+<!--        <TitledPane fx:id="shipPane2" text="Nave 2">-->
+<!--            <VBox spacing="8" padding="10">-->
+<!--                <Label fx:id="speedLabel2" text="Speed: -" />-->
+<!--                <Label fx:id="pointsLabel2" text="Points: -" />-->
+<!--                <Label fx:id="cargoLabel2" text="Cargo: -" />-->
+<!--                <Label fx:id="damageLabel2" text="Damage: -" />-->
+<!--            </VBox>-->
+<!--        </TitledPane>-->
+<!--        <TitledPane fx:id="shipPane3" text="Nave 3">-->
+<!--            <VBox spacing="8" padding="10">-->
+<!--                <Label fx:id="speedLabel3" text="Speed: -" />-->
+<!--                <Label fx:id="pointsLabel3" text="Points: -" />-->
+<!--                <Label fx:id="cargoLabel3" text="Cargo: -" />-->
+<!--                <Label fx:id="damageLabel3" text="Damage: -" />-->
+<!--            </VBox>-->
+<!--        </TitledPane>-->
+<!--        <TitledPane fx:id="shipPane4" text="Nave 4">-->
+<!--            <VBox spacing="8" padding="10">-->
+<!--                <Label fx:id="speedLabel4" text="Speed: -" />-->
+<!--                <Label fx:id="pointsLabel4" text="Points: -" />-->
+<!--                <Label fx:id="cargoLabel4" text="Cargo: -" />-->
+<!--                <Label fx:id="damageLabel4" text="Damage: -" />-->
+<!--            </VBox>-->
+<!--        </TitledPane>-->
+<!--    </Accordion>-->
+
+</AnchorPane>

@@ -70,9 +70,21 @@ public class GameListMenuController extends GUIController {
     @FXML
     public void back() {
         try {
-            guiView.setSelectedGameId(0);
-            guiView.setMainScene(SceneEnum.MAIN_MENU);
-        } catch (IOException e) {
+            Platform.runLater(() -> {
+                try {
+                    guiView.setSelectedGameId(0);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+           Platform.runLater(() -> {
+               try {
+                   guiView.setMainScene(SceneEnum.MAIN_MENU);
+               } catch (IOException e) {
+                   throw new RuntimeException(e);
+               }
+           });
+        } catch (Exception e) {
             showInfo("Error returning to main menu.");
             e.printStackTrace();
         }
