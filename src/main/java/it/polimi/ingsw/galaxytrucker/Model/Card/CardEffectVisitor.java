@@ -336,7 +336,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     /**/
                     controller.inform("SERVER: Lista di merci prima: " + p.getTotalListOfGood(), nick);
 
-                    controller.addGoods(p, card.getRewardGoods());
+                    controller.manageGoods(p, card.getRewardGoods());
 
                     /**/
                     controller.inform("SERVER: Lista di merci dopo: " + p.getTotalListOfGood(), nick);
@@ -441,7 +441,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     /**/controller.inform("SERVER: Goods prima ", nick);
                     /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
 
-                    controller.addGoods(p, card.getStationGoods());
+                    controller.manageGoods(p, card.getStationGoods());
 
                     /**/controller.inform("SERVER: Goods prima ", nick);
                     /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
@@ -588,7 +588,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             if (controller.askPlayerDecision(string, p)) {
                 int days = card.getDays();
                 f.moveRocket(-days, p);
-                controller.addGoods(p, card.getRewardGoods().get(z));
+                controller.manageGoods(p, card.getRewardGoods().get(z));
                 z++;
 
                 controller.changeMapPosition(nick, p);

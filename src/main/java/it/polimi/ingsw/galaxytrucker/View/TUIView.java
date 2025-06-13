@@ -33,7 +33,7 @@ public class TUIView implements View {
             "YELLOW", YELLOW,
             "BLUE",   BLUE
     );
-    private static final long TIME_OUT = 30000;
+    private static final long TIME_OUT = 300000; //TODO: messo così per debug, capire quanto mettere in definitiva
 
 
     //per ora lascio il server come int
@@ -368,10 +368,10 @@ public class TUIView implements View {
         inform("List of goods: ");
         for(String colour : Goods) {
             switch (colour){
-                case BLUE -> System.out.println(BLUE+"Blue "+RESET);
-                case RED -> System.out.println(RED+"Red "+RESET);
-                case GREEN -> System.out.println(GREEN+"Green "+RESET);
-                case YELLOW -> System.out.println(YELLOW+"Yellow "+RESET);
+                case "BLUE" -> System.out.println(BLUE+"Blue "+RESET);
+                case "RED" -> System.out.println(RED+"Red "+RESET);
+                case "GREEN" -> System.out.println(GREEN+"Green "+RESET);
+                case "YELLOW" -> System.out.println(YELLOW+"Yellow "+RESET);
             }
         }
     }

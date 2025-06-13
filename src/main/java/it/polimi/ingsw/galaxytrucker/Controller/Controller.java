@@ -68,7 +68,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateAbandonedStationDecks();
+            decks = deckCreator.CreatePlagueDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1475,14 +1475,45 @@ public class Controller implements Serializable {
 
     //TODO: Gestione risposte predefinite per timeout,
     // gestione indici richiesti-coordinate fuori bunds
-    public void addGoods(Player p, List<Colour> list) throws BusinessLogicException {
-        boolean flag = true;
+    public void manageGoods(Player p, List<Colour> list) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
-        scriptOfAddGoods(p, list);
+        boolean flag = true;
+
+        while(flag){
+            inform("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods", nick);
+            int tmp = askPlayerIndex(p);
+
+            //TODO: gestione timeout/disconnessione
+            //TODO: gestire default
+
+            switch (tmp){
+                case 0 -> addGoods(p, x, list, nick);
+                case 1 -> caseRedistribution(p, x, list, nick);
+                case 2 -> caseRemove(p,x,nick);
+                default -> {
+                    inform("SERVER: Invalid choice. Please try again", nick);
+                    continue;
+                }
+            }
+
+            if(!askPlayerDecision("SERVER: Do you want to continue to manage your goods?", p)) flag = false;
+        }
+    }
+
+
+    public void addGoods(Player p, VirtualView x, List<Colour> list, String nick) throws BusinessLogicException {
+        boolean flag = true;
+        Colour tempGood = null;
+
+        if(list.isEmpty()){
+            inform("SERVER: Empty list of goods", nick);
+            return;
+        }
 
         while (!list.isEmpty() && flag) {
-            inform("SERVER: seleziona una Storage unit", nick);
+            inform("SERVER: Select a storage unit", nick);
+            printListOfGoods(list, nick);
             printPlayerDashboard(x, p, nick);
 
             int[] vari = askPlayerCoordinates(p);
@@ -1491,81 +1522,76 @@ public class Controller implements Serializable {
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
+                        inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
                         printListOfGoods(c.getListOfGoods(), nick);
-                        inform("SERVER: seleziona indice da rimuovere", nick);
                         int tmpint = askPlayerIndex(p);
 
-                        Colour tmp = c.getListOfGoods().get(tmpint - 1);
-                        c.removeGood(tmpint-1);
+                        Colour tmp = c.getListOfGoods().get(tmpint);
+                        tempGood = c.removeGood(tmpint);
                         list.add(tmp);
                     }
 
-                    inform("SERVER: seleziona la merce da inserire", nick);
+                    inform("SERVER: Select the index of the good to place", nick);
+                    printListOfGoods(list, nick);
                     int tmpint = askPlayerIndex(p);
 
-                    if(list.get(tmpint - 1) == Colour.RED){
-                        if(c.isAdvanced()) c.addGood(list.get(tmpint-1));
-                        else inform("SERVER: Non puoi inserire merce rossa in uno non advance", nick);
-
-                    }else c.addGood(list.get(tmpint-1));
+                    if(list.get(tmpint) == Colour.RED){
+                        if(c.isAdvanced()) {
+                            c.addGood(list.get(tmpint));
+                            list.remove(tmpint);
+                        }
+                        else {
+                            inform("SERVER: You can't place a dangerous good in a not advanced storage unit", nick);
+                            if(tempGood!=null){
+                                c.addGood(tempGood);
+                                list.remove(tempGood);
+                                tempGood = null;
+                            }
+                        }
+                    }else {
+                        c.addGood(list.get(tmpint));
+                        list.remove(tmpint);
+                    }
                 }
-                default -> inform("SERVER: " + "cella non valida", nick);
+                default -> inform("SERVER: Not valid cell", nick);
             }
 
-            if(!askPlayerDecision("SERVER: " + "Vuoi continurare", p)) flag = false;
+            if(!askPlayerDecision("SERVER: Do you want to continue to add goods?", p)) flag = false;
         }
-    }
 
-
-    public void scriptOfAddGoods(Player p, List<Colour> list) throws BusinessLogicException {
-        String nick = getNickByPlayer(p);
-        VirtualView x = viewsByNickname.get(nick);
-
-        inform("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods", nick);
-        int tmp = askPlayerIndex(p);
-
-        //TODO: gestione timeout/disconnessione
-        //TODO: gestire default
-
-        switch (tmp){
-            case 0 -> {}
-            case 1 -> caseRedistribution(p, x ,list , nick);
-            case 2 -> caseRemove(p,x,nick);
-            default -> {}
-        }
+        if(flag) inform("SERVER: Empty list of goods", nick);
     }
 
     //TODO: gestione default, timeout,
     // gestione indici/coordinate out of bunds
     public void caseRedistribution(Player p , VirtualView v , List<Colour> list , String nick) throws BusinessLogicException {
         printPlayerDashboard(v, p, nick);
-        printListOfGoods(list, nick);
 
         int[] coordinates;
-        boolean exit = false;
+        boolean exit = true;
 
-            while (!exit) {
-                coordinates = askPlayerCoordinates(p);
+        while (exit) {
+            inform("SERVER: Select a storage unit to take the good from", nick);
+            coordinates = askPlayerCoordinates(p);
 
-                Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
-                switch (tmp2) {
-                    case StorageUnit c -> {
-                        List<Colour> tmplist = c.getListOfGoods();
-                        printListOfGoods(tmplist, nick);
+            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+            switch (tmp2) {
+                case StorageUnit c -> {
+                    List<Colour> tmplist = c.getListOfGoods();
+                    printListOfGoods(tmplist, nick);
 
-                        inform("SERVER: select the one that you want to change", nick);
-                        int tmpint = askPlayerIndex(p);
+                    inform("SERVER: Select the index of the good you want to rearrange", nick);
+                    int tmpint = askPlayerIndex(p);
 
-                        Colour tmpColor = c.getListOfGoods().get(tmpint);
-                        c.removeGood(tmpint);
-                        selectStorageUnitForAdd(v, p ,tmpColor , nick);
-                    }
-                    default -> {
-                        inform("SERVER: Not valid cell", nick);
-                        if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage?", p)) exit = true;
-                    }
+                    Colour tmpColor = c.getListOfGoods().get(tmpint);
+                    c.removeGood(tmpint);
+                    selectStorageUnitForAdd(v, p, tmpColor, nick);
+                    printPlayerDashboard(v, p, nick);
                 }
+                default -> inform("SERVER: Not valid cell", nick);
             }
+            if(!askPlayerDecision("SERVER: Do you want to select another storage unit for the rearranging?", p)) exit = false;
+        }
     }
 
     //TODO: gestione default, timeout,
@@ -1573,20 +1599,22 @@ public class Controller implements Serializable {
     public void selectStorageUnitForAdd(VirtualView v, Player p , Colour color , String nick) throws BusinessLogicException {
         int[] coordinates;
         boolean exit = false;
+
         while (!exit) {
+            inform("SERVER: Select a storage unit to place the good in", nick);
             coordinates = askPlayerCoordinates(p);
             Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
             switch (tmp2) {
                 case StorageUnit c -> {
                     if(c.isFull()) {
-                        inform("SERVER: this one is full", nick);
+                        inform("SERVER: This storage unit is full. Try again", nick);
                         continue;
                     }
                     if(color == Colour.RED) {
                         if(c.isAdvanced()) {
                             c.addGood(color);
                             exit = true;
-                        } else inform("SERVER: Select one that can contain it", nick);
+                        } else inform("SERVER: You can't place a dangerous good in a not advanced storage unit", nick);
                     }else {
                         c.addGood(color);
                         exit = true;
@@ -1594,7 +1622,7 @@ public class Controller implements Serializable {
                 }
                 default -> {
                     inform("SERVER: Not valid cell", nick);
-                    if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage? , if not you will loose the goods", p)) exit = true;
+                    //if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage Unit? , if not you will loose the goods", p)) exit = true;
                 }
             }
         }
@@ -1604,8 +1632,11 @@ public class Controller implements Serializable {
     // gestione indici/coordinate out of bunds
     public void caseRemove(Player p , VirtualView v , String nick) throws BusinessLogicException {
         int[] coordinates;
-        boolean exit = false;
-        while (!exit) {
+        boolean exit = true;
+        printPlayerDashboard(v, p, nick);
+
+        while (exit) {
+            inform("SERVER: Select a storage unit", nick);
             coordinates = askPlayerCoordinates(p);
             Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
             switch (tmp2) {
@@ -1613,16 +1644,16 @@ public class Controller implements Serializable {
                     List<Colour> tmplist = c.getListOfGoods();
                     printListOfGoods(tmplist, nick);
 
-                    inform("SERVER: select the one that you want to remove", nick);
+                    inform("SERVER: Select the index of the good you want to trash", nick);
                     int tmpint = askPlayerIndex(p);
 
                     c.removeGood(tmpint);
+
+                    printPlayerDashboard(v, p, nick);
                 }
-                default -> {
-                    inform("SERVER: Not valid cell", nick);
-                    if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage?", p)) exit = true;
-                }
+                default -> inform("SERVER: Not valid cell", nick);
             }
+            if(!askPlayerDecision("SERVER: " + "Do you want to select another storage unit for trashing?", p)) exit = false;
         }
     }
 
