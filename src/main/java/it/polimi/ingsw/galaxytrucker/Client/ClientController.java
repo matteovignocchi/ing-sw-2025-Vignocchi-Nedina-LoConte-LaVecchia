@@ -324,10 +324,16 @@ public class ClientController {
 
         if(view.getGamePhase() == ClientGamePhase.TILE_MANAGEMENT) view.printTile(tmpTile);
         view.printListOfCommand();
+        ClientGamePhase lastPhase = currentGamePhase;
         switch (view){
             case TUIView v -> {
                 while (true) {
                     ClientGamePhase temp = currentGamePhase;
+                    if (lastPhase == ClientGamePhase.CARD_EFFECT
+                            && temp != ClientGamePhase.CARD_EFFECT) {
+                        view.printListOfCommand();
+                    }
+                    lastPhase = temp;
 
                     if(temp ==ClientGamePhase.CARD_EFFECT) {
                         try {
@@ -688,10 +694,8 @@ public class ClientController {
     public void updateGameStateByController(String phase){
 
         ClientGamePhase gamePhase = clientEnumFactory.describeGamePhase(phase);
+        this.currentGamePhase = gamePhase;
         view.updateState(gamePhase);
-
-
-        currentGamePhase = gamePhase;
     }
 
     public String choosePlayerByController() throws IOException, InterruptedException {

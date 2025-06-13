@@ -640,32 +640,64 @@ public class Controller implements Serializable {
                     .map(Map.Entry::getKey)
                     .toList();
 
+            //da qui in poi ha modificato franci per mettere tutti i giocatori in waiting for turn solo dopo che ciascun giocatore ha risposto. Assicurarsi che funziona (ma dovrebbe)
+            //In caso di problemi il codice vecchio è completamente commentate successivamente
             for (int i = 0; i < inFlight.size(); i++) {
                 String nick = inFlight.get(i);
                 Player p   = playersByNickname.get(nick);
-                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
-                String question = "SERVER: Do you want to abandon the flight? ";
-                if (askPlayerDecision(question, p)) {
+                if (askPlayerDecision("SERVER: Do you want to abandon the flight? ", p)) {
                     p.setEliminated();
                     handleElimination(p);
                 }
-                if (i < inFlight.size() - 1) {
-                    String waitingMsg = "SERVER: Waiting for others to decide…";
-                    inform(waitingMsg, nick);
-                }
 
-                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                try {
-                    VirtualView v = viewsByNickname.get(nick);
-                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-                } catch (IOException ex) {
-                    markDisconnected(nick);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                if (i < inFlight.size() - 1) {
+                    inform("SERVER: Waiting for others to decide…", nick);
                 }
             }
+
             fBoard.eliminatePlayers();
+
+            for (String nick : inFlight) {
+                Player p = playersByNickname.get(nick);
+                if (!p.isEliminated()) {
+                    p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+                    try {
+                        VirtualView v = viewsByNickname.get(nick);
+                        v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
+                    } catch (IOException ex) {
+                        markDisconnected(nick);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+//            for (int i = 0; i < inFlight.size(); i++) {
+//                String nick = inFlight.get(i);
+//                Player p   = playersByNickname.get(nick);
+//                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+//
+//                String question = "SERVER: Do you want to abandon the flight? ";
+//                if (askPlayerDecision(question, p)) {
+//                    p.setEliminated();
+//                    handleElimination(p);
+//                }
+//                if (i < inFlight.size() - 1) {
+//                    String waitingMsg = "SERVER: Waiting for others to decide…";
+//                    inform(waitingMsg, nick);
+//                }
+//
+//                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
+//                try {
+//                    VirtualView v = viewsByNickname.get(nick);
+//                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
+//                } catch (IOException ex) {
+//                    markDisconnected(nick);
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            fBoard.eliminatePlayers();
             activateDrawPhase();
         }
     }
