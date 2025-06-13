@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
@@ -17,11 +18,13 @@ import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -34,15 +37,17 @@ public class GUIView extends Application implements View {
     private ClientController clientController;
     public ClientTile currentTile;
     public ClientTile[][] dashBoard;
+    private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+    private Boolean[][] maschera;
     private CompletableFuture<List<Object>> dataForGame;
     private CompletableFuture<String> menuChoiceFuture;
     private SceneEnum sceneEnum;
     private ClientGamePhase gamePhase;
-    private boolean demo;
+    private boolean isDemo;
     private static int protocolChoice;
     private static String host;
     private static int port;
-    private int selectedGameId = -1;
+    private int selectedGameId;
     private final Object lock = new Object();
 
     public static void setStartupConfig(int protocol, String h, int p) {
@@ -55,7 +60,14 @@ public class GUIView extends Application implements View {
     public void start(Stage stage) {
         this.mainStage = stage;
         stage.setTitle("Galaxy Trucker");
-
+        dashBoard = new ClientTile[5][7];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                ClientTile tile = new ClientTile();
+                tile.type = "EMPTYSPACE";
+                dashBoard[i][j] = tile;
+            }
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.MAIN_MENU.value()));
             Parent root = loader.load();
@@ -98,18 +110,20 @@ public class GUIView extends Application implements View {
                 Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
             }
         }).start();
+
     }
 
     @Override
     public void inform(String message) {
-        if (message.equals("Login successful")) {
-            showNotification("You have successfully connected!");
-        } else if (message.contains("connected")) {
+        if (sceneEnum == SceneEnum.WAITING_QUEUE) {
+            if(message.equals("Waiting for other players...")) return;
             showNotification(message);
-        } else if (sceneEnum == SceneEnum.WAITING_QUEUE) {
-            // TODO: fare metodo che mette messaggi sullo schermo di chi si è connesso
         } else if (sceneEnum == SceneEnum.MAIN_MENU) {
-            // Gestione altri messaggi nel menu principale
+            if (message.equals("Login successful")) {
+                showNotification("You have successfully connected!");
+            } else if (message.contains("connected")) {
+                showNotification(message);
+            }
         }
     }
 
@@ -157,10 +171,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public Integer askIndex() {
-        if(sceneEnum == SceneEnum.JOIN_GAME_MENU) {
-            return waitForGameChoice();
+        Integer choice = -1;
+        switch (sceneEnum) {
+            case JOIN_GAME_MENU -> {
+                choice = waitForGameChoice();
+            }
+            default -> {}
         }
-        return 0;
+        return choice;
     }
 
     @Override
@@ -223,7 +241,6 @@ public class GUIView extends Application implements View {
             Platform.runLater(this::showNicknameDialog);
             try {
                 String nickname = nicknameFuture.get();
-                sceneEnum = null;
                 return nickname;
             } catch (Exception e) {
                 reportError("Can not load the nickname : " + e.getMessage());
@@ -241,7 +258,6 @@ public class GUIView extends Application implements View {
                 e.printStackTrace();
                 return "";
             } finally {
-                sceneEnum = null;
                 menuChoiceFuture = null;
             }
         }
@@ -271,9 +287,17 @@ public class GUIView extends Application implements View {
     public void updateState(ClientGamePhase gamePhase) {
         this.gamePhase = gamePhase;
         switch (gamePhase){
-            case WAITING_IN_LOBBY -> sceneEnum = SceneEnum.WAITING_QUEUE;
+            case WAITING_IN_LOBBY -> {
+                    Platform.runLater(() -> {
+                        try {
+                            setMainScene(sceneEnum.WAITING_QUEUE);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+            }
             case BOARD_SETUP -> {
-                if (demo) {
+                if (isDemo) {
                     sceneEnum = SceneEnum.BUILDING_PHASE_DEMO;
                 } else {
                     sceneEnum = SceneEnum.BUILDING_PHASE;
@@ -319,18 +343,94 @@ public class GUIView extends Application implements View {
 
     @Override
     public void setIsDemo(Boolean demo) {
-        this.demo = demo;
+        Boolean[][] validStatus = new Boolean[5][7];
+        this.isDemo = demo;
+        if (isDemo) {
+            //first row
+            validStatus[0][0]  = null;
+            validStatus[0][1]  = null;
+            validStatus[0][2]  = null;
+            validStatus[0][3]  = true;
+            validStatus[0][4]  = null;
+            validStatus[0][5]  = null;
+            validStatus[0][6]  = null;
+            //second row
+            validStatus[1][0]  = null;
+            validStatus[1][1]  = null;
+            validStatus[1][2]  = true;
+            validStatus[1][3]  = true;
+            validStatus[1][4]  = true;
+            validStatus[1][5]  = null;
+            validStatus[1][6]  = null;
+            //third row
+            validStatus[2][0]  = null;
+            validStatus[2][1]  = true;
+            validStatus[2][2]  = true;
+            validStatus[2][3]  = true;
+            validStatus[2][4]  = true;
+            validStatus[2][5]  = true;
+            validStatus[2][6]  =null;
+            //fourth row
+            validStatus[3][0]  = null;
+            validStatus[3][1]  = true;
+            validStatus[3][2]  = true;
+            validStatus[3][3]  = true;
+            validStatus[3][4]  = true;
+            validStatus[3][5]  = true;
+            validStatus[3][6]  = null;
+            //fifth row
+            validStatus[4][0]  = null;
+            validStatus[4][1]  = true;
+            validStatus[4][2]  = true;
+            validStatus[4][3]  = null;
+            validStatus[4][4]  = true;
+            validStatus[4][5]  = true;
+            validStatus[4][6]  = null;
+        } else {
+            //first row
+            validStatus[0][0]  = null;
+            validStatus[0][1]  = null;
+            validStatus[0][2]  = true;
+            validStatus[0][3]  = null;
+            validStatus[0][4]  = true;
+            validStatus[0][5]  = true;
+            validStatus[0][6]  = true;
+            //second row
+            validStatus[1][0]  = null;
+            validStatus[1][1]  = true;
+            validStatus[1][2]  = true;
+            validStatus[1][3]  = true;
+            validStatus[1][4]  = true;
+            validStatus[1][5]  = true;
+            validStatus[1][6]  = null;
+            //third row
+            validStatus[2][0]  = true;
+            validStatus[2][1]  = true;
+            validStatus[2][2]  = true;
+            validStatus[2][3]  = true;
+            validStatus[2][4]  = true;
+            validStatus[2][5]  = true;
+            validStatus[2][6]  = true;
+            //fourth row
+            validStatus[3][0]  = true;
+            validStatus[3][1]  = true;
+            validStatus[3][2]  = true;
+            validStatus[3][3]  = true;
+            validStatus[3][4]  = true;
+            validStatus[3][5]  = true;
+            validStatus[3][6]  = true;
+            //fifth row
+            validStatus[4][0]  = true;
+            validStatus[4][1]  = true;
+            validStatus[4][2]  = true;
+            validStatus[4][3]  = null;
+            validStatus[4][4]  = true;
+            validStatus[4][5]  = true;
+            validStatus[4][6]  = true;
+        }
+        this.maschera = validStatus;
     }
 
-    @Override
-    public boolean ReturnValidity(int a, int b) {
-        return false;
-    }
-
-    @Override
-    public void setValidity(int a, int b) {
-
-    }
 
     public void showNotification(String message) {
         Platform.runLater(() -> {
@@ -343,19 +443,25 @@ public class GUIView extends Application implements View {
             notificationStage.setTitle("Notification");
 
             Label label = new Label(message);
-            label.setStyle("-fx-padding: 10; -fx-font-size: 14;");
-            Scene scene = new Scene(new StackPane(label));
+            label.setStyle("-fx-padding: 12; -fx-font-size: 14px; -fx-alignment: top-left;");
+            label.setWrapText(true);
+            label.setMaxWidth(200);
+
+            StackPane root = new StackPane(label);
+            root.setStyle("-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-width: 1px;");
+
+            Scene scene = new Scene(root);
             notificationStage.setScene(scene);
 
-            double notificationWidth = 250;
-            double notificationHeight = 80;
-            double mainX = mainStage.getX();
-            double mainY = mainStage.getY();
-            double mainWidth = mainStage.getWidth();
-            double mainHeight = mainStage.getHeight();
+            double notificationWidth = 220;
+            double notificationHeight = 160;
 
-            notificationStage.setX(mainX + mainWidth - notificationWidth - 10);
-            notificationStage.setY(mainY + mainHeight - notificationHeight - 10);
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            double screenRight = screenBounds.getMaxX();
+            double screenBottom = screenBounds.getMaxY();
+
+            notificationStage.setX(screenRight - notificationWidth - 10);
+            notificationStage.setY(screenBottom - notificationHeight - 10);
 
             notificationStage.show();
 
@@ -376,9 +482,11 @@ public class GUIView extends Application implements View {
     }
     public void setMainScene(SceneEnum sceneName) throws IOException {
         setSceneEnum(sceneName);
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName.value()));
         Parent root = loader.load();
         Scene scene = new Scene(root);
+
         this.mainStage.setScene(scene);
         this.mainStage.centerOnScreen();
         Object controller = loader.getController();
@@ -496,18 +604,18 @@ public class GUIView extends Application implements View {
 
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
-        ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
-
-        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-            int id = entry.getKey();
-            int[] info = entry.getValue();
-            boolean isDemo = info[2] == 1;
-            String suffix = isDemo ? " DEMO" : "";
-            String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
-            gameDescriptions.add(desc);
-        }
-
         Platform.runLater(() -> {
+            ObservableList<String> gameDescriptions = FXCollections.observableArrayList();
+
+            for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+                int id = entry.getKey();
+                int[] info = entry.getValue();
+                boolean isDemo = info[2] == 1;
+                String suffix = isDemo ? " DEMO" : "";
+                String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+                gameDescriptions.add(desc);
+            }
+
             if (controller != null) {
                 try {
                     ((GameListMenuController) controller).displayGames(gameDescriptions);
@@ -518,34 +626,54 @@ public class GUIView extends Application implements View {
                 reportError("Controller is null");
             }
         });
+
     }
 
 
 
-    public void setSelectedGameId(int gameId) {
+    public void setSelectedGameId(Integer gameId) {
         synchronized (lock) {
             this.selectedGameId = gameId;
             lock.notifyAll();
         }
     }
 
-    public int waitForGameChoice() {
+    public Integer waitForGameChoice() {
         synchronized (lock) {
-            while (selectedGameId == -1) {
-                try {
+
+            selectedGameId = -10;
+
+            try {
+                while (selectedGameId == -10) {
                     lock.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return -1;
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
             }
-            int choice = selectedGameId;
-            selectedGameId = -1;
-            return choice;
+            return selectedGameId;
         }
+    }
+    @Override
+    public void setTile(ClientTile tile, int row, int col) {
+        dashBoard[row][col] = tile;
+    }
+    @Override
+    public void setCurrentTile(ClientTile tile) {
+
     }
 
 
     @Override
-    public void resetValidity(int a , int b) {}
+    public boolean returnValidity(int a , int b){
+        return maschera[a][b];
+    }
+    @Override
+    public void setValidity(int a , int b){
+        maschera[a][b] = false;
+    }
+    @Override
+    public void resetValidity(int a , int b){
+        maschera[a][b] = true;
+    }
 }

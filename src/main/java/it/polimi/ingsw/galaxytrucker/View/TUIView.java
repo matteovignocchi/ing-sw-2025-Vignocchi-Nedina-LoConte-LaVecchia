@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class TUIView implements View {
     private ClientGamePhase game;
     private boolean isDemo;
-    private Boolean[][] maschera;
+    private Boolean[][] mask;
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
     private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
@@ -395,7 +395,7 @@ public class TUIView implements View {
                 border.append("+---------");
                 switch (tile.type) {
                     case "EMPTYSPACE"  -> {
-                        if (maschera[row][col] == null) {
+                        if (mask[row][col] == null) {
                             String block = "█████████"; // 9 caratteri pieni
                             top.append("|").append(block);
                             mid.append("|").append(block);
@@ -1014,7 +1014,7 @@ public class TUIView implements View {
             validStatus[4][5]  = true;
             validStatus[4][6]  = true;
         }
-        this.maschera = validStatus;
+        this.mask = validStatus;
 
     }
     @Override
@@ -1028,19 +1028,32 @@ public class TUIView implements View {
         }
     }
     @Override
-    public boolean ReturnValidity(int a , int b){
-        return maschera[a][b];
+    public boolean returnValidity(int a , int b){
+        return mask[a][b];
     }
     @Override
     public void setValidity(int a , int b){
-        maschera[a][b] = false;
+        mask[a][b] = false;
     }
     @Override
     public void resetValidity(int a , int b){
-        maschera[a][b] = true;
+        mask[a][b] = true;
     }
-
+    
+    @Override
+    public void setTile(ClientTile tile,  int row, int col){
+        
+    }
+   @Override
+   public void setCurrentTile(ClientTile tile){
+        
+   }
+    
+    
+    @Override
     public ClientGamePhase getGamePhase() {return game;}
+    
+    
 
 }
 

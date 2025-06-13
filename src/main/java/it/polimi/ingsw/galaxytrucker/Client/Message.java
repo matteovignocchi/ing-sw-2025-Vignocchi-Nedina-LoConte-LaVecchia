@@ -54,6 +54,7 @@ public class Message implements Serializable {
     public static final String OP_UPDATE_DA = "UPDATE_DA";
     public static final String OP_ASK_TO = "ASK_TIMEOUT";
     public static final String OP_COORDINATE_TO = "COORDINATE_TIMEOUT";
+    public static final String OP_INDEX_TO = "INDEX_TIMEOUT";
 
     private final String messageType;
     private final String operation;

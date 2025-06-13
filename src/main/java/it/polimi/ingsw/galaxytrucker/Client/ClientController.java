@@ -7,10 +7,8 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
-import javafx.application.Platform;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -213,6 +211,8 @@ public class ClientController {
                 int response = virtualClient.sendGameRequest("CREATE" , numberOfPlayer , demo);
                 if (response > 0) {
                     virtualClient.setGameId(response);
+                    boolean started = waitForGameStart();
+                    if (!started) return;
                     startGame();
                 }else{
                     v.reportError("Game creation failed");
@@ -564,7 +564,9 @@ public class ClientController {
         } else {
 
             try {
-                if(view.ReturnValidity(a,b)) Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
+                if(view.returnValidity(a,b)) {
+                    view.setTile(tmpTile,a,b);
+                    Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);}
                 else {
                     view.reportError("Invalid position");
                     return;
@@ -701,7 +703,7 @@ public class ClientController {
     }
 
     public boolean returOKAY(int a , int b){
-        return view.ReturnValidity(a,b);
+        return view.returnValidity(a,b);
     }
 
     public String getSomeTile(int a, int b){
