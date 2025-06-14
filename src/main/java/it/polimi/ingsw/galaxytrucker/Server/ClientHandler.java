@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -366,7 +367,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public void updateMapPosition(Map<String,Integer> map) throws IOException {
-        out.writeObject(Message.update(Message.OP_MAP_POSITION, map));
+        out.writeObject(Message.update(Message.OP_MAP_POSITION, new HashMap<>(map)));
         out.flush();
     }
 
