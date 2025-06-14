@@ -1909,60 +1909,66 @@ public class Controller implements Serializable {
     public boolean isProtected(String nick, int d) throws BusinessLogicException {
         boolean flag = false;
         VirtualView x = viewsByNickname.get(nick);
-
-        while (!flag) {
-            boolean ans = false;
-            try {
-                ans = x.ask("SERVER: " + "vuoi usare uno scudo?");
-            } catch (IOException e) {
-                markDisconnected(nick);
-            } catch (Exception e){
-                markDisconnected(nick);
-                System.err.println("[ERROR] in isProtected: " + e.getMessage());
+        Player p = getPlayerByNickname(nick);
+        boolean directionProtected = false;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                Tile tile = p.getTile(i, j);
+                switch (tile) {
+                    case Shield sh -> {
+                        if (sh.getProtectedCorner(d) == 8) directionProtected = true;
+                    }
+                    default -> {
+                    }
+                }
             }
-            if (ans) {
-                int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
-                Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
-                switch (y) {
-                    case Shield shield -> {
-                        if (!(shield.getProtectedCorner(d) == 8)) {
+        }
+        if (directionProtected) {
+            while (!flag) {
+                boolean ans = false;
+                try {
+                    ans = x.ask("SERVER: " + "vuoi usare uno scudo?");
+                } catch (IOException e) {
+                    markDisconnected(nick);
+                } catch (Exception e) {
+                    markDisconnected(nick);
+                    System.err.println("[ERROR] in isProtected: " + e.getMessage());
+                }
+                if (ans) {
+                    int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
+                    Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
+                    switch (y) {
+                        case Shield shield -> {
+                            if (!(shield.getProtectedCorner(d) == 8)) {
+                                try {
+                                    x.inform("SERVER: " + "seleziona un'altro scudo");
+                                } catch (IOException e) {
+                                    markDisconnected(nick);
+                                } catch (Exception e) {
+                                    markDisconnected(nick);
+                                    System.err.println("[ERROR] in isProtected: " + e.getMessage());
+                                }
+                            } else {
+                                return manageEnergyCell(nick);
+                            }
+                        }
+                        default -> {
                             try {
-                                x.inform("SERVER: " + "seleziona un'altro scudo");
+                                x.inform("SERVER: " + "cella non valida");
                             } catch (IOException e) {
                                 markDisconnected(nick);
-                            } catch (Exception e){
+                            } catch (Exception e) {
                                 markDisconnected(nick);
                                 System.err.println("[ERROR] in isProtected: " + e.getMessage());
                             }
-                        } else {
-                            return manageEnergyCell(nick);
                         }
                     }
-                    default ->{
-                        try{
-                            x.inform("SERVER: " + "cella non valida");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in isProtected: " + e.getMessage());
-                        }
-                    }
+                } else {
+                    flag = true;
                 }
-            } else {
-                flag = true;
             }
         }
         return false;
-        //il controller chiede al player se vuole usare uno scudo
-        //il player se vuole usare uno scudo fa partire unn ciclo in cui
-        //deve selezionare una tile, se il controller tramite il visitor osserva che
-        //è uno scudo,controlla che protegga il lato richiesto e passo al punto 2
-        //2: fa in modo di uscire dal ciclo e chiedere al player se vuole quindi usare una batteria
-        //se la vuole usare fa selezionare una energy cell
-        //il controller a questo punto se osserva come prima che è una energy cell fa in modo che si possa eliminare una batteria
-        //se si puo eliminare modifica il flag protection
-        //altrimenti chiede unaltra energy cell
     }
 
     /**

@@ -30,7 +30,7 @@ public class Player implements Serializable {
     //In game values
     //Si inizia a contare da 1 per le posizioni
     protected int lap;
-    protected int position;
+    protected Integer position;
     private boolean isEliminated;
     private GamePhase gamePhase;
     private Tile lastTile;
@@ -177,7 +177,7 @@ public class Player implements Serializable {
     /**
      * @return the position where the player is
      */
-    public int getPos() {
+    public Integer getPos() {
         return position;
     }
 
@@ -192,7 +192,7 @@ public class Player implements Serializable {
      * this method changes the play order
      * @param pos turn order placement
      */
-    public void setPos(int pos) {
+    public void setPos(Integer pos) {
         position = pos;
     }
 
