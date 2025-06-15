@@ -1898,6 +1898,8 @@ public class Controller implements Serializable {
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
+
+    //TODO: caso default null timeout
     public boolean isProtected(String nick, int d) throws BusinessLogicException {
         boolean flag = false;
         VirtualView x = viewsByNickname.get(nick);
@@ -1916,50 +1918,30 @@ public class Controller implements Serializable {
             }
         }
         if (directionProtected) {
-            while (!flag) {
-                boolean ans = false;
-                try {
-                    ans = x.ask("SERVER: " + "vuoi usare uno scudo?");
-                } catch (IOException e) {
-                    markDisconnected(nick);
-                } catch (Exception e) {
-                    markDisconnected(nick);
-                    System.err.println("[ERROR] in isProtected: " + e.getMessage());
-                }
-                if (ans) {
-                    int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
-                    Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
-                    switch (y) {
-                        case Shield shield -> {
-                            if (!(shield.getProtectedCorner(d) == 8)) {
-                                try {
-                                    x.inform("SERVER: " + "seleziona un'altro scudo");
-                                } catch (IOException e) {
-                                    markDisconnected(nick);
-                                } catch (Exception e) {
-                                    markDisconnected(nick);
-                                    System.err.println("[ERROR] in isProtected: " + e.getMessage());
-                                }
-                            } else {
-                                return manageEnergyCell(nick);
-                            }
-                        }
-                        default -> {
-                            try {
-                                x.inform("SERVER: " + "cella non valida");
-                            } catch (IOException e) {
-                                markDisconnected(nick);
-                            } catch (Exception e) {
-                                markDisconnected(nick);
-                                System.err.println("[ERROR] in isProtected: " + e.getMessage());
-                            }
-                        }
-                    }
-                } else {
-                    flag = true;
-                }
-            }
+            inform("SERVER: You can activate the shield by consuming a battery ", nick);
+            return manageEnergyCell(nick);
         }
+//            while (!flag) {
+//                boolean ans = askPlayerDecision("SERVER: Do you want to use a shield?", p);
+//
+//                if (ans) {
+//                    int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
+//
+//                    //TODO: gestire caso default null
+//
+//                    Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
+//                    switch (y) {
+//                        case Shield shield -> {
+//                            if (!(shield.getProtectedCorner(d) == 8))
+//                                inform("SERVER: Select another shield", nick);
+//                            else
+//                                return manageEnergyCell(nick);
+//                        }
+//                        default -> inform("SERVER: Select a valid shield", nick);
+//                    }
+//                } else flag = true;
+//            }
+//        }
         return false;
     }
 
@@ -2054,31 +2036,22 @@ public class Controller implements Serializable {
 //    }
     public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
-        int adjustedDir2 = (dir == 0 || dir == 2) ? dir2 + 4 : dir2 + 5;
         String direction = directions[dir];
+        String size = type ? "big" : "small";
         String nick = getNickByPlayer(p);
-        Tile[][] tmpDash = p.getDashMatrix();
+        VirtualView v = getViewCheck(nick);
 
-        try {
-            viewsByNickname.get(nick).inform("The attack is coming from " + direction + " on section " + adjustedDir2);
-            viewsByNickname.get(nick).inform("SHIP BEFORE THE ATTACK");
-            viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
-        } catch (Exception e) {
-            markDisconnected(nick);
-            return;
-        }
+        String msg = "\nSERVER: A "+size+" attack is coming from "+direction+" on section "+dir2+"\nSERVER: Ship before attack";
+        inform(msg, nick);
+        printPlayerDashboard(v, p, nick);
 
         if (isHitZone(dir, dir2)) {
-            if (type || !isProtected(nick, dir)) {
-                scriptOfDefence(nick, tmpDash, dir2 , dir);
-            } else {
-                try {
-                    viewsByNickname.get(nick).inform("You are safe");
-                } catch (Exception e) {
-                    markDisconnected(nick);
-                }
-            }
-        }
+            if (type || !isProtected(nick, dir))
+                scriptOfDefence(nick, p, v, dir2 , dir);
+            else
+                inform("SERVER: You are protected", nick);
+        } else
+            inform("SERVER: Attack out of range. You are safe", nick);
     }
 
     private boolean isHitZone(int dir, int dir2) {
@@ -2092,8 +2065,7 @@ public class Controller implements Serializable {
 
 
 
-    private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2 , int dir) throws BusinessLogicException {
-        Player p = getPlayerByNickname(Nickname);
+    private void scriptOfDefence(String Nickname , Player p, VirtualView v, int dir2 , int dir) throws BusinessLogicException {
         Boolean tmpBoolean = false;
         switch (dir){
             case 0 ->  tmpBoolean = p.removeFrom0(dir2);
@@ -2102,19 +2074,10 @@ public class Controller implements Serializable {
             case 3 ->  tmpBoolean = p.removeFrom3(dir2);
         }
         if(!tmpBoolean){
-            try {
-                viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-                viewsByNickname.get(Nickname).inform("safe");
-            } catch (Exception e) {
-                markDisconnected(Nickname);
-            }
+            inform("SERVER: You are safe", Nickname);
         }else{
+            inform("SERVER: You've been hit", Nickname);
             askStartHousingForControl(Nickname);
-            try {
-                viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
@@ -2149,6 +2112,8 @@ public class Controller implements Serializable {
 
         for (String nick : playersByNickname.keySet()) {
 
+            Player p = getPlayerCheck(nick);
+            VirtualView v = getViewCheck(nick);
             Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
             try {
                 viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
@@ -2160,7 +2125,7 @@ public class Controller implements Serializable {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, nick)) {
-                            scriptOfDefence(nick , tmpDash , dir2 , dir);
+                            scriptOfDefence(nick, p, v, dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2170,7 +2135,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick,dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2 , dir);
+                            scriptOfDefence(nick, p, v, dir2 , dir);
                         }
                     }else {
                         try {
@@ -2183,7 +2148,7 @@ public class Controller implements Serializable {
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick , tmpDash , dir2 , dir);
+                        scriptOfDefence(nick, p, v, dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2193,7 +2158,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2 ,dir);
+                            scriptOfDefence(nick, p, v , dir2 ,dir);
                         }
                     }else {
                         try {
@@ -2206,7 +2171,7 @@ public class Controller implements Serializable {
             } else if (dir == 1 || dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick , tmpDash , dir2 , dir);
+                        scriptOfDefence(nick, p, v , dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2216,7 +2181,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2 , dir);
+                            scriptOfDefence(nick, p, v, dir2 , dir);
                         }
                     }else {
                         try {
@@ -2410,43 +2375,32 @@ public class Controller implements Serializable {
     }
 
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
-        VirtualView v = getViewCheck(nickname);
         Player p = getPlayerCheck(nickname);
+
         if(p.isConnected()){
             int[] xy;
-            try {
-                v.inform("SERVER: " + "choose your starting housing unit");
-                xy = askPlayerCoordinates(p);
-            } catch (RemoteException e) {
-                markDisconnected(nickname);
-                throw new RuntimeException(e);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
             boolean flag = true;
-            while (flag) {
+
+            do{
+                inform("SERVER: Choose your starting housing unit:", nickname);
+                xy = askPlayerCoordinates(p);
+
+                if(xy == null) {
+                    xy = new int[] {2,3};
+                    break;
+                }
+
                 Tile tmp = p.getTile(xy[0], xy[1]);
                 switch (tmp) {
                     case HousingUnit h -> flag = false;
-                    default -> {
-                        try {
-                            v.inform("SERVER: " + "Position non valid , choose another tile");
-                            xy = askPlayerCoordinates(p);
-                        } catch (IOException e) {
-                            markDisconnected(nickname);
-                        } catch (Exception e){
-                            markDisconnected(nickname);
-                            System.err.println("[ERROR] in askStartHousingForControl: " + e.getMessage());
-                        }
-                    }
+                    default -> inform("SERVER: Not valid position, try again", nickname);
                 }
-            }
+            } while(flag);
+
             checkPlayerAssembly(nickname,  xy[0], xy[1]);
         }else{
             checkPlayerAssembly(nickname,  2,3);
         }
-
-
     }
 
     private void checkPlayerAssembly(String nick , int x , int y) throws BusinessLogicException {
