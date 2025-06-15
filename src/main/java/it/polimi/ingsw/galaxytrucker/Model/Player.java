@@ -918,10 +918,12 @@ public class Player implements Serializable {
     public void removeFrom0(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 0;
+        int tmp = dir2 -4;
+        if(tmp < 0) return;
         while (flag && i < 5) {
-            if (validStatus[i][dir2 - 4] == Status.USED) {
+            if (validStatus[i][tmp] == Status.USED) {
                 flag = false;
-                this.removeTile(i, dir2 - 4);
+                this.removeTile(i, tmp);
             }
             i++;
         }
@@ -936,10 +938,12 @@ public class Player implements Serializable {
     public void removeFrom1(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 6;
+        int tmp = dir2 -5;
+        if(tmp < 0) return;
         while (flag && i >= 0) {
-            if (validStatus[dir2 - 5][i] == Status.USED) {
+            if (validStatus[tmp][i] == Status.USED) {
                 flag = false;
-                this.removeTile(dir2-5, i);
+                this.removeTile(tmp, i);
             }
             i--;
         }
@@ -953,10 +957,12 @@ public class Player implements Serializable {
     public void removeFrom2(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 4;
+        int tmp = dir2 -4;
+        if(tmp < 0) return;
         while (flag && i >= 0) {
-            if (validStatus[i][dir2 - 4] == Status.USED) {
+            if (validStatus[i][tmp] == Status.USED) {
                 flag = false;
-                this.removeTile(i, dir2 - 4);
+                this.removeTile(i, tmp);
             }
             i--;
         }
@@ -970,10 +976,12 @@ public class Player implements Serializable {
     public void removeFrom3(int dir2) throws BusinessLogicException {
         boolean flag = true;
         int i = 0;
+        int tmp = dir2 -5;
+        if(tmp < 0) return;
         while (flag && i < 7) {
-            if (validStatus[dir2 - 5][i] == Status.USED) {
+            if (validStatus[tmp][i] == Status.USED) {
                 flag = false;
-                this.removeTile(dir2-5, i);
+                this.removeTile(tmp, i);
             }
             i++;
         }

@@ -455,12 +455,13 @@ public class ClientController {
                         }
                         case "takereservedtile" -> {
                             try {
-                                tmpTile = clientTileFactory.fromJson(virtualClient.takeReservedTile());
+                                String json = virtualClient.takeReservedTile();
+                                if (json != null) {
+                                    tmpTile = clientTileFactory.fromJson(json);
+                                    view.printTile(tmpTile);
+                                }
                             } catch (Exception e) {
                                 view.reportError(e.getMessage());
-                            }
-                            if (tmpTile != null) {
-                                view.printTile(tmpTile);
                             }
                         }
                         case "logout" -> {
