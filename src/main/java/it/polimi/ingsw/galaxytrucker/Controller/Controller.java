@@ -2102,13 +2102,14 @@ public class Controller implements Serializable {
 
     private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2 , int dir) throws BusinessLogicException {
         Player p = getPlayerByNickname(Nickname);
+        Boolean tmpBoolean = false;
         switch (dir){
-            case 0 -> p.removeFrom0(dir2);
-            case 1 -> p.removeFrom1(dir2);
-            case 2 -> p.removeFrom2(dir2);
-            case 3 -> p.removeFrom3(dir2);
+            case 0 ->  tmpBoolean = p.removeFrom0(dir2);
+            case 1 ->  tmpBoolean = p.removeFrom1(dir2);
+            case 2 ->  tmpBoolean = p.removeFrom2(dir2);
+            case 3 ->  tmpBoolean = p.removeFrom3(dir2);
         }
-        if(Arrays.deepEquals(tmpDash, p.getDashMatrix())){
+        if(!tmpBoolean){
             try {
                 viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
                 viewsByNickname.get(Nickname).inform("safe");

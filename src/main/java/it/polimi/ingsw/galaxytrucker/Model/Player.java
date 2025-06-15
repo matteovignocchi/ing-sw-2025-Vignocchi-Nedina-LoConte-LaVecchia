@@ -915,19 +915,18 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 column index
      */
-    public void removeFrom0(int dir2) throws BusinessLogicException {
-        boolean flag = true;
+    public Boolean removeFrom0(int dir2) throws BusinessLogicException {
         int i = 0;
         int tmp = dir2 -4;
-        if(tmp < 0) return;
-        while (flag && i < 5) {
+        if(tmp < 0) return false;
+        while ( i < 5) {
             if (validStatus[i][tmp] == Status.USED) {
-                flag = false;
                 this.removeTile(i, tmp);
+                return true;
             }
             i++;
         }
-
+        return false;
     }
 
     /**
@@ -935,18 +934,19 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 row index
      */
-    public void removeFrom1(int dir2) throws BusinessLogicException {
-        boolean flag = true;
+    public Boolean removeFrom1(int dir2) throws BusinessLogicException {
         int i = 6;
         int tmp = dir2 -5;
-        if(tmp < 0) return;
-        while (flag && i >= 0) {
+        if(tmp < 0) return false;
+        while (i >= 0) {
             if (validStatus[tmp][i] == Status.USED) {
-                flag = false;
                 this.removeTile(tmp, i);
+                return true;
+
             }
             i--;
         }
+        return false;
     }
 
     /**
@@ -954,18 +954,19 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 column index
      */
-    public void removeFrom2(int dir2) throws BusinessLogicException {
-        boolean flag = true;
+    public Boolean removeFrom2(int dir2) throws BusinessLogicException {
         int i = 4;
         int tmp = dir2 -4;
-        if(tmp < 0) return;
-        while (flag && i >= 0) {
+        if(tmp < 0) return false;
+        while (i >= 0) {
             if (validStatus[i][tmp] == Status.USED) {
-                flag = false;
                 this.removeTile(i, tmp);
+                return true;
             }
             i--;
         }
+        return false;
+
     }
 
     /**
@@ -973,18 +974,18 @@ public class Player implements Serializable {
      * the method remove the first tile hit
      * @param dir2 row index
      */
-    public void removeFrom3(int dir2) throws BusinessLogicException {
-        boolean flag = true;
+    public Boolean removeFrom3(int dir2) throws BusinessLogicException {
         int i = 0;
         int tmp = dir2 -5;
-        if(tmp < 0) return;
-        while (flag && i < 7) {
+        if(tmp < 0) return false;
+        while (i < 7) {
             if (validStatus[tmp][i] == Status.USED) {
-                flag = false;
                 this.removeTile(tmp, i);
+                return true;
             }
             i++;
         }
+        return false;
     }
 
     /**
