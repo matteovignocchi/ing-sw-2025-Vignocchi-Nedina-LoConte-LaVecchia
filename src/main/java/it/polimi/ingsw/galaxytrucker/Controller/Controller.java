@@ -2100,6 +2100,7 @@ public class Controller implements Serializable {
             case 2 -> p.removeFrom2(dir2);
             case 3 -> p.removeFrom3(dir2);
         }
+
         if(Arrays.deepEquals(tmpDash, p.getDashMatrix())){
             try {
                 viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
