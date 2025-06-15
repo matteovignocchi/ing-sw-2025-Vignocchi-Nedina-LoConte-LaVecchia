@@ -438,13 +438,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 if (controller.askPlayerDecision(string, p)) {
                     f.moveRocket(-days, p);
 
-                    /**/controller.inform("SERVER: Goods prima ", nick);
-                    /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
-
                     controller.manageGoods(p, card.getStationGoods());
-
-                    /**/controller.inform("SERVER: Goods prima ", nick);
-                    /**/controller.printListOfGoods(p.getTotalListOfGood(), nick);
 
                     controller.changeMapPosition(nick, p);
                     controller.updatePositionForEveryBody();
@@ -480,8 +474,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
             nicks.add(nick);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
         }
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
@@ -492,11 +484,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
         }
 
-        for (int i = 0; i < players.size(); i++) {
-            Player p = players.get(i);
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nicks.get(i), p, GamePhase.WAITING_FOR_TURN);
-        }
     }
 
     /**
@@ -519,41 +506,49 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
         List<Player> losers = new ArrayList<>();
+
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
-
 
             if (controller.getFirePowerForCard(p) > card.getFirePower()) {
-                String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
+                int days = card.getDays();
+                int credits = card.getCredits();
+                String string = "SERVER: You defeted the Pirates!\n SERVER: Do you want to redeem "+credits+
+                        " and lose "+days+ " flight days?";
 
                 if (controller.askPlayerDecision(string, p)) {
-                    int days = card.getDays();
                     f.moveRocket(-days, p);
-                    int credits = card.getCredits();
                     p.addCredits(credits);
+                    controller.changeMapPosition(nick, p);
+                    controller.updatePositionForEveryBody();
                 }
-                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                controller.changeMapPosition(nick, p);
-                //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
-                controller.updatePositionForEveryBody();
+
+                controller.broadcastInform("SERVER: Pirates defeated by "+nick+"!");
                 break;
-            } else if (controller.getFirePowerForCard(p) < card.getFirePower())
+
+            } else if (controller.getFirePowerForCard(p) < card.getFirePower()) {
                 losers.add(p);
+                controller.inform("SERVER: You have been defeted by slavers. You'll be hit by cannon fire", nick);
+            } else {
+                controller.inform("SERVER: You have the same fire power as Pirates. Draw, nothing happnes", nick);
+            }
         }
 
         if (!losers.isEmpty()) {
+
             int res = losers.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + losers.stream().filter(Player::isConnected).toList().getFirst().throwDice();
-            for (Player p : losers) {
-                for (int i = 0; i < card.getShots_directions().size(); i++) {
+
+            for (Player p : losers){
+                String nick = controller.getNickByPlayer(p);
+                for (int i = 0; i < card.getShots_directions().size(); i++){
+
+                    /**/controller.inform("Cannonata "+card.getShots_size().get(i)+" proveniente da "+card.getShots_directions().get(i), nick);
+                    //TODO: per debug solo! togliere poi
+                    res = 8+i;
+
                     controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
-
-                String nick = controller.getNickByPlayer(p);
-                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
             }
         }
     }
