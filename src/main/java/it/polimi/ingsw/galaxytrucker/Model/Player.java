@@ -65,8 +65,9 @@ public class Player implements Serializable {
 
         //initialized a matrix with the valid position of the ship
         validStatus = new Status[5][7];
-        validStatus[2][3] = Status.BLOCK;
+        validStatus[2][3] = Status.USED;
         if (isDemo) {
+
             //first row
             validStatus[0][0]  = Status.BLOCK;
             validStatus[0][1]  = Status.BLOCK;
@@ -920,7 +921,7 @@ public class Player implements Serializable {
         int tmp = dir2 -4;
         if(tmp < 0) return false;
         while ( i < 5) {
-            if (validStatus[i][tmp] == Status.USED) {
+            if (validStatus[i][tmp] == Status.USED || validStatus[i][tmp]==Status.BLOCK ) {
                 this.removeTile(i, tmp);
                 return true;
             }

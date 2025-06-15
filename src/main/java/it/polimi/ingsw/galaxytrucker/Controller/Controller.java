@@ -1106,6 +1106,18 @@ public class Controller implements Serializable {
         return p.getTotalGood();
     }
 
+
+    //TODO metodo per gabri
+    public boolean playerEliminated(Player p) {
+        int tmp= p.getTotalHuman();
+        if(tmp == 0){
+            p.setEliminated();
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     //TODO questi tre sono i metodi per la autoCommand che mi permettono di eseguire i controlli automatici , vanno inserii nei casi di disconnessione
 
 
