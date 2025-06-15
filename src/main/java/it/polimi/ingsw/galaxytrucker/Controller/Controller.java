@@ -2078,7 +2078,7 @@ public class Controller implements Serializable {
 
         if (isHitZone(dir, dir2)) {
             if (type || !isProtected(nick, dir)) {
-                scriptOfDefence(nick, tmpDash, dir2);
+                scriptOfDefence(nick, tmpDash, dir2 , dir);
             } else {
                 try {
                     viewsByNickname.get(nick).inform("You are safe");
@@ -2100,8 +2100,14 @@ public class Controller implements Serializable {
 
 
 
-    private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2) throws BusinessLogicException {
+    private void scriptOfDefence(String Nickname , Tile[][] tmpDash , int dir2 , int dir) throws BusinessLogicException {
         Player p = getPlayerByNickname(Nickname);
+        switch (dir){
+            case 0 -> p.removeFrom0(dir2);
+            case 1 -> p.removeFrom1(dir2);
+            case 2 -> p.removeFrom2(dir2);
+            case 3 -> p.removeFrom3(dir2);
+        }
         if(Arrays.deepEquals(tmpDash, p.getDashMatrix())){
             try {
                 viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
@@ -2110,7 +2116,6 @@ public class Controller implements Serializable {
                 markDisconnected(Nickname);
             }
         }else{
-            p.removeFrom0(dir2);
             askStartHousingForControl(Nickname);
             try {
                 viewsByNickname.get(Nickname).printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
@@ -2163,7 +2168,7 @@ public class Controller implements Serializable {
             if (dir == 0) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && !checkProtection(dir, dir2, nick)) {
-                            scriptOfDefence(nick , tmpDash , dir2);
+                            scriptOfDefence(nick , tmpDash , dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2173,7 +2178,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick,dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2);
+                            scriptOfDefence(nick , tmpDash , dir2 , dir);
                         }
                     }else {
                         try {
@@ -2186,7 +2191,7 @@ public class Controller implements Serializable {
             } else if (dir == 2) {
                 if (dir2 > 3 && dir2 < 11) {
                     if (type && checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick , tmpDash , dir2);
+                        scriptOfDefence(nick , tmpDash , dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2196,7 +2201,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2);
+                            scriptOfDefence(nick , tmpDash , dir2 ,dir);
                         }
                     }else {
                         try {
@@ -2209,7 +2214,7 @@ public class Controller implements Serializable {
             } else if (dir == 1 || dir == 3) {
                 if (dir2 > 4 && dir2 < 10) {
                     if (type && !checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick , tmpDash , dir2);
+                        scriptOfDefence(nick , tmpDash , dir2 , dir);
                     }else {
                         try {
                             viewsByNickname.get(nick).inform("you are safe");
@@ -2219,7 +2224,7 @@ public class Controller implements Serializable {
                     }
                     if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
                         if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick , tmpDash , dir2);
+                            scriptOfDefence(nick , tmpDash , dir2 , dir);
                         }
                     }else {
                         try {
