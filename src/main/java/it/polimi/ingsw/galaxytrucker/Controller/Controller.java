@@ -68,7 +68,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreatePlagueDeck();
+            decks = deckCreator.CreatePiratesDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -887,42 +887,32 @@ public class Controller implements Serializable {
         return null;
     }
 
-    public Integer askPlayerIndex (Player p) throws BusinessLogicException {
+    public Integer askPlayerIndex(Player p, int len) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
 
-        if(!p.isConnected()) return 0;
+        if (!p.isConnected()) return null;
 
-        /**
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Integer> future = executor.submit(v::askIndex);
+        while (true) {
+            try {
+                Integer idx = v.askIndexWithTimeout();
 
-        try{
-            return future.get(TIME_OUT, TimeUnit.SECONDS);
+                if (idx == null) return null;
 
-        } catch (TimeoutException te){
-            future.cancel(true);
-            return 0;
-
-        } catch (Exception e) {
-            future.cancel(true);
-            markDisconnected(nick);
-            return 0;
-
-        } finally {
-            executor.shutdownNow();
+                if (idx < 0 || idx >= len) {
+                    inform("SERVER: Index out of range. Please try again", nick);
+                    continue;
+                }
+                return idx;
+            } catch (IOException e) {
+                markDisconnected(nick);
+                return null;
+            } catch (Exception e) {
+                markDisconnected(nick);
+                System.err.println("Error in askPlayerIndex");
+                return null;
+            }
         }
-         */
-
-        try {
-            return v.askIndexWithTimeout();
-        } catch (IOException e) {
-            markDisconnected(nick);
-        } catch(Exception e){
-            markDisconnected(nick);
-            System.err.println("Error in askPlayerIndex");
-        }
-        return null;
     }
 
 
@@ -1524,7 +1514,7 @@ public class Controller implements Serializable {
 
         while(flag){
             inform("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods", nick);
-            int tmp = askPlayerIndex(p);
+            int tmp = askPlayerIndex(p, 3);
 
             //TODO: gestione timeout/disconnessione
             //TODO: gestire default
@@ -1565,8 +1555,9 @@ public class Controller implements Serializable {
                 case StorageUnit c -> {
                     if(c.isFull()){
                         inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
-                        printListOfGoods(c.getListOfGoods(), nick);
-                        int tmpint = askPlayerIndex(p);
+                        List<Colour> listGoods = c.getListOfGoods();
+                        printListOfGoods(listGoods, nick);
+                        int tmpint = askPlayerIndex(p, listGoods.size());
 
                         Colour tmp = c.getListOfGoods().get(tmpint);
                         tempGood = c.removeGood(tmpint);
@@ -1575,7 +1566,7 @@ public class Controller implements Serializable {
 
                     inform("SERVER: Select the index of the good to place", nick);
                     printListOfGoods(list, nick);
-                    int tmpint = askPlayerIndex(p);
+                    int tmpint = askPlayerIndex(p, list.size());
 
                     if(list.get(tmpint) == Colour.RED){
                         if(c.isAdvanced()) {
@@ -1620,20 +1611,20 @@ public class Controller implements Serializable {
             switch (tmp2) {
                 case StorageUnit c -> {
                     List<Colour> tmplist = c.getListOfGoods();
-                    printListOfGoods(tmplist, nick);
 
-                    inform("SERVER: Select the index of the good you want to rearrange", nick);
-                    int tmpint = askPlayerIndex(p);
-                    if(!c.getListOfGoods().isEmpty()){
-                        Colour tmpColor = c.getListOfGoods().get(tmpint);
-                        c.removeGood(tmpint);
-                        selectStorageUnitForAdd(v, p, tmpColor, nick);
-                        printPlayerDashboard(v, p, nick);
-                    }else {
-                        inform("SERVER: Empty list of goods", nick);
+                    if(tmplist.isEmpty()){
+                        inform("SERVER: Empty storage unit", nick);
+                        break;
                     }
 
+                    printListOfGoods(tmplist, nick);
+                    inform("SERVER: Select the index of the good you want to rearrange", nick);
+                    int tmpint = askPlayerIndex(p, tmplist.size());
 
+                    Colour tmpColor = tmplist.get(tmpint);
+                    c.removeGood(tmpint);
+                    selectStorageUnitForAdd(v, p, tmpColor, nick);
+                    printPlayerDashboard(v, p, nick);
                 }
                 default -> inform("SERVER: Not valid cell", nick);
             }
@@ -1692,7 +1683,7 @@ public class Controller implements Serializable {
                         List<Colour> tmplist = c.getListOfGoods();
                         printListOfGoods(tmplist, nick);
                         inform("SERVER: Select the index of the good you want to trash", nick);
-                        int tmpint = askPlayerIndex(p);
+                        int tmpint = askPlayerIndex(p, tmplist.size());
                         c.removeGood(tmpint);
                         printPlayerDashboard(v, p, nick);
                     }else{
@@ -1871,7 +1862,8 @@ public class Controller implements Serializable {
     public void startPlauge(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
-        System.out.println("[SERVER: Starting plauge " + nick + "]");
+
+        inform("SERVER: Starting plague", nick);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -1882,7 +1874,7 @@ public class Controller implements Serializable {
                         if(h.isConnected() && !h.getListOfToken().isEmpty()){
                             tmpHuman = h.getListOfToken().getFirst();
                             h.removeHumans(0);
-                            System.out.println("[SERVER plauge nick" + 1 + "]");
+                            inform("SERVER: Connected Housing Unit detected. You lose 1 crewmate", nick);
                             switch (tmpHuman){
                                 case BROWN_ALIEN -> p.setBrownAlien();
                                 case PURPLE_ALIEN ->  p.setPurpleAlien();
