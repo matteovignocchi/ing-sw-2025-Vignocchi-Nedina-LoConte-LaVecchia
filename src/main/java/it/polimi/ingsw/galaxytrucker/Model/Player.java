@@ -638,7 +638,7 @@ public class Player implements Serializable {
         int [] dy = {0, 1, 0, -1};
         int [] opp = {2,3,0,1};
         //addo
-        queue.add(new int[] {2,3});
+        queue.add(new int[] {xx, yy});
         visited[xx][yy] = true;
 
         //inizio algoritmo di ricerca per nodale:
