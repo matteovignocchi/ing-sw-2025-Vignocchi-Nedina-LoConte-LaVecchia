@@ -2509,6 +2509,7 @@ public class Controller implements Serializable {
         if(p.isConnected()){
             int[] xy;
             boolean flag = true;
+            Tile tmp = new MultiJoint(3,3,3,3 , 0);
 
             do{
                 inform("SERVER: Choose your starting housing unit:", nickname);
@@ -2519,14 +2520,20 @@ public class Controller implements Serializable {
                     break;
                 }
 
-                Tile tmp = p.getTile(xy[0], xy[1]);
+                tmp = p.getTile(xy[0], xy[1]);
                 switch (tmp) {
-                    case HousingUnit h -> flag = false;
+                    case HousingUnit h -> {
+                        if(h.getType() == Human.HUMAN) flag = false;
+                        else inform("SERVER: Not valid position, try again", nickname);
+                    }
                     default -> inform("SERVER: Not valid position, try again", nickname);
                 }
             } while(flag);
 
             checkPlayerAssembly(nickname,  xy[0], xy[1]);
+            p.removeTile(xy[0], xy[1]);
+            p.addTile(xy[0],xy[1],tmp);
+
         }else{
             checkPlayerAssembly(nickname,  2,3);
         }
