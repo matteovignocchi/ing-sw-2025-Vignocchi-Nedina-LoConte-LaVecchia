@@ -519,10 +519,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             for (Player p : losers){
                 for (int i = 0; i < card.getShots_directions().size(); i++){
-
-                    //TODO: per debug solo! togliere poi
-                    res = 7;
-
                     boolean ans = controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                     if (ans) break;
                 }
