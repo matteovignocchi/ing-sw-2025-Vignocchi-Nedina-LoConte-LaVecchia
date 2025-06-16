@@ -18,15 +18,22 @@ public class ResponseHandler {
     }
 
     /**
-     * Inserisce la risposta ricevuta nella coda corrispondente al requestId
+     * Controlla se stiamo ancora aspettando una response per questo requestId
+     */
+    public boolean hasPending(String requestId) {
+        return pendingResponses.containsKey(requestId);
+    }
+
+    /**
+     * Inserisce la risposta ricevuta nella coda corrispondente al requestId,
+     * se qualcuno la stava aspettando.
      */
     public void handleResponse(String requestId, Message msg) {
         BlockingQueue<Message> queue = pendingResponses.get(requestId);
         if (queue != null) {
             queue.offer(msg);
-        } else {
-            System.err.println("No response from this requestId: " + requestId);
         }
+        // altrimenti: ignoro silenziosamente
     }
 
     /**
@@ -35,13 +42,12 @@ public class ResponseHandler {
     public Message waitForResponse(String requestId) throws InterruptedException {
         BlockingQueue<Message> queue = pendingResponses.get(requestId);
         if (queue == null) {
-            throw new IllegalStateException("No response from this requestId: " + requestId);
+            throw new IllegalStateException("No response expected for this requestId: " + requestId);
         }
-        Message response = queue.poll(20, TimeUnit.MINUTES);    // opzionale: timeout per evitare blocchi infiniti
+        Message response = queue.poll(20, TimeUnit.MINUTES);
         if (response == null) {
-            throw new InterruptedException("Timeout expired: " + requestId);
+            throw new InterruptedException("Timeout expired waiting for response to: " + requestId);
         }
-
         pendingResponses.remove(requestId);
         return response;
     }
