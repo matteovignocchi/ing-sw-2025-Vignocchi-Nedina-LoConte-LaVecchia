@@ -2097,115 +2097,154 @@ public class Controller implements Serializable {
      * this method evaluates the protection of the ship making use of the other methods
      *
      * @param dir  cardinal direction of the attack
-     * @param type dimension of the attack, true if it is big
+     * @param isBig dimension of the attack, true if it is big
      */
-    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws BusinessLogicException {
+//    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws BusinessLogicException {
+//
+//        String direction = "";
+//        int direction2 = dir2;
+//        switch (dir) {
+//            case 0 -> {
+//                direction = "Nord";
+//                direction2 = dir2+4;
+//            }
+//            case 1 -> {
+//                direction = "East";
+//                direction2 = dir2+5;
+//            }
+//            case 2 -> {
+//                direction = "South";
+//                direction2 = dir2+4;
+//            }
+//            case 3 -> {
+//                direction = "West";
+//                direction2 = dir2+5;
+//            }
+//        }
+//
+//        for (String nick : playersByNickname.keySet()) {
+//
+//            Player p = getPlayerCheck(nick);
+//            VirtualView v = getViewCheck(nick);
+//            Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
+//            try {
+//                viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
+//                viewsByNickname.get(nick).inform("ship before the attack");
+//                viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
+//            } catch (Exception e) {
+//                markDisconnected(nick);
+//            }
+//            if (dir == 0) {
+//                if (dir2 > 3 && dir2 < 11) {
+//                    if (type && !checkProtection(dir, dir2, nick)) {
+//                            scriptOfDefence(nick, p, v, dir2 , dir);
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                    if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+//                        if (!isProtected(nick,dir)) {
+//                            scriptOfDefence(nick, p, v, dir2 , dir);
+//                        }
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                }
+//            } else if (dir == 2) {
+//                if (dir2 > 3 && dir2 < 11) {
+//                    if (type && checkProtection(dir, dir2, nick)) {
+//                        scriptOfDefence(nick, p, v, dir2 , dir);
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+//                        if (!isProtected(nick, dir)) {
+//                            scriptOfDefence(nick, p, v , dir2 ,dir);
+//                        }
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                }
+//            } else if (dir == 1 || dir == 3) {
+//                if (dir2 > 4 && dir2 < 10) {
+//                    if (type && !checkProtection(dir, dir2, nick)) {
+//                        scriptOfDefence(nick, p, v , dir2 , dir);
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
+//                        if (!isProtected(nick, dir)) {
+//                            scriptOfDefence(nick, p, v, dir2 , dir);
+//                        }
+//                    }else {
+//                        try {
+//                            viewsByNickname.get(nick).inform("you are safe");
+//                        } catch (Exception e) {
+//                            markDisconnected(nick);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-        String direction = "";
-        int direction2 = dir2;
-        switch (dir) {
-            case 0 -> {
-                direction = "Nord";
-                direction2 = dir2+4;
-            }
-            case 1 -> {
-                direction = "East";
-                direction2 = dir2+5;
-            }
-            case 2 -> {
-                direction = "South";
-                direction2 = dir2+4;
-            }
-            case 3 -> {
-                direction = "West";
-                direction2 = dir2+5;
-            }
-        }
+    public void defenceFromMeteorite(int dir, boolean isBig, int dir2) throws BusinessLogicException {
+        String[] directions = {"Nord", "East", "South", "West"};
+        String direction = directions[dir];
+        String size = isBig ? "big" : "small";
 
         for (String nick : playersByNickname.keySet()) {
-
             Player p = getPlayerCheck(nick);
             VirtualView v = getViewCheck(nick);
-            Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
-            try {
-                viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
-                viewsByNickname.get(nick).inform("ship before the attack");
-                viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
-            } catch (Exception e) {
-                markDisconnected(nick);
+
+            inform("\nSERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
+            inform("SERVER: Ship before the attack", nick);
+            printPlayerDashboard(v, p, nick);
+
+            if (!isHitZone(dir, dir2)) {
+                inform("SERVER: Meteorite out of range. You are safe.", nick);
+                continue;
             }
-            if (dir == 0) {
-                if (dir2 > 3 && dir2 < 11) {
-                    if (type && !checkProtection(dir, dir2, nick)) {
-                            scriptOfDefence(nick, p, v, dir2 , dir);
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
-                    if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(nick,dir)) {
-                            scriptOfDefence(nick, p, v, dir2 , dir);
-                        }
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
+            if (isBig) {
+                if (!checkProtection(dir, dir2, nick)) {
+                    scriptOfDefence(nick, p, v, dir2, dir);
+                } else {
+                    inform("SERVER: Shield protected you!", nick);
                 }
-            } else if (dir == 2) {
-                if (dir2 > 3 && dir2 < 11) {
-                    if (type && checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick, p, v, dir2 , dir);
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
-                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick, p, v , dir2 ,dir);
-                        }
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
-                }
-            } else if (dir == 1 || dir == 3) {
-                if (dir2 > 4 && dir2 < 10) {
-                    if (type && !checkProtection(dir, dir2, nick)) {
-                        scriptOfDefence(nick, p, v , dir2 , dir);
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
-                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-                        if (!isProtected(nick, dir)) {
-                            scriptOfDefence(nick, p, v, dir2 , dir);
-                        }
-                    }else {
-                        try {
-                            viewsByNickname.get(nick).inform("you are safe");
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
-                    }
+            }
+            else {
+                boolean exposed = p.checkNoConnector(dir, dir2);
+                boolean shielded = isProtected(nick, dir);
+
+                if (exposed && !shielded) {
+                    scriptOfDefence(nick, p, v, dir2, dir);
+                } else {
+                    inform("SERVER: You are safe", nick);
                 }
             }
         }
     }
+
+
 
     public void addCreditToPlayer(int credits, Player player) {
         player.addCredits(credits);
@@ -2251,140 +2290,195 @@ public class Controller implements Serializable {
     }
 
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
-        boolean result = false;
-        if (dir == 0) {
-            boolean flag = true;
-            int i = 0;
-            while (flag && i < 5) {
-                if (playersByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
-                    Tile y = playersByNickname.get(player).getTile(i, dir2 - 4);
-                    switch (y) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                return manageEnergyCell(player);
-                            }
-                        }
-                        default -> {
-                            return false;
-                        }
-                    }
-                }
-                i++;
+        return switch (dir) {
+            case 0 -> checkColumnProtection(player, dir2 - 4);
+            case 1 -> checkRowProtectionRight(player, dir2 - 5);
+            case 3 -> checkRowProtectionLeft(player, dir2 - 5);
+            default -> false;
+        };
+    }
 
+    private boolean checkColumnProtection(String player, int col) throws BusinessLogicException {
+        for (int row = 0; row < 5; row++) {
+            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                Tile tile = playersByNickname.get(player).getTile(row, col);
+                return isCannonProtected(tile, player);
             }
-            return result;
-        } else if (dir == 1) {
-            boolean flag = true;
-            int i = 5;
-            while (flag && i >= 1) {
-                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-                    switch (y1) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    switch (y2) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    switch (y3) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    flag = false;
-
-                }
-                i--;
-            }
-            return result;
-        }else if (dir == 3) {
-            boolean flag = true;
-            int i = 1;
-            while (flag && i<6) {
-                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-                    switch (y1) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    switch (y2) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    switch (y3) {
-                        case Cannon c -> {
-                            if (!c.isDouble()) {
-                                return true;
-                            } else {
-                                if (manageEnergyCell(player)) {
-                                    return true;
-                                }
-                            }
-                        }
-                        default -> {
-                        }
-                    }
-                    flag = false;
-
-                }
-                i++;
-            }
-            return result;
-
         }
         return false;
     }
+
+    private boolean checkRowProtectionRight(String player, int row) throws BusinessLogicException {
+        for (int col = 5; col >= 1; col--) {
+            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                return checkAdjacentTilesForCannon(player, row, col);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkRowProtectionLeft(String player, int row) throws BusinessLogicException {
+        for (int col = 1; col < 6; col++) {
+            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                return checkAdjacentTilesForCannon(player, row, col);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkAdjacentTilesForCannon(String player, int row, int col) throws BusinessLogicException {
+        for (int d = -1; d <= 1; d++) {
+            int nc = col + d;
+            if (nc >= 0 && nc < 7) {
+                Tile tile = playersByNickname.get(player).getTile(row, nc);
+                if (isCannonProtected(tile, player)) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isCannonProtected(Tile tile, String player) throws BusinessLogicException {
+        return switch (tile) {
+            case Cannon c -> !c.isDouble() || manageEnergyCell(player);
+            default -> false;
+        };
+    }
+
+    //    public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
+//        boolean result = false;
+//        if (dir == 0) {
+//            boolean flag = true;
+//            int i = 0;
+//            while (flag && i < 5) {
+//                if (playersByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
+//                    Tile y = playersByNickname.get(player).getTile(i, dir2 - 4);
+//                    switch (y) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                return manageEnergyCell(player);
+//                            }
+//                        }
+//                        default -> {
+//                            return false;
+//                        }
+//                    }
+//                }
+//                i++;
+//
+//            }
+//            return result;
+//        } else if (dir == 1) {
+//            boolean flag = true;
+//            int i = 5;
+//            while (flag && i >= 1) {
+//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
+//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
+//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
+//                    switch (y1) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    switch (y2) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    switch (y3) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    flag = false;
+//
+//                }
+//                i--;
+//            }
+//            return result;
+//        }else if (dir == 3) {
+//            boolean flag = true;
+//            int i = 1;
+//            while (flag && i<6) {
+//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
+//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
+//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
+//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
+//                    switch (y1) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    switch (y2) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    switch (y3) {
+//                        case Cannon c -> {
+//                            if (!c.isDouble()) {
+//                                return true;
+//                            } else {
+//                                if (manageEnergyCell(player)) {
+//                                    return true;
+//                                }
+//                            }
+//                        }
+//                        default -> {
+//                        }
+//                    }
+//                    flag = false;
+//
+//                }
+//                i++;
+//            }
+//            return result;
+//
+//        }
+//        return false;
+//    }
 
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
