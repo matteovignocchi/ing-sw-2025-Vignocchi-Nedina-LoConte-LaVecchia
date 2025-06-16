@@ -543,9 +543,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 String nick = controller.getNickByPlayer(p);
                 for (int i = 0; i < card.getShots_directions().size(); i++){
 
-                    /**/controller.inform("Cannonata "+card.getShots_size().get(i)+" proveniente da "+card.getShots_directions().get(i), nick);
                     //TODO: per debug solo! togliere poi
-                    res = 8+i;
+                    res = 7;
 
                     controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
