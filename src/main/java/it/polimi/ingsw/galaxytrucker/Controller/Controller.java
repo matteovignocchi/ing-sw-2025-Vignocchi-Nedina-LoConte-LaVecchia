@@ -657,6 +657,8 @@ public class Controller implements Serializable {
             }
 
             fBoard.eliminatePlayers();
+            //TODO: chiedere a chat se va bene o superfluo
+            fBoard.orderPlayersInFlightList();
 
             for (String nick : inFlight) {
                 Player p = playersByNickname.get(nick);
@@ -1117,8 +1119,7 @@ public class Controller implements Serializable {
     }
 
 
-    //TODO metodo per gabri
-    public boolean playerEliminated(Player p) {
+    public boolean manageIfPlayerEliminated(Player p) {
         int tmp= p.getTotalHuman();
         if(tmp == 0){
             p.setEliminated();
@@ -2056,7 +2057,7 @@ public class Controller implements Serializable {
 //        }
 //
 //    }
-    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
+    public boolean defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
         String size = type ? "big" : "small";
@@ -2068,12 +2069,16 @@ public class Controller implements Serializable {
         printPlayerDashboard(v, p, nick);
 
         if (isHitZone(dir, dir2)) {
-            if (type || !isProtected(nick, dir))
-                scriptOfDefence(nick, p, v, dir2 , dir);
-            else
+            if (type || !isProtected(nick, dir)){
+                return scriptOfDefence(nick, p, v, dir2 , dir);
+            } else {
                 inform("SERVER: You are protected", nick);
-        } else
+            }
+        } else {
             inform("SERVER: Attack out of range. You are safe", nick);
+        }
+
+        return false;
     }
 
     private boolean isHitZone(int dir, int dir2) {
@@ -2087,7 +2092,7 @@ public class Controller implements Serializable {
 
 
 
-    private void scriptOfDefence(String Nickname , Player p, VirtualView v, int dir2 , int dir) throws BusinessLogicException {
+    private boolean scriptOfDefence(String Nickname , Player p, VirtualView v, int dir2 , int dir) throws BusinessLogicException {
         Boolean tmpBoolean = false;
         switch (dir){
             case 0 ->  tmpBoolean = p.removeFrom0(dir2);
@@ -2095,12 +2100,20 @@ public class Controller implements Serializable {
             case 2 ->  tmpBoolean = p.removeFrom2(dir2);
             case 3 ->  tmpBoolean = p.removeFrom3(dir2);
         }
+
+        if(manageIfPlayerEliminated(p)){
+            inform("SERVER: You have lost all your humans", Nickname);
+            return true;
+        }
+
         if(!tmpBoolean){
             inform("SERVER: You are safe", Nickname);
         }else{
             inform("SERVER: You've been hit", Nickname);
             askStartHousingForControl(Nickname);
         }
+
+        return false;
     }
 
     /**
