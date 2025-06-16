@@ -832,15 +832,25 @@ public class Controller implements Serializable {
         return ans;
         */
 
+//        try {
+//            return v.askWithTimeout(question);
+//        } catch (IOException e) {
+//            markDisconnected(nick);
+//        } catch(Exception e){
+//            markDisconnected(nick);
+//            System.err.println("Error in askPlayerDecision");
+//        }
+//        return false;
         try {
             return v.askWithTimeout(question);
         } catch (IOException e) {
+            System.err.println("[WARN] IOException in askPlayerDecision for " + nick + ": " + e.getMessage());
+            return false;
+        } catch (Exception e) {
             markDisconnected(nick);
-        } catch(Exception e){
-            markDisconnected(nick);
-            System.err.println("Error in askPlayerDecision");
+            System.err.println("Error in askPlayerDecision: " + e);
+            return false;
         }
-        return false;
 
     }
 

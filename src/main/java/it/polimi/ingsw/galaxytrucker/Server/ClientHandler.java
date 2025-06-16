@@ -1,4 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Server;
+import it.polimi.ingsw.galaxytrucker.Client.ResponseHandler;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.Message;
 import it.polimi.ingsw.galaxytrucker.Client.UpdateViewRequest;
@@ -15,12 +16,23 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler extends VirtualViewAdapter implements Runnable {
     private final Socket socket;
     private final GameManager gameManager;
     private final ObjectInputStream in;
     private final ObjectOutputStream out;
+    private final ResponseHandler responseHandler = new ResponseHandler();
+    private final ExecutorService worker = Executors.newSingleThreadExecutor();
+
+    private Message sendRequestAndWait(Message req) throws IOException, InterruptedException {
+        responseHandler.expect(req.getRequestId());
+        out.writeObject(req);
+        out.flush();
+        return responseHandler.waitForResponse(req.getRequestId());
+    }
 
     public ClientHandler(Socket socket, GameManager gameManager) throws IOException {
         this.socket = socket;
@@ -36,17 +48,29 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
-                Message req = (Message) in.readObject();
-
-                if (!Message.TYPE_REQUEST.equals(req.getMessageType())) {
-                    out.writeObject(Message.error("Expected REQUEST but got " + req.getMessageType()));
-                    out.flush();
-                    continue;
+                Message msg = (Message) in.readObject();
+                switch (msg.getMessageType()) {
+                    case Message.TYPE_REQUEST:
+                        worker.submit(() -> {
+                            try {
+                                Message reply = dispatch(msg);
+                                synchronized(out) {
+                                    out.writeObject(reply);
+                                    out.flush();
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Errore dispatch: " + e.getMessage());
+                            }
+                        });
+                        break;
+                    case Message.TYPE_RESPONSE:
+                        responseHandler.handleResponse(msg.getRequestId(), msg);
+                        break;
+                    case Message.TYPE_UPDATE:
+                    case Message.TYPE_NOTIFICATION:
+                        break;
+                    default:
                 }
-
-                Message resp = dispatch(req);
-                out.writeObject(resp);
-                out.flush();
             }
         } catch (EOFException eof) {
             System.out.println("Client disconnected: " + socket.getRemoteSocketAddress());
@@ -64,19 +88,6 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         try {
             String op = req.getOperation();
             Object p  = req.getPayload();
-
-            if (Message.OP_COORDINATE_TO.equals(op)) {
-                int[] coords = askCoordsWithTimeout();
-                return wrap(req, coords);
-            }
-            if (Message.OP_ASK_TO.equals(op)) {
-                boolean yesNo = askWithTimeout((String) p);
-                return wrap(req, yesNo);
-            }
-            if (Message.OP_INDEX_TO.equals(op)) {
-                Integer idx = askIndexWithTimeout();
-                return wrap(req, idx);
-            }
 
             return switch (op) {
                 case Message.OP_GET_RESERVED_TILE  -> wrap(req, handleGetReservedTile(p));
@@ -396,112 +407,86 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public boolean askWithTimeout(String question) throws IOException {
-        Message req = Message.request(Message.OP_ASK_TO, question);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
-        try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_ASK_TIMEOUT", e);
-        }
-        return (Boolean) resp.getPayload();
-    }
-
-    @Override
-    public int[] askCoordsWithTimeout() throws IOException {
-        Message req = Message.request(Message.OP_COORDINATE_TO, null);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
-        try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_COORDS_TIMEOUT", e);
-        }
-        return (int[]) resp.getPayload();
-    }
-
-    @Override
-    public Integer askIndexWithTimeout() throws IOException {
-        Message req = Message.request(Message.OP_INDEX_TO, null);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
-        try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_INDEX_TIMEOUT", e);
-        }
-        return (Integer) resp.getPayload();
-    }
-
-
-    @Override
     public Boolean ask(String question) throws IOException {
-        // identico a askWithTimeout
-        Message req = Message.request(Message.OP_ASK, question);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
         try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_ASK", e);
+            Message resp = sendRequestAndWait(Message.request(Message.OP_ASK, question));
+            return (Boolean) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
         }
-        return (Boolean) resp.getPayload();
     }
 
     @Override
     public Integer askIndex() throws IOException {
-        Message req = Message.request(Message.OP_INDEX, null);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
         try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_INDEX", e);
+            Message resp = sendRequestAndWait(Message.request(Message.OP_INDEX, null));
+            return (Integer) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return 0;
         }
-        return (Integer) resp.getPayload();
     }
 
     @Override
     public int[] askCoordinate() throws IOException {
-        Message req = Message.request(Message.OP_COORDINATE, null);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
         try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_COORDINATE", e);
+            Message resp = sendRequestAndWait(Message.request(Message.OP_COORDINATE, null));
+            return (int[]) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
         }
-        return (int[]) resp.getPayload();
     }
 
     @Override
     public String askString() throws IOException {
-        Message req = Message.request(Message.OP_STRING, null);
-        out.writeObject(req);
-        out.flush();
-
-        Message resp;
         try {
-            resp = (Message) in.readObject();
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Invalid response for OP_STRING", e);
+            Message resp = sendRequestAndWait(Message.request(Message.OP_STRING, null));
+            return (String) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
         }
-        return (String) resp.getPayload();
     }
 
+    @Override
+    public boolean askWithTimeout(String question) throws IOException {
+        try {
+            Message resp = sendRequestAndWait(
+                    Message.request(Message.OP_ASK_TO, question)
+            );
+            return (Boolean) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
 
+    @Override
+    public Integer askIndexWithTimeout() throws IOException {
+        try {
+            Message resp = sendRequestAndWait(
+                    Message.request(Message.OP_INDEX_TO, null)
+            );
+            return (Integer) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return 0;
+        }
+    }
+
+    @Override
+    public int[] askCoordsWithTimeout() throws IOException {
+        try {
+            Message resp = sendRequestAndWait(
+                    Message.request(Message.OP_COORDINATE_TO, null)
+            );
+            return (int[]) resp.getPayload();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
 }
 

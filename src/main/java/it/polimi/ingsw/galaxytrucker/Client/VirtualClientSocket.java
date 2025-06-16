@@ -49,7 +49,11 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                         }
                     }
                     case Message.TYPE_REQUEST -> handleRequest(msg);
-                    case Message.TYPE_RESPONSE -> responseHandler.handleResponse(msg.getRequestId(), msg);
+                    case Message.TYPE_RESPONSE -> {
+                        if (responseHandler.hasPending(msg.getRequestId())) {
+                            responseHandler.handleResponse(msg.getRequestId(), msg);
+                        }
+                    }
                     case Message.TYPE_UPDATE -> handleUpdate(msg);
                     case Message.TYPE_ERROR -> this.reportError((String) msg.getPayload());
                     default -> throw new IllegalStateException("Unexpected value: " + msg.getOperation());
@@ -103,14 +107,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 }
                 case Message.OP_ASK_TO -> {
                     Boolean decision = this.askWithTimeout((String)msg.getPayload());
-                    if(decision == null) { return; }
+                    //if(decision == null) { return; }
                     Message response = Message.response(decision, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_COORDINATE_TO -> {
                     this.inform((String) msg.getPayload());
                     int[] coordinate = this.askCoordsWithTimeout();
-                    if (coordinate == null) { return; }
+                    //if (coordinate == null) { return; }
                     Message response = Message.response(coordinate, msg.getRequestId());
                     sendRequest(response);
                 }
