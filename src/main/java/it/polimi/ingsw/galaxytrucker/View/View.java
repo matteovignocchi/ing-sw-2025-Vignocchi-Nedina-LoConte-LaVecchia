@@ -30,7 +30,7 @@ public interface View {
     void printTile(ClientTile tile);
     void printCard(ClientCard card);
     String sendAvailableChoices() throws Exception;
-    void updateMap(Map<String, Integer> map);
+    void updateMap(Map<String, int[] > map);
     String choosePlayer() throws IOException, InterruptedException;
     void printListOfCommand();
     void setIsDemo(Boolean demo);

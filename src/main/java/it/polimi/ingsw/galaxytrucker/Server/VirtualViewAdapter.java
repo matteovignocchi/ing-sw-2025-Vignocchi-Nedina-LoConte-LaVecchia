@@ -48,7 +48,7 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void lookDashBoard() throws Exception {}
     @Override public void logOut() throws Exception {}
     @Override public void setNickname(String nickname) throws Exception {}
-    @Override public void updateMapPosition(Map<String, Integer> Position) throws Exception {}
+    @Override public void updateMapPosition(Map<String, int[] > Position) throws Exception {}
 //    @Override public void setFlagStart() throws Exception {}
     @Override public void setStart() throws Exception {}
     @Override public String askInformationAboutStart() throws Exception { return null; }

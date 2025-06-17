@@ -327,7 +327,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public void updateMap(Map<String, Integer> map) {
+    public void updateMap(Map<String, int[]> map) {
 
     }
 

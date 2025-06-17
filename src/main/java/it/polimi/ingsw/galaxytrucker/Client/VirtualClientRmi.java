@@ -382,7 +382,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position) throws RemoteException {
+    public void updateMapPosition(Map<String, int [] > Position) throws RemoteException {
         clientController.updateMapPositionByController(Position);
     }
 
