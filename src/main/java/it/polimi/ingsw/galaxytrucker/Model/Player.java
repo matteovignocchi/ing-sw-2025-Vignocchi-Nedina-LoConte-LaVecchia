@@ -618,13 +618,17 @@ public class Player implements Serializable {
             removeTile(0,5);
             removeTile(0,6);
         }
+        Tile tmp = getTile(x,y);
+
         boolean flag = true;
         while(flag){
             flag = false;
-            boolean tmp = controlAssembly2(x,y);
-            if(tmp) flag = true;
+            boolean tmpBo = controlAssembly2(x,y);
+            if(tmpBo) flag = true;
         }
         controlOfConnection();
+        removeTile(x, y);
+        addTile(x,y,tmp);
     }
 
     public boolean controlAssembly2(int xx, int yy) throws BusinessLogicException {
