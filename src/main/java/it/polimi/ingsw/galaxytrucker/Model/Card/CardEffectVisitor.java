@@ -378,7 +378,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.updatePositionForEveryBody();
                 exit = true;
             } else {
-                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players", nick);
+                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
             }
 
             if (exit) break;
@@ -419,11 +419,11 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     controller.updatePositionForEveryBody();
                     exit = true;
                 } else {
-                    if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players", nick);
+                    if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
                 }
             } else {
                 controller.inform("SERVER: You don't have enough crewmates to be able to redeem the card's reward", nick);
-                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players", nick);
+                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
             }
 
             if (exit) break;
@@ -543,31 +543,35 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     @Override
     public void visit(PlanetsCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
-        boolean exit = false;
-
         int z = 0;
+        int days = card.getDays();
+        List<Player> landedPlayers = new ArrayList<>();
+
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
 
-            String string = "SERVER: Do you want to redeem the card's reward and lose the indicated flight days?";
+            String string = "SERVER: Do you want to land on "+(z+1)+"° planet, take its goods and lose "+days+" flight days?";
 
             if (controller.askPlayerDecision(string, p)) {
-                int days = card.getDays();
-                f.moveRocket(-days, p);
+                landedPlayers.add(p);
+                controller.broadcastInform("SERVER: "+nick+" landed on planet "+(z+1));
                 controller.manageGoods(p, card.getRewardGoods().get(z));
                 z++;
 
-                controller.changeMapPosition(nick, p);
-                controller.updatePositionForEveryBody();
-                if (z >= card.getRewardGoods().size()) exit = true;
+                if (z >= card.getRewardGoods().size()) break;
             }
 
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nick, p, GamePhase.WAITING_FOR_TURN);
+            if(players.indexOf(p) < players.size()-1) controller.inform("SERVER: Asking other players...", nick);
+        }
 
-            if (exit) break;
+        if (!landedPlayers.isEmpty()) {
+            for(int i = landedPlayers.size()-1; i >= 0; i--){
+                Player p = landedPlayers.get(i);
+                String nick = controller.getNickByPlayer(p);
+                f.moveRocket(-days, p);
+                controller.changeMapPosition(nick, p);
+            }
+            controller.updatePositionForEveryBody();
         }
     }
 

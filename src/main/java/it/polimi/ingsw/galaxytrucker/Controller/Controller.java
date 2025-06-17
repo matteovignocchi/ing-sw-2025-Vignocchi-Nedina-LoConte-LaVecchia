@@ -68,7 +68,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreatePiratesDeck();
+            decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -648,7 +648,7 @@ public class Controller implements Serializable {
                 String nick = inFlight.get(i);
                 Player p   = playersByNickname.get(nick);
 
-                if (askPlayerDecision("SERVER: Do you want to abandon the flight? ", p)) {
+                if (askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)) {
                     p.setEliminated();
                     handleElimination(p);
                 }

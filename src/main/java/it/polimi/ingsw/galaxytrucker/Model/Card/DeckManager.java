@@ -197,11 +197,37 @@ public class DeckManager implements Serializable {
         size1.add(false);
         size1.add(true);
         size1.add(true);
-
-
         Card c1 = new PiratesCard("1", 2, 3, 5, dir1, size1);
         Card c2 = new PiratesCard("2", 2, 3, 5, dir1, size1);
         Card c3 = new PiratesCard("3", 2, 3, 5, dir1, size1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreatePlanetsDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("1", list, 4);
+        Card c2 = new PlanetsCard("2", list, 4);
+        Card c3 = new PlanetsCard("3", list, 4);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
