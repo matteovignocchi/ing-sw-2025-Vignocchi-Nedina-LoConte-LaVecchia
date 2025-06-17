@@ -188,29 +188,20 @@ public class DeckManager implements Serializable {
 
     public List<Deck> CreatePiratesDeck() throws CardEffectException {
         List<Integer> dir1 = new ArrayList<>();
+        dir1.add(0);
+        dir1.add(1);
         dir1.add(2);
-        dir1.add(2);
-        dir1.add(2);
-        dir1.add(2);
+        dir1.add(3);
         List<Boolean> size1 = new ArrayList<>();
-        size1.add(true);
-        size1.add(true);
+        size1.add(false);
+        size1.add(false);
         size1.add(true);
         size1.add(true);
 
-//        List<Integer> dir2 = new ArrayList<>();
-//        dir2.add(0);
-//        List<Boolean> size2 = new ArrayList<>();
-//        size2.add(false);
-//
-//        List<Integer> dir3 = new ArrayList<>();
-//        dir3.add(0);
-//        List<Boolean> size3 = new ArrayList<>();
-//        size3.add(false);
 
         Card c1 = new PiratesCard("1", 2, 3, 5, dir1, size1);
-        Card c2 = new PiratesCard("2", 3, 2, 5, dir1, size1);
-        Card c3 = new PiratesCard("3", 3, 2, 5, dir1, size1);
+        Card c2 = new PiratesCard("2", 2, 3, 5, dir1, size1);
+        Card c3 = new PiratesCard("3", 2, 3, 5, dir1, size1);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
