@@ -514,16 +514,16 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         if (!losers.isEmpty()) {
 
-            int res = losers.stream().filter(Player::isConnected).toList().getFirst().throwDice()
-                    + losers.stream().filter(Player::isConnected).toList().getFirst().throwDice();
-
-            for (Player p : losers){
-                for (int i = 0; i < card.getShots_directions().size(); i++){
-                    boolean ans = controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
-                    if (ans) break;
+            for (int i = 0; i < card.getShots_directions().size(); i++){
+                Player first = losers.stream().filter(p -> p.isConnected() && !p.isEliminated()).toList().getFirst();
+                int res = first.throwDice() + first.throwDice();
+                for (Player p : losers){
+                    if(!p.isEliminated())
+                        controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
             }
         }
+
     }
 
     /**
