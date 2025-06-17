@@ -720,7 +720,7 @@ public class ClientController {
         return null;
     }
 
-    public void updateMapPositionByController(Map<String, Integer> Position){
+    public void updateMapPositionByController(Map<String, int[] > Position){
         view.updateMap(Position);
     }
 

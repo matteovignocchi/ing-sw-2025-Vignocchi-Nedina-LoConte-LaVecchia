@@ -26,7 +26,7 @@ public class TUIView implements View {
     private static final String PURPLE = "\u001B[35m";
     private static final String BROWN = "\u001B[33m";
     private static final String PEFOH = "\u001B[36m";
-    private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+    private static Map<String , int[] > mapPosition = new ConcurrentHashMap<>();
     private static final Map<String, String> ANSI_COLOR = Map.of(
             "RED",    RED,
             "GREEN",  GREEN,
@@ -93,7 +93,7 @@ public class TUIView implements View {
         game = gamePhase;
     }
     @Override
-    public void updateMap(Map<String, Integer> map) {
+    public void updateMap(Map<String, int[]> map) {
         mapPosition = map;
     }
 
@@ -103,12 +103,16 @@ public class TUIView implements View {
 
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
+                .filter(e -> e.getValue()[2] == 0) // todo:qui filtro solo chi è ancora in gioco, lassciamo cosi o un player deve poter vedere tutti?
+                .sorted(Comparator.comparingInt(e -> e.getValue()[0]))
                 .forEach(entry -> {
-                    int pos = entry.getValue();
-                    String nick = entry.getKey();
-                    inform(String.format("  %d - %s", pos, nick));
+                    String nick      = entry.getKey();
+                    int[] info       = entry.getValue();
+                    int   pos        = info[0];
+                    int   lap        = info[1];
+                    inform(String.format("  %s - Lap: %d, Position: %d", nick, lap, pos));
                 });
+
         inform("Select nickname of the player:");
 
         while(true) {
@@ -127,7 +131,7 @@ public class TUIView implements View {
             }
 
             for (String key : mapPosition.keySet()) {
-                if (key.equalsIgnoreCase(nickname)) {
+                if (key.equalsIgnoreCase(nickname) && mapPosition.get(key)[2] == 0) {
                     return key;
                 }
             }
@@ -443,18 +447,34 @@ public class TUIView implements View {
         System.out.println();
     }
 
-    //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
     @Override
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())    // ordina per posizione
-                .forEachOrdered(entry -> {
-                    int pos = entry.getValue();
-                    String nick = entry.getKey();
-                    inform(String.format("  %d - %s", pos, nick));
+                .sorted(Comparator.comparingInt(e -> e.getValue()[0]))
+                .forEach(entry -> {
+                    String nick  = entry.getKey();
+                    int[] data   = entry.getValue();
+                    int pos      = data[0];
+                    int lap      = data[1];
+                    boolean elim = data[2] == 1;
+                    String stato = elim ? "Eliminated" : "In game";
+                    inform(String.format(" %s – Lap: %d, Position: %d, status: %s", nick, lap, pos, stato));
                 });
     }
+
+    //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
+//    @Override
+//    public void printMapPosition() {
+//        System.out.println("\nPlayers in game:");
+//        mapPosition.entrySet().stream()
+//                .sorted(Map.Entry.comparingByValue())    // ordina per posizione
+//                .forEachOrdered(entry -> {
+//                    int pos = entry.getValue();
+//                    String nick = entry.getKey();
+//                    inform(String.format("  %d - %s", pos, nick));
+//                });
+//    }
 //    public void printMapPosition(){
 //        StringBuilder string = new StringBuilder();
 //        for(String key : mapPosition.keySet()){

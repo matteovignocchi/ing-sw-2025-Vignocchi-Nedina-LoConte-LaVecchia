@@ -30,7 +30,7 @@ public class Controller implements Serializable {
     private final int gameId;
     public transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
-    private final Map<String , Integer> playersPosition = new ConcurrentHashMap<>();
+    private Map<String , int[] > playersPosition = new ConcurrentHashMap<>();
 
     //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
@@ -101,7 +101,8 @@ public class Controller implements Serializable {
         Player p      = playersByNickname.get(nickname);
         try {
             v.updateGameState(enumSerializer.serializeGamePhase(p.getGamePhase()));
-            v.updateMapPosition(playersPosition);
+            Map<String,int[]> fullMap = buildPlayersPositionMap();
+            v.updateMapPosition(fullMap);
             v.showUpdate(
                     nickname,
                     getFirePower(p),
@@ -154,7 +155,7 @@ public class Controller implements Serializable {
         view.setTile(tileSerializer.toJson(p.getTile(2,3)));
         playersByNickname.put(nickname, p);
         viewsByNickname.put(nickname, view);
-        playersPosition.put(nickname, p.getPos());
+        playersPosition=buildPlayersPositionMap();
 
         broadcastInform( nickname + "  joined");
     }
@@ -330,10 +331,11 @@ public class Controller implements Serializable {
 
     public void startGame() {
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.BOARD_SETUP));
+        Map<String,int[]> fullMap = buildPlayersPositionMap();
 
         viewsByNickname.forEach((nick, v) -> {
             try {
-                v.updateMapPosition(playersPosition);
+                v.updateMapPosition(fullMap);
                 v.setIsDemo(isDemo);
                 v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.BOARD_SETUP));
                 v.setTile(tileSerializer.toJson(getPlayerCheck(nick).getTile(2,3)));
@@ -460,7 +462,7 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
 
-        playersPosition.put(nickname, p.getPos());
+        playersPosition = buildPlayersPositionMap();
 
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {
             startFlight();
@@ -485,7 +487,7 @@ public class Controller implements Serializable {
         for(Map.Entry<String, Player> entry : playersByNickname.entrySet()) {
             Player p = entry.getValue();
             String nickname = entry.getKey();
-            playersPosition.put(nickname, p.getPos());
+            playersPosition = buildPlayersPositionMap();
         }
 
         broadcastInform("SERVER: " + "Flight started!");
@@ -2590,7 +2592,7 @@ public class Controller implements Serializable {
      */
 
     public void changeMapPosition(String nick, Player p) throws BusinessLogicException {
-        playersPosition.put(nick, p.getPos());
+        playersPosition = buildPlayersPositionMap();
     }
 
     public void updatePositionForEveryBody() throws BusinessLogicException {
@@ -2623,8 +2625,8 @@ public class Controller implements Serializable {
         onGameEnd.accept(gameId);
     }
 
-    public Map<String,Integer> getPlayersPosition(){
-        return playersPosition;
+    public Map<String,int[] > getPlayersPosition(){
+        return new HashMap<>(playersPosition);
     }
 
     public String getGamePhase(String nick){
@@ -2643,6 +2645,21 @@ public class Controller implements Serializable {
             System.err.println("[ERROR] in serializeDashMatrix: " + e.getMessage());
         }
         return null;
+    }
+
+    private Map<String,int[]> buildPlayersPositionMap() {
+        Map<String,int[]> m = new HashMap<>();
+        for (Map.Entry<String, Player> e : playersByNickname.entrySet()) {
+            String nick = e.getKey();
+            Player p    = e.getValue();
+
+            m.put(nick, new int[]{
+                    p.getPos(),                 // posizione
+                    p.getLap(),                 // lap
+                    p.isEliminated() ? 1 : 0    // 1=eliminato, 0=ingame
+            });
+        }
+        return m;
     }
 
 }

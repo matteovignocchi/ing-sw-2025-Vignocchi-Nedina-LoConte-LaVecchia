@@ -150,7 +150,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             case Message.OP_SET_NICKNAME -> this.setNickname((String) msg.getPayload());
 //            case Message.OP_SET_VIEW -> this.setView((View) msg.getPayload());
             case Message.OP_SET_GAMEID -> this.setGameId((int) msg.getPayload());
-            case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, Integer>) msg.getPayload());
+            case Message.OP_MAP_POSITION -> this.updateMapPosition((Map<String, int[] >) msg.getPayload());
             case Message.OP_SET_IS_DEMO -> this.setIsDemo((boolean) msg.getPayload());
             case Message.OP_SET_CENTRAL_TILE -> this.setTile((String) msg.getPayload());
             case Message.OP_UPDATE_VIEW -> {
@@ -655,7 +655,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     }
 
     @Override
-    public void updateMapPosition(Map<String, Integer> Position)  {
+    public void updateMapPosition(Map<String, int[]> Position)  {
         clientController.updateMapPositionByController(Position);
     }
 

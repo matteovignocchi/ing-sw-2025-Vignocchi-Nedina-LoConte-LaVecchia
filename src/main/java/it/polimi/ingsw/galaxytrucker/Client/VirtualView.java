@@ -1,8 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
-import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -81,7 +78,7 @@ public interface VirtualView extends Remote {
 
     void setNickname(String nickname) throws Exception;
 
-    void updateMapPosition(Map<String, Integer> Position) throws Exception;
+    void updateMapPosition(Map<String, int[] > Position) throws Exception;
 
     void setStart() throws Exception;
 

@@ -377,7 +377,7 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void updateMapPosition(Map<String,Integer> map) throws IOException {
+    public void updateMapPosition(Map<String, int [] > map) throws IOException {
         out.writeObject(Message.update(Message.OP_MAP_POSITION, new HashMap<>(map)));
         out.flush();
     }
