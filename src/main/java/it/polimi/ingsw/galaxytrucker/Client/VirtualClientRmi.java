@@ -124,6 +124,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
 
     @Override
     public void updateGameState(String phase) throws RemoteException {
+        if ("PING".equalsIgnoreCase(phase)) return;
         clientController.updateGameStateByController(phase);
     }
 
