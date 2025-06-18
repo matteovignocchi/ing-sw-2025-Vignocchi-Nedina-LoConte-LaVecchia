@@ -2292,30 +2292,32 @@ public class Controller implements Serializable {
             Player p = getPlayerCheck(nick);
             VirtualView v = getViewCheck(nick);
 
-            inform("\nSERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
-            inform("SERVER: Ship before the attack", nick);
-            printPlayerDashboard(v, p, nick);
+            if(p.isConnected() && !p.isEliminated()){
+                inform("\nSERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
+                inform("SERVER: Ship before the attack", nick);
+                printPlayerDashboard(v, p, nick);
 
-            if (!isHitZone(dir, dir2)) {
-                inform("SERVER: Meteorite out of range. You are safe.", nick);
-                continue;
-            }
-            if (isBig) {
-                if (!checkProtection(dir, dir2, nick)) {
-                    scriptOfDefence(nick, p, v, dir2, dir);
-                } else {
-                    inform("SERVER: Shield protected you!", nick);
+                if (!isHitZone(dir, dir2)) {
+                    inform("SERVER: Meteorite out of range. You are safe.", nick);
+                    continue;
                 }
-            }
-            else {
-                boolean exposed = p.checkNoConnector(dir, dir2);
-                boolean shielded = isProtected(nick, dir);
+                if (isBig) {
+                    if (!checkProtection(dir, dir2, nick)) {
+                        scriptOfDefence(nick, p, v, dir2, dir);
+                    } else {
+                        inform("SERVER: Shield protected you!", nick);
+                    }
+                } else {
+                    boolean exposed = p.checkNoConnector(dir, dir2);
+                    boolean shielded = isProtected(nick, dir);
 
-                if (exposed && !shielded) {
-                    scriptOfDefence(nick, p, v, dir2, dir);
-                } else {
-                    inform("SERVER: You are safe", nick);
+                    if (exposed || !shielded) {
+                        scriptOfDefence(nick, p, v, dir2, dir);
+                    } else {
+                        inform("SERVER: You are safe", nick);
+                    }
                 }
+
             }
         }
     }

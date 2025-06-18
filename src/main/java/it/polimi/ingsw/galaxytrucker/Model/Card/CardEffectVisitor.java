@@ -445,12 +445,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(MeteoritesRainCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
-        List<String> nicks = new ArrayList<>();
-        for (Player p : players) {
-            String nick = controller.getNickByPlayer(p);
-            nicks.add(nick);
-        }
-
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             //superfluo ? capire se abbinare il lancio del dado al playe effettivamente, oppure semplice generazione di randomici
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
