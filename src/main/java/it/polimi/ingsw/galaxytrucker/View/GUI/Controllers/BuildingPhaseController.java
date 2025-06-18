@@ -32,10 +32,10 @@ public class BuildingPhaseController extends GUIController {
     public void initialize() {
         setupGridStructure();
 
-        rotateLeftBtn.setVisible(false);
-        rotateRightBtn.setVisible(false);
-        rotateLeftBtn.setDisable(true);
-        rotateRightBtn.setDisable(true);
+//        rotateLeftBtn.setVisible(false);
+//        rotateRightBtn.setVisible(false);
+//        rotateLeftBtn.setDisable(true);
+//        rotateRightBtn.setDisable(true);
 
         dashBoard = new ClientTile[5][7];
     }

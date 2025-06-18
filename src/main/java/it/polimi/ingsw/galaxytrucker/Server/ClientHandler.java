@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.Client.ResponseHandler;
+import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.Message;
 import it.polimi.ingsw.galaxytrucker.Client.UpdateViewRequest;
@@ -26,6 +27,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     private final ObjectOutputStream out;
     private final ResponseHandler responseHandler = new ResponseHandler();
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
+    private String nickname;
+    private int gameId;
 
     private Message sendRequestAndWait(Message req) throws IOException, InterruptedException {
         responseHandler.expect(req.getRequestId());
@@ -81,6 +84,15 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
             try { out.close(); } catch (IOException ignored) {}
             try { socket.close(); } catch (IOException ignored) {}
             System.out.println("Connection closed: " + socket.getRemoteSocketAddress());
+
+            if (nickname != null) {
+                try {
+                    Controller ctrl = gameManager.getControllerCheck(gameId);
+                    ctrl.markDisconnected(nickname);
+                } catch (Exception e) {
+                    System.err.println("Error with markdisconnected for " + nickname + ": " + e.getMessage());
+                }
+            }
         }
     }
 
@@ -125,7 +137,10 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     private Object handleLogin(Object p) throws Exception {
         String nickname = (String) p;
-        return gameManager.login(nickname, this);
+        this.nickname = nickname;
+        int returnedGameId = gameManager.login(nickname, this);
+        this.gameId = returnedGameId;
+        return returnedGameId;
     }
 
     @SuppressWarnings("unchecked")
@@ -157,6 +172,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
         List<Object> args = (List<Object>) p;
         int gameId = (Integer) args.get(0);
         String nickname = (String)  args.get(1);
+        this.gameId = gameId;
+        this.nickname = nickname;
         gameManager.joinGame(gameId,this, nickname);
         return "OK";
     }
@@ -362,6 +379,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
 
     @Override
     public void setGameId(int gameId) throws RemoteException {
+        this.gameId = gameId;
+        super.setGameId(gameId);
         try {
             out.writeObject(Message.update(Message.OP_SET_GAMEID, gameId));
             out.flush();
@@ -371,7 +390,9 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     }
 
     @Override
-    public void setNickname(String nickname) throws IOException {
+    public void setNickname(String nickname) throws Exception {
+        this.nickname = nickname;
+        super.setNickname(nickname);
         out.writeObject(Message.update(Message.OP_SET_NICKNAME, nickname));
         out.flush();
     }

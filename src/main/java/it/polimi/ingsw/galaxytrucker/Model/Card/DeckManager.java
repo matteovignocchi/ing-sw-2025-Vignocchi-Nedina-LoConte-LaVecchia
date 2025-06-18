@@ -241,6 +241,29 @@ public class DeckManager implements Serializable {
         return decks;
     }
 
+    public List<Deck> CreateMeteoritesDeck() throws CardEffectException {
+        List<Integer> directions = new ArrayList<>();
+        directions.add(0);
+        directions.add(1);
+        List<Boolean> size = new ArrayList<>();
+        size.add(false);
+        size.add(false);
+        Card c1 = new MeteoritesRainCard("1", directions, size);
+        Card c2 = new MeteoritesRainCard("2", directions, size);
+        Card c3 = new MeteoritesRainCard("3", directions, size);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
     /**
     public List<Deck> CreateSmugglersDecks() throws CardEffectException {
         List<Colour> list1= new ArrayList<>();

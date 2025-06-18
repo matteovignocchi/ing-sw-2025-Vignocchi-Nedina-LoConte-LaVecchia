@@ -103,42 +103,50 @@ public class TUIView implements View {
         ClientGamePhase originalPhase = getGamePhase();
 
         System.out.println("\nPlayers in game:");
-        mapPosition.entrySet().stream()
-                .filter(e -> e.getValue()[2] == 0) // todo:qui filtro solo chi è ancora in gioco, lassciamo cosi o un player deve poter vedere tutti?
-                .sorted(Comparator.comparingInt(e -> e.getValue()[0]))
-                .forEach(entry -> {
-                    String nick      = entry.getKey();
-                    int[] info       = entry.getValue();
-                    int   pos        = info[0];
-                    int   lap        = info[1];
-                    inform(String.format("  %s - Lap: %d, Position: %d", nick, lap, pos));
-                });
+        List<Map.Entry<String,int[]>> sorted = mapPosition.entrySet().stream()
+                .sorted(
+                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[1])
+                                .reversed()
+                                .thenComparing(
+                                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[0])
+                                                .reversed()
+                                )
+                )
+                .toList();
+
+        for (var entry : sorted) {
+            String nick = entry.getKey();
+            int[] info = entry.getValue();
+            int pos    = info[0];
+            int lap    = info[1];
+            boolean elim = info[2] == 1;
+            String stato = elim ? "Eliminated" : "In game";
+            inform(String.format("  %s – Lap: %d, Position: %d, status: %s",
+                    nick, lap, pos, stato));
+        }
 
         inform("Select nickname of the player:");
 
-        while(true) {
+        while (true) {
             String line = readLine(200);
             if (line == null) {
-                if (getGamePhase() != originalPhase) {
-                    return null;
-                }
-                continue;
+                if (getGamePhase() != originalPhase) return null;
+                else continue;
             }
-            String nickname = line.trim();
-
-            if (nickname.isEmpty()) {
+            String chosen = line.trim();
+            if (chosen.isEmpty()) {
                 reportError("Please enter a valid nickname from the list");
                 continue;
             }
-
             for (String key : mapPosition.keySet()) {
-                if (key.equalsIgnoreCase(nickname) && mapPosition.get(key)[2] == 0) {
+                if (key.equalsIgnoreCase(chosen)) {
                     return key;
                 }
             }
             reportError("Please enter a valid nickname from the list");
         }
     }
+
 
     @Override
     public Boolean ask(String message) {
@@ -452,38 +460,25 @@ public class TUIView implements View {
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue()[0]))
-                .forEach(entry -> {
-                    String nick  = entry.getKey();
-                    int[] data   = entry.getValue();
-                    int pos      = data[0];
-                    int lap      = data[1];
-                    boolean elim = data[2] == 1;
+                .sorted(
+                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[1])
+                                .reversed()
+                                .thenComparing(
+                                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[0])
+                                                .reversed()
+                                )
+                )
+                .forEachOrdered(entry -> {
+                    String nick = entry.getKey();
+                    int[] info = entry.getValue();
+                    int pos    = info[0];
+                    int lap    = info[1];
+                    boolean elim = info[2] == 1;
                     String stato = elim ? "Eliminated" : "In game";
-                    inform(String.format(" %s – Lap: %d, Position: %d, status: %s", nick, lap, pos, stato));
+                    inform(String.format("  %s – Lap: %d, Position: %d, status: %s",
+                            nick, lap, pos, stato));
                 });
     }
-
-    //TODO: Assicurarsi che l'ordine sia corretto, altrimenti il vecchio metodo è scritto sotto
-//    @Override
-//    public void printMapPosition() {
-//        System.out.println("\nPlayers in game:");
-//        mapPosition.entrySet().stream()
-//                .sorted(Map.Entry.comparingByValue())    // ordina per posizione
-//                .forEachOrdered(entry -> {
-//                    int pos = entry.getValue();
-//                    String nick = entry.getKey();
-//                    inform(String.format("  %d - %s", pos, nick));
-//                });
-//    }
-//    public void printMapPosition(){
-//        StringBuilder string = new StringBuilder();
-//        for(String key : mapPosition.keySet()){
-//            string.append(" /").append(key).append(": ").append(mapPosition.get(key));
-//        }
-//        string.append("/");
-//        inform(string.toString());
-//    }
 
     /// position diventa una mappa stringa intero
     @Override

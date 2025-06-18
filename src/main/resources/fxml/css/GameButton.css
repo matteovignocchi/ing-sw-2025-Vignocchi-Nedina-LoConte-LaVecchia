@@ -1,0 +1,57 @@
+.blue-button {
+    -fx-font-family: "Impact";
+    -fx-font-size: 20px;
+    -fx-text-fill: #ffffff;
+
+    -fx-background-color: linear-gradient(
+            to bottom,
+            rgba(0, 102, 255, 0.55) 0%,
+            rgba(0, 51, 204, 0.55) 100%
+    );
+
+    -fx-border-color: #000000;
+    -fx-border-width: 2px;
+    -fx-border-insets: -1;
+    -fx-border-radius: 9px;
+
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px;
+
+    -fx-background-insets: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(
+            three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 3
+    );
+}
+
+.blue-button:hover {
+    -fx-background-color: linear-gradient(
+            to bottom,
+            rgba(51, 153, 255, 0.65) 0%,
+            rgba(0, 102, 255, 0.65) 100%
+    );
+    -fx-effect: dropshadow(
+            three-pass-box, rgba(0,0,0,0.8), 12, 0, 0, 4
+    );
+    -fx-text-fill: #ffffff;
+}
+
+.blue-button:pressed {
+    -fx-background-color: linear-gradient(
+            to bottom,
+            rgba(0, 51, 204, 0.7) 0%,
+            rgba(0, 25, 102, 0.7) 100%
+    );
+    -fx-effect: innershadow(
+            three-pass-box, rgba(0,0,0,0.7), 7, 0, 0, 2
+    );
+    -fx-translate-y: 3px;
+    -fx-text-fill: #ffffff;
+}
+
+.blue-button:disabled {
+    -fx-opacity: 0.6;
+    -fx-effect: dropshadow(
+            three-pass-box, rgba(0,0,0,0.3), 5, 0, 0, 1
+    );
+}
