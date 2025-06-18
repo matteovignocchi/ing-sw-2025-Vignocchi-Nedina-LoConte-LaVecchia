@@ -26,6 +26,7 @@ public class ClientController {
     private boolean isConnected = false;
     private ClientTile[][] Dash_Matrix;
     private ClientGamePhase currentGamePhase;
+    private String nickname;
 
 
     //Cose per il refactor dei json
@@ -118,6 +119,7 @@ public class ClientController {
                 continue;
             }
             virtualClient.setNickname(username);
+            nickname = username;
 
             if (res > 0) {
                 return res;

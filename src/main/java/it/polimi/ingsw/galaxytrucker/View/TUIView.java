@@ -26,6 +26,7 @@ public class TUIView implements View {
     private static final String PURPLE = "\u001B[35m";
     private static final String BROWN = "\u001B[33m";
     private static final String PEFOH = "\u001B[36m";
+    private String nickname;
     private static Map<String , int[] > mapPosition = new ConcurrentHashMap<>();
     private static final Map<String, String> ANSI_COLOR = Map.of(
             "RED",    RED,
@@ -1068,6 +1069,10 @@ public class TUIView implements View {
    @Override
    public void setCurrentTile(ClientTile tile){
         
+   }
+   @Override
+   public void setNickName(String nickname){
+        this.nickname = nickname;
    }
     
     

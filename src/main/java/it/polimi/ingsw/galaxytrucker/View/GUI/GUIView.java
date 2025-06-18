@@ -48,6 +48,7 @@ public class GUIView extends Application implements View {
     private static String host;
     private static int port;
     private int selectedGameId;
+    private String nickname;
     private final Object lock = new Object();
 
     public static void setStartupConfig(int protocol, String h, int p) {
@@ -675,5 +676,9 @@ public class GUIView extends Application implements View {
     @Override
     public void resetValidity(int a , int b){
         maschera[a][b] = true;
+    }
+    @Override
+    public void setNickName(String nickname) {
+        this.nickname = nickname;
     }
 }

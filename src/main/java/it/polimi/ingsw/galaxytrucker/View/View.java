@@ -46,6 +46,7 @@ public interface View {
     void displayAvailableGames(Map<Integer, int[]> availableGames);
     void setTile(ClientTile tile, int row, int col);
     void setCurrentTile(ClientTile tile);
+    void setNickName(String cognomePradella);
 }
 
 //public interface VirtualViewRmi extends VirtualView {
