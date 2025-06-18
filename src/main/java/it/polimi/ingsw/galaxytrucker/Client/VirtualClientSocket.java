@@ -273,6 +273,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void updateGameState(String phase){
+        if ("PING".equalsIgnoreCase(phase)) return;
         clientController.updateGameStateByController(phase);
     }
 //TODO:gabri succhia, vedere se va

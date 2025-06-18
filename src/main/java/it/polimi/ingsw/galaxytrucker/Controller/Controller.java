@@ -53,9 +53,11 @@ public class Controller implements Serializable {
     private TileParserLoader pileMaker = new TileParserLoader();
     private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
-    private CardSerializer cardSerializer;
-    private TileSerializer tileSerializer;
-    private EnumSerializer enumSerializer;
+    private transient CardSerializer cardSerializer;
+    private transient TileSerializer tileSerializer;
+    private transient EnumSerializer enumSerializer;
+    private transient ScheduledExecutorService pingScheduler;
+
 
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
@@ -76,6 +78,7 @@ public class Controller implements Serializable {
         this.enumSerializer = new EnumSerializer();
         this.gameId = gameId;
         this.onGameEnd = onGameEnd;
+        initPingScheduler();
         this.hourglass = new Hourglass(h -> {
             try {
                 onHourglassStateChange(h);
@@ -95,6 +98,44 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void initPingScheduler() {
+        pingScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "PingScheduler-" + gameId);
+            t.setDaemon(true);
+            return t;
+        });
+        // ping ogni 10 secondi
+        pingScheduler.scheduleAtFixedRate(this::pingAllClients, 10, 10, TimeUnit.SECONDS);
+    }
+
+    private void pingAllClients() {
+        String phase;
+        try {
+            phase = enumSerializer.serializeGamePhase(getGamePhaseForAll());
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            System.err.println("[PING] errore serializzazione fase: " + e.getMessage());
+            phase = "PING";
+        }
+
+        for (var entry : viewsByNickname.entrySet()) {
+            String nick = entry.getKey();
+            VirtualView v = entry.getValue();
+            try {
+                v.updateGameState("PING");
+            } catch (Exception e) {
+                markDisconnected(nick);
+            }
+        }
+    }
+
+    public void shutdownPing() {
+        if (pingScheduler != null) pingScheduler.shutdownNow();
+    }
+
+    private GamePhase getGamePhaseForAll() {
+        return playersByNickname.values().iterator().next().getGamePhase();
+    }
 
     public void notifyView(String nickname) {
         VirtualView v = viewsByNickname.get(nickname);
@@ -290,7 +331,11 @@ public class Controller implements Serializable {
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
         this.viewsByNickname = new ConcurrentHashMap<>();
-        this.hourglass       = new Hourglass(hourglassListener);
+        this.hourglass = new Hourglass(hourglassListener);
+        this.cardSerializer = new CardSerializer();
+        this.tileSerializer = new TileSerializer();
+        this.enumSerializer = new EnumSerializer();
+        initPingScheduler();
     }
 
     public boolean isGameStarted() {
