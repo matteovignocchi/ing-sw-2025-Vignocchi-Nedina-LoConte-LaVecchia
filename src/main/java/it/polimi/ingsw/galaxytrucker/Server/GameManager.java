@@ -113,6 +113,7 @@ public class GameManager {
     public synchronized void removeGame(int gameId) {
         Controller controller = games.remove(gameId);
         if (controller != null) {
+            controller.shutdownPing();
             deleteSavedGame(gameId);
         }
     }
@@ -286,6 +287,7 @@ public class GameManager {
                     });
                     int id = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
                     games.put(id, controller);
+                    controller.getPlayersPosition().keySet().forEach(nick -> nicknameToGameId.put(nick, id));
                     maxId = Math.max(maxId, id);
                 } catch (Exception e) {
                     System.err.println("Loading error " + f + ": " + e.getMessage());
@@ -328,5 +330,14 @@ public class GameManager {
                             };
                         }
                 ));
+    }
+
+    public void handleDisconnectRmi(int gameId, String nickname) {
+        try {
+            Controller ctrl = getControllerCheck(gameId);
+            ctrl.markDisconnected(nickname);
+            System.out.println("Marked "+nickname+" as DISCONNECTED in game "+gameId);
+        } catch (BusinessLogicException e) {
+        }
     }
 }

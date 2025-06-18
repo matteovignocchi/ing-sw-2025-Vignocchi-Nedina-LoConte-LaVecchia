@@ -297,11 +297,13 @@ public class GUIView extends Application implements View {
                     });
             }
             case BOARD_SETUP -> {
-                if (isDemo) {
-                    sceneEnum = SceneEnum.BUILDING_PHASE_DEMO;
-                } else {
-                    sceneEnum = SceneEnum.BUILDING_PHASE;
-                }
+                Platform.runLater(() -> {
+                    try {
+                        setMainScene(sceneEnum.BUILDING_PHASE);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
             case WAITING_FOR_PLAYERS -> {}//Aspetto che gli altri finiscano di completare la nave
             case WAITING_FOR_TURN -> {} //aspetto il mio turno di scelta

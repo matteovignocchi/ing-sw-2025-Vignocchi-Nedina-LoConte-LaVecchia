@@ -53,9 +53,11 @@ public class Controller implements Serializable {
     private TileParserLoader pileMaker = new TileParserLoader();
     private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
-    private CardSerializer cardSerializer;
-    private TileSerializer tileSerializer;
-    private EnumSerializer enumSerializer;
+    private transient CardSerializer cardSerializer;
+    private transient TileSerializer tileSerializer;
+    private transient EnumSerializer enumSerializer;
+    private transient ScheduledExecutorService pingScheduler;
+
 
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
@@ -76,6 +78,7 @@ public class Controller implements Serializable {
         this.enumSerializer = new EnumSerializer();
         this.gameId = gameId;
         this.onGameEnd = onGameEnd;
+        initPingScheduler();
         this.hourglass = new Hourglass(h -> {
             try {
                 onHourglassStateChange(h);
@@ -95,6 +98,44 @@ public class Controller implements Serializable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //GESTIONE PARTITA
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void initPingScheduler() {
+        pingScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "PingScheduler-" + gameId);
+            t.setDaemon(true);
+            return t;
+        });
+        // ping ogni 10 secondi
+        pingScheduler.scheduleAtFixedRate(this::pingAllClients, 10, 10, TimeUnit.SECONDS);
+    }
+
+    private void pingAllClients() {
+        String phase;
+        try {
+            phase = enumSerializer.serializeGamePhase(getGamePhaseForAll());
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            System.err.println("[PING] errore serializzazione fase: " + e.getMessage());
+            phase = "PING";
+        }
+
+        for (var entry : viewsByNickname.entrySet()) {
+            String nick = entry.getKey();
+            VirtualView v = entry.getValue();
+            try {
+                v.updateGameState("PING");
+            } catch (Exception e) {
+                markDisconnected(nick);
+            }
+        }
+    }
+
+    public void shutdownPing() {
+        if (pingScheduler != null) pingScheduler.shutdownNow();
+    }
+
+    private GamePhase getGamePhaseForAll() {
+        return playersByNickname.values().iterator().next().getGamePhase();
+    }
 
     public void notifyView(String nickname) {
         VirtualView v = viewsByNickname.get(nickname);
@@ -290,7 +331,11 @@ public class Controller implements Serializable {
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
         this.viewsByNickname = new ConcurrentHashMap<>();
-        this.hourglass       = new Hourglass(hourglassListener);
+        this.hourglass = new Hourglass(hourglassListener);
+        this.cardSerializer = new CardSerializer();
+        this.tileSerializer = new TileSerializer();
+        this.enumSerializer = new EnumSerializer();
+        initPingScheduler();
     }
 
     public boolean isGameStarted() {
@@ -1748,8 +1793,11 @@ public class Controller implements Serializable {
                                         for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
                                     case PURPLE_ALIEN -> {
-                                        if(p.presenceBrownAlien()) continue;
-                                        if(i == 2 && j == 3) continue;
+                                        if(p.presenceBrownAlien() || (i == 2 && j == 3)) {
+                                            Human tmp2 = Human.HUMAN;
+                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            continue;
+                                        }
                                         try {
                                             String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
                                                     "next to the purple alien module?";
@@ -1767,8 +1815,11 @@ public class Controller implements Serializable {
 
                                     }
                                     case BROWN_ALIEN -> {
-                                        if(p.presenceBrownAlien()) continue;
-                                        if(i == 2 && j == 3) continue;
+                                        if(p.presenceBrownAlien() || (i == 2 && j == 3)){
+                                            Human tmp2 = Human.HUMAN;
+                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            continue;
+                                        }
                                         try {
                                             String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
                                                     "next to the brown alien module?";
@@ -2511,8 +2562,6 @@ public class Controller implements Serializable {
         if(p.isConnected()){
             int[] xy;
             boolean flag = true;
-            Tile tmp = new MultiJoint(3,3,3,3 , 0);
-
             do{
                 inform("SERVER: Choose your starting housing unit:", nickname);
                 xy = askPlayerCoordinates(p);
@@ -2522,7 +2571,7 @@ public class Controller implements Serializable {
                     break;
                 }
 
-                tmp = p.getTile(xy[0], xy[1]);
+               Tile tmp = p.getTile(xy[0], xy[1]);
                 switch (tmp) {
                     case HousingUnit h -> {
                         if(h.getType() == Human.HUMAN) flag = false;
@@ -2531,11 +2580,7 @@ public class Controller implements Serializable {
                     default -> inform("SERVER: Not valid position, try again", nickname);
                 }
             } while(flag);
-
             checkPlayerAssembly(nickname,  xy[0], xy[1]);
-            p.removeTile(xy[0], xy[1]);
-            p.addTile(xy[0],xy[1],tmp);
-
         }else{
             checkPlayerAssembly(nickname,  2,3);
         }
