@@ -68,7 +68,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreatePlanetsDeck();
+            decks = deckCreator.CreateMeteoritesDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
