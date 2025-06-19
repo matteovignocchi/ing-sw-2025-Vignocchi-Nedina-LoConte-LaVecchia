@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -68,17 +69,40 @@ public class BuildingPhaseController extends GUIController {
     private ImageView card4;
     @FXML
     private ImageView card5;
-
+    @FXML
+    private Label nicknameLabel;
 
 
 
     private ImageView draggedTileView;
-    private int rotationAngle = 0;
 
+    private int rotationAngle = 0;
 
     @FXML
     public void initialize() {
         setupGridStructure();
+        if (getIsDemo()) {
+            dash.setVisible(false);
+            dashDemo.setVisible(true);
+            hourGlassBtn.setVisible(false);
+            deck1Btn.setVisible(false);
+            deck2Btn.setVisible(false);
+            deck3Btn.setVisible(false);
+            card0.setVisible(false);
+            card1.setVisible(false);
+            card2.setVisible(false);
+            card3.setVisible(false);
+            card4.setVisible(false);
+            card5.setVisible(false);
+        } else {
+            dash.setVisible(true);
+            dashDemo.setVisible(false);
+            hourGlassBtn.setVisible(true);
+            deck1Btn.setVisible(true);
+            deck2Btn.setVisible(true);
+            deck3Btn.setVisible(true);
+        }
+        setNickName(getNickname());
         rotateLeftBtn.setVisible(false);
         rotateRightBtn.setVisible(false);
         returnTileBtn.setVisible(false);
@@ -111,6 +135,12 @@ public class BuildingPhaseController extends GUIController {
             deck2Btn.setVisible(true);
             deck3Btn.setVisible(true);
         }
+        setNickName(getNickname());
+
+    }
+
+    public void setNickName(String nickName) {
+        nicknameLabel.setText(nickName);
     }
 
     @FXML

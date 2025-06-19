@@ -8,6 +8,7 @@ public abstract class GUIController {
     protected ClientTile[][] dashBoard;
     protected GUIView guiView;
     protected Boolean demo;
+    protected String nickname;
 
     public void setIsDemo(Boolean demo) {
         this.demo = demo;
@@ -26,5 +27,12 @@ public abstract class GUIController {
 
     public void setCurrentTile(ClientTile tile) {
 
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    public String getNickname() {
+        return nickname;
     }
 }

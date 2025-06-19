@@ -690,4 +690,7 @@ public class GUIView extends Application implements View {
     public void setNickName(String nickname) {
         this.nickname = nickname;
     }
+    public String getNickname() {
+        return nickname;
+    }
 }
