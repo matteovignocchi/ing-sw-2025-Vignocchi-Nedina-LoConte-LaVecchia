@@ -2370,8 +2370,8 @@ public class Controller implements Serializable {
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
-            case 1 -> checkRowProtectionRight(player, dir2 - 5);
-            case 3 -> checkRowProtectionLeft(player, dir2 - 5);
+            case 1 -> checkRowProtectionFromSide(player, dir2 - 5 , 1);
+            case 3 -> checkRowProtectionFromSide(player, dir2 - 5 , 3);
             default -> false;
         };
     }
@@ -2380,47 +2380,52 @@ public class Controller implements Serializable {
         for (int row = 0; row < 5; row++) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                 Tile tile = playersByNickname.get(player).getTile(row, col);
-                return isCannonProtected(tile, player);
+                return isCannonProtected(tile, player, 0);
             }
         }
         return false;
     }
 
-    private boolean checkRowProtectionRight(String player, int row) throws BusinessLogicException {
-        for (int col = 5; col >= 1; col--) {
-            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
-                return checkAdjacentTilesForCannon(player, row, col);
+    private boolean checkRowProtectionFromSide(String player, int row, int direction) throws BusinessLogicException {
+        for (int r = row - 1; r <= row + 1; r++) {
+            if (r < 0 || r >= 5) continue;
+            if (checkFirstTileInRow(player, r, direction)) return true;
+        }
+        return false;
+    }
+
+
+    private boolean checkFirstTileInRow(String player, int row, int direction) throws BusinessLogicException {
+        if (direction == 1) {
+            for (int col = 5; col >= 1; col--) {
+                if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                    Tile tile = playersByNickname.get(player).getTile(row, col);
+                    return isCannonProtected(tile, player, direction);
+                }
+            }
+        } else if (direction == 3) {
+            for (int col = 1; col <= 5; col++) {
+                if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                    Tile tile = playersByNickname.get(player).getTile(row, col);
+                    return isCannonProtected(tile, player, direction);
+                }
             }
         }
         return false;
     }
 
-    private boolean checkRowProtectionLeft(String player, int row) throws BusinessLogicException {
-        for (int col = 1; col < 6; col++) {
-            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
-                return checkAdjacentTilesForCannon(player, row, col);
+    private boolean isCannonProtected(Tile tile, String player , int orientation) throws BusinessLogicException {
+        switch (tile){
+            case Cannon c -> {
+                if(c.isDouble() && c.controlCorners(orientation) == 5) return manageEnergyCell(player);
+                else if (c.isDouble() && c.controlCorners(orientation) != 5) {return false;}
+                else if(c.controlCorners(orientation) != 4) {return false;}
+                else return true;
             }
+            default -> {return false;}
         }
-        return false;
     }
 
-    private boolean checkAdjacentTilesForCannon(String player, int row, int col) throws BusinessLogicException {
-        for (int d = -1; d <= 1; d++) {
-            int nc = col + d;
-            if (nc >= 0 && nc < 7) {
-                Tile tile = playersByNickname.get(player).getTile(row, nc);
-                if (isCannonProtected(tile, player)) return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isCannonProtected(Tile tile, String player) throws BusinessLogicException {
-        return switch (tile) {
-            case Cannon c -> !c.isDouble() || manageEnergyCell(player);
-            default -> false;
-        };
-    }
 
     //    public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
 //        boolean result = false;
