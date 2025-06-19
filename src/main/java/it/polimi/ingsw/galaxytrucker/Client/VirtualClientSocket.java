@@ -273,7 +273,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
     @Override
     public void updateGameState(String phase){
-        if ("PING".equalsIgnoreCase(phase)) return;
+        if (phase == null || "PING".equalsIgnoreCase(phase)) return;
         clientController.updateGameStateByController(phase);
     }
 //TODO:gabri succhia, vedere se va
@@ -463,8 +463,8 @@ public class VirtualClientSocket implements Runnable, VirtualView {
     @Override
     public void positionTile(String tile) throws Exception {
         clientController.printMyDashBoardByController();
-        int[] tmp;
         clientController.informByController("Choose coordinate!");
+        int[] tmp;
         tmp = clientController.askCoordinateByController();
         if(tmp == null) return;
 
@@ -476,21 +476,21 @@ public class VirtualClientSocket implements Runnable, VirtualView {
 
         Message request = Message.request(Message.OP_POSITION_TILE, payloadGame);
         Message response = sendRequestWithResponse(request);
-        clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
 
 
-        Object payload = response.getPayload();
-
-        switch (payload) {
-            case String p when p.equals("OK") -> {}
-            case String error -> {
-                clientController.reportErrorByController("Error from server: " + error);
-                return;
-            }
-            default -> throw new IOException("Unexpected payload: ");
+        Object raw = response.getPayload();
+        String result;
+        try {
+            result = (String) raw;
+        } catch (ClassCastException e) {
+            throw new IOException("Unexpected payload type from server: " + raw.getClass().getName(), e);
         }
-        clientController.setTileInMatrix(tile , tmp[0] ,  tmp[1]);
-        clientController.printMyDashBoardByController();
+        if ("OK".equals(result)) {
+            clientController.setTileInMatrix(tile, tmp[0], tmp[1]);
+            clientController.printMyDashBoardByController();
+        } else {
+            clientController.reportErrorByController("Error from server: " + result);
+        }
     }
 
     @Override
