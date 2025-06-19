@@ -114,6 +114,10 @@ public class GameManager {
         Controller controller = games.remove(gameId);
         if (controller != null) {
             controller.shutdownPing();
+            for (String nick : controller.getPlayersByNickname().keySet()) {
+                nicknameToGameId.remove(nick);
+                loggedInUsers.remove(nick);
+            }
             deleteSavedGame(gameId);
         }
     }
@@ -234,7 +238,7 @@ public class GameManager {
                     }
                 }
             }
-        }, 1, 1, TimeUnit.MINUTES);
+        }, 0, 1, TimeUnit.MINUTES);
     }
 
     //Assicura che esiste la cartella saves/
@@ -286,8 +290,11 @@ public class GameManager {
                         }
                     });
                     int id = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
+                    controller.getPlayersByNickname().values().forEach(p -> p.setConnected(false));
                     games.put(id, controller);
-                    controller.getPlayersPosition().keySet().forEach(nick -> nicknameToGameId.put(nick, id));
+                    for (String nicnkname : controller.getPlayersByNickname().keySet()){
+                        nicknameToGameId.put(nicnkname, id);
+                    }
                     maxId = Math.max(maxId, id);
                 } catch (Exception e) {
                     System.err.println("Loading error " + f + ": " + e.getMessage());
