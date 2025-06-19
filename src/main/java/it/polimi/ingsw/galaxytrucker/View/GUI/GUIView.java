@@ -348,6 +348,7 @@ public class GUIView extends Application implements View {
     public void setIsDemo(Boolean demo) {
         Boolean[][] validStatus = new Boolean[5][7];
         this.isDemo = demo;
+        controller.setIsDemo(demo);
         if (isDemo) {
             //first row
             validStatus[0][0]  = null;
@@ -512,6 +513,8 @@ public class GUIView extends Application implements View {
             }
             case BuildingPhaseController c -> {
                 c.setGuiView(this);
+                c.setIsDemo(this.isDemo);
+                c.postInitialize();
                 this.controller = c;
             }
             case WaitingQueueController c ->{
@@ -639,6 +642,10 @@ public class GUIView extends Application implements View {
             this.selectedGameId = gameId;
             lock.notifyAll();
         }
+    }
+
+    public Boolean getIsDemo(){
+        return isDemo;
     }
 
     public Integer waitForGameChoice() {

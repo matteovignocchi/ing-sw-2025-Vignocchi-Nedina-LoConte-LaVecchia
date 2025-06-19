@@ -7,6 +7,14 @@ public abstract class GUIController {
     protected ClientTile currentTile;
     protected ClientTile[][] dashBoard;
     protected GUIView guiView;
+    protected Boolean demo;
+
+    public void setIsDemo(Boolean demo) {
+        this.demo = demo;
+    }
+    public Boolean getIsDemo(){
+        return demo;
+    }
 
     public void setGuiView(GUIView guiView) {
         this.guiView = guiView;
