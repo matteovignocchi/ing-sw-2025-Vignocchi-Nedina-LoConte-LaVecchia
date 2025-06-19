@@ -7,18 +7,15 @@ public abstract class GUIController {
     protected ClientTile currentTile;
     protected ClientTile[][] dashBoard;
     protected GUIView guiView;
-    protected Boolean demo;
+    protected Boolean isDemo =false   ;
     protected String nickname;
-
-    public void setIsDemo(Boolean demo) {
-        this.demo = demo;
-    }
-    public Boolean getIsDemo(){
-        return demo;
+    public Boolean getIsDemo() {
+        return isDemo != null ? isDemo : false; // Safe check
     }
 
     public void setGuiView(GUIView guiView) {
         this.guiView = guiView;
+        this.isDemo = guiView.getIsDemo();
     }
 
     public void setDashBoard(ClientTile[][] dashBoard) {

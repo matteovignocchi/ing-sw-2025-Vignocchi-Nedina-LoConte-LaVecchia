@@ -7,15 +7,16 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class NicknameDialogController {
+public class NicknameDialogController extends GUIController {
 
     @FXML
     private TextField nicknameField;
 
     private GUIView guiView;
 
-    public void setGuiView(GUIView guiView) {
-        this.guiView = guiView;
+    @FXML
+    public void initialize() {
+
     }
 
     @FXML

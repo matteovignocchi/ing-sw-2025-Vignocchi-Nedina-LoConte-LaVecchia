@@ -13,8 +13,10 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import java.io.IOException;
+import java.net.URL;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -32,6 +34,9 @@ import javafx.util.Duration;
 public class GUIView extends Application implements View {
     private Stage mainStage;
     private GUIController controller;
+    private final Map<SceneEnum, Scene> scenes = new HashMap<>();
+    private final Map<SceneEnum, GUIController> controllers = new HashMap<>();
+
     private CompletableFuture<int[]> coordinateFuture;
     private CompletableFuture<String> nicknameFuture;
     private ClientController clientController;
@@ -61,6 +66,8 @@ public class GUIView extends Application implements View {
     public void start(Stage stage) {
         this.mainStage = stage;
         stage.setTitle("Galaxy Trucker");
+            initializeAllScenes();
+
         dashBoard = new ClientTile[5][7];
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -68,18 +75,6 @@ public class GUIView extends Application implements View {
                 tile.type = "EMPTYSPACE";
                 dashBoard[i][j] = tile;
             }
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.MAIN_MENU.value()));
-            Parent root = loader.load();
-            MainMenuController controller = loader.getController();
-            controller.setGuiView(this);
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
         }
 
         new Thread(() -> {
@@ -98,21 +93,15 @@ public class GUIView extends Application implements View {
 
                 controller.start();
 
-                Platform.runLater(() -> {
-                    try {
-                        setMainScene(SceneEnum.MAIN_MENU);
-                    } catch (IOException e) {
-                        reportError("Failed to load main menu: " + e.getMessage());
-                    }
-                });
-
             } catch (Exception e) {
                 e.printStackTrace();
                 Platform.runLater(() -> reportError("Connection failed: " + e.getMessage()));
             }
         }).start();
 
+        stage.show();
     }
+
 
     @Override
     public void inform(String message) {
@@ -239,7 +228,6 @@ public class GUIView extends Application implements View {
 
         if (sceneEnum == SceneEnum.NICKNAME_DIALOG) {
             nicknameFuture = new CompletableFuture<>();
-            Platform.runLater(this::showNicknameDialog);
             try {
                 String nickname = nicknameFuture.get();
                 return nickname;
@@ -290,20 +278,12 @@ public class GUIView extends Application implements View {
         switch (gamePhase){
             case WAITING_IN_LOBBY -> {
                     Platform.runLater(() -> {
-                        try {
-                            setMainScene(sceneEnum.WAITING_QUEUE);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        setMainScene(sceneEnum.WAITING_QUEUE);
                     });
             }
             case BOARD_SETUP -> {
                 Platform.runLater(() -> {
-                    try {
-                        setMainScene(sceneEnum.BUILDING_PHASE);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    setMainScene(sceneEnum.BUILDING_PHASE);
                 });
             }
             case WAITING_FOR_PLAYERS -> {}//Aspetto che gli altri finiscano di completare la nave
@@ -347,8 +327,6 @@ public class GUIView extends Application implements View {
     @Override
     public void setIsDemo(Boolean demo) {
         Boolean[][] validStatus = new Boolean[5][7];
-        this.isDemo = demo;
-        controller.setIsDemo(demo);
         if (isDemo) {
             //first row
             validStatus[0][0]  = null;
@@ -483,47 +461,65 @@ public class GUIView extends Application implements View {
     }
     public void setSceneEnum(SceneEnum sceneEnum) {
         this.sceneEnum = sceneEnum;
+        setMainScene(sceneEnum);
     }
-    public void setMainScene(SceneEnum sceneName) throws IOException {
-        setSceneEnum(sceneName);
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(sceneName.value()));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
+    public void initializeAllScenes(){
+        for (SceneEnum scene : SceneEnum.values()) {
+            String path = scene.value();
+            System.out.println("Trying to load FXML for scene: " + scene.name() + " at path: " + path);
 
-        this.mainStage.setScene(scene);
-        this.mainStage.centerOnScreen();
-        Object controller = loader.getController();
-        //TODO ricordarsi di mettere tutti i controller quando si scrive
-        switch (controller) {
-            case MainMenuController c -> {
-                c.setGuiView(this);
-                this.controller = c;
+            URL resource = getClass().getResource(path);
+            if (resource == null) {
+                System.err.println("ERROR: Resource not found for scene: " + scene.name() + " at path: " + path);
+                continue; // oppure puoi throware qui se vuoi bloccare tutto
             }
-            case CreateGameMenuController c -> {
-                c.setGuiView(this);
-                this.controller = c;
+
+            try {
+                FXMLLoader loader = new FXMLLoader(resource);
+                Parent root = loader.load();
+                GUIController controller = loader.getController();
+
+                if (controller == null) {
+                    System.err.println("ERROR: Controller is null for scene: " + scene.name());
+                    continue;
+                }
+
+                controller.setGuiView(this);
+                controllers.put(scene, controller);
+                scenes.put(scene, new Scene(root));
+                System.out.println("Successfully loaded scene: " + scene.name());
+            } catch (IOException | RuntimeException e) {
+                System.err.println("ERROR while loading scene: " + scene.name() + " at path: " + path);
+                e.printStackTrace();
             }
-            case GameListMenuController c -> {
-                c.setGuiView(this);
-                this.controller = c;
-            }
-            case NicknameDialogController c -> {
-                c.setGuiView(this);
-            }
-            case BuildingPhaseController c -> {
-                c.setGuiView(this);
-                c.setIsDemo(this.isDemo);
-                c.postInitialize();
-                this.controller = c;
-            }
-            case WaitingQueueController c ->{
-                c.setGuiView(this);
-                this.controller = c;
-            }
-            default -> {}
         }
     }
+
+
+    public void setMainScene(SceneEnum sceneName) {
+        System.out.println("[DEBUG] setMainScene called with: " + sceneName);
+
+        Scene scene = scenes.get(sceneName);
+        if (scene == null) {
+            System.err.println("[ERROR] Scene not found for: " + sceneName);
+            return;
+        }
+
+        GUIController controller = controllers.get(sceneName);
+        if (controller == null) {
+            System.err.println("[ERROR] Controller not found for: " + sceneName);
+            return;
+        }
+
+        this.controller = controller;
+        System.out.println("[DEBUG] Scene and controller found, setting scene...");
+
+        mainStage.setScene(scene);
+        mainStage.centerOnScreen();
+    }
+
+
 
     public void resolveCoordinates(int row, int col) {
         if (coordinateFuture != null && !coordinateFuture.isDone()) {
@@ -539,34 +535,6 @@ public class GUIView extends Application implements View {
     }
 
 
-    public void showNicknameDialog() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(SceneEnum.NICKNAME_DIALOG.value()));
-            Parent root = loader.load();
-            NicknameDialogController controller = loader.getController();
-            controller.setGuiView(this);
-
-            Stage dialogStage = new Stage();
-            dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.initOwner(mainStage);
-            dialogStage.setResizable(false);
-            dialogStage.setTitle("Insert your nickname");
-
-            dialogStage.setOnCloseRequest(event -> {
-                if (nicknameFuture != null && !nicknameFuture.isDone()) {
-                    nicknameFuture.complete("");
-                }
-            });
-
-            dialogStage.setScene(new Scene(root));
-            dialogStage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            if (nicknameFuture != null && !nicknameFuture.isDone()) {
-                nicknameFuture.completeExceptionally(e);
-            }
-        }
-    }
 
     public void resolveNickname(String nickname) {
         if (nicknameFuture != null && !nicknameFuture.isDone()) {
@@ -587,11 +555,7 @@ public class GUIView extends Application implements View {
             dataForGame = new CompletableFuture<>();
             try {
                 Platform.runLater(() -> {
-                    try {
-                        setMainScene(SceneEnum.CREATE_GAME_MENU);
-                    } catch (IOException e) {
-                        reportError("Cannot load game creation screen: " + e.getMessage());
-                    }
+                    setMainScene(SceneEnum.CREATE_GAME_MENU);
                 });
             } catch (Exception e) {
                 e.printStackTrace();

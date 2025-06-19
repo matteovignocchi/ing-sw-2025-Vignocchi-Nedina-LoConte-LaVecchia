@@ -7,6 +7,7 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.util.List;
@@ -95,8 +96,12 @@ public class ClientController {
     private int loginLoop() throws Exception {
         while (true) {
             view.inform("Insert your username:");
-            switch (view){
-                case GUIView v -> v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+            switch (view) {
+
+                case GUIView v -> Platform.runLater(() -> {
+                    System.out.println("[DEBUG] GUI Detected. Switching to NICKNAME_DIALOG...");
+                    v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
+                });
                 default -> {}
             }
             String username = virtualClient.askString();
