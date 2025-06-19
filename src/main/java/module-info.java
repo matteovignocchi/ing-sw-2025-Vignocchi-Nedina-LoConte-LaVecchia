@@ -12,6 +12,7 @@ module it.polimi.ingsw.galaxytrucker {
     requires java.naming;
     requires java.desktop;
     requires java.logging;
+    requires java.compiler;
 
     exports it.polimi.ingsw.galaxytrucker;
     exports it.polimi.ingsw.galaxytrucker.Controller;
