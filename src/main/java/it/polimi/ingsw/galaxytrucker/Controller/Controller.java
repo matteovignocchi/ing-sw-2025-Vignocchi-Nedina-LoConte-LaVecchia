@@ -2360,6 +2360,7 @@ public class Controller implements Serializable {
         }
     }
 
+    //TODO: aggiungere il caso sud
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
@@ -2369,7 +2370,7 @@ public class Controller implements Serializable {
         };
     }
 
-    private boolean checkColumnProtectionNord(String player, int col) throws BusinessLogicException {
+    private boolean checkColumnProtection(String player, int col) throws BusinessLogicException {
         for (int row = 0; row < 5; row++) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                 Tile tile = playersByNickname.get(player).getTile(row, col);
@@ -2410,7 +2411,7 @@ public class Controller implements Serializable {
     private boolean isCannonProtected(Tile tile, String player , int orientation) throws BusinessLogicException {
         switch (tile){
             case Cannon c -> {
-                if(c.isDouble() && c.controlCorners(orientation) == 5) return manageEnergyCell(player);
+                if(c.isDouble() && c.controlCorners(orientation) == 5) return manageEnergyCell(player, "To activate double cannon");
                 else if (c.isDouble() && c.controlCorners(orientation) != 5) {return false;}
                 else if(c.controlCorners(orientation) != 4) {return false;}
                 else return true;
