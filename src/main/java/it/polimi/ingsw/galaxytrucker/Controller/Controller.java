@@ -70,7 +70,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateMeteoritesDeck();
+            decks = deckCreator.CreateFirstWarzone();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -687,6 +687,7 @@ public class Controller implements Serializable {
                     .map(Map.Entry::getKey)
                     .toList();
 
+            /**
             //da qui in poi ha modificato franci per mettere tutti i giocatori in waiting for turn solo dopo che ciascun giocatore ha risposto. Assicurarsi che funziona (ma dovrebbe)
             //In caso di problemi il codice vecchio è completamente commentate successivamente
             for (int i = 0; i < inFlight.size(); i++) {
@@ -701,6 +702,44 @@ public class Controller implements Serializable {
                 if (i < inFlight.size() - 1) {
                     inform("SERVER: Waiting for others to decide…", nick);
                 }
+            }*/
+
+
+            ExecutorService exec = Executors.newFixedThreadPool(inFlight.size());
+            try {
+                Map<String,Future<Boolean>> futures = new HashMap<>();
+                for(String nick : inFlight){
+                    Player p = playersByNickname.get(nick);
+                    futures.put(nick, exec.submit(() ->
+                            askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)
+                    ));
+                }
+
+                Map<String, Boolean> decisions = new HashMap<>();
+                for(var e : futures.entrySet()){
+                    String nick = e.getKey();
+                    Future<Boolean> f = e.getValue();
+                    try {
+                        decisions.put(nick, f.get());
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        decisions.put(nick, false);
+                    } catch (ExecutionException ee) {
+                        markDisconnected(nick);
+                        decisions.put(nick, false);
+                    }
+                }
+
+                for(var e : decisions.entrySet()){
+                    if(e.getValue()){
+                        Player p = playersByNickname.get(e.getKey());
+                        p.setEliminated();
+                        handleElimination(p);
+                    }
+                }
+
+            } finally {
+                exec.shutdownNow();
             }
 
             fBoard.eliminatePlayers();
@@ -861,35 +900,6 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) return false;
 
-        /*
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<Boolean> future = executor.submit(() -> v.ask(question));
-        Boolean ans = false;
-        try {
-            ans = future.get(TIME_OUT, TimeUnit.SECONDS);
-
-        } catch (TimeoutException te) {
-            future.cancel(true);
-            inform("SERVER: TimeOut", nick);
-        } catch (Exception e) {
-            future.cancel(true);
-            markDisconnected(nick);
-            System.err.println("[ERROR] in askPlayerDecision: " + e);
-        } finally {
-            executor.shutdownNow();
-        }
-        return ans;
-        */
-
-//        try {
-//            return v.askWithTimeout(question);
-//        } catch (IOException e) {
-//            markDisconnected(nick);
-//        } catch(Exception e){
-//            markDisconnected(nick);
-//            System.err.println("Error in askPlayerDecision");
-//        }
-//        return false;
         try {
             return v.askWithTimeout(question);
         } catch (IOException e) {
@@ -909,34 +919,8 @@ public class Controller implements Serializable {
 
         if(!p.isConnected()) return null;
 
-        /**
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<int[]> future = executor.submit(v::askCoordinate);
-
-        try{
-            int[] coords = future.get(TIME_OUT, TimeUnit.SECONDS);
-            if(coords == null) throw new BusinessLogicException("Coordinates null");
-            if(coords.length != 2) throw new BusinessLogicException("Coordinates length should be 2");
-            return coords;
-
-        } catch (TimeoutException te){
-            future.cancel(true);
-            return null;
-
-        } catch (Exception e) {
-            future.cancel(true);
-            markDisconnected(nick);
-            return null;
-
-        } finally {
-            executor.shutdownNow();
-        }
-         */
-
         try {
-            int[] c =  v.askCoordsWithTimeout();
-            if(c==null) System.out.println("CORDINATE NULLE");
-            return c;
+            return v.askCoordsWithTimeout();
         } catch (IOException e) {
             markDisconnected(nick);
         } catch(Exception e){
@@ -1044,7 +1028,8 @@ public class Controller implements Serializable {
                     case Engine c -> {
                         var = c.isDouble();
                         if (var) {
-                            boolean activate = manageEnergyCell(nick);
+                            String mex = "To activate a double engine";
+                            boolean activate = manageEnergyCell(nick, mex);
                             if (activate) {
                                 tmp = tmp + 2;
                             }
@@ -1104,7 +1089,8 @@ public class Controller implements Serializable {
                     case Cannon c -> {
                         var = c.isDouble();
                         if (var) {
-                            boolean activate = manageEnergyCell(nick);
+                            String mex = "To activate a double cannon";
+                            boolean activate = manageEnergyCell(nick, mex);
                             if (activate) {
                                 if (c.controlCorners(0) != 5) tmp = tmp + 1;
                                 else tmp = tmp + 2;
@@ -1995,7 +1981,8 @@ public class Controller implements Serializable {
         }
         if (directionProtected) {
             inform("SERVER: You can activate the shield by consuming a battery ", nick);
-            return manageEnergyCell(nick);
+            String mex = "To activate a shield";
+            return manageEnergyCell(nick, mex);
         }
 //            while (!flag) {
 //                boolean ans = askPlayerDecision("SERVER: Do you want to use a shield?", p);
@@ -2283,41 +2270,47 @@ public class Controller implements Serializable {
 //        }
 //    }
 
-    public void defenceFromMeteorite(int dir, boolean isBig, int dir2) throws BusinessLogicException {
+    public void defenceFromMeteorite(int dir, boolean isBig, int dir2, List<Player> players, int numMeteorite) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
         String size = isBig ? "big" : "small";
 
-        for (String nick : playersByNickname.keySet()) {
-            Player p = getPlayerCheck(nick);
-            VirtualView v = getViewCheck(nick);
+        for (Player p : players) {
+            String nick = getNickByPlayer(p);
+            if(players.indexOf(p)!=0) inform("\nSERVER: Waiting for your turn...", nick);
+        }
 
+        for (Player p : players) {
             if(p.isConnected() && !p.isEliminated()){
-                inform("\nSERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
+                String nick = getNickByPlayer(p);
+                VirtualView v = getViewCheck(nick);
+                inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
                 inform("SERVER: Ship before the attack", nick);
                 printPlayerDashboard(v, p, nick);
 
                 if (!isHitZone(dir, dir2)) {
-                    inform("SERVER: Meteorite out of range. You are safe.", nick);
+                    inform("SERVER: Meteorite out of range. You are safe", nick);
                     continue;
                 }
                 if (isBig) {
                     if (!checkProtection(dir, dir2, nick)) {
                         scriptOfDefence(nick, p, v, dir2, dir);
                     } else {
-                        inform("SERVER: Shield protected you!", nick);
+                        inform("SERVER: Cannon protected you!", nick);
                     }
                 } else {
-                    boolean exposed = p.checkNoConnector(dir, dir2);
+                    boolean noConnector = p.checkNoConnector(dir, dir2);
                     boolean shielded = isProtected(nick, dir);
 
-                    if (exposed || !shielded) {
+                    if (!noConnector && !shielded) {
                         scriptOfDefence(nick, p, v, dir2, dir);
                     } else {
                         inform("SERVER: You are safe", nick);
                     }
                 }
 
+                if(players.indexOf(p) != players.size()-1) inform("SERVER: Checking other players...", nick);
+                else broadcastInform("SERVER: "+numMeteorite+"° meteorite processed for all players");
             }
         }
     }
@@ -2328,7 +2321,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String nick) throws BusinessLogicException {
+    private boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
@@ -2336,7 +2329,7 @@ public class Controller implements Serializable {
         int[] coordinates;
         boolean exit = false;
 
-        if (!askPlayerDecision("SERVER: " + "Do you want to use a battery?", player)) {
+        if (!askPlayerDecision("SERVER: " + "Do you want to use a battery? "+mex, player)) {
             return false;
         } else {
             while (!exit) {
@@ -2369,15 +2362,26 @@ public class Controller implements Serializable {
 
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
-            case 0 -> checkColumnProtection(player, dir2 - 4);
+            case 0 -> checkColumnProtectionNord(player, dir2 - 4);
             case 1 -> checkRowProtectionRight(player, dir2 - 5);
+            case 2 -> checkColumnProtectionSouth(player, dir2 - 4);
             case 3 -> checkRowProtectionLeft(player, dir2 - 5);
             default -> false;
         };
     }
 
-    private boolean checkColumnProtection(String player, int col) throws BusinessLogicException {
+    private boolean checkColumnProtectionNord(String player, int col) throws BusinessLogicException {
         for (int row = 0; row < 5; row++) {
+            if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
+                Tile tile = playersByNickname.get(player).getTile(row, col);
+                return isCannonProtected(tile, player);
+            }
+        }
+        return false;
+    }
+
+    private boolean checkColumnProtectionSouth(String player, int col) throws BusinessLogicException {
+        for (int row = 4; row >=0 ; row--) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                 Tile tile = playersByNickname.get(player).getTile(row, col);
                 return isCannonProtected(tile, player);
@@ -2417,7 +2421,7 @@ public class Controller implements Serializable {
 
     private boolean isCannonProtected(Tile tile, String player) throws BusinessLogicException {
         return switch (tile) {
-            case Cannon c -> !c.isDouble() || manageEnergyCell(player);
+            case Cannon c -> !c.isDouble() || manageEnergyCell(player, "To activate a double cannon");
             default -> false;
         };
     }

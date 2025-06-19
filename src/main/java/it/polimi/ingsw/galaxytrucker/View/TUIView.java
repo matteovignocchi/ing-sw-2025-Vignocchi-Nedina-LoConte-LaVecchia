@@ -610,7 +610,7 @@ public class TUIView implements View {
     }
 
     private void printAttackTable(List<Integer> dirs, List<Boolean> sizes) {
-        Map<Integer,String> arrow = Map.of(0,"↑",1,"←",2,"↓",3,"→");
+        Map<Integer,String> arrow = Map.of(0,"↓",1,"←",2,"↑",3,"→");
         Function<Boolean,String> sizeLabel = b->b?"Big":"Small";
 
         int shotW = 6, dirW = 10, szW = 6;

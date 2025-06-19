@@ -176,14 +176,10 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(FirstWarzoneCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
-        if (players.size() == 1) return;
-
-        List<String> nicks = new ArrayList<>();
-        for (Player p : players) {
-            String nick = controller.getNickByPlayer(p);
-            nicks.add(nick);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            // controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+        if (players.size() == 1) {
+            for (Player p : players) controller.inform("DSERVER: You are flying alone. warzone card effect not activated ",
+                    controller.getNickByPlayer(p));
+            return;
         }
 
         int idx_firepower = 0;
@@ -199,10 +195,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 idx_engine = i;
         }
 
+        String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
+        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board");
         f.moveRocket(-card.getDays(), players.get(idx_crew));
+
+        String nickFire = controller.getNickByPlayer(players.get(idx_firepower));
+        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power");
         controller.removeCrewmates(players.get(idx_firepower), card.getNumCrewmates());
 
         Player p = players.get(idx_engine);
+        String nickEngine = controller.getNickByPlayer(p);
+        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power");
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
@@ -210,11 +213,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
         }
 
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
-        }
     }
 
     /**
@@ -450,9 +448,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
 
-            //TODO: per debug, poi eliminare
-            res = 7;
-            controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res);
+            controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, players, i+1);
         }
 
     }
