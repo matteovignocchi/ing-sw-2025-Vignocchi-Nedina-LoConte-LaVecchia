@@ -55,17 +55,21 @@ public class GameListMenuController extends GUIController {
     public void joinSelectedGame() {
         String selectedItem = gameListView.getSelectionModel().getSelectedItem();
         if (selectedItem == null || selectedItem.isBlank()) {
-            showInfo("Please select a game.");
+            guiView.reportError("Please select a game.");
             return;
         }
-
         try {
-            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) -1;
+            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) - 1;
             guiView.setSelectedGameId(gameId);
+
+
         } catch (NumberFormatException e) {
-            showInfo("Invalid game selection.");
+            guiView.reportError("Invalid game selection.");
+        } catch (Exception e) {
+            guiView.reportError("Error joining game: " + e.getMessage());
         }
     }
+
 
     @FXML
     public void back() {

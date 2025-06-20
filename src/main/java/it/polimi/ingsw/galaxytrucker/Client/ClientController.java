@@ -99,7 +99,6 @@ public class ClientController {
             switch (view) {
 
                 case GUIView v -> Platform.runLater(() -> {
-                    System.out.println("[DEBUG] GUI Detected. Switching to NICKNAME_DIALOG...");
                     v.setSceneEnum(SceneEnum.NICKNAME_DIALOG);
                 });
                 default -> {}
@@ -131,7 +130,9 @@ public class ClientController {
             } else {
                 view.inform("Login successful");
                 switch (view) {
-                    case GUIView g -> g.setSceneEnum(SceneEnum.MAIN_MENU);
+                    case GUIView g -> Platform.runLater(() -> {
+                        g.setSceneEnum(SceneEnum.MAIN_MENU);
+                    });
                     default -> {}
                 }
                 return 0;

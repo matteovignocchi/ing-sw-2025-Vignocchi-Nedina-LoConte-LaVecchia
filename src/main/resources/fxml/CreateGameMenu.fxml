@@ -10,7 +10,7 @@
 
 <AnchorPane prefHeight="900.0" prefWidth="686.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.CreateGameMenuController">
    <children>
-      <ImageView fitHeight="900.0" fitWidth="922.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-22.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="900.0" fitWidth="908.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-8.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../LobbyImage2.png" />
          </image>

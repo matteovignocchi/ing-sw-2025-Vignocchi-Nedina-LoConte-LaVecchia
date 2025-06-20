@@ -467,12 +467,10 @@ public class GUIView extends Application implements View {
     public void initializeAllScenes(){
         for (SceneEnum scene : SceneEnum.values()) {
             String path = scene.value();
-            System.out.println("Trying to load FXML for scene: " + scene.name() + " at path: " + path);
-
             URL resource = getClass().getResource(path);
             if (resource == null) {
                 System.err.println("ERROR: Resource not found for scene: " + scene.name() + " at path: " + path);
-                continue; // oppure puoi throware qui se vuoi bloccare tutto
+                continue;
             }
 
             try {
@@ -488,7 +486,6 @@ public class GUIView extends Application implements View {
                 controller.setGuiView(this);
                 controllers.put(scene, controller);
                 scenes.put(scene, new Scene(root));
-                System.out.println("Successfully loaded scene: " + scene.name());
             } catch (IOException | RuntimeException e) {
                 System.err.println("ERROR while loading scene: " + scene.name() + " at path: " + path);
                 e.printStackTrace();
@@ -498,8 +495,6 @@ public class GUIView extends Application implements View {
 
 
     public void setMainScene(SceneEnum sceneName) {
-        System.out.println("[DEBUG] setMainScene called with: " + sceneName);
-
         Scene scene = scenes.get(sceneName);
         if (scene == null) {
             System.err.println("[ERROR] Scene not found for: " + sceneName);
@@ -513,7 +508,6 @@ public class GUIView extends Application implements View {
         }
 
         this.controller = controller;
-        System.out.println("[DEBUG] Scene and controller found, setting scene...");
 
         mainStage.setScene(scene);
         mainStage.centerOnScreen();

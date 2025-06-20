@@ -12,8 +12,6 @@ public class NicknameDialogController extends GUIController {
     @FXML
     private TextField nicknameField;
 
-    private GUIView guiView;
-
     @FXML
     public void initialize() {
 
@@ -21,24 +19,12 @@ public class NicknameDialogController extends GUIController {
 
     @FXML
     public void confirmNickname() {
-        String nickname = nicknameField.getText().trim();
+        String nickname = nicknameField.getText();
         if (!nickname.isEmpty()) {
             guiView.resolveNickname(nickname);
-            Stage dialogStage = (Stage) nicknameField.getScene().getWindow();
-            dialogStage.close();
+
         } else {
-            showError("Nickname cannot be empty.");
+            guiView.reportError("Nickname cannot be empty.");
         }
-    }
-
-
-
-
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Invalid Nickname");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

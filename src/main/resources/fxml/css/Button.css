@@ -17,13 +17,15 @@
 .text-field.transparent {
     -fx-font-family: "Impact";
     -fx-font-size: 22px;
-    -fx-text-fill: #444444;
+    -fx-text-fill: #000000;
+    -fx-alignment: center;
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-border-color: transparent;
     -fx-border-width: 0;
     -fx-padding: 0;
 }
+
 
 .text-field.transparent .text {
     -fx-font-family: "Impact";
