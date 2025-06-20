@@ -59,21 +59,18 @@ public class GameListMenuController extends GUIController {
             return;
         }
         try {
-            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) - 1;
+            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) -1;
             guiView.setSelectedGameId(gameId);
-
-
         } catch (NumberFormatException e) {
             guiView.reportError("Invalid game selection.");
-        } catch (Exception e) {
-            guiView.reportError("Error joining game: " + e.getMessage());
         }
     }
+
 
 
     @FXML
     public void back() {
         guiView.setSelectedGameId(-1);
-        guiView.setMainScene(SceneEnum.MAIN_MENU);
+        Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.MAIN_MENU));
     }
 }

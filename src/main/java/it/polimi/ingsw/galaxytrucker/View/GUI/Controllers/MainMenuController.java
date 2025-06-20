@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 import it.polimi.ingsw.galaxytrucker.Client.ClientController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -46,17 +47,15 @@ public class MainMenuController extends GUIController {
     }
 
 
-
-        @FXML
-        private void joinGame() throws IOException {
-            guiView.setMainScene(SceneEnum.JOIN_GAME_MENU);
-        }
+    @FXML
+    private void joinGame() throws IOException {
+        Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.JOIN_GAME_MENU));
+    }
 
     @FXML
     private void createGame() throws IOException {
-        guiView.setMainScene(SceneEnum.CREATE_GAME_MENU);
+        Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.CREATE_GAME_MENU));
     }
-
 
     @FXML
     public void logout(){

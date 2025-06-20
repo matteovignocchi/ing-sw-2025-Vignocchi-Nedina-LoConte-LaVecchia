@@ -608,13 +608,14 @@ public class GUIView extends Application implements View {
 
     public Integer waitForGameChoice() {
         synchronized (lock) {
-
             selectedGameId = -10;
 
             try {
                 while (selectedGameId == -10) {
+                    System.out.println("[DEBUG] Waiting for game choice...");
                     lock.wait();
                 }
+                System.out.println("[DEBUG] Game choice resolved: " + selectedGameId);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return -1;
