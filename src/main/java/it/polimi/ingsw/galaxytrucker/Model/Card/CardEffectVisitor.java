@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CardEffectVisitor implements CardVisitor, Serializable {
     private final Controller controller;
     private final FlightCardBoard f;
-    private final List<Player> players;
+    private List<Player> players;
 
     /**
      * CardEffectVisitor constructs that apply adventure card effects using the specified Controller.
@@ -177,38 +177,96 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
         if (players.size() == 1) {
-            for (Player p : players) controller.inform("DSERVER: You are flying alone. warzone card effect not activated ",
-                    controller.getNickByPlayer(p));
+            String nick = controller.getNickByPlayer(players.getFirst());
+            controller.inform("SERVER: You are flying alone. warzone card effect not activated ", nick);
             return;
         }
 
-        int idx_firepower = 0;
-        int idx_crew = 0;
-        int idx_engine = 0;
 
+        int idx_crew = 0;
+        int days = card.getDays();
+        controller.broadcastInform("\nSERVER: Checking the player with the least number of crewmates...\n");
+
+        controller.broadcastInform("SERVER: "+controller.getNickByPlayer(players.get(idx_crew))+" has "+
+                controller.getNumCrew(players.get(idx_crew))+" crewmates");
         for (int i = 1; i < players.size(); i++) {
-            if (controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
+            Player p = players.get(i);
+            int numcrew = controller.getNumCrew(p);
+            controller.broadcastInform("SERVER: "+controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
+            if (numcrew < controller.getNumCrew(players.get(idx_crew)))
                 idx_crew = i;
-            if (controller.getFirePowerForCard(players.get(i)) < controller.getFirePowerForCard(players.get(idx_firepower)))
-                idx_firepower = i;
-            if (controller.getPowerEngineForCard(players.get(i)) < controller.getPowerEngineForCard(players.get(idx_engine)))
-                idx_engine = i;
         }
 
         String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
-        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board");
-        f.moveRocket(-card.getDays(), players.get(idx_crew));
+        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board!" +
+                "He loses "+days+" flight days");
+        f.moveRocket(-days, players.get(idx_crew));
 
-        String nickFire = controller.getNickByPlayer(players.get(idx_firepower));
-        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power");
-        controller.removeCrewmates(players.get(idx_firepower), card.getNumCrewmates());
+        f.setOverlappedPlayersEliminated();
+        List<Player> eliminated = f.eliminatePlayers();
+        for (Player player : eliminated) controller.handleElimination(player);
+        f.orderPlayersInFlightList();
+        players = f.getOrderedPlayers();
 
-        Player p = players.get(idx_engine);
-        String nickEngine = controller.getNickByPlayer(p);
-        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power");
+        if (players.size() == 1) {
+            String nick = controller.getNickByPlayer(players.getFirst());
+            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
+            return;
+        }
+
+        int idx_enginepower = 0;
+        int numCrew = card.getNumCrewmates();
+        controller.broadcastInform("\nSERVER: Checking the player with the lowest engine power...\n");
+
+        List<Integer> enginePowers = new ArrayList<>();
+        for(Player p : players) {
+            int x = controller.getPowerEngineForCard(p);
+            enginePowers.add(x);
+            String nick = controller.getNickByPlayer(p);
+            controller.broadcastInform("SERVER: "+nick+" has an engine power of "+x);
+        }
+        for (int i = 1; i < enginePowers.size(); i++) {
+            if(enginePowers.get(i) < enginePowers.get(idx_enginepower))
+                idx_enginepower = i;
+        }
+
+        String nickEngine = controller.getNickByPlayer(players.get(idx_enginepower));
+        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
+        controller.removeCrewmates(players.get(idx_enginepower), numCrew);
+
+        eliminated = f.eliminatePlayers();
+        for (Player player : eliminated) controller.handleElimination(player);
+        f.orderPlayersInFlightList();
+        players = f.getOrderedPlayers();
+
+        if (players.size() == 1) {
+            String nick = controller.getNickByPlayer(players.getFirst());
+            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
+            return;
+        }
+
+
+        int idx_firepower = 0;
+        controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
+
+        List<Double> firePowers = new ArrayList<>();
+        for(Player p : players) {
+            double x = controller.getFirePowerForCard(p);
+            firePowers.add(x);
+            String nick = controller.getNickByPlayer(p);
+            controller.broadcastInform("SERVER: "+nick+" has a fire power of "+x);
+        }
+        for (int i = 1; i < firePowers.size(); i++) {
+            if(firePowers.get(i) < firePowers.get(idx_firepower))
+                idx_firepower = i;
+        }
+
+        Player p = players.get(idx_firepower);
+        String nickFire = controller.getNickByPlayer(p);
+        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power! He will be hit by cannon fire");
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
-        for (int i = 0; i < card.getShotsDirections().size(); i++) {
+        for (int i = 0; i < shots_directions.size(); i++) {
             int res = p.throwDice() + p.throwDice();
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
         }

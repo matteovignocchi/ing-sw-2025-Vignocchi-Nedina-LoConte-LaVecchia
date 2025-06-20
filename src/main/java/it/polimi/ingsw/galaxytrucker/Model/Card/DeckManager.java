@@ -271,9 +271,9 @@ public class DeckManager implements Serializable {
         dir.add(0);
         List<Boolean> size = new ArrayList<>();
         size.add(false);
-        Card c1 = new FirstWarzoneCard("1", 5, 3, dir, size);
-        Card c2 = new FirstWarzoneCard("2", 5, 3, dir, size);
-        Card c3 = new FirstWarzoneCard("3", 5, 3, dir, size);
+        Card c1 = new FirstWarzoneCard("1", 30, 1, dir, size);
+        Card c2 = new FirstWarzoneCard("2", 30, 1, dir, size);
+        Card c3 = new FirstWarzoneCard("3", 30, 1, dir, size);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();

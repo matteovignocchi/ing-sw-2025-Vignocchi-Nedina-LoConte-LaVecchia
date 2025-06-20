@@ -258,7 +258,7 @@ public class FlightCardBoard implements Serializable {
             if(p.isEliminated()) continue;
             for(Player other : orderedPlayersInFlight) {
                 if(other.getId() == p.getId() || other.isEliminated()) continue;
-                if(other.getLap() > p.getLap() && other.getPos() > p.getPos()){
+                if((other.getLap() == p.getLap()+1 &&  other.getPos() > p.getPos()) || other.getLap() > p.getLap()+1 ){
                     p.setEliminated();
                     break;
                 }
