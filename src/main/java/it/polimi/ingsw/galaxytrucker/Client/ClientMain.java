@@ -35,13 +35,13 @@ public class ClientMain {
 
         int protocolChoice = readChoice(
                 scanner,
-                "> Choose the type of protocol:\n 1 - RMI\n 2 - SOCKET",
+                "Choose the type of protocol:\n 1 - RMI\n 2 - SOCKET",
                 Set.of("1", "2")
         );
 
         int viewChoice = readChoice(
                 scanner,
-                "> Choose the type of view:\n 1 - TUI\n 2 - GUI",
+                "Choose the type of view:\n 1 - TUI\n 2 - GUI",
                 Set.of("1", "2")
         );
 
@@ -85,7 +85,7 @@ public class ClientMain {
     private static int readChoice(Scanner scanner, String prompt, Set<String> validOptions) {
         while (true) {
             System.out.println(prompt);
-            System.out.print("> ");
+            System.out.print("");
             String line = scanner.nextLine().trim();
             if (validOptions.contains(line)) {
                 return Integer.parseInt(line);

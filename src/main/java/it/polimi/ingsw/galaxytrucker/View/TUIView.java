@@ -86,7 +86,7 @@ public class TUIView implements View {
     }
 
     @Override
-    public void inform(String message) {System.out.println("> " + message);}
+    public void inform(String message) {System.out.println(message);}
     @Override
     public void reportError(String message) {System.out.println(RED+ "[ERROR] " + message + RESET);}
     @Override
@@ -105,28 +105,26 @@ public class TUIView implements View {
         System.out.println("\nPlayers in game:");
         List<Map.Entry<String,int[]>> sorted = mapPosition.entrySet().stream()
                 .sorted(
-                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[1])
-                                .reversed()
-                                .thenComparing(
-                                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[0])
-                                                .reversed()
-                                )
+                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[2])
+                                .thenComparing(Comparator.comparingInt((Map.Entry<String,int[]> e) -> e.getValue()[1])
+                                        .reversed())
+                                .thenComparing(Comparator.comparingInt((Map.Entry<String,int[]> e) -> e.getValue()[0])
+                                        .reversed())
                 )
                 .toList();
 
         for (var entry : sorted) {
-            String nick = entry.getKey();
-            int[] info = entry.getValue();
-            int pos    = info[0];
-            int lap    = info[1];
-            boolean elim = info[2] == 1;
-            String stato = elim ? "Eliminated" : "In game";
-            inform(String.format("  %s – Lap: %d, Position: %d, status: %s",
-                    nick, lap, pos, stato));
+            String nick   = entry.getKey();
+            int[] info    = entry.getValue();
+            boolean elim  = info[2] == 1;
+            String lapStr = elim ? "x" : String.valueOf(info[1]);
+            String posStr = elim ? "x" : String.valueOf(info[0]);
+            String stato  = elim ? "Eliminated" : "In game";
+            inform(String.format("  %s – Lap: %s, Position: %s, status: %s",
+                    nick, lapStr, posStr, stato));
         }
 
         inform("Select nickname of the player:");
-
         while (true) {
             String line = readLine(200);
             if (line == null) {
@@ -146,6 +144,7 @@ public class TUIView implements View {
             reportError("Please enter a valid nickname from the list");
         }
     }
+
 
 
     @Override
@@ -460,23 +459,21 @@ public class TUIView implements View {
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
         mapPosition.entrySet().stream()
-                .sorted(
-                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[1])
-                                .reversed()
-                                .thenComparing(
-                                        Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[0])
-                                                .reversed()
-                                )
+                .sorted(Comparator.<Map.Entry<String,int[]>>comparingInt(e -> e.getValue()[2])
+                        .thenComparing(Comparator.comparingInt((Map.Entry<String,int[]> e) -> e.getValue()[1])
+                                .reversed())
+                        .thenComparing(Comparator.comparingInt((Map.Entry<String,int[]> e) -> e.getValue()[0])
+                                .reversed())
                 )
-                .forEachOrdered(entry -> {
-                    String nick = entry.getKey();
-                    int[] info = entry.getValue();
-                    int pos    = info[0];
-                    int lap    = info[1];
-                    boolean elim = info[2] == 1;
-                    String stato = elim ? "Eliminated" : "In game";
-                    inform(String.format("  %s – Lap: %d, Position: %d, status: %s",
-                            nick, lap, pos, stato));
+                .forEach(entry -> {
+                    String nick    = entry.getKey();
+                    int[] data     = entry.getValue();
+                    boolean elim   = data[2] == 1;
+                    String lapStr  = elim ? "x" : String.valueOf(data[1]);
+                    String posStr  = elim ? "x" : String.valueOf(data[0]);
+                    String status  = elim ? "Eliminated" : "In game";
+                    inform(String.format("  %s – Lap: %s, Position: %s, status: %s",
+                            nick, lapStr, posStr, status));
                 });
     }
 
@@ -485,12 +482,12 @@ public class TUIView implements View {
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
             case WAITING_IN_LOBBY  -> inform("Nickame : " + nickname);
-            case BOARD_SETUP -> inform(" -Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
+            case BOARD_SETUP -> inform("-Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
             case TILE_MANAGEMENT -> {}
-            case DRAW_PHASE -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
-            case WAITING_FOR_PLAYERS -> inform(" -Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
-            case WAITING_FOR_TURN, CARD_EFFECT -> inform(" -Nickname: "+nickname+ /*" -Position : "+position+*/"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries: "+numberOfEnergy);
-            case SCORING -> inform(" -Nickname: "+nickname/*+" -Position : "+position*/);
+            case DRAW_PHASE -> inform("-Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
+            case WAITING_FOR_PLAYERS -> inform("-Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
+            case WAITING_FOR_TURN, CARD_EFFECT -> inform("-Nickname: "+nickname+ /*" -Position : "+position+*/"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries: "+numberOfEnergy);
+            case SCORING -> inform("-Nickname: "+nickname/*+" -Position : "+position*/);
             case EXIT -> inform("Goodbye!");
         }
         printMapPosition();
