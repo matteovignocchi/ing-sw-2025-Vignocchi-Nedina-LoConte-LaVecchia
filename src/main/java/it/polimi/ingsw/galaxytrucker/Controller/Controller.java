@@ -70,7 +70,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateFirstWarzone();
+            decks = deckCreator.CreateSmugglersDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1189,6 +1189,29 @@ public class Controller implements Serializable {
         }
     }
 
+    public void autoCommandForRemoveSingleGood(Player p, Colour col) throws BusinessLogicException {
+        for(int i=0; i<5; i++){
+            for(int j=0; j<7; j++){
+                Tile tmp = p.getTile(i, j);
+                switch (tmp){
+                    case StorageUnit c -> {
+                        List<Colour> list = c.getListOfGoods();
+                        if(list.isEmpty()) continue;
+                        else {
+                            for(int z=0; z<list.size(); z++){
+                                if(list.get(z).equals(col)){
+                                    c.removeGood(z);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    default ->{}
+                }
+            }
+        }
+    }
+
     public void autoCommandForRemovePlayers(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
@@ -1214,6 +1237,7 @@ public class Controller implements Serializable {
     public void autoCommandForBattery(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
+
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile tmpTile = p.getTile(i, j);
@@ -1221,9 +1245,12 @@ public class Controller implements Serializable {
                     case EnergyCell e -> {
                         if(e.getCapacity() == 0) continue;
                         else {
-                            for(int z=0 ; z<e.getCapacity() ; z++) {
+                            int size = e.getCapacity();
+                            int z = 0;
+                            while(flag > 0 && z<size){
                                 e.useBattery();
                                 flag--;
+                                z++;
                             }
                         }
                     }
@@ -1235,6 +1262,7 @@ public class Controller implements Serializable {
     }
 
 
+    //TODO: gestire caso null e vedere per il caso delle disconnessioni
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1256,29 +1284,13 @@ public class Controller implements Serializable {
             }
         }
 
+        //1° caso
         if(num == totalGood){
-            /**
-             if(!p.isConnected()) {
-             autoCommandForRemoveGoods(p, totalGood);
-             return;
-             }
-             for (int i = 0; i < 5; i++) {
-             for (int j = 0; j < 7; j++){
-             Tile y = p.getTile(i, j);
-             switch (y){
-             case StorageUnit c -> {
-             while (!c.getListOfGoods().isEmpty())
-             c.removeGood(0);
-             }
-             default -> {}
-             }
-             }
-             }
-             */
-
             autoCommandForRemoveGoods(p, totalGood);
             if(!p.isConnected()) return;
+            inform("SERVER: You have lost all your goods", nick);
 
+        //2° caso
         } else if(num < totalGood){
             if(!p.isConnected()) {
                 autoCommandForRemoveGoods(p, num);
@@ -1288,10 +1300,17 @@ public class Controller implements Serializable {
             while(num != 0){
                 if(r != 0){
                     if(p.isConnected()){
-                        inform("SERVER: selezionare cella ed eliminare rosso", nick);
+                        inform("SERVER: Select a storage unit to remove a red good from", nick);
+                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
-                        //TODO: controllo può essere null
+                        if(vari==null){
+                            autoCommandForRemoveSingleGood(p, Colour.RED);
+                            r--;
+                            num--;
+                            inform("SERVER: Timeout! Automatic choice", nick);
+                            continue;
+                        }
 
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
@@ -1305,10 +1324,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: Non ci sono merci rosse in questa cella", nick);
+                                if(!flag) inform("SERVER: There are not red goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
+                            default -> inform("SERVER: Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1331,10 +1350,17 @@ public class Controller implements Serializable {
                     }
                 } else if(g != 0){
                     if(p.isConnected()){
-                        inform("SERVER: selezionare cella ed eliminare giallo", nick);
+                        inform("SERVER: Select a storage unit to remove a yellow good from", nick);
+                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
-                        //TODO: gestire caso null
+                        if(vari==null){
+                            autoCommandForRemoveSingleGood(p, Colour.YELLOW);
+                            g--;
+                            num--;
+                            inform("SERVER: Timeout! Automatic choice", nick);
+                            continue;
+                        }
 
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
@@ -1348,10 +1374,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: Non ci sono merci gialle in questa cella", nick);
+                                if(!flag) inform("SERVER: There are not yellow goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
+                            default -> inform("SERVER: Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1375,8 +1401,17 @@ public class Controller implements Serializable {
                     }
                 }else if(v != 0){
                     if(p.isConnected()){
-                        inform("SERVER: selezionare cella ed eliminare verde", nick);
+                        inform("SERVER: Select a storage unit to remove a green good from", nick);
+                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
+
+                        if(vari==null){
+                            autoCommandForRemoveSingleGood(p, Colour.GREEN);
+                            v--;
+                            num--;
+                            inform("SERVER: Timeout! Automatic choice", nick);
+                            continue;
+                        }
 
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
@@ -1390,10 +1425,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: Non ci sono merci verdi in questa cella", nick);
+                                if(!flag) inform("SERVER: There are not green goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
+                            default -> inform("SERVER: Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1416,10 +1451,17 @@ public class Controller implements Serializable {
                     }
                 } else if(b != 0){
                     if(p.isConnected()){
-                        inform("SERVER: selezionare cella ed eliminare blu", nick);
+                        inform("SERVER: Select a storage unit to remove a blue good from", nick);
+                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
-                        //TODO: gestire caso null
+                        if(vari==null){
+                            autoCommandForRemoveSingleGood(p, Colour.BLUE);
+                            b--;
+                            num--;
+                            inform("SERVER: Timeout! Automatic choice", nick);
+                            continue;
+                        }
 
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
@@ -1433,10 +1475,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: Non ci sono merci blu in questa cella", nick);
+                                if(!flag) inform("SERVER: There are not blue goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
+                            default -> inform("SERVER: Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1458,74 +1500,56 @@ public class Controller implements Serializable {
                         }
                     }
                 }
-                printPlayerDashboard(x, p, nick);
             }
-        }else { //if(num > totalGood)
+        }else { //3° caso: if(num > totalGood)
+            autoCommandForRemoveGoods(p, totalGood);
+            int finish = num-totalGood;
+
             if(!p.isConnected()) {
-                autoCommandForRemoveGoods(p, totalGood);
-                autoCommandForBattery(p, num-totalGood);
+                autoCommandForBattery(p, finish);
                 return;
             }
 
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 7; j++){
-                    Tile y = p.getTile(i, j);
-                    switch (y){
-                        case StorageUnit c -> {
-                            while (!c.getListOfGoods().isEmpty())
-                                c.removeGood(0);
-                        }
-                        default -> {}
-                    }
-                }
-            }
-
-            int finish = num-totalGood;
+            if(totalGood > 0) inform("SERVER: You have lost all your goods", nick);
+            else inform("SERVER: You don't have any good to remove", nick);
 
             if(finish < totalEnergy){
+                inform("SERVER: You will lose "+finish+" battery/ies", nick);
                 while(finish > 0){
                     if(p.isConnected()){
-                        inform("SERVER: selezionare cella ed eliminare una batteria", nick);
+                        inform("SERVER: Select an energy cell to remove a battery from", nick);
+                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
-                        //TODO: gestire caso null
+                        if(vari==null){
+                            autoCommandForBattery(p, 1);
+                            finish--;
+                            inform("SERVER: Timeout! Automatic choice", nick);
+                            continue;
+                        }
 
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
                             case EnergyCell c -> {
-                                if(c.getCapacity() != 0) c.useBattery();
-                                finish--;
+                                if(c.getCapacity() != 0){
+                                    c.useBattery();
+                                    finish--;
+                                } else inform("SERVER: Empty energy cell. Try again", nick);
                             }
-                            default -> {}
+                            default -> inform("SERVER: Not valid cell. Try again", nick);
                         }
                     }else{
-                        for(int index =0 ; index <5 ; index++){
-                            for(int index2 =0 ; index2 <7 ; index2++){
-                                Tile tmpTile = p.getTile(index, index2);
-                                switch (tmpTile){
-                                    case EnergyCell c -> {
-                                        if(c.getCapacity() != 0) c.useBattery();
-                                        finish--;
-                                    }
-                                    default -> {}
-                                }
-                            }
-                        }
+                        autoCommandForBattery(p, 1);
                     }
-                    printPlayerDashboard(x, p, nick);
                 }
             }else{
-                for (int i = 0; i < 5; i++) {
-                    for (int j = 0; j < 7; j++){
-                        Tile y = p.getTile(i, j);
-                        switch (y){
-                            case EnergyCell c -> {
-                                for(int bb = 0 ; bb < c.getCapacity() ; i++) c.useBattery();
-                            }
-                            default -> {}
-                        }
-                    }
+                autoCommandForBattery(p, totalEnergy);
+                if(!p.isConnected()) return;
+
+                if(totalEnergy>0){
+                    inform("SERVER: You have lost all your batteries", nick);
                 }
+                else inform("SERVER: You don't have any batteries to remove", nick);
             }
         }
         printPlayerDashboard(x, p, nick);

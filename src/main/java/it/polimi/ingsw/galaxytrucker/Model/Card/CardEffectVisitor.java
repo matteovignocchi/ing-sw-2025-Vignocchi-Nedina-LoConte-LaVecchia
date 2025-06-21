@@ -378,6 +378,19 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 }
                 exit = true;
             } else if (player_fire_power < smugglers_fire_power) {
+
+                /**/List<Colour> list1= new ArrayList<>();
+                /**/list1.add(Colour.RED);
+                /**/list1.add(Colour.RED);
+                /**/list1.add(Colour.RED);
+                /**/list1.add(Colour.YELLOW);
+                /**/list1.add(Colour.YELLOW);
+                /**/list1.add(Colour.GREEN);
+                /**/list1.add(Colour.GREEN);
+                /**/list1.add(Colour.BLUE);
+                /**/list1.add(Colour.BLUE);
+                /**/controller.manageGoods(p, list1);
+
                 String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated";
                 controller.inform(msg, nick);
 

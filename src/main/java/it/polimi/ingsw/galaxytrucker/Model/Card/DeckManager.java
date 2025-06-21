@@ -243,12 +243,8 @@ public class DeckManager implements Serializable {
 
     public List<Deck> CreateMeteoritesDeck() throws CardEffectException {
         List<Integer> directions = new ArrayList<>();
-        directions.add(2);
-        directions.add(1);
-        directions.add(0);
+        directions.add(3);
         List<Boolean> size = new ArrayList<>();
-        size.add(true);
-        size.add(true);
         size.add(true);
         Card c1 = new MeteoritesRainCard("1", directions, size);
         Card c2 = new MeteoritesRainCard("2", directions, size);
@@ -287,20 +283,19 @@ public class DeckManager implements Serializable {
         return decks;
     }
 
-    /**
     public List<Deck> CreateSmugglersDecks() throws CardEffectException {
         List<Colour> list1= new ArrayList<>();
-        List<Colour> list2= new ArrayList<>();
         list1.add(Colour.RED);
         list1.add(Colour.RED);
         list1.add(Colour.YELLOW);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.GREEN);
+        list1.add(Colour.GREEN);
         list1.add(Colour.BLUE);
-        list2.add(Colour.RED);
-        list2.add(Colour.GREEN);
-        list2.add(Colour.GREEN);
-        Card c1 = new SmugglersCard("1", 4, 1, 3, list1);
-        Card c2 = new SmugglersCard("1", 4, 1, 3, list2);
-        Card c3 = new SmugglersCard("1", 4, 1, 3, list2);
+        list1.add(Colour.BLUE);
+        Card c1 = new SmugglersCard("1", 4, 1, 2, list1);
+        Card c2 = new SmugglersCard("2", 4, 1, 2, list1);
+        Card c3 = new SmugglersCard("3", 4, 1, 2, list1);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
@@ -313,6 +308,5 @@ public class DeckManager implements Serializable {
         decks.add(deck3);
         return decks;
     }
-    */
 
 }
