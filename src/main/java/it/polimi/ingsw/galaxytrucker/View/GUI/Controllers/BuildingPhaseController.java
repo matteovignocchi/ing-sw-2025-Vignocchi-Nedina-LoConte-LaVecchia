@@ -81,31 +81,6 @@ public class BuildingPhaseController extends GUIController {
     @FXML
     public void initialize() {
         setupGridStructure();
-        if (getIsDemo()) {
-            dash.setVisible(false);
-            dashDemo.setVisible(true);
-            hourGlassBtn.setVisible(false);
-            deck1Btn.setVisible(false);
-            deck2Btn.setVisible(false);
-            deck3Btn.setVisible(false);
-            card0.setVisible(false);
-            card1.setVisible(false);
-            card2.setVisible(false);
-            card3.setVisible(false);
-            card4.setVisible(false);
-            card5.setVisible(false);
-        } else {
-            dash.setVisible(true);
-            dashDemo.setVisible(false);
-            hourGlassBtn.setVisible(true);
-            deck1Btn.setVisible(true);
-            deck2Btn.setVisible(true);
-            deck3Btn.setVisible(true);
-        }
-        setNickName(getNickname());
-        rotateLeftBtn.setVisible(false);
-        rotateRightBtn.setVisible(false);
-        returnTileBtn.setVisible(false);
 
 
         dashBoard = new ClientTile[5][7];
@@ -218,6 +193,10 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void onTilePressed(MouseEvent event) {
+        if (event.getTarget() != draggedTileView) {
+            event.consume();
+            return;
+        }
         draggedTileView.setMouseTransparent(true);
         draggedTileView.setOpacity(0.7);
         event.consume();

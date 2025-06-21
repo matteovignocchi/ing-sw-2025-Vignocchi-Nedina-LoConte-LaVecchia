@@ -327,6 +327,7 @@ public class GUIView extends Application implements View {
     @Override
     public void setIsDemo(Boolean demo) {
         Boolean[][] validStatus = new Boolean[5][7];
+        this.isDemo = demo;
         if (isDemo) {
             //first row
             validStatus[0][0]  = null;
@@ -502,6 +503,10 @@ public class GUIView extends Application implements View {
         }
 
         GUIController controller = controllers.get(sceneName);
+        switch (controller){
+            case BuildingPhaseController c -> c.postInitialize();
+            default -> {}
+        }
         if (controller == null) {
             System.err.println("[ERROR] Controller not found for: " + sceneName);
             return;
@@ -612,10 +617,8 @@ public class GUIView extends Application implements View {
 
             try {
                 while (selectedGameId == -10) {
-                    System.out.println("[DEBUG] Waiting for game choice...");
                     lock.wait();
                 }
-                System.out.println("[DEBUG] Game choice resolved: " + selectedGameId);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return -1;

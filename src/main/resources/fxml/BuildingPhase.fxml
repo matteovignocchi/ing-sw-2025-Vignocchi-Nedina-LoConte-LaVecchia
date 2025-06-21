@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import java.lang.*?>
 <?import java.net.*?>
 <?import javafx.scene.control.*?>
@@ -10,7 +11,7 @@
 <AnchorPane fx:id="rootPane" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController">
     <children>
 
-        <ImageView fitHeight="720.0" fitWidth="1284.0" layoutX="8.0" styleClass="blue-button" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <ImageView fitHeight="720.0" fitWidth="1284.0" layoutX="8.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <image>
                 <Image url="@../Background_image_game.jpg" />
             </image>
@@ -125,7 +126,7 @@
             <Image url="@../Polytechnic/cards/GT-cards_II_IT_0121.jpg" />
          </image>
       </ImageView>
-        <HBox fx:id="nicknameBox" spacing="10.0" AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0">
+        <HBox fx:id="nicknameBox" spacing="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
             <children>
                 <Label fx:id="nicknameLabel" text="NicknamePlaceholder" />
             </children>
