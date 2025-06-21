@@ -7,13 +7,29 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.GamingPhase">
    <children>
-      <ImageView fitHeight="112.0" fitWidth="200.0">
+      <ImageView fitHeight="720.0" fitWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../Background_image_game.jpg" />
          </image>
       </ImageView>
+      <ImageView fitHeight="636.0" fitWidth="1032.0" layoutX="106.0" preserveRatio="true" visible="false" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="124.0" AnchorPane.topAnchor="55.0">
+         <image>
+            <Image url="@../Polytechnic/cardboard/cardboard-5.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="628.0" fitWidth="1120.0" preserveRatio="true" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="55.0">
+         <image>
+            <Image url="@../Polytechnic/cardboard/cardboard-3.png" />
+         </image>
+      </ImageView>
+      <Pane fx:id="demo1" layoutX="347.0" layoutY="169.0" prefHeight="50.0" prefWidth="50.0" rotate="24.0" />
+      <Pane fx:id="demo2" layoutX="449.0" layoutY="135.0" prefHeight="50.0" prefWidth="50.0" rotate="-49.4" />
+      <Pane fx:id="demo3" layoutX="552.0" layoutY="121.0" prefHeight="50.0" prefWidth="50.0" rotate="135.0" />
+      <Pane layoutX="661.0" layoutY="124.0" prefHeight="50.0" prefWidth="50.0" rotate="140.0" />
+      <Pane fx:id="demo5" layoutX="767.0" layoutY="140.0" prefHeight="50.0" prefWidth="50.0" rotate="150.0" />
+      <Pane fx:id="demo6" layoutX="871.0" layoutY="173.0" prefHeight="50.0" prefWidth="50.0" rotate="160.0" />
+      <Pane layoutX="777.0" layoutY="179.0" prefHeight="50.0" prefWidth="50.0" />
    </children>
 </AnchorPane>

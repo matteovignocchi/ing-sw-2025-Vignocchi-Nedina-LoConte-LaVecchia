@@ -4,4 +4,14 @@
     -fx-padding: 0;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
+    -fx-cursor: hand;
+    -fx-background-radius: 0;
+}
+
+.transparent-button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+}
+
+.transparent-button:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
 }

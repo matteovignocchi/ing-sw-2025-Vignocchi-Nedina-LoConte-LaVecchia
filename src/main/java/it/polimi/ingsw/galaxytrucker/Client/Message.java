@@ -69,7 +69,6 @@ public class Message implements Serializable {
         this.requestId = requestId;
     }
 
-    // 🔧 Factory con UUID generato automaticamente
     public static Message request(String operation, Object payload) {
         return new Message(TYPE_REQUEST, operation, payload, UUID.randomUUID().toString());
     }
