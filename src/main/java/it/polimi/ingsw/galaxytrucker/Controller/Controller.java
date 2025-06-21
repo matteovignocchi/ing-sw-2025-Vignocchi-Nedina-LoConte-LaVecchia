@@ -313,7 +313,7 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) {
             p.setConnected(true);
-            broadcastInform( nickname + " is reconnected");
+            broadcastInform("SERVER: "+ nickname + " is reconnected");
         }
         cancelLastPlayerTimeout();
         notifyView(nickname);
@@ -580,6 +580,7 @@ public class Controller implements Serializable {
         }
 
         for (String nickname : viewsByNickname.keySet()) {
+            if(nickname.equals(leaderNick)) continue; //aggiunta per risolvere problema salvataggio
             Player p = getPlayerCheck(nickname);
             p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             if(p.isConnected() && !p.isEliminated() && !nickname.equals(leaderNick)) notifyView(nickname);
@@ -600,21 +601,21 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped a second time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
                 } else {
-                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
                     inform(msg, nickname);
                 }
                 break;
             case 2:
                 if(state == HourglassState.ONGOING){
-                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
                     inform(msg, nickname);
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped the last time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
                 } else {
-                    String msg = "SERVER: You cannot flip the hourglass for the last time: " +
+                    String msg = "\nSERVER: You cannot flip the hourglass for the last time: " +
                             "You are not ready";
                     inform(msg, nickname);
                 }
@@ -628,13 +629,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("SERVER: " + "First Hourglass expired");
+                broadcastInform("\nSERVER: " + "First Hourglass expired");
                 break;
             case 2:
-                broadcastInform("SERVER: " + "Second Hourglass expired");
+                broadcastInform("\nSERVER: " + "Second Hourglass expired");
                 break;
             case 3:
-                broadcastInform("SERVER: " + "Time’s up! Building phase ended.");
+                broadcastInform("\nSERVER: " + "Time’s up! Building phase ended.");
                 startFlight();
                 break;
         }
