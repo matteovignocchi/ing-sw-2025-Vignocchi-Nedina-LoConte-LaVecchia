@@ -2360,8 +2360,7 @@ public class Controller implements Serializable {
             return false;
         }
     }
-
-    //TODO: aggiungere il caso sud
+    
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
