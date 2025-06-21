@@ -48,12 +48,11 @@ public class GameManager {
         Controller controller = getControllerCheck(gameId);
 
         //if (controller.getPlayerByNickname(nickname) == null)
-            controller.addPlayer(nickname, v);
-            nicknameToGameId.put(nickname, gameId);
-            if (controller.countConnectedPlayers() == controller.getMaxPlayers())
-                controller.startGame();
-
-
+        safeSave(gameId, controller);
+        controller.addPlayer(nickname, v);
+        nicknameToGameId.put(nickname, gameId);
+        if (controller.countConnectedPlayers() == controller.getMaxPlayers())
+            controller.startGame();
         safeSave(gameId, controller);
     }
 
@@ -127,6 +126,7 @@ public class GameManager {
     public String getCoveredTile(int gameId, String nickname) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             String t = controller.getCoveredTile(nickname);
             safeSave(gameId, controller);
             return t;
@@ -136,6 +136,7 @@ public class GameManager {
     public String getUncoveredTilesList(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             String uncoveredTiles = controller.jsongetShownTiles();
             if(uncoveredTiles.isEmpty()) throw new BusinessLogicException("Pile of uncovered tiles is empty");
             return uncoveredTiles;
@@ -145,6 +146,7 @@ public class GameManager {
     public String chooseUncoveredTile(int gameId, String nickname, int idTile) throws BusinessLogicException{
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             String t = controller.chooseUncoveredTile(nickname, idTile);
             safeSave(gameId, controller);
             return t;
@@ -154,6 +156,7 @@ public class GameManager {
     public void dropTile (int gameId, String nickname, String tile) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             controller.dropTile(nickname, tile);
             safeSave(gameId, controller);
         }
@@ -162,6 +165,7 @@ public class GameManager {
     public void placeTile(int gameId, String nickname, String tile, int[] cord) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             controller.placeTile(nickname, tile, cord);
             safeSave(gameId, controller);
         }
@@ -171,6 +175,7 @@ public class GameManager {
         Controller controller = getControllerCheck(gameId);
         String t;
         synchronized (controller) {
+            safeSave(gameId, controller);
             t = controller.getReservedTile(nickname, id);
             safeSave(gameId, controller);
         }
@@ -180,6 +185,7 @@ public class GameManager {
     public void setReady(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             controller.setReady(nickname);
             safeSave(gameId, controller);
         }
@@ -188,6 +194,7 @@ public class GameManager {
     public void flipHourglass(int gameId, String nickname) throws BusinessLogicException, RemoteException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             controller.flipHourglass(nickname);
             safeSave(gameId, controller);
         }
@@ -203,6 +210,7 @@ public class GameManager {
     public void drawCard(int gameId, String nickname) throws BusinessLogicException {
         Controller controller = getControllerCheck(gameId);
         synchronized (controller) {
+            safeSave(gameId, controller);
             controller.drawCardManagement(nickname);
             safeSave(gameId, controller);
         }

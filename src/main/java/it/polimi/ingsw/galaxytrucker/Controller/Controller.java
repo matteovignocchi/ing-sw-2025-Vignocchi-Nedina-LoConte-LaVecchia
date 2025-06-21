@@ -313,7 +313,7 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) {
             p.setConnected(true);
-            broadcastInform( nickname + " is reconnected");
+            broadcastInform("SERVER: "+ nickname + " is reconnected");
         }
         cancelLastPlayerTimeout();
         notifyView(nickname);
@@ -580,6 +580,7 @@ public class Controller implements Serializable {
         }
 
         for (String nickname : viewsByNickname.keySet()) {
+            if(nickname.equals(leaderNick)) continue; //aggiunta per risolvere problema salvataggio
             Player p = getPlayerCheck(nickname);
             p.setGamePhase(GamePhase.WAITING_FOR_TURN);
             if(p.isConnected() && !p.isEliminated() && !nickname.equals(leaderNick)) notifyView(nickname);
@@ -600,21 +601,21 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped a second time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
                 } else {
-                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
                     inform(msg, nickname);
                 }
                 break;
             case 2:
                 if(state == HourglassState.ONGOING){
-                    String msg = "SERVER: " + "You cannot flip the hourglass: It's still running";
+                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
                     inform(msg, nickname);
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("SERVER: " + "Hourglass flipped the last time!");
+                    broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
                 } else {
-                    String msg = "SERVER: You cannot flip the hourglass for the last time: " +
+                    String msg = "\nSERVER: You cannot flip the hourglass for the last time: " +
                             "You are not ready";
                     inform(msg, nickname);
                 }
@@ -628,13 +629,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("SERVER: " + "First Hourglass expired");
+                broadcastInform("\nSERVER: " + "First Hourglass expired");
                 break;
             case 2:
-                broadcastInform("SERVER: " + "Second Hourglass expired");
+                broadcastInform("\nSERVER: " + "Second Hourglass expired");
                 break;
             case 3:
-                broadcastInform("SERVER: " + "Time’s up! Building phase ended.");
+                broadcastInform("\nSERVER: " + "Time’s up! Building phase ended.");
                 startFlight();
                 break;
         }
@@ -1175,7 +1176,7 @@ public class Controller implements Serializable {
                     case StorageUnit c -> {
                         if(c.getListOfGoods().isEmpty()) continue;
                         else {
-                            for(int z=0 ; z<c.getListOfGoods().size() ; z++) {
+                            while(flag > 0 && !c.getListOfGoods().isEmpty()) {
                                 c.removeGood(0);
                                 flag--;
                             }
@@ -1239,6 +1240,7 @@ public class Controller implements Serializable {
         VirtualView x = viewsByNickname.get(nick);
         int totalEnergy = getTotalEnergy(p);
         int totalGood = getTotalGood(p);
+        boolean flag = false;
 
         List<Colour> TotalGood = p.getTotalListOfGood();
         int r = 0;
@@ -1253,47 +1255,44 @@ public class Controller implements Serializable {
                 case YELLOW -> g++;
             }
         }
+
         if(num == totalGood){
+            /**
+             if(!p.isConnected()) {
+             autoCommandForRemoveGoods(p, totalGood);
+             return;
+             }
+             for (int i = 0; i < 5; i++) {
+             for (int j = 0; j < 7; j++){
+             Tile y = p.getTile(i, j);
+             switch (y){
+             case StorageUnit c -> {
+             while (!c.getListOfGoods().isEmpty())
+             c.removeGood(0);
+             }
+             default -> {}
+             }
+             }
+             }
+             */
+
+            autoCommandForRemoveGoods(p, totalGood);
+            if(!p.isConnected()) return;
+
+        } else if(num < totalGood){
             if(!p.isConnected()) {
-                autoCommandForRemoveGoods(p, totalGood);
+                autoCommandForRemoveGoods(p, num);
                 return;
             }
-            for (int i = 0; i < 5; i++) {
-                for (int j = 0; j < 7; j++){
-                    Tile y = p.getTile(i, j);
-                    switch (y){
-                        case StorageUnit c -> {
-                            for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
-                        }
-                        default -> {}
-                    }
-                }
-            }
-            printPlayerDashboard(x, p, nick);
-        }
-        if(num < totalGood){
-            if(!p.isConnected()) {
-                autoCommandForRemoveGoods(p, totalGood);
-                return;
-            }
+
             while(num != 0){
                 if(r != 0){
                     if(p.isConnected()){
-                        try {
-                            x.inform("SERVER: " + "selezionare cella ed eliminare rosso");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in removeGoods: " + e.getMessage());
-                        }
-                        int[] vari = null;
-                        try {
-                            vari = askPlayerCoordinates(p);
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                            throw new RuntimeException(e);
-                        }
+                        inform("SERVER: selezionare cella ed eliminare rosso", nick);
+                        int[] vari = askPlayerCoordinates(p);
+
+                        //TODO: controllo può essere null
+
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
                             case StorageUnit c -> {
@@ -1302,12 +1301,15 @@ public class Controller implements Serializable {
                                         r--;
                                         num--;
                                         c.removeGood(c.getListOfGoods().indexOf(co));
+                                        flag=true;
+                                        break;
                                     }
                                 }
+                                if(!flag) inform("SERVER: Non ci sono merci rosse in questa cella", nick);
+                                else flag=false;
                             }
-                            default -> {}
+                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
                         }
-
                     }else{
                         for(int index =0 ; index <5 ; index++){
                             for(int index2 =0 ; index2 <7 ; index2++){
@@ -1327,24 +1329,13 @@ public class Controller implements Serializable {
                             }
                         }
                     }
-
-                }
-                if(r == 0 && num!=0 && g != 0){
+                } else if(g != 0){
                     if(p.isConnected()){
-                        try {
-                            x.inform("SERVER: " + "selezionare cella ed eliminare giallo");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in removeGoods: " + e.getMessage());
-                        }
-                        int[] vari = null;
-                        try {
-                            vari = askPlayerCoordinates(p);
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                        }
+                        inform("SERVER: selezionare cella ed eliminare giallo", nick);
+                        int[] vari = askPlayerCoordinates(p);
+
+                        //TODO: gestire caso null
+
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
                             case StorageUnit c -> {
@@ -1353,10 +1344,14 @@ public class Controller implements Serializable {
                                         g--;
                                         num--;
                                         c.removeGood(c.getListOfGoods().indexOf(co));
+                                        flag=true;
+                                        break;
                                     }
                                 }
+                                if(!flag) inform("SERVER: Non ci sono merci gialle in questa cella", nick);
+                                else flag=false;
                             }
-                            default -> {}
+                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1366,7 +1361,7 @@ public class Controller implements Serializable {
                                     case StorageUnit c -> {
                                         for(Colour co : c.getListOfGoods()) {
                                             if (co == Colour.YELLOW) {
-                                                r--;
+                                                g--;
                                                 num--;
                                                 c.removeGood(c.getListOfGoods().indexOf(co));
                                             }
@@ -1378,17 +1373,9 @@ public class Controller implements Serializable {
                         }
 
                     }
-                }
-                if(r == 0 && g == 0 && v != 0 && num!=0){
+                }else if(v != 0){
                     if(p.isConnected()){
-                        try {
-                            x.inform("SERVER: " + "selezionare cella ed eliminare verde");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in removeGoods: " + e.getMessage());
-                        }
+                        inform("SERVER: selezionare cella ed eliminare verde", nick);
                         int[] vari = askPlayerCoordinates(p);
 
                         Tile y = p.getTile(vari[0], vari[1]);
@@ -1399,10 +1386,14 @@ public class Controller implements Serializable {
                                         v--;
                                         num--;
                                         c.removeGood(c.getListOfGoods().indexOf(co));
+                                        flag=true;
+                                        break;
                                     }
                                 }
+                                if(!flag) inform("SERVER: Non ci sono merci verdi in questa cella", nick);
+                                else flag=false;
                             }
-                            default -> {}
+                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1412,7 +1403,7 @@ public class Controller implements Serializable {
                                     case StorageUnit c -> {
                                         for(Colour co : c.getListOfGoods()) {
                                             if (co == Colour.GREEN) {
-                                                r--;
+                                                v--;
                                                 num--;
                                                 c.removeGood(c.getListOfGoods().indexOf(co));
                                             }
@@ -1422,102 +1413,83 @@ public class Controller implements Serializable {
                                 }
                             }
                         }
-
                     }
+                } else if(b != 0){
+                    if(p.isConnected()){
+                        inform("SERVER: selezionare cella ed eliminare blu", nick);
+                        int[] vari = askPlayerCoordinates(p);
 
+                        //TODO: gestire caso null
 
-                }
-                if(r == 0 && g == 0 && v == 0 && b != 0 && num!=0){
-                  if(p.isConnected()){
-                      try {
-                          x.inform("SERVER: " + "selezionare cella ed eliminare blu");
-                      } catch (IOException e) {
-                          markDisconnected(nick);
-                      } catch (Exception e){
-                          markDisconnected(nick);
-                          System.err.println("[ERROR] in removeGoods: " + e.getMessage());
-                      }
-                      int[] vari = null;
-                      try {
-                          vari = askPlayerCoordinates(p);
-                      } catch (Exception e) {
-                          markDisconnected(nick);
-                          throw new RuntimeException(e);
-                      }
-                      Tile y = p.getTile(vari[0], vari[1]);
-                      switch (y){
-                          case StorageUnit c -> {
-                              for(Colour co : c.getListOfGoods()) {
-                                  if (co == Colour.BLUE) {
-                                      b--;
-                                      num--;
-                                      c.removeGood(c.getListOfGoods().indexOf(co));
-                                  }
-                              }
-                          }
-                          default -> {}
-                      }
-                  }else{
-                      for(int index =0 ; index <5 ; index++){
-                          for(int index2 =0 ; index2 <7 ; index2++){
-                              Tile tmpTile = p.getTile(index, index2);
-                              switch (tmpTile){
-                                  case StorageUnit c -> {
-                                      for(Colour co : c.getListOfGoods()) {
-                                          if (co == Colour.BLUE) {
-                                              r--;
-                                              num--;
-                                              c.removeGood(c.getListOfGoods().indexOf(co));
-                                          }
-                                      }
-                                  }
-                                  default -> {}
-                              }
-                          }
-                      }
-
-                  }
-
+                        Tile y = p.getTile(vari[0], vari[1]);
+                        switch (y){
+                            case StorageUnit c -> {
+                                for(Colour co : c.getListOfGoods()) {
+                                    if (co == Colour.BLUE) {
+                                        b--;
+                                        num--;
+                                        c.removeGood(c.getListOfGoods().indexOf(co));
+                                        flag=true;
+                                        break;
+                                    }
+                                }
+                                if(!flag) inform("SERVER: Non ci sono merci blu in questa cella", nick);
+                                else flag=false;
+                            }
+                            default -> inform("SERVER: cella non valida, scegline un'altra", nick);
+                        }
+                    }else{
+                        for(int index =0 ; index <5 ; index++){
+                            for(int index2 =0 ; index2 <7 ; index2++){
+                                Tile tmpTile = p.getTile(index, index2);
+                                switch (tmpTile){
+                                    case StorageUnit c -> {
+                                        for(Colour co : c.getListOfGoods()) {
+                                            if (co == Colour.BLUE) {
+                                                b--;
+                                                num--;
+                                                c.removeGood(c.getListOfGoods().indexOf(co));
+                                            }
+                                        }
+                                    }
+                                    default -> {}
+                                }
+                            }
+                        }
+                    }
                 }
                 printPlayerDashboard(x, p, nick);
             }
-        }
-        if(num > totalGood){
+        }else { //if(num > totalGood)
             if(!p.isConnected()) {
                 autoCommandForRemoveGoods(p, totalGood);
                 autoCommandForBattery(p, num-totalGood);
                 return;
             }
+
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++){
                     Tile y = p.getTile(i, j);
                     switch (y){
                         case StorageUnit c -> {
-                            for(int i2=0 ; i2<c.getListSize() ;i2++) c.removeGood(i2);
+                            while (!c.getListOfGoods().isEmpty())
+                                c.removeGood(0);
                         }
                         default -> {}
                     }
                 }
             }
+
             int finish = num-totalGood;
+
             if(finish < totalEnergy){
                 while(finish > 0){
                     if(p.isConnected()){
-                        try {
-                            x.inform("SERVER: " + "selezionare cella ed eliminare una batteria");
-                        } catch (IOException e) {
-                            markDisconnected(nick);
-                        } catch (Exception e){
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in removeGoods: " + e.getMessage());
-                        }
-                        int[] vari = null;
-                        try {
-                            vari = askPlayerCoordinates(p);
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                            throw new RuntimeException(e);
-                        }
+                        inform("SERVER: selezionare cella ed eliminare una batteria", nick);
+                        int[] vari = askPlayerCoordinates(p);
+
+                        //TODO: gestire caso null
+
                         Tile y = p.getTile(vari[0], vari[1]);
                         switch (y){
                             case EnergyCell c -> {
@@ -1525,7 +1497,6 @@ public class Controller implements Serializable {
                                 finish--;
                             }
                             default -> {}
-
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1540,7 +1511,6 @@ public class Controller implements Serializable {
                                 }
                             }
                         }
-
                     }
                     printPlayerDashboard(x, p, nick);
                 }
@@ -2360,11 +2330,12 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: aggiungere il caso sud
+
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
             case 1 -> checkRowProtectionFromSide(player, dir2 - 5 , 1);
+            case 2 -> checkColumnProtectionFromSouth(player, dir2-4, 2);
             case 3 -> checkRowProtectionFromSide(player, dir2 - 5 , 3);
             default -> false;
         };
@@ -2374,7 +2345,7 @@ public class Controller implements Serializable {
         for (int row = 0; row < 5; row++) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                 Tile tile = playersByNickname.get(player).getTile(row, col);
-                return isCannonProtected(tile, player, 0);
+                if(isCannonProtected(tile, player, 0)) return true;
             }
         }
         return false;
@@ -2383,26 +2354,44 @@ public class Controller implements Serializable {
     private boolean checkRowProtectionFromSide(String player, int row, int direction) throws BusinessLogicException {
         for (int r = row - 1; r <= row + 1; r++) {
             if (r < 0 || r >= 5) continue;
-            if (checkFirstTileInRow(player, r, direction)) return true;
+            if (checkTileInRow(player, r, direction)) return true;
         }
         return false;
     }
 
 
-    private boolean checkFirstTileInRow(String player, int row, int direction) throws BusinessLogicException {
+    private boolean checkTileInRow(String player, int row, int direction) throws BusinessLogicException {
         if (direction == 1) {
-            for (int col = 5; col >= 1; col--) {
+            for (int col = 6; col >= 0; col--) {
                 if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                     Tile tile = playersByNickname.get(player).getTile(row, col);
-                    return isCannonProtected(tile, player, direction);
+                    if(isCannonProtected(tile, player, direction)) return true;
                 }
             }
         } else if (direction == 3) {
-            for (int col = 1; col <= 5; col++) {
+            for (int col = 0; col <= 6; col++) {
                 if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                     Tile tile = playersByNickname.get(player).getTile(row, col);
-                    return isCannonProtected(tile, player, direction);
+                    if(isCannonProtected(tile, player, direction)) return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkColumnProtectionFromSouth(String player, int column, int direction) throws BusinessLogicException {
+        for (int c = column - 1; c <= column + 1; c++) {
+            if(c < 0 || c>= 7) continue;
+            if(checkTileInColumn(player, c, direction)) return true;
+        }
+        return false;
+    }
+
+    private boolean checkTileInColumn(String player, int column, int direction) throws BusinessLogicException {
+        for(int row = 4; row >= 0; row--){
+            if (playersByNickname.get(player).validityCheck(row, column) == Status.USED){
+                Tile tile = playersByNickname.get(player).getTile(row, column);
+                if(isCannonProtected(tile, player, direction)) return true;
             }
         }
         return false;
