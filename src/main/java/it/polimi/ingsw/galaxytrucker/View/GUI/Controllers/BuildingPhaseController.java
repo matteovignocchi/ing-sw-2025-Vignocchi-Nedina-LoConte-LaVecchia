@@ -218,6 +218,10 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void onTilePressed(MouseEvent event) {
+        if (event.getTarget() != draggedTileView) {
+            event.consume();
+            return;
+        }
         draggedTileView.setMouseTransparent(true);
         draggedTileView.setOpacity(0.7);
         event.consume();

@@ -612,10 +612,8 @@ public class GUIView extends Application implements View {
 
             try {
                 while (selectedGameId == -10) {
-                    System.out.println("[DEBUG] Waiting for game choice...");
                     lock.wait();
                 }
-                System.out.println("[DEBUG] Game choice resolved: " + selectedGameId);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return -1;
