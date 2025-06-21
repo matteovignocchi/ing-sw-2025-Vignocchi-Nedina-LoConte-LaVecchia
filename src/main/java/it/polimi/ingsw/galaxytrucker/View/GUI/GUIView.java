@@ -42,7 +42,7 @@ public class GUIView extends Application implements View {
     private ClientController clientController;
     public ClientTile currentTile;
     public ClientTile[][] dashBoard;
-    private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+    private static Map<String, int[]> mapPosition = new ConcurrentHashMap<String, int[]>();
     private Boolean[][] maschera;
     private CompletableFuture<List<Object>> dataForGame;
     private CompletableFuture<String> menuChoiceFuture;
@@ -311,6 +311,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public void updateMap(Map<String, int[]> map) {
+        mapPosition = map;
 
     }
 
@@ -646,6 +647,7 @@ public class GUIView extends Application implements View {
     @Override
     public void setNickName(String nickname) {
         this.nickname = nickname;
+        this.controller.setNickname(nickname);
     }
     public String getNickname() {
         return nickname;
