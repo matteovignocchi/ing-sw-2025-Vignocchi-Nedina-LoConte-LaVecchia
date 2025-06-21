@@ -2360,7 +2360,9 @@ public class Controller implements Serializable {
             return false;
         }
     }
-    
+
+    //TODO: aggiungere il caso sud
+    //TODO caso sud non serve dato che non ci sono meteoriti che arrivano da giù
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
@@ -2374,7 +2376,7 @@ public class Controller implements Serializable {
         for (int row = 0; row < 5; row++) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                 Tile tile = playersByNickname.get(player).getTile(row, col);
-                return isCannonProtected(tile, player, 0);
+                if(isCannonProtected(tile, player, 0)) return true;
             }
         }
         return false;
@@ -2383,25 +2385,25 @@ public class Controller implements Serializable {
     private boolean checkRowProtectionFromSide(String player, int row, int direction) throws BusinessLogicException {
         for (int r = row - 1; r <= row + 1; r++) {
             if (r < 0 || r >= 5) continue;
-            if (checkFirstTileInRow(player, r, direction)) return true;
+            if (checkTileInRow(player, r, direction)) return true;
         }
         return false;
     }
 
 
-    private boolean checkFirstTileInRow(String player, int row, int direction) throws BusinessLogicException {
+    private boolean checkTileInRow(String player, int row, int direction) throws BusinessLogicException {
         if (direction == 1) {
             for (int col = 5; col >= 1; col--) {
                 if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                     Tile tile = playersByNickname.get(player).getTile(row, col);
-                    return isCannonProtected(tile, player, direction);
+                    if(isCannonProtected(tile, player, direction)) return true;
                 }
             }
         } else if (direction == 3) {
             for (int col = 1; col <= 5; col++) {
                 if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
                     Tile tile = playersByNickname.get(player).getTile(row, col);
-                    return isCannonProtected(tile, player, direction);
+                    if(isCannonProtected(tile, player, direction)) return true;
                 }
             }
         }
