@@ -72,7 +72,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreatePlanetsDeck();
+            decks = deckCreator.CreateOpenSpaceDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -286,6 +286,17 @@ public class Controller implements Serializable {
         } catch (Exception e) {
             markDisconnected(nick);
             System.err.println("[ERROR] in printListOfGoods : " + e.getMessage());
+        }
+    }
+
+    public void updateGamePhase(String nick, VirtualView v, GamePhase phase){
+        try {
+            v.updateGameState(enumSerializer.serializeGamePhase(phase));
+        } catch (IOException ex) {
+            markDisconnected(nick);
+        } catch (Exception e) {
+            markDisconnected(nick);
+            System.err.println("[ERROR] in updateGamePhase: " + e.getMessage());
         }
     }
 
@@ -584,9 +595,9 @@ public class Controller implements Serializable {
         for (String nickname : viewsByNickname.keySet()) {
             if(nickname.equals(leaderNick)) continue;
             Player p = getPlayerCheck(nickname);
-            //TODO: veder se modificare la fase pure degli eliminati oppure no
+            if(p.isEliminated()) continue;
             p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            if(p.isConnected() && !p.isEliminated()) notifyView(nickname);
+            if(p.isConnected()) notifyView(nickname);
         }
     }
 
@@ -644,20 +655,12 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: analizzare meglio i casi di eliminazione e disconnessione
     public void drawCardManagement(String nickname) throws BusinessLogicException {
         Card card = deck.draw();
         
         Player drawer = getPlayerCheck(nickname);
         drawer.setGamePhase(GamePhase.WAITING_FOR_TURN);
-        try{
-            getViewCheck(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-        } catch (IOException e){
-            markDisconnected(nickname);
-        } catch (Exception e){
-            markDisconnected(nickname);
-            System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
-        }
+        updateGamePhase(nickname, getViewCheck(nickname), GamePhase.WAITING_FOR_TURN); //omettibile
 
         broadcastInform("\nSERVER: " + "Card drawn!");
 
@@ -665,18 +668,17 @@ public class Controller implements Serializable {
             String nick = entry.getKey();
             VirtualView v = entry.getValue();
             Player p = getPlayerCheck(nick);
+            if(!p.isEliminated()) p.setGamePhase(GamePhase.CARD_EFFECT);
 
-            p.setGamePhase(GamePhase.CARD_EFFECT);
-            //TODO: updatare la fase anche dell'eliminato?
             if(p.isConnected()){
+                if(!p.isEliminated()) updateGamePhase(nick, v, GamePhase.CARD_EFFECT);
                 try {
-                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
                     v.printCard(cardSerializer.toJSON(card));
                 } catch (IOException e) {
                     markDisconnected(nick);
                 } catch (Exception e){
                     markDisconnected(nick);
-                    System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
+                    System.err.println("[ERROR] in drawCardManagement: "+e.getMessage());
                 }
             }
         }
@@ -684,9 +686,13 @@ public class Controller implements Serializable {
         activateCard(card);
         broadcastInform("SERVER: end of card's effect");
 
-        if(deck.isEmpty() || fBoard.getOrderedPlayers().isEmpty()){
+        if(deck.isEmpty()){
+            broadcastInform("SERVER: All cards drawn");
             startAwardsPhase();
-        } else {
+        } else if (fBoard.getOrderedPlayers().isEmpty()){
+            broadcastInform("SERVER: All players eliminated");
+            startAwardsPhase();
+        }else {
             List<String> inFlight = playersByNickname.entrySet().stream()
                     .filter(e -> !e.getValue().isEliminated())
                     .map(Map.Entry::getKey)
@@ -697,7 +703,7 @@ public class Controller implements Serializable {
                 Map<String,Future<Boolean>> futures = new HashMap<>();
                 for(String nick : inFlight){
                     Player p = playersByNickname.get(nick);
-                    if(p.isConnected()){
+                    if(p.isConnected() && !p.isEliminated()){
                         futures.put(nick, exec.submit(() ->
                                 askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)
                         ));
@@ -733,31 +739,30 @@ public class Controller implements Serializable {
             fBoard.eliminatePlayers();
             fBoard.orderPlayersInFlightList();
 
-            //TODO: inutile !p.iseliminated.. inflight non li dovrebbe contenere
-            for (String nick : inFlight) {
-                Player p = playersByNickname.get(nick);
-                if (!p.isEliminated()) {
+            if(fBoard.getOrderedPlayers().isEmpty()){
+                broadcastInform("SERVER: All players eliminated");
+                startAwardsPhase();
+            } else {
+                inFlight =  playersByNickname.entrySet().stream()
+                        .filter(e -> !e.getValue().isEliminated())
+                        .map(Map.Entry::getKey)
+                        .toList();
+
+                for (String nick : inFlight) {
+                    Player p = playersByNickname.get(nick);
                     p.setGamePhase(GamePhase.WAITING_FOR_TURN);
                     if(p.isConnected()){
-                        try {
-                            VirtualView v = viewsByNickname.get(nick);
-                            v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-                        } catch (IOException ex) {
-                            markDisconnected(nick);
-                        } catch (Exception e) {
-                            markDisconnected(nick);
-                            System.err.println("[ERROR] in drawCardManagement: " + e.getMessage());
-                        }
+                        VirtualView v = viewsByNickname.get(nick);
+                        updateGamePhase(nick, v, GamePhase.WAITING_FOR_TURN);
                     }
                 }
-            }
 
-            activateDrawPhase();
+                activateDrawPhase();
+            }
         }
     }
 
 
-    //TODO; qui metto tutti in exit e, se connesso, comunico
     public void startAwardsPhase() throws BusinessLogicException {
 
         broadcastInform("\nSERVER: Flight ended! Time to collect rewards!");
