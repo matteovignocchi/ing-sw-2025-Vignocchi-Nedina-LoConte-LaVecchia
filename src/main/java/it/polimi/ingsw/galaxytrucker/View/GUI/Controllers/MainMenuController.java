@@ -1,69 +1,40 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
-import it.polimi.ingsw.galaxytrucker.Client.ClientController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class MainMenuController extends GUIController {
+
     @FXML
     private Button joinButton;
+
     @FXML
     private Button createButton;
 
-    private ClientController clientController;
+    @FXML private Button logoutButton;
 
     @FXML
     public void initialize() {
-        clientController = ClientController.getInstance();
         joinButton.setOnAction(event -> {
-            try {
-                guiView.resolveMenuChoice("2");
-                joinGame();
-            } catch (Exception e) {
-                e.printStackTrace();
-                guiView.reportError("Failed to load join game scene");
-            }
+            guiView.resolveMenuChoice("2");
+            guiView.setSceneEnum(SceneEnum.JOIN_GAME_MENU);
         });
 
         createButton.setOnAction(event -> {
-            try {
-                guiView.resolveMenuChoice("1");
-                createGame();
-            } catch (Exception e) {
-                e.printStackTrace();
-                guiView.reportError("Failed to load create game scene");
-            }
+            guiView.resolveMenuChoice("1");
+            guiView.setSceneEnum(SceneEnum.CREATE_GAME_MENU);
+        });
+
+        logoutButton.setOnAction(event -> {
+            guiView.resolveMenuChoice("3");
+            System.exit(0);
         });
     }
 
 
-    @FXML
-    private void joinGame() throws IOException {
-        Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.JOIN_GAME_MENU));
-    }
-
-    @FXML
-    private void createGame() throws IOException {
-        Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.CREATE_GAME_MENU));
-    }
-
-    @FXML
-    public void logout(){
-        try {
-            guiView.resolveMenuChoice("3");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        System.exit(0);
+    @Override
+    public void postInitialize() {
     }
 }

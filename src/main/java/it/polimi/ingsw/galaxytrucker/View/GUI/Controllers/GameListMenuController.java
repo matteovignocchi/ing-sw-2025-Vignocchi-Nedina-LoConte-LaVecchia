@@ -1,16 +1,13 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.input.MouseEvent;
-
-import java.io.IOException;
 
 public class GameListMenuController extends GUIController {
 
@@ -18,8 +15,6 @@ public class GameListMenuController extends GUIController {
     @FXML private Button joinButton;
     @FXML private ListView<String> gameListView;
     @FXML private Label infoLabel;
-
-    private GUIView guiView;
 
     @FXML
     public void initialize() {
@@ -35,8 +30,14 @@ public class GameListMenuController extends GUIController {
                 gameListView.getSelectionModel().selectedItemProperty().isNull()
         );
     }
-    public void setGuiView(GUIView guiView) {
-        this.guiView = guiView;
+
+    @Override
+    public void postInitialize() {
+        // Potresti voler ricaricare la lista qui
+        ObservableList<String> testItems = FXCollections.observableArrayList();
+        testItems.add("1. Players: 2 | Demo: Yes");
+        testItems.add("2. Players: 3 | Demo: No");
+        displayGames(testItems);
     }
 
     public void displayGames(ObservableList<String> games) {
@@ -45,7 +46,6 @@ public class GameListMenuController extends GUIController {
             infoLabel.setText("");
         });
     }
-
 
     public void showInfo(String message) {
         Platform.runLater(() -> infoLabel.setText(message));
@@ -58,19 +58,24 @@ public class GameListMenuController extends GUIController {
             guiView.reportError("Please select a game.");
             return;
         }
+
         try {
-            Integer gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) -1;
-            guiView.setSelectedGameId(gameId);
+            int gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) - 1;
+
+            if (!inputManager.indexFuture.isDone()) {
+                inputManager.indexFuture.complete(gameId);  // ✅ sblocca askIndex()
+            }
+
         } catch (NumberFormatException e) {
             guiView.reportError("Invalid game selection.");
         }
     }
 
-
-
     @FXML
     public void back() {
-        guiView.setSelectedGameId(-1);
+        if (!inputManager.indexFuture.isDone()) {
+            inputManager.indexFuture.complete(-1);  // annullamento
+        }
         Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.MAIN_MENU));
     }
 }

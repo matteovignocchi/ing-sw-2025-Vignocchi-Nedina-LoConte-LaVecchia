@@ -2,26 +2,40 @@
 
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="150" prefWidth="300" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController">
+<AnchorPane prefHeight="400.0" prefWidth="700.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController">
 
     <children>
-      <ImageView fitHeight="500.0" fitWidth="700.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <image>
-            <Image url="@../nicknamePhoto.png" />
-         </image>
-      </ImageView>
-      <Text fill="#444444" layoutX="155.0" layoutY="185.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Insert your nickname" AnchorPane.leftAnchor="136.5" AnchorPane.rightAnchor="136.609375" AnchorPane.topAnchor="150.0">
-         <font>
-            <Font name="Impact" size="26.0" />
-         </font>
-      </Text>
-        <TextField fx:id="nicknameField" layoutX="113.0" layoutY="218.0" prefHeight="65.0" prefWidth="273.0" styleClass="transparent" AnchorPane.bottomAnchor="217.0" AnchorPane.leftAnchor="113.0" AnchorPane.rightAnchor="113.0" AnchorPane.topAnchor="217.0" />
-        <Button layoutX="125.0" layoutY="100.0" onAction="#confirmNickname" prefHeight="27.0" prefWidth="50.0" text="Send" AnchorPane.leftAnchor="200.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="325.0" />
+        <ImageView fitHeight="500.0" fitWidth="700.0" preserveRatio="true"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <image>
+                <Image url="@../nicknamePhoto.png" />
+            </image>
+        </ImageView>
+
+        <Text fill="#444444" layoutX="155.0" layoutY="185.0" strokeType="OUTSIDE"
+              strokeWidth="0.0" text="Insert your nickname"
+              AnchorPane.leftAnchor="150.0">
+            <font>
+                <Font name="Impact" size="26.0" />
+            </font>
+        </Text>
+
+        <TextField fx:id="nicknameField"
+                   prefHeight="65.0" prefWidth="273.0"
+                   layoutX="113.0" layoutY="218.0"
+                   AnchorPane.topAnchor="217.0"
+                   AnchorPane.leftAnchor="113.0" />
+
+        <Button fx:id="confirmButton"
+                text="Send"
+                prefHeight="27.0" prefWidth="100.0"
+                layoutX="200.0" layoutY="325.0"
+                AnchorPane.topAnchor="325.0"
+                AnchorPane.leftAnchor="200.0" />
     </children>
 </AnchorPane>

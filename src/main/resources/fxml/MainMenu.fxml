@@ -4,25 +4,34 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1060.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController">
+<AnchorPane prefHeight="800.0" prefWidth="1060.0" stylesheets="@css/Button.css"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.MainMenuController">
 
     <children>
-        <ImageView fitHeight="800.0" fitWidth="1060.0" preserveRatio="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+        <!-- Background Image -->
+        <ImageView fitHeight="800.0" fitWidth="1060.0" preserveRatio="false"
+                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <image>
                 <Image url="@../background_image_menu.png" />
             </image>
         </ImageView>
 
-        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="620.0">
+        <!-- Optional Logo -->
+        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true"
+                   AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="620.0">
             <image>
                 <Image url="@../SSC_Neapel.svg.png" />
             </image>
         </ImageView>
 
-        <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <!-- Grid with Buttons -->
+        <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="300.0" />
@@ -35,19 +44,31 @@
             </rowConstraints>
 
             <children>
-                <Button fx:id="joinButton" mnemonicParsing="false" prefHeight="65.0" prefWidth="200.0" styleClass="button" text="Join Game" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+                <Button fx:id="joinButton" mnemonicParsing="false"
+                        prefHeight="65.0" prefWidth="200.0"
+                        styleClass="button" text="Join Game"
+                        GridPane.columnIndex="0" GridPane.rowIndex="1"
+                        GridPane.halignment="CENTER">
                     <GridPane.margin>
                         <Insets top="100.0" />
                     </GridPane.margin>
                 </Button>
 
-                <Button fx:id="createButton" mnemonicParsing="false" prefHeight="65.0" prefWidth="200.0" styleClass="button" text="Create Game" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+                <Button fx:id="createButton" mnemonicParsing="false"
+                        prefHeight="65.0" prefWidth="200.0"
+                        styleClass="button" text="Create Game"
+                        GridPane.columnIndex="1" GridPane.rowIndex="1"
+                        GridPane.halignment="CENTER">
                     <GridPane.margin>
                         <Insets top="100.0" />
                     </GridPane.margin>
                 </Button>
 
-                <Button mnemonicParsing="false" onMouseClicked="#logout" prefHeight="65.0" prefWidth="200.0" styleClass="button" text="Logout" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+                <Button fx:id="logoutButton" mnemonicParsing="false"
+                        prefHeight="65.0" prefWidth="200.0"
+                        styleClass="button" text="Logout"
+                        GridPane.columnIndex="2" GridPane.rowIndex="1"
+                        GridPane.halignment="CENTER">
                     <GridPane.margin>
                         <Insets top="100.0" />
                     </GridPane.margin>
@@ -56,4 +77,3 @@
         </GridPane>
     </children>
 </AnchorPane>
-
