@@ -70,7 +70,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateSmugglersDecks();
+            decks = deckCreator.CreateSecondWarzoneDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();

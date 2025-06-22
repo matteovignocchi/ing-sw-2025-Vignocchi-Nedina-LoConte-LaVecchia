@@ -309,4 +309,27 @@ public class DeckManager implements Serializable {
         return decks;
     }
 
+    public List<Deck> CreateSecondWarzoneDecks() throws CardEffectException {
+        List<Integer> dir = new ArrayList<>();
+        dir.add(0);
+        dir.add(1);
+        List<Boolean> size = new ArrayList<>();
+        size.add(false);
+        size.add(true);
+        Card c1 = new SecondWarzoneCard("0", 3, 2, dir, size);
+        Card c2 = new SecondWarzoneCard("1", 3, 2, dir, size);
+        Card c3 = new SecondWarzoneCard("2", 3, 2, dir, size);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
 }
