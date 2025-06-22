@@ -313,9 +313,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 idx_firepower = i;
         }
 
-        String nickCrew = controller.getNickByPlayer(players.get(idx_firepower));
-        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the lowest fire power!" +
-                "He loses "+days+" flight days");
+        String nickFire = controller.getNickByPlayer(players.get(idx_firepower));
+        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power!" +
+                " He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_firepower));
 
         f.setOverlappedPlayersEliminated();
@@ -329,7 +329,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
-
 
 
 
@@ -355,13 +354,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
 
 
-
-
-
         int idx_crew = 0;
 
         controller.broadcastInform("\nSERVER: Checking the player with the least number of crewmates...\n");
-
         controller.broadcastInform("SERVER: "+controller.getNickByPlayer(players.get(idx_crew))+" has "+
                 controller.getNumCrew(players.get(idx_crew))+" crewmates");
         for (int i = 1; i < players.size(); i++) {
@@ -374,7 +369,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
         controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board!" +
-                "He loses "+days+" flight days");
+                " He will be hit by cannon fire!");
 
         Player p = players.get(idx_crew);
         List<Integer> shots_directions = card.getShotsDirections();
@@ -408,7 +403,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            controller.inform("SERVER: Checking your fire power...", nick);
+            controller.inform("\nSERVER: Checking your fire power...", nick);
             double player_fire_power = controller.getFirePowerForCard(p);
 
             if (player_fire_power > smugglers_fire_power) {
@@ -423,7 +418,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     controller.updatePositionForEveryBody();
                 }
 
-                controller.broadcastInform("SERVER: Smugglers defeated by " + nick + "!");
+                controller.broadcastInform("\nSERVER: Smugglers defeated by " + nick + "!");
                 exit = true;
             } else if (player_fire_power < smugglers_fire_power) {
 

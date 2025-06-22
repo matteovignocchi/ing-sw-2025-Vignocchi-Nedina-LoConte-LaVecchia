@@ -529,8 +529,8 @@ public class TUIView implements View {
                 printWarzoneTable(
                         card.directions,
                         card.sizes,
-                        "- Player with less crewmates lose " + card.days + " days",
-                        "- Player with less engine power lose " + card.numCrewmates + " crewmates"
+                        "- Player with less crewmates loses " + card.days + " days",
+                        "- Player with less engine power loses " + card.numCrewmates + " crewmates"
                 );
             }
             case "SECONDWARZONECARD"  -> {
@@ -538,8 +538,8 @@ public class TUIView implements View {
                 printWarzoneTable(
                         card.directions,
                         card.sizes,
-                        "- Player with less fire power lose " + card.days + " days",
-                        "- Player with less engine power lose " + card.numCrewmates + " goods"
+                        "- Player with less fire power loses " + card.days + " days",
+                        "- Player with less engine power loses " + card.numGoods + " goods"
                 );
             }
             case "METEORITESRAINCARD"  -> {
