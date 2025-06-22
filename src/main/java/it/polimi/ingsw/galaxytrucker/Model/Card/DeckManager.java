@@ -350,4 +350,29 @@ public class DeckManager implements Serializable {
         return deck1;
     }
 
+    public Deck CreateMixedDemoDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("0", list, 4);
+        Deck deck1 = new Deck();
+        deck1.add(c1);
+
+        List<Integer> directions = new ArrayList<>();
+        directions.add(2);
+        List<Boolean> size = new ArrayList<>();
+        size.add(true);
+        Card c2 = new MeteoritesRainCard("1", directions, size);
+        deck1.add(c2);
+        return deck1;
+    }
+
 }

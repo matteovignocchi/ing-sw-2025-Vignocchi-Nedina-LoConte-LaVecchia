@@ -542,6 +542,9 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
 
+            //TODO: rimuovere
+            res = 7;
+
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, players, i+1);
         }
 
