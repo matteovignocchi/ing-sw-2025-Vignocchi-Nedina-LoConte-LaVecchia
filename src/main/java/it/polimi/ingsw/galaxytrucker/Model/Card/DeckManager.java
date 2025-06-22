@@ -126,9 +126,9 @@ public class DeckManager implements Serializable {
     }
 
     public List<Deck> CreateAbandonedShipDecks() throws CardEffectException {
-        Card c1 = new AbandonedShipCard("1", 3, 6, 2);
-        Card c2 = new AbandonedShipCard("2", 3, 6, 2);
-        Card c3 = new AbandonedShipCard("3", 3, 6, 2);
+        Card c1 = new AbandonedShipCard("1", 3, 6, 1);
+        Card c2 = new AbandonedShipCard("2", 3, 6, 1);
+        Card c3 = new AbandonedShipCard("3", 3, 6, 1);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
@@ -330,6 +330,24 @@ public class DeckManager implements Serializable {
         decks.add(deck2);
         decks.add(deck3);
         return decks;
+    }
+
+    public Deck CreatePlanetsDemoDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("0", list, 4);
+        Deck deck1 = new Deck();
+        deck1.add(c1);
+        return deck1;
     }
 
 }

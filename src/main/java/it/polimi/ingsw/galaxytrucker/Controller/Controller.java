@@ -64,13 +64,15 @@ public class Controller implements Serializable {
         if(isDemo) {
             fBoard = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
-            deck = deckCreator.CreateDemoDeck();
+            //TODO: commentato per debugging. ripristinare una volta finito
+//            deck = deckCreator.CreateDemoDeck();
+            deck = deckCreator.CreatePlanetsDemoDeck();
         }else{
             fBoard = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateSecondWarzoneDecks();
+            decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -537,12 +539,18 @@ public class Controller implements Serializable {
 
         broadcastInform("SERVER: " + "Flight started!");
 
+        //TODO: queste stampe da eliminare per debug
+        /**/for(Player p: playersByNickname.values()) System.out.println("1 VOLTA: Player "+getNickByPlayer(p)+" num di discard tiles: "+
+                p.checkDiscardPile());
+
         for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
+
+        /**/for(Player p: playersByNickname.values()) System.out.println("2 VOLTA: Player "+getNickByPlayer(p)+" num di discard tiles: "+
+                p.checkDiscardPile());
+
         addHuman();
 
         playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
-
-        //notifyAllViews();
 
         activateDrawPhase();
     }
@@ -641,7 +649,7 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: vedere se skippabile il waiting for turn al leader
+    //TODO: analizzare meglio i casi di eliminazione e disconnessione
     public void drawCardManagement(String nickname) throws BusinessLogicException {
         Card card = deck.draw();
         
@@ -688,32 +696,16 @@ public class Controller implements Serializable {
                     .map(Map.Entry::getKey)
                     .toList();
 
-            /**
-            //da qui in poi ha modificato franci per mettere tutti i giocatori in waiting for turn solo dopo che ciascun giocatore ha risposto. Assicurarsi che funziona (ma dovrebbe)
-            //In caso di problemi il codice vecchio è completamente commentate successivamente
-            for (int i = 0; i < inFlight.size(); i++) {
-                String nick = inFlight.get(i);
-                Player p   = playersByNickname.get(nick);
-
-                if (askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)) {
-                    p.setEliminated();
-                    handleElimination(p);
-                }
-
-                if (i < inFlight.size() - 1) {
-                    inform("SERVER: Waiting for others to decide…", nick);
-                }
-            }*/
-
-
             ExecutorService exec = Executors.newFixedThreadPool(inFlight.size());
             try {
                 Map<String,Future<Boolean>> futures = new HashMap<>();
                 for(String nick : inFlight){
                     Player p = playersByNickname.get(nick);
-                    futures.put(nick, exec.submit(() ->
-                            askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)
-                    ));
+                    if(p.isConnected()){
+                        futures.put(nick, exec.submit(() ->
+                                askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)
+                        ));
+                    }
                 }
 
                 Map<String, Boolean> decisions = new HashMap<>();
@@ -738,55 +730,30 @@ public class Controller implements Serializable {
                         handleElimination(p);
                     }
                 }
-
             } finally {
                 exec.shutdownNow();
             }
 
             fBoard.eliminatePlayers();
-            //TODO: chiedere a chat se va bene o superfluo
             fBoard.orderPlayersInFlightList();
 
             for (String nick : inFlight) {
                 Player p = playersByNickname.get(nick);
                 if (!p.isEliminated()) {
                     p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-                    try {
-                        VirtualView v = viewsByNickname.get(nick);
-                        v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-                    } catch (IOException ex) {
-                        markDisconnected(nick);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    if(p.isConnected()){
+                        try {
+                            VirtualView v = viewsByNickname.get(nick);
+                            v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
+                        } catch (IOException ex) {
+                            markDisconnected(nick);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
-//            for (int i = 0; i < inFlight.size(); i++) {
-//                String nick = inFlight.get(i);
-//                Player p   = playersByNickname.get(nick);
-//                //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-//
-//                String question = "SERVER: Do you want to abandon the flight? ";
-//                if (askPlayerDecision(question, p)) {
-//                    p.setEliminated();
-//                    handleElimination(p);
-//                }
-//                if (i < inFlight.size() - 1) {
-//                    String waitingMsg = "SERVER: Waiting for others to decide…";
-//                    inform(waitingMsg, nick);
-//                }
-//
-//                p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-//                try {
-//                    VirtualView v = viewsByNickname.get(nick);
-//                    v.updateGameState(enumSerializer.serializeGamePhase(GamePhase.WAITING_FOR_TURN));
-//                } catch (IOException ex) {
-//                    markDisconnected(nick);
-//                } catch (Exception e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//            fBoard.eliminatePlayers();
+
             activateDrawPhase();
         }
     }
@@ -795,11 +762,7 @@ public class Controller implements Serializable {
     //TODO: testare e capire se updatare e mettere in exit prima o dopo gli awards
     public void startAwardsPhase() throws BusinessLogicException {
 
-        //UPDATE FATTO DOPO, vedere se va bene
-        //playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
-        //notifyAllViews();
-
-        broadcastInform("SERVER: Flight ended! Time to collect rewards!");
+        broadcastInform("\nSERVER: Flight ended! Time to collect rewards!");
 
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -811,6 +774,8 @@ public class Controller implements Serializable {
                 fBoard.getBonusThirdPosition(), fBoard.getBonusFourthPosition()};
         List<Player> orderedPlayers = fBoard.getOrderedPlayers();
 
+        /**/System.out.printf("%d %d %d %d %d %d %s%n", malusBrokenTile, bonusBestShip, redGoodBonus, yellowGoodBonus, greenGoodBonus, blueGoodBonus, Arrays.toString(arrivalBonus));
+
         int minExpConnectors = playersByNickname.values().stream()
                 .mapToInt(Player::countExposedConnectors)
                 .min()
@@ -819,13 +784,22 @@ public class Controller implements Serializable {
                 .filter(p -> p.countExposedConnectors() == minExpConnectors)
                 .toList();
 
+        /**/System.out.printf("Connettori minimi esposti %s%n", minExpConnectors);
+        /**/for(Player p: bestShipPlayers) System.out.println("Best ship player: "+getNickByPlayer(p));
+
+        /**/for (Player p : playersByNickname.values()) System.out.println("Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
+
         for (int i = 0; i < orderedPlayers.size(); i++) {
             orderedPlayers.get(i).addCredits(arrivalBonus[i]);
         }
 
+        /**/for (Player p : playersByNickname.values()) System.out.println("AFTER ARRIVAL BONUS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
+
         for (Player p : bestShipPlayers) {
             p.addCredits(bonusBestShip);
         }
+
+        /**/for (Player p : playersByNickname.values()) System.out.println("AFTER BESTSHIP BONUS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
 
         for (Player p : playersByNickname.values()) {
             List<Colour> goods = p.getTotalListOfGood();
@@ -841,32 +815,32 @@ public class Controller implements Serializable {
                 }
             }
 
+            /**/System.out.println("Crediti bonus per merce: "+totalDouble);
+
+            /**/ System.out.println("BEFORE GOODS CREDTIS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
+
             p.addCredits((int) Math.ceil(totalDouble));
 
+            /**/ System.out.println("AFTER GOODS CREDTIS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
+
             int numBrokenTiles = p.checkDiscardPile();
+
+            /**/ System.out.println("Numero di tessere distrutte: "+numBrokenTiles);
+
             p.addCredits(numBrokenTiles * malusBrokenTile);
 
-            String nick = playersByNickname.entrySet().stream()
-                    .filter(e -> e.getValue().equals(p))
-                    .map(Map.Entry::getKey)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Impossible to find first player nickname"));
+            /**/ System.out.println("AFTER BROKEN TILES: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
+
+            String nick = getNickByPlayer(p);
             VirtualView v = viewsByNickname.get(nick);
             int totalCredits = p.getCredits();
-            p.setGamePhase(GamePhase.EXIT);  //se fase di exit messa prima, levare
+            p.setGamePhase(GamePhase.EXIT);
 
             if(p.isConnected()){
-                try{
-                    if(totalCredits>0) v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!");
-                    else v.inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!");
-                    v.inform("SERVER: " + "Game over. Thank you for playing!");
-                    notifyView(nick);  //se fase di exit messa prima, levare
-                } catch (IOException e) {
-                    markDisconnected(nick);
-                } catch (Exception e){
-                    markDisconnected(nick);
-                    System.err.println("[ERROR] in startAwardPhase: " + e.getMessage());
-                }
+                if(totalCredits>0) inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!", nick);
+                else inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!", nick);
+
+                informAndNotify("SERVER: " + "Game over. Thank you for playing!", nick);
             }
         }
 

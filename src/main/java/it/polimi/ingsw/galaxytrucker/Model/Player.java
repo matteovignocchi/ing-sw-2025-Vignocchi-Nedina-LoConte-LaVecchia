@@ -47,7 +47,7 @@ public class Player implements Serializable {
         this.position = 0;
         this.isEliminated = false;
         this.connected = true;
-        this.discardPile = new ArrayList<Tile>();
+        this.discardPile = new ArrayList<>();
         this.isdemo = isDemo;
         credits = 0;
         purpleAlien = false;
