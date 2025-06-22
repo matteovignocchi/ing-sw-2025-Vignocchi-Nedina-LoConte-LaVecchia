@@ -129,9 +129,8 @@ public class GameController extends GUIController{
     private Label energycell;
 
 
+    @Override
+    public void postInitialize() {
 
-
-
-
-    
+    }
 }

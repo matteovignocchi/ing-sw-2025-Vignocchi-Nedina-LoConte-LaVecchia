@@ -18,6 +18,7 @@ public class ClientTile {
     public List<String> goods = new ArrayList<>();
     public List<String> tokens = new ArrayList<>();
     public List<Integer> protectedCorners = new ArrayList<>();
+    public int rotation;
 
     public void rotateRight() {
         int temp = d;
@@ -25,6 +26,7 @@ public class ClientTile {
         c = b;
         b = a;
         a = temp;
+        rotation ++;
 
         if (protectedCorners != null && protectedCorners.size() == 4) {
             int tmp = protectedCorners.get(3);
@@ -41,6 +43,7 @@ public class ClientTile {
         b = c;
         c = d;
         d = temp;
+        rotation --;
 
         if (protectedCorners != null && protectedCorners.size() == 4) {
             int tmp = protectedCorners.get(0);
@@ -73,6 +76,10 @@ public class ClientTile {
 
     public Image getImage() {
         return loadImageById(this.id);
+    }
+
+    public int getRotation() {
+        return this.rotation*90;
     }
 }
 

@@ -15,4 +15,5 @@ public class TileDTO {
     public List<String> goods = new ArrayList<>();
     public List<String> tokens = new ArrayList<>();
     public List<Integer> protectedCorners = new ArrayList<>();
+    public int rotation;
 }

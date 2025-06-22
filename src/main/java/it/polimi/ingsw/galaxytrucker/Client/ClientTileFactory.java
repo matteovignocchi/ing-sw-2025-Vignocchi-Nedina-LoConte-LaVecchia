@@ -43,6 +43,7 @@ public class ClientTileFactory {
         dto.tokens = tile.tokens;
         dto.protectedCorners = tile.protectedCorners;
         dto.capacity = tile.capacity;
+        dto.rotation = tile.rotation;
         return dto;
     }
 

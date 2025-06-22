@@ -1,11 +1,10 @@
+
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
-import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
-import javafx.application.Platform;
+import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import javafx.scene.control.Button;
 
 public class NicknameDialogController extends GUIController {
 
@@ -13,18 +12,26 @@ public class NicknameDialogController extends GUIController {
     private TextField nicknameField;
 
     @FXML
-    public void initialize() {
-
-    }
+    private Button confirmButton;
 
     @FXML
-    public void confirmNickname() {
-        String nickname = nicknameField.getText();
-        if (!nickname.isEmpty()) {
-            guiView.resolveNickname(nickname);
+    public void initialize() {
+        confirmButton.setOnAction(event -> confirmNickname());
+    }
 
+    public void confirmNickname() {
+        String nickname = nicknameField.getText().trim();
+        if (!nickname.isEmpty()) {
+            model.setNickname(nickname);
+            inputManager.nicknameFuture.complete(nickname);
+            sceneRouter.setScene(SceneEnum.MAIN_MENU);
         } else {
             guiView.reportError("Nickname cannot be empty.");
         }
+    }
+
+    @Override
+    public void postInitialize() {
+
     }
 }

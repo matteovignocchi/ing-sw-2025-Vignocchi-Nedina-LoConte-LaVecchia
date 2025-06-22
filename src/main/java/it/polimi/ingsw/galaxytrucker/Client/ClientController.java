@@ -79,18 +79,33 @@ public class ClientController {
         }
 
         while (isConnected) {
-            mainMenuLoop();
-            String cmd = view.askString();
-            switch (cmd) {
-                case "1" -> createNewGame();
-                case "2" -> joinExistingGame();
-                case "3" -> {
-                    virtualClient.logOut();
-                    isConnected = false;
+            switch (view) {
+                case GUIView g -> {
+                    // Lascio la GUI controllare cosa inviare con resolveMenuChoice o simili
+                    while (!g.hasResolvedMenuChoice()) {
+                        Thread.sleep(100);
+                    }
+
+                    String cmd = g.consumeMenuChoice();
+
+                    switch (cmd) {
+                        case "1" -> createNewGame();
+                        case "2" -> joinExistingGame();
+                        case "3" -> {
+                            virtualClient.logOut();
+                            isConnected = false;
+                            return;
+                        }
+                        default -> view.reportError("Enter 1, 2 or 3.");
+                    }
                 }
-                default -> view.reportError("Enter 1, 2 or 3.");
+
+                default -> {
+                    mainMenuLoop(); // fallback per TUI
+                }
             }
         }
+
     }
 
     private int loginLoop() throws Exception {
@@ -216,7 +231,7 @@ public class ClientController {
                 }
             }
             case GUIView v -> {
-                List<Object> data = v.getDataForGame();
+                List<Object> data = v.askCreateGameData();
                 boolean demo = (boolean) data.get(0);
                 int numberOfPlayer = (int) data.get(1);
                 int response = virtualClient.sendGameRequest("CREATE", numberOfPlayer, demo);
@@ -228,13 +243,17 @@ public class ClientController {
                 } else {
                     v.reportError("Game creation failed");
                 }
-            }
+        }
             default -> {
             }
         }
     }
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
+        System.out.println("DEBUG - Available games:");
+        availableGames.forEach((id, info) ->
+                System.out.println("Game " + id + ": Players=" + info[0] + ", Demo=" + info[1])
+        );
         int choice;
         view.inform("**Available Games:**");
         view.inform("0. Return to main menu");
@@ -556,7 +575,7 @@ public class ClientController {
 
             try {
                 if (view.returnValidity(a, b)) {
-                    view.setTile(tmpTile, a, b);
+                    view.setTile(clientTileFactory.fromJson(jsonTile), a, b);
                     Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
                 } else {
                     view.reportError("Invalid position");
@@ -755,8 +774,8 @@ public class ClientController {
 
             try {
                 // Aspetta asincronamente il comando dalla GUI
-                String key = guiView.sendAvailableChoices2().get();
-                processCommand(key); // Estrai questa logica in un metodo separato
+//                String key = guiView.sendAvailableChoices2().get();
+                processCommand(""); // Estrai questa logica in un metodo separato
             } catch (Exception e) {
                 view.reportError(e.getMessage());
             }
@@ -777,6 +796,15 @@ public class ClientController {
                 }
             }
             // ... altri casi come nello switch originale
+        }
+    }
+
+    public void setTileFromGui(ClientTile tile) {
+        tmpTile = tile;
+        try {
+            virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

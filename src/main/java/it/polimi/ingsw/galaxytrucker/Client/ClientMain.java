@@ -69,6 +69,7 @@ public class ClientMain {
                 }
             }
             case 2 -> {
+
                 GUIView.setStartupConfig(protocolChoice, host, port);
                 System.out.println("Launching GUI...");
                 Application.launch(GUIView.class);
