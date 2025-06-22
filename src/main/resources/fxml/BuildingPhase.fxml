@@ -126,9 +126,9 @@
             <Image url="@../Polytechnic/cards/GT-cards_II_IT_0121.jpg" />
          </image>
       </ImageView>
-        <HBox fx:id="nicknameBox" spacing="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <HBox fx:id="nicknameBox" layoutX="10.0" layoutY="14.0" prefHeight="42.0" prefWidth="321.0" spacing="10.0" AnchorPane.rightAnchor="953.0" AnchorPane.topAnchor="14.0">
             <children>
-                <Label fx:id="nicknameLabel" text="NicknamePlaceholder" />
+                <Label fx:id="nicknameLabel" prefHeight="42.0" prefWidth="322.0" styleClass="blue-nickname" text="NicknamePlaceolder" />
             </children>
         </HBox><Button fx:id="deck3Btn" layoutX="907.0" layoutY="277.0" mnemonicParsing="false" rotate="-9.5" styleClass="transparent-button" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="10.0">
         <graphic>
