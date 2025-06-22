@@ -148,24 +148,13 @@ public abstract class GUIController {
     }
 
 
-
-
-    // Equivalente di sendAvailableChoices() della TUI, ma ritorna un CompletableFuture
-    public CompletableFuture<String> sendAvailableChoices() {
-        pendingCommandFuture = new CompletableFuture<>();
-        return pendingCommandFuture;
-    }
-
     @FXML
     private void onButtonClick(ActionEvent event) {
-        if (pendingCommandFuture != null && !pendingCommandFuture.isDone()) {
-            String buttonId = ((Button) event.getSource()).getId();
-            String command = mapButtonIdToCommand(buttonId); // Es. "start", "stop"
-
-            if (command != null) {
-                pendingCommandFuture.complete(command); // "Restituisce" il comando
-                pendingCommandFuture = null; // Resetta per la prossima chiamata
-            }
+        Button clickedButton = (Button) event.getSource();
+        String buttonId = clickedButton.getId();
+        String command = mapButtonIdToCommand(buttonId);
+        if (command != null) {
+            guiView.onUserCommand(command);
         }
     }
     private String mapButtonIdToCommand(String buttonId) {
