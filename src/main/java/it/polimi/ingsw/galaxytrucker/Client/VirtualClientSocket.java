@@ -106,22 +106,14 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     sendRequest(response);
                 }
                 case Message.OP_ASK_TO -> {
-                    String prompt = (String) msg.getPayload();
-                    if (prompt != null) this.inform(prompt);
-                    Boolean decision = this.askWithTimeout(prompt);
-                    Message response = Message.response(decision, msg.getRequestId());
-                    sendRequest(response);
+                    Boolean decision = this.askWithTimeout((String) msg.getPayload());
+                    sendRequest(Message.response(decision, msg.getRequestId()));
                 }
                 case Message.OP_COORDINATE_TO -> {
-                    String prompt = (String) msg.getPayload();
-                    if (prompt != null) this.inform(prompt);
                     int[] coordinate = this.askCoordsWithTimeout();
-                    Message response = Message.response(coordinate, msg.getRequestId());
-                    sendRequest(response);
+                    sendRequest(Message.response(coordinate, msg.getRequestId()));
                 }
                 case Message.OP_INDEX_TO -> {
-                    String prompt = (String) msg.getPayload();
-                    if (prompt != null) this.inform(prompt);
                     Integer answer = clientController.askIndexWithTimeoutByController();
                     sendRequest(Message.response(answer, msg.getRequestId()));
                 }
@@ -132,7 +124,6 @@ public class VirtualClientSocket implements Runnable, VirtualView {
             throw new RuntimeException(e);
         }
     }
-
 
 
     private void handleUpdate(Message msg) throws Exception {
