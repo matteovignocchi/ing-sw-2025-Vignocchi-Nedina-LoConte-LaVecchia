@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import java.net.*?>
 <?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
@@ -7,29 +9,121 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.GamingPhase">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameController">
    <children>
-      <ImageView fitHeight="720.0" fitWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="720.0" fitWidth="1297.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../Background_image_game.jpg" />
          </image>
       </ImageView>
-      <ImageView fitHeight="636.0" fitWidth="1032.0" layoutX="106.0" preserveRatio="true" visible="false" AnchorPane.leftAnchor="124.0" AnchorPane.rightAnchor="124.0" AnchorPane.topAnchor="55.0">
+      <ImageView fx:id="dashboard2" fitHeight="636.0" fitWidth="640.0" layoutX="106.0" preserveRatio="true" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="30.0">
          <image>
             <Image url="@../Polytechnic/cardboard/cardboard-5.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="628.0" fitWidth="1120.0" preserveRatio="true" AnchorPane.leftAnchor="80.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="55.0">
+      <ImageView fx:id="dashboard1" fitHeight="363.0" fitWidth="640.0" preserveRatio="true" visible="false" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="30.0">
          <image>
             <Image url="@../Polytechnic/cardboard/cardboard-3.png" />
          </image>
       </ImageView>
-      <Pane fx:id="demo1" layoutX="347.0" layoutY="169.0" prefHeight="50.0" prefWidth="50.0" rotate="24.0" />
-      <Pane fx:id="demo2" layoutX="449.0" layoutY="135.0" prefHeight="50.0" prefWidth="50.0" rotate="-49.4" />
-      <Pane fx:id="demo3" layoutX="552.0" layoutY="121.0" prefHeight="50.0" prefWidth="50.0" rotate="135.0" />
-      <Pane layoutX="661.0" layoutY="124.0" prefHeight="50.0" prefWidth="50.0" rotate="140.0" />
-      <Pane fx:id="demo5" layoutX="767.0" layoutY="140.0" prefHeight="50.0" prefWidth="50.0" rotate="150.0" />
-      <Pane fx:id="demo6" layoutX="871.0" layoutY="173.0" prefHeight="50.0" prefWidth="50.0" rotate="160.0" />
-      <Pane layoutX="777.0" layoutY="179.0" prefHeight="50.0" prefWidth="50.0" />
+      <Pane fx:id="demo1" layoutX="170.0" layoutY="96.0" prefHeight="28.0" prefWidth="28.0" rotate="20.0" />
+      <Pane fx:id="demo2" layoutX="228.0" layoutY="77.0" prefHeight="28.0" prefWidth="28.0" rotate="40.0" />
+      <Pane fx:id="demo3" layoutX="288.0" layoutY="70.0" prefHeight="28.0" prefWidth="28.0" rotate="45.0" />
+      <Pane fx:id="demo4" layoutX="350.0" layoutY="68.0" prefHeight="28.0" prefWidth="28.0" rotate="50.0" />
+      <Pane fx:id="demo5" layoutX="409.0" layoutY="78.0" prefHeight="28.0" prefWidth="28.0" rotate="60.0" />
+      <Pane fx:id="demo6" layoutX="470.0" layoutY="98.0" prefHeight="28.0" prefWidth="28.0" rotate="70.0" />
+      <Pane fx:id="demo7" layoutX="523.0" layoutY="130.0" prefHeight="28.0" prefWidth="28.0" rotate="90.0" />
+      <Pane fx:id="demo8" layoutX="552.0" layoutY="200.0" prefHeight="28.0" prefWidth="28.0" rotate="150.0" />
+      <Pane fx:id="demo9" layoutX="516.0" layoutY="258.0" prefHeight="28.0" prefWidth="28.0" rotate="180.0" />
+      <Pane fx:id="demo10" layoutX="462.0" layoutY="290.0" prefHeight="28.0" prefWidth="28.0" rotate="200.0" />
+      <Pane fx:id="demo11" layoutX="404.0" layoutY="310.0" prefHeight="28.0" prefWidth="28.0" rotate="210.0" />
+      <Pane fx:id="demo12" layoutX="345.0" layoutY="319.0" prefHeight="28.0" prefWidth="28.0" rotate="230.0" />
+      <Pane fx:id="demo13" layoutX="285.0" layoutY="316.0" prefHeight="28.0" prefWidth="28.0" rotate="230.0" />
+      <Pane fx:id="demo14" layoutX="225.0" layoutY="310.0" prefHeight="28.0" prefWidth="28.0" rotate="250.0" />
+      <Pane fx:id="demo15" layoutX="166.0" layoutY="291.0" prefHeight="28.0" prefWidth="28.0" rotate="270.0" />
+      <Pane fx:id="demo16" layoutX="114.0" layoutY="254.0" prefHeight="28.0" prefWidth="28.0" rotate="280.0" />
+      <Pane fx:id="demo17" layoutX="84.0" layoutY="186.0" prefHeight="28.0" prefWidth="28.0" rotate="340.0" />
+      <Pane fx:id="demo18" layoutX="116.0" layoutY="131.0" prefHeight="28.0" prefWidth="28.0" />
+      <Pane fx:id="path1" layoutX="156.0" layoutY="106.0" prefHeight="28.0" prefWidth="28.0" rotate="30.0" />
+      <Pane fx:id="path2" layoutX="202.0" layoutY="92.0" prefHeight="28.0" prefWidth="28.0" rotate="35.0" />
+      <Pane fx:id="path3" layoutX="248.0" layoutY="81.0" prefHeight="28.0" prefWidth="28.0" rotate="45.0" />
+      <Pane fx:id="path4" layoutX="296.0" layoutY="74.0" prefHeight="28.0" prefWidth="28.0" rotate="50.0" />
+      <Pane fx:id="path5" layoutX="344.0" layoutY="76.0" prefHeight="28.0" prefWidth="28.0" rotate="55.0" />
+      <Pane fx:id="path6" layoutX="390.0" layoutY="81.0" prefHeight="28.0" prefWidth="28.0" rotate="60.0" />
+      <Pane fx:id="path7" layoutX="440.0" layoutY="91.0" prefHeight="28.0" prefWidth="28.0" rotate="70.0" />
+      <Pane fx:id="path8" layoutX="484.0" layoutY="110.0" prefHeight="28.0" prefWidth="28.0" rotate="80.0" />
+      <Pane fx:id="path9" layoutX="524.0" layoutY="138.0" prefHeight="28.0" prefWidth="28.0" rotate="90.0" />
+      <Pane fx:id="path10" layoutX="554.0" layoutY="187.0" prefHeight="28.0" prefWidth="28.0" rotate="120.0" />
+      <Pane fx:id="path11" layoutX="554.0" layoutY="240.0" prefHeight="28.0" prefWidth="28.0" rotate="160.0" />
+      <Pane fx:id="path12" layoutX="521.0" layoutY="281.0" prefHeight="28.0" prefWidth="28.0" rotate="190.0" />
+      <Pane fx:id="path13" layoutX="480.0" layoutY="310.0" prefHeight="28.0" prefWidth="28.0" rotate="200.0" />
+      <Pane fx:id="path14" layoutX="433.0" layoutY="325.0" prefHeight="28.0" prefWidth="28.0" rotate="210.0" />
+      <Pane fx:id="path15" layoutX="384.0" layoutY="337.0" prefHeight="28.0" prefWidth="28.0" rotate="220.0" />
+      <Pane fx:id="path16" layoutX="338.0" layoutY="344.0" prefHeight="28.0" prefWidth="28.0" rotate="230.0" />
+      <Pane fx:id="path17" layoutX="289.0" layoutY="345.0" prefHeight="28.0" prefWidth="28.0" rotate="235.0" />
+      <Pane fx:id="path18" layoutX="240.0" layoutY="338.0" prefHeight="28.0" prefWidth="28.0" rotate="245.0" />
+      <Pane fx:id="path19" layoutX="192.0" layoutY="328.0" prefHeight="28.0" prefWidth="28.0" rotate="260.0" />
+      <Pane fx:id="path20" layoutX="146.0" layoutY="310.0" prefHeight="28.0" prefWidth="28.0" rotate="270.0" />
+      <Pane fx:id="path21" layoutX="108.0" layoutY="279.0" prefHeight="28.0" prefWidth="28.0" rotate="280.0" />
+      <Pane fx:id="path22" layoutX="79.0" layoutY="231.0" prefHeight="28.0" prefWidth="28.0" rotate="305.0" />
+      <Pane fx:id="path23" layoutX="82.0" layoutY="176.0" prefHeight="28.0" prefWidth="28.0" rotate="330.0" />
+      <Pane fx:id="path24" layoutX="112.0" layoutY="136.0" prefHeight="28.0" prefWidth="28.0" />
+      <ImageView fx:id="ship2" fitHeight="390.0" fitWidth="930.0" layoutX="712.0" layoutY="41.0" preserveRatio="true" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <image>
+            <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="ship1" fitHeight="390.0" fitWidth="930.0" preserveRatio="true" visible="false" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+         <image>
+            <Image url="@../Polytechnic/cardboard/cardboard-1.jpg" />
+         </image>
+      </ImageView>
+      <GridPane fx:id="imageShip" layoutX="749.0" layoutY="47.0" prefHeight="355.0" prefWidth="495.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+      </GridPane>
+      <Button fx:id="logout" layoutX="38.0" layoutY="635.0" mnemonicParsing="false" text="Logout" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
+      <Button layoutX="354.0" layoutY="575.0" mnemonicParsing="false" prefWidth="77.0" styleClass="blue-button" text="Yes" AnchorPane.rightAnchor="780.0" AnchorPane.topAnchor="500.0" />
+      <Button layoutX="503.0" layoutY="575.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="77.0" styleClass="blue-button" text="No" AnchorPane.rightAnchor="650.0" AnchorPane.topAnchor="500.0" />
+      <Button layoutX="513.0" layoutY="572.0" mnemonicParsing="false" styleClass="blue-button" text="Draw Card" AnchorPane.rightAnchor="690.0" AnchorPane.topAnchor="500.0" />
+      <HBox fx:id="messageBox" layoutX="30.0" layoutY="450.0" prefHeight="208.0" prefWidth="396.0">
+         <children>
+            <TextFlow fx:id="messageTextFlow" prefHeight="208.0" prefWidth="395.0">
+               <children>
+                  <Text fx:id="messageText" styleClass="chat-message" text="" wrappingWidth="360.0" />
+               </children>
+            </TextFlow>
+         </children>
+      </HBox>
+      <VBox layoutX="728.0" layoutY="444.0" prefHeight="256.0" prefWidth="538.0">
+         <children>
+            <Label fx:id="nicknametext" styleClass="nickname" />
+            <Label fx:id="position" styleClass="chat-message" text="Position:" />
+            <Label fx:id="credits" styleClass="chat-message" text="Credits:" />
+            <Label fx:id="enginepower" styleClass="chat-message" text="Engine Power:" />
+            <Label fx:id="firepower" styleClass="chat-message" text="Fire Power:" />
+            <Label fx:id="purplealien" styleClass="chat-message" text="Purple Alien:" />
+            <Label fx:id="brownalien" styleClass="chat-message" text="Brown Alien:" />
+            <Label fx:id="numofhumans" styleClass="chat-message" text="Number of Humans:" />
+            <Label fx:id="energycell" styleClass="chat-message" text="Number of energy Cell:" />
+         </children></VBox>
    </children>
+   <stylesheets>
+      <URL value="@css/Button.css" />
+      <URL value="@css/GameButton.css" />
+   </stylesheets>
 </AnchorPane>
