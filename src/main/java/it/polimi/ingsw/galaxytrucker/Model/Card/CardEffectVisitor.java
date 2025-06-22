@@ -290,30 +290,91 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(SecondWarzoneCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
-        if (players.size() == 1) return;
-
-        List<String> nicks = new ArrayList<>();
-        for (Player p : players) {
-            String nick = controller.getNickByPlayer(p);
-            nicks.add(nick);
-            //p.setGamePhase(GamePhase.CARD_EFFECT);
-            //controller.changePhaseFromCard(nick, p, GamePhase.CARD_EFFECT);
+        if (players.size() == 1) {
+            String nick = controller.getNickByPlayer(players.getFirst());
+            controller.inform("SERVER: You are flying alone. warzone card effect not activated ", nick);
+            return;
         }
+
 
         int idx_firepower = 0;
-        int idx_engine = 0;
-        int idx_crew = 0;
+        int days = card.getDays();
+        controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
 
-        for (int i = 1; i < players.size(); i++) {
-            if (controller.getNumCrew(players.get(i)) < controller.getNumCrew(players.get(idx_crew)))
-                idx_crew = i;
-            if (controller.getFirePowerForCard(players.get(i)) < controller.getFirePowerForCard(players.get(idx_firepower)))
+        List<Double> firePowers = new ArrayList<>();
+        for(Player p : players) {
+            double x = controller.getFirePowerForCard(p);
+            firePowers.add(x);
+            String nick = controller.getNickByPlayer(p);
+            controller.broadcastInform("SERVER: "+nick+" has a fire power of "+x);
+        }
+        for (int i = 1; i < firePowers.size(); i++) {
+            if(firePowers.get(i) < firePowers.get(idx_firepower))
                 idx_firepower = i;
-            if (controller.getPowerEngineForCard(players.get(i)) < controller.getPowerEngineForCard(players.get(idx_engine)))
+        }
+
+        String nickCrew = controller.getNickByPlayer(players.get(idx_firepower));
+        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the lowest fire power!" +
+                "He loses "+days+" flight days");
+        f.moveRocket(-days, players.get(idx_firepower));
+
+        f.setOverlappedPlayersEliminated();
+        List<Player> eliminated = f.eliminatePlayers();
+        for (Player player : eliminated) controller.handleElimination(player);
+        f.orderPlayersInFlightList();
+        players = f.getOrderedPlayers();
+
+        if (players.size() == 1) {
+            String nick = controller.getNickByPlayer(players.getFirst());
+            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
+            return;
+        }
+
+
+
+
+        int idx_engine = 0;
+        int numGoods = card.getNumGoods();
+        controller.broadcastInform("\nSERVER: Checking the player with the lowest engine power...\n");
+
+        List<Integer> enginePowers = new ArrayList<>();
+        for(Player p : players) {
+            int x = controller.getPowerEngineForCard(p);
+            enginePowers.add(x);
+            String nick = controller.getNickByPlayer(p);
+            controller.broadcastInform("SERVER: "+nick+" has an engine power of "+x);
+        }
+        for (int i = 1; i < enginePowers.size(); i++) {
+            if(enginePowers.get(i) < enginePowers.get(idx_engine))
                 idx_engine = i;
         }
-        f.moveRocket(-card.getDays(), players.get(idx_firepower));
-        controller.removeGoods(players.get(idx_engine), card.getNumGoods());
+
+        String nickEngine = controller.getNickByPlayer(players.get(idx_engine));
+        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numGoods+" goods");
+        controller.removeGoods(players.get(idx_engine), numGoods);
+
+
+
+
+
+
+        int idx_crew = 0;
+
+        controller.broadcastInform("\nSERVER: Checking the player with the least number of crewmates...\n");
+
+        controller.broadcastInform("SERVER: "+controller.getNickByPlayer(players.get(idx_crew))+" has "+
+                controller.getNumCrew(players.get(idx_crew))+" crewmates");
+        for (int i = 1; i < players.size(); i++) {
+            Player p = players.get(i);
+            int numcrew = controller.getNumCrew(p);
+            controller.broadcastInform("SERVER: "+controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
+            if (numcrew < controller.getNumCrew(players.get(idx_crew)))
+                idx_crew = i;
+        }
+
+        String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
+        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board!" +
+                "He loses "+days+" flight days");
 
         Player p = players.get(idx_crew);
         List<Integer> shots_directions = card.getShotsDirections();
@@ -321,12 +382,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
             int res = p.throwDice() + p.throwDice();
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
-        }
-
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            //p.setGamePhase(GamePhase.WAITING_FOR_TURN);
-            //controller.changePhaseFromCard(nicks.get(i), player, GamePhase.WAITING_FOR_TURN);
         }
     }
 
@@ -348,64 +403,37 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(SmugglersCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
-
         double smugglers_fire_power = card.getFirePower();
+
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
+            controller.inform("SERVER: Checking your fire power...", nick);
             double player_fire_power = controller.getFirePowerForCard(p);
+
             if (player_fire_power > smugglers_fire_power) {
                 int days = card.getDays();
-                List<Colour> reward_goods = card.getRewardGoods();
-                String reward_goods_string = reward_goods.stream().map(Colour::name).collect(Collectors.joining(", "));
-                String string = String.format("SERVER: Do you want to redeem %s goods and lose %d flight days?",
-                        reward_goods_string, days);
+                String string = String.format("SERVER: You defeated the smugglers!\nDo you want to redeem the card's reward goods" +
+                                " and lose %d flight days?", days);
 
                 if (controller.askPlayerDecision(string, p)) {
                     f.moveRocket(-days, p);
-
-                    /**/
-                    controller.inform("SERVER: Lista di merci prima: " + p.getTotalListOfGood(), nick);
-
                     controller.manageGoods(p, card.getRewardGoods());
-
-                    /**/
-                    controller.inform("SERVER: Lista di merci dopo: " + p.getTotalListOfGood(), nick);
-
-                    controller.broadcastInform("SERVER: Smugglers defeated by " + nick + "!");
                     controller.changeMapPosition(nick, p);
                     controller.updatePositionForEveryBody();
                 }
+
+                controller.broadcastInform("SERVER: Smugglers defeated by " + nick + "!");
                 exit = true;
             } else if (player_fire_power < smugglers_fire_power) {
 
-                /**/List<Colour> list1= new ArrayList<>();
-                /**/list1.add(Colour.RED);
-                /**/list1.add(Colour.RED);
-                /**/list1.add(Colour.RED);
-                /**/list1.add(Colour.YELLOW);
-                /**/list1.add(Colour.YELLOW);
-                /**/list1.add(Colour.GREEN);
-                /**/list1.add(Colour.GREEN);
-                /**/list1.add(Colour.BLUE);
-                /**/list1.add(Colour.BLUE);
-                /**/controller.manageGoods(p, list1);
-
-                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated";
+                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated flight days";
                 controller.inform(msg, nick);
-
-                /**/
-                controller.inform("SERVER: Lista di merci prima: " + p.getTotalListOfGood(), nick);
-
                 controller.removeGoods(p, card.getNumRemovedGoods());
-
-                /**/
-                controller.inform("SERVER: Lista di merci dopo: " + p.getTotalListOfGood(), nick);
-
                 controller.inform("SERVER: Checking other players", nick);
 
             } else {
-                controller.inform("You have the same firepower as the slavers. Draw, nothing happens\n" +
+                controller.inform("SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" +
                         "SERVER: Checking other players", nick);
             }
 
