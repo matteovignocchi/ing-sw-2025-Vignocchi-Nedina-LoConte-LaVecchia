@@ -106,20 +106,22 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                     sendRequest(response);
                 }
                 case Message.OP_ASK_TO -> {
-                    Boolean decision = this.askWithTimeout((String)msg.getPayload());
-                    //if(decision == null) { return; }
+                    String prompt = (String) msg.getPayload();
+                    if (prompt != null) this.inform(prompt);
+                    Boolean decision = this.askWithTimeout(prompt);
                     Message response = Message.response(decision, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_COORDINATE_TO -> {
-                    this.inform((String) msg.getPayload());
+                    String prompt = (String) msg.getPayload();
+                    if (prompt != null) this.inform(prompt);
                     int[] coordinate = this.askCoordsWithTimeout();
-                    //if (coordinate == null) { return; }
                     Message response = Message.response(coordinate, msg.getRequestId());
                     sendRequest(response);
                 }
                 case Message.OP_INDEX_TO -> {
-                    this.inform((String) msg.getPayload());
+                    String prompt = (String) msg.getPayload();
+                    if (prompt != null) this.inform(prompt);
                     Integer answer = clientController.askIndexWithTimeoutByController();
                     sendRequest(Message.response(answer, msg.getRequestId()));
                 }
