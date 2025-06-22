@@ -15,6 +15,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
 import javax.annotation.processing.Generated;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class BuildingPhaseController extends GUIController {
@@ -81,13 +83,17 @@ public class BuildingPhaseController extends GUIController {
     @FXML
     public void initialize() {
         setupGridStructure();
-
-
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
         dashBoard = new ClientTile[5][7];
     }
 
     public void postInitialize() {
         Boolean isDemo = getIsDemo();
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
 
         if (isDemo) {
             dash.setVisible(false);
@@ -102,6 +108,7 @@ public class BuildingPhaseController extends GUIController {
             card3.setVisible(false);
             card4.setVisible(false);
             card5.setVisible(false);
+
         } else {
             dash.setVisible(true);
             dashDemo.setVisible(false);
@@ -111,8 +118,48 @@ public class BuildingPhaseController extends GUIController {
             deck3Btn.setVisible(true);
         }
         setNickName(getNickname());
+        setVisibleBottom();
 
     }
+
+    public void setVisibleBottom(){
+        int size = mapPosition.size();
+        List<String> tmpString = new ArrayList<>();
+        for (String s : mapPosition.keySet()) {
+            tmpString.add(s);
+        }
+        List<String> tmpString2 = new ArrayList<>();
+        for(int i = 0; i < size; i++){
+            if(!tmpString.get(i).equals(getNickname())){
+                tmpString2.add(tmpString.get(i));
+            }
+        }
+        switch(size){
+            case 0 -> guiView.inform("piedino pradella");
+            case 1 -> guiView.inform("piedino pradella");
+            case 2 -> {
+                playerShip1Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of "+ tmpString2.getFirst());
+            }
+            case 3 -> {
+                playerShip2Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of "+ tmpString2.getFirst());
+                playerShip3Btn.setVisible(true);
+                playerShip3Btn.setText("Player Ship of "+ tmpString2.getLast());
+            }
+            case 4 -> {
+                playerShip1Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of "+ tmpString2.getFirst());
+                playerShip2Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of "+ tmpString2.get(1));
+                playerShip3Btn.setVisible(true);
+                playerShip3Btn.setText("Player Ship of "+ tmpString2.getLast());
+            }
+        }
+
+    }
+
+
 
     public void setNickName(String nickName) {
         nicknameLabel.setText(nickName);

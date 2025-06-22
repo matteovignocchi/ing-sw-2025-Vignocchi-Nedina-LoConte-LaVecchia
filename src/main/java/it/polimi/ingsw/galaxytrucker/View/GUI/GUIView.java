@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -42,7 +44,7 @@ public class GUIView extends Application implements View {
     private ClientController clientController;
     public ClientTile currentTile;
     public ClientTile[][] dashBoard;
-    private static Map<String , Integer> mapPosition = new ConcurrentHashMap<>();
+    private static Map<String, int[]> mapPosition = new ConcurrentHashMap<String, int[]>();
     private Boolean[][] maschera;
     private CompletableFuture<List<Object>> dataForGame;
     private CompletableFuture<String> menuChoiceFuture;
@@ -55,6 +57,7 @@ public class GUIView extends Application implements View {
     private int selectedGameId;
     private String nickname;
     private final Object lock = new Object();
+    private CompletableFuture<String> currentCommandFuture;
 
     public static void setStartupConfig(int protocol, String h, int p) {
         protocolChoice = protocol;
@@ -305,12 +308,29 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public String sendAvailableChoices() throws Exception {
+    public String sendAvailableChoices() {
+//        currentCommandFuture = new CompletableFuture<>();
+//        return currentCommandFuture;
         return "";
     }
 
+    public CompletableFuture<String> sendAvailableChoices2() {
+        currentCommandFuture = new CompletableFuture<>();
+        return currentCommandFuture;
+    }
+
+    public void onUserCommand(String command) {
+        if (currentCommandFuture != null && !currentCommandFuture.isDone()) {
+            currentCommandFuture.complete(command); // "Sblocca" il Future
+            currentCommandFuture = null;
+        }
+    }
+
+
     @Override
     public void updateMap(Map<String, int[]> map) {
+        mapPosition = map;
+        controller.updateMapPosition(map);
 
     }
 
@@ -412,6 +432,7 @@ public class GUIView extends Application implements View {
             validStatus[4][6]  = true;
         }
         this.maschera = validStatus;
+        controller.setIsDemo(isDemo);
     }
 
 
@@ -629,12 +650,13 @@ public class GUIView extends Application implements View {
     @Override
     public void setTile(ClientTile tile, int row, int col) {
         dashBoard[row][col] = tile;
+        controller.setTileInDash(tile, row, col);
     }
     @Override
     public void setCurrentTile(ClientTile tile) {
-
+        currentTile = tile;
+        controller.setCurrentTile(tile);
     }
-
 
     @Override
     public boolean returnValidity(int a , int b){
@@ -643,14 +665,17 @@ public class GUIView extends Application implements View {
     @Override
     public void setValidity(int a , int b){
         maschera[a][b] = false;
+        controller.setValidity(a, b);
     }
     @Override
     public void resetValidity(int a , int b){
         maschera[a][b] = true;
+        controller.resetValidity(a,b);
     }
     @Override
     public void setNickName(String nickname) {
         this.nickname = nickname;
+        this.controller.setNickname(nickname);
     }
     public String getNickname() {
         return nickname;
