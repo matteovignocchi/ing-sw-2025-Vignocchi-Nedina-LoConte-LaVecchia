@@ -556,7 +556,7 @@ public class ClientController {
 
             try {
                 if (view.returnValidity(a, b)) {
-                    view.setTile(tmpTile, a, b);
+                    view.setTile(clientTileFactory.fromJson(jsonTile), a, b);
                     Dash_Matrix[a][b] = clientTileFactory.fromJson(jsonTile);
                 } else {
                     view.reportError("Invalid position");
@@ -777,6 +777,15 @@ public class ClientController {
                 }
             }
             // ... altri casi come nello switch originale
+        }
+    }
+
+    public void setTileFromGui(ClientTile tile) {
+        tmpTile = tile;
+        try {
+            virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

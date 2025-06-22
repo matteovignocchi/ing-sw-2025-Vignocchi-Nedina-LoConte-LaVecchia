@@ -21,6 +21,7 @@ public class TileSerializer {
         dto.c = tile.controlCorners(2);
         dto.d = tile.controlCorners(3);
         dto.id = tile.getIdTile();
+        dto.rotation = tile.rotation;
 
         switch (dto.type) {
             case "ENGINE" -> dto.idDouble = ((Engine) tile).isDouble();
@@ -86,7 +87,7 @@ public class TileSerializer {
      */
     private Tile fromDTO(TileDTO dto) {
         // per leggibilità
-        int a = dto.a, b = dto.b, c = dto.c, d = dto.d, id = dto.id;
+        int a = dto.a, b = dto.b, c = dto.c, d = dto.d, id = dto.id , rotation = dto.rotation;
 
         switch (dto.type) {
             case "EMPTYSPACE" -> {

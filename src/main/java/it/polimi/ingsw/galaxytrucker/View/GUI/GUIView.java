@@ -58,13 +58,13 @@ public class GUIView extends Application implements View {
     private String nickname;
     private final Object lock = new Object();
     private CompletableFuture<String> currentCommandFuture;
+    private SecondaryPhase secondaryPhase;
 
     public static void setStartupConfig(int protocol, String h, int p) {
         protocolChoice = protocol;
         host = h;
         port = p;
     }
-
     @Override
     public void start(Stage stage) {
         this.mainStage = stage;
@@ -139,7 +139,14 @@ public class GUIView extends Application implements View {
     //TODO: da scrivere
     @Override
     public int[] askCoordinatesWithTimeout() {
-        return new int[0];
+        if(secondaryPhase == SecondaryPhase.COORDINATE_FOR_PLACING) {
+            return controller.getCordinate();
+        }
+        else return controller.askForCoordinate();
+    }
+
+    public void setSecondaryPhase(SecondaryPhase secondaryPhase) {
+        this.secondaryPhase = secondaryPhase;
     }
 
     @Override
@@ -190,8 +197,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
-        controller.setDashBoard(ship);
+        Platform.runLater(() -> {
+            this.dashBoard = ship;
+            controller.setDashBoard(dashBoard);
+            controller.redrawDashboard();
+        });
     }
+
+
 
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
@@ -317,6 +330,20 @@ public class GUIView extends Application implements View {
     public CompletableFuture<String> sendAvailableChoices2() {
         currentCommandFuture = new CompletableFuture<>();
         return currentCommandFuture;
+    }
+    public void sendTileToServer(ClientTile tile , int rotation) {
+        if(rotation>0) {
+            while(rotation>0) {
+                tile.rotateRight();
+                rotation = rotation -90;
+            }
+        } else if (rotation < 0) {
+            while(rotation < 0) {
+                tile.rotateLeft();
+                rotation = rotation + 90;
+            }
+        }
+        clientController.setTileFromGui(tile);
     }
 
     public void onUserCommand(String command) {
@@ -650,8 +677,11 @@ public class GUIView extends Application implements View {
     @Override
     public void setTile(ClientTile tile, int row, int col) {
         dashBoard[row][col] = tile;
-        controller.setTileInDash(tile, row, col);
-    }
+        Platform.runLater(() -> {
+            if (controller instanceof BuildingPhaseController bpc) {
+                bpc.drawTileAt(tile, row, col);
+            }
+        });    }
     @Override
     public void setCurrentTile(ClientTile tile) {
         currentTile = tile;

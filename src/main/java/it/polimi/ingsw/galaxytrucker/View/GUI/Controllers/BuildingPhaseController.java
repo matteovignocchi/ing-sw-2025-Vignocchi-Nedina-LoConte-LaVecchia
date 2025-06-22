@@ -1,6 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
+import it.polimi.ingsw.galaxytrucker.View.GUI.SecondaryPhase;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -14,7 +16,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
-import javax.annotation.processing.Generated;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +91,11 @@ public class BuildingPhaseController extends GUIController {
         dashBoard = new ClientTile[5][7];
     }
 
+    @FXML
+    public void onButtonClick(javafx.event.ActionEvent event) {
+        super.onButtonClick(event);
+    }
+
     public void postInitialize() {
         Boolean isDemo = getIsDemo();
         playerShip1Btn.setVisible(false);
@@ -120,6 +127,33 @@ public class BuildingPhaseController extends GUIController {
         setNickName(getNickname());
         setVisibleBottom();
 
+    }
+
+    @Override
+    public void setTileInDash(ClientTile tile, int row, int col) {
+        dashBoard[row][col] = tile;
+        if(numeberOfTile == 0){
+            numeberOfTile ++;
+            placeStartingTile(tile);
+        }
+        ImageView tileView = new ImageView(ClientTile.loadImageById(tile.id));
+        tileView.setFitWidth(graphicGridPane.getWidth() / 7);
+        tileView.setFitHeight(graphicGridPane.getHeight() / 5);
+        tileView.setRotate(tile.getRotation());
+
+        graphicGridPane.add(tileView, row, col);
+
+    }
+
+    public void placeStartingTile(ClientTile startingTile) {
+        dashBoard[2][3] = startingTile;
+
+        ImageView tileView = new ImageView(ClientTile.loadImageById(startingTile.id));
+        tileView.setFitWidth(graphicGridPane.getWidth() / 7);
+        tileView.setFitHeight(graphicGridPane.getHeight() / 5);
+        tileView.setRotate(startingTile.getRotation());
+
+        graphicGridPane.add(tileView, 3, 2); // col = 3, row = 2
     }
 
     public void setVisibleBottom(){
@@ -255,8 +289,7 @@ public class BuildingPhaseController extends GUIController {
         event.consume();
     }
 
-    private void onTileReleased(MouseEvent event) {
-        draggedTileView.setMouseTransparent(false);
+    private void onTileReleased(MouseEvent event) {    draggedTileView.setMouseTransparent(false);
         draggedTileView.setOpacity(1.0);
 
         Point2D sceneCoords = new Point2D(event.getSceneX(), event.getSceneY());
@@ -266,29 +299,56 @@ public class BuildingPhaseController extends GUIController {
             int col = (int)(gridCoords.getX() / (coordinateGridPane.getWidth() / coordinateGridPane.getColumnConstraints().size()));
             int row = (int)(gridCoords.getY() / (coordinateGridPane.getHeight() / coordinateGridPane.getRowConstraints().size()));
 
-            if (col >= 0 && col < coordinateGridPane.getColumnConstraints().size() &&
-                    row >= 0 && row < coordinateGridPane.getRowConstraints().size()) {
-                placeTileOnGrid(row, col);
+            if (col >= 0 && col < 7 && row >= 0 && row < 5) {
+                // Salva tile + rotazione + coordinate
+                super.row = row;
+                super.col = col;
+                super.currentRotation = rotationAngle;
+
+                // Manda solo la tile al server
+                guiView.setSecondaryPhase(SecondaryPhase.COORDINATE_FOR_PLACING);
+                guiView.sendTileToServer(currentTile, currentRotation);
             }
         }
 
         event.consume();
     }
 
-    private void placeTileOnGrid(int row, int col) {
-        if (getNodeAt(coordinateGridPane, col, row) != null) return;
+    public void redrawDashboard() {
+        coordinateGridPane.getChildren().clear();
 
-        ImageView tileView = new ImageView(ClientTile.loadImageById(currentTile.id));
-        tileView.setFitWidth(coordinateGridPane.getWidth() / coordinateGridPane.getColumnConstraints().size());
-        tileView.setFitHeight(coordinateGridPane.getHeight() / coordinateGridPane.getRowConstraints().size());
-        tileView.setRotate(rotationAngle);
-        coordinateGridPane.add(tileView, col, row);
-
-        if (guiView != null) {
-            guiView.resolveCoordinates(row, col);
+        for (int i = 0; i < dashBoard.length; i++) {
+            for (int j = 0; j < dashBoard[0].length; j++) {
+                ClientTile tile = dashBoard[i][j];
+                if (tile != null && tile.id != 0) {
+                    ImageView tileView = new ImageView(ClientTile.loadImageById(tile.id));
+                    tileView.setFitWidth(coordinateGridPane.getWidth() / 7);
+                    tileView.setFitHeight(coordinateGridPane.getHeight() / 5);
+                    tileView.setRotate(tile.getRotation());
+                    coordinateGridPane.add(tileView, j, i);
+                }
+            }
         }
+    }
 
+    @Override
+    public void placeTileOnGrid(int row, int col) {
+        if (getNodeAt(coordinateGridPane, col, row) != null) return;
+        if (dashBoard[row][col] != null && dashBoard[row][col].id != 0) return;
+        if(maschera[row][col] != true) return;
+        super.row = row;
+        super.col = col;
+        super.currentRotation = rotationAngle;
+        if (guiView != null) {
+            guiView.sendTileToServer(currentTile, rotationAngle);
+        }
         resetTileSelection();
+    }
+    public void drawTileAt(ClientTile tile, int row, int col) {
+        ImageView tileView = new ImageView(ClientTile.loadImageById(tile.id));
+        tileView.setFitWidth(coordinateGridPane.getWidth() / 7);
+        tileView.setFitHeight(coordinateGridPane.getHeight() / 5);
+        coordinateGridPane.add(tileView, col, row);
     }
 
     private Node getNodeAt(GridPane grid, int col, int row) {
@@ -318,4 +378,5 @@ public class BuildingPhaseController extends GUIController {
         rootPane.getChildren().remove(draggedTileView);
         createDraggableTileView();
     }
+
 }
