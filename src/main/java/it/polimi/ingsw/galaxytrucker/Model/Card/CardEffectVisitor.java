@@ -9,6 +9,7 @@ import it.polimi.ingsw.galaxytrucker.Model.Player;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class CardEffectVisitor implements CardVisitor, Serializable {
@@ -542,9 +543,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
                     + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
 
-            //TODO: rimuovere
-            res = 7;
-
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, players, i+1);
         }
 
@@ -604,7 +602,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (!losers.isEmpty()) {
 
             for (int i = 0; i < card.getShots_directions().size(); i++){
-                Player first = losers.stream().filter(p -> p.isConnected() && !p.isEliminated()).toList().getFirst();
+                Player first;
+                try{
+                    first = losers.stream().filter(p -> p.isConnected() && !p.isEliminated()).toList().getFirst();
+                } catch(NoSuchElementException e){
+                    return;
+                }
+
                 int res = first.throwDice() + first.throwDice();
                 for (Player p : losers){
                     if(!p.isEliminated())

@@ -65,14 +65,14 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard();
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-//            deck = deckCreator.CreateDemoDeck();
-            deck = deckCreator.CreateMixedDemoDeck();
+            deck = deckCreator.CreateDemoDeck();
+//            deck = deckCreator.CreateMixedDemoDeck();
         }else{
             fBoard = new FlightCardBoard2();
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateStardustDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -338,8 +338,16 @@ public class Controller implements Serializable {
         //TODO: capire la fase di eliminazione
         p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
-        String msg = "SERVER: You have been eliminated!";
+        String msg = "\nSERVER: You have been eliminated!";
         informAndNotify(msg, nick);
+
+        String msg1 = "\nSERVER: Player "+nick+" has been eliminated!";
+        List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
+        for(String nickname : nicknames) {
+            if(nickname.equals(nick)) continue;
+            Player player = getPlayerByNickname(nickname);
+            if(player.isConnected()) inform(msg1, nickname);
+        }
     }
 
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
@@ -579,7 +587,7 @@ public class Controller implements Serializable {
             VirtualView v = viewsByNickname.get(leaderNick);
             leader.setGamePhase(GamePhase.DRAW_PHASE);
             try {
-                v.inform("SERVER: " + "You're the leader! Draw a card");
+                v.inform("\nSERVER: " + "You're the leader! Draw a card");
                 notifyView(leaderNick);
                 break;
             } catch (IOException e) {
