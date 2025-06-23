@@ -340,7 +340,6 @@ public class Controller implements Serializable {
 
         String msg = "\nSERVER: You have been eliminated!";
         informAndNotify(msg, nick);
-
         String msg1 = "\nSERVER: Player "+nick+" has been eliminated!";
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
