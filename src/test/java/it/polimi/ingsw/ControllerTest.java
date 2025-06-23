@@ -106,8 +106,7 @@ public class ControllerTest {
     @Test
     public void testAddDuplicatePlayerThrows() throws Exception {
         controller.addPlayer("Alice", viewA);
-        assertThrows(BusinessLogicException.class,
-                () -> controller.addPlayer("Alice", viewB));
+        assertThrows(BusinessLogicException.class, () -> controller.addPlayer("Alice", viewB));
     }
 
     @Test
@@ -115,8 +114,7 @@ public class ControllerTest {
         controller.addPlayer("Alice", viewA);
         controller.addPlayer("Bob", viewB);
         TestView viewC = new TestView();
-        assertThrows(BusinessLogicException.class,
-                () -> controller.addPlayer("Charlie", viewC));
+        assertThrows(BusinessLogicException.class, () -> controller.addPlayer("Charlie", viewC));
     }
 
     @Test
@@ -125,8 +123,7 @@ public class ControllerTest {
         Player p = controller.getPlayerCheck("Alice");
         assertNotNull(p);
         assertEquals("Alice", controller.getNickByPlayer(p));
-        assertThrows(BusinessLogicException.class,
-                () -> controller.getPlayerCheck("Unknown"));
+        assertThrows(BusinessLogicException.class, () -> controller.getPlayerCheck("Unknown"));
     }
 
     @Test
@@ -159,7 +156,6 @@ public class ControllerTest {
         assertTrue(pos.containsKey("Alice"));
         int[] arr = pos.get("Alice");
         assertEquals(3, arr.length);
-        // elimination flag should be 0
         assertEquals(0, arr[2]);
     }
 }
