@@ -649,7 +649,9 @@ public class ClientController {
 
     public void printPlayerDashboardByController(String[][] jsonDashboard) {
         try {
-            view.printDashShip(clientTileFactory.fromJsonMatrix(jsonDashboard));
+            ClientTile[][] newMatrix = clientTileFactory.fromJsonMatrix(jsonDashboard);
+            this.Dash_Matrix = newMatrix;
+            view.printDashShip(newMatrix);
         } catch (IOException e) {
             view.reportError(e.getMessage());
         }
