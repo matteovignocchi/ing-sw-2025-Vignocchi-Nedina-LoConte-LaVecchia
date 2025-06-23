@@ -81,7 +81,6 @@ public class GUIView extends Application implements View {
 
     @Override
     public void start(Stage primaryStage) {
-        System.out.println("OKAY1 GUI");
         this.mainStage = primaryStage;
         this.model = new GUIModel();
         this.inputManager = new UserInputManager();
@@ -109,7 +108,7 @@ public class GUIView extends Application implements View {
                 reportError("Errore durante l'avvio del ClientController: " + e.getMessage());
                 e.printStackTrace();
             }
-            System.out.println("OKAY2 GUI");
+
 
         }).start();
     }
@@ -203,20 +202,19 @@ public class GUIView extends Application implements View {
         });
     }
 
-    @Override
     public void updateState(ClientGamePhase gamePhase) {
-        // TODO: switch scene based on game phase
         Platform.runLater(() -> {
             switch (gamePhase) {
-                case BOARD_SETUP -> setSceneEnum(BUILDING_PHASE);
+                case BOARD_SETUP -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
                 default -> {}
-
             }
         });
-
-
     }
+
 
     @Override
     public void printTile(ClientTile tile) {
@@ -265,11 +263,22 @@ public class GUIView extends Application implements View {
 
     @Override
     public void setTile(ClientTile tile, int row, int col) {
+        model.getDashboard()[row][col] = tile;
+
+        if (sceneEnum != SceneEnum.BUILDING_PHASE) {
+            return;
+        }
+
         Platform.runLater(() -> {
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
-            ctrl.placeTileAt(tile, row, col);  // Definisci tu questo metodo
+            if (ctrl != null) {
+                ctrl.placeTileAt(tile, row, col);
+            } else {
+                System.err.println("[GUIView] WARNING: BUILDING_PHASE controller not initialized yet.");
+            }
         });
     }
+
 
     @Override
     public void setCurrentTile(ClientTile tile) {
@@ -307,7 +316,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public boolean returnValidity(int a, int b) {
-        return false;
+        return model.returnValidity(a,b);
     }
 
     @Override
@@ -398,6 +407,7 @@ public class GUIView extends Application implements View {
             inputManager.indexFuture.complete(index);
         }
     }
+
     @Override
     public int askGameToJoin(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameStrings = FXCollections.observableArrayList();
@@ -406,9 +416,11 @@ public class GUIView extends Application implements View {
             int[] info = entry.getValue();
             boolean isDemo = info[2] == 1;
             String suffix = isDemo ? " DEMO" : "";
-            String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+            String desc = (id + 1) + ". Players in game: " + info[0] + "/" + info[1] + suffix;
             gameStrings.add(desc);
         }
+
+        inputManager.indexFuture = new CompletableFuture<>();
 
         Platform.runLater(() -> {
             GameListMenuController ctrl = (GameListMenuController) sceneRouter.getController(SceneEnum.JOIN_GAME_MENU);
@@ -416,16 +428,17 @@ public class GUIView extends Application implements View {
             setSceneEnum(SceneEnum.JOIN_GAME_MENU);
         });
 
-        inputManager.indexFuture = new CompletableFuture<>();
         try {
-            return inputManager.indexFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
+            Integer result = inputManager.indexFuture.get();
+            return result != null && result == -1 ? 0 : result;
+        } catch (Exception e) {
             reportError("Failed to get index: " + e.getMessage());
-            return -1;
+            return 0;
         }
     }
 
-    private void showNotification(String message){
+
+    private void showNotification(String message) {
         Platform.runLater(() -> {
             Scene scene = sceneRouter.getCurrentScene();
             if (scene == null || scene.getRoot() == null) {
@@ -439,7 +452,15 @@ public class GUIView extends Application implements View {
                 Pane pane = (Pane) root;
 
                 Label label = new Label(message);
-                label.setStyle("-fx-background-color: rgba(0, 0, 0, 0.85); -fx-text-fill: white; -fx-padding: 10px; -fx-background-radius: 8px;");
+                label.setStyle("""
+                -fx-font-family: "Impact";
+                -fx-font-size: 19px;
+                -fx-text-fill: #000000;
+                -fx-background-color: rgba(255, 223, 0, 0.85); /* giallo oro semi-trasparente */
+                -fx-padding: 10px 18px;
+                -fx-background-radius: 0; /* rettangolare */
+                -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
+            """);
                 label.setWrapText(true);
                 label.setMaxWidth(300);
 
@@ -449,8 +470,8 @@ public class GUIView extends Application implements View {
 
                 pane.getChildren().add(toast);
 
-                double xOffset = scene.getWidth() - 320;
-                double yOffset = scene.getHeight() - 100;
+                double xOffset = scene.getWidth() - 300 - 10;
+                double yOffset = scene.getHeight() - 80;
 
                 toast.setTranslateX(xOffset);
                 toast.setTranslateY(yOffset);
@@ -474,14 +495,18 @@ public class GUIView extends Application implements View {
         });
     }
 
+
+
+
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
         if (sceneEnum == null) {
-            return false;
+            return message.toLowerCase().contains("login successful");
         }
         return switch (sceneEnum) {
             case BUILDING_PHASE -> true;
             case WAITING_QUEUE -> !message.contains("Waiting");
             case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
+            case NICKNAME_DIALOG -> message.contains("Login");
             default -> false;
         };
     }

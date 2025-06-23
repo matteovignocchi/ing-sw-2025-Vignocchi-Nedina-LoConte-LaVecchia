@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIModel;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
 import javafx.application.Platform;
@@ -40,11 +41,9 @@ public class BuildingPhaseController extends GUIController {
 
     @FXML
     public void initialize() {
-        // Pulsanti per rotazione tile
         rotateLeftBtn.setOnAction(e -> rotateTile(-90));
         rotateRightBtn.setOnAction(e -> rotateTile(90));
 
-        // Azioni passive
         getCoveredBtn.setOnAction(e -> completeCommand("deck covered"));
         getShownBtn.setOnAction(e -> completeCommand("deck shown"));
         returnTileBtn.setOnAction(e -> completeCommand("return"));
@@ -59,7 +58,6 @@ public class BuildingPhaseController extends GUIController {
         deck2Btn.setOnAction(e -> completeIndex(1));
         deck3Btn.setOnAction(e -> completeIndex(2));
 
-        // Coordinate: click sulla griglia
         setupCoordinateGridClickHandler();
     }
 
@@ -113,46 +111,72 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void setNickname(String nickname) {
-        Platform.runLater(() -> nicknameLabel.setText(nickname));
+
+        Platform.runLater(() -> {
+            nicknameLabel.setText(nickname);
+        });
     }
+
     public void placeTileAt(ClientTile tile, int row, int col) {
-        ImageView tileImage = new ImageView();
-        tileImage.setFitWidth(70);
-        tileImage.setFitHeight(70);
-        tileImage.setImage(tile.getImage());
+        try {
+            ImageView tileImage = new ImageView();
+            tileImage.setFitWidth(70);
+            tileImage.setFitHeight(70);
+            tileImage.setImage(tile.getImage()); // <-- può lanciare eccezione
 
-        // Aggiungi nella griglia grafica (la nave "renderizzata")
-        graphicGridPane.add(tileImage, col, row);
+            graphicGridPane.add(tileImage, col, row);
+            playerGrid[row][col] = tile;
 
-        // Salva localmente se serve aggiornare lo stato
-        playerGrid[row][col] = tile;
+        } catch (RuntimeException e) {
+            System.err.println("[ERROR] Failed to place tile at (" + row + "," + col + "): " + e.getMessage());
+            // Puoi anche mostrare una tile "vuota" o placeholder se vuoi
+        }
     }
+
     public void showCurrentTile(ClientTile tile) {
         currentTile = tile;
 
-        // Mostra graficamente la tile corrente (es. in un ImageView dedicato)
         ImageView currentTileView = new ImageView(tile.getImage());
         currentTileView.setFitWidth(100);
         currentTileView.setFitHeight(100);
 
-        // Inserisci nel nodo UI previsto per anteprima (es. Rectangle o VBox)
-        // Supponiamo che tu abbia un nodo come: `tilePreviewPane.getChildren().setAll(currentTileView);`
         tilePreviewPane.getChildren().setAll(currentTileView);
     }
 
 
 
     @Override
-    public void postInitialize(){}
+    public void postInitialize() {
+
+        ClientTile[][] ship = model.getDashboard();
+        for (int row = 0; row < ship.length; row++) {
+            for (int col = 0; col < ship[row].length; col++) {
+                ClientTile tile = ship[row][col];
+                if (tile != null && !tile.type.equals("EMPTYSPACE")) {
+                    placeTileAt(tile, row, col);
+                }
+            }
+        }
+
+
+        ClientTile current = model.getCurrentTile();
+        if (current != null) {
+            showCurrentTile(current);
+        }
+        String nickname = model.getNickname();
+        if (nickname != null && !nickname.isBlank()) {
+            setNickname(nickname);
+
+        }
+
+    }
+
 
     @FXML
     private void onButtonClick(ActionEvent event) {
-        // Recupera il bottone premuto
         Button sourceButton = (Button) event.getSource();
         String buttonId = sourceButton.getId();
 
-        // Esegui la logica passiva che comunica con GUIView
-        // (ad esempio, completa una future oppure chiama un metodo helper passivo)
         switch (buttonId) {
             case "getCoveredBtn" -> guiView.resolveGenericCommand("GET_COVERED");
             case "getShownBtn" -> guiView.resolveGenericCommand("GET_SHOWN");

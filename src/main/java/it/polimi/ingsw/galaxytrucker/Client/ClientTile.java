@@ -1,10 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.Tile;
+
 import javafx.scene.image.Image;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ClientTile {
     public String type;
@@ -26,7 +27,7 @@ public class ClientTile {
         c = b;
         b = a;
         a = temp;
-        rotation ++;
+        rotation++;
 
         if (protectedCorners != null && protectedCorners.size() == 4) {
             int tmp = protectedCorners.get(3);
@@ -43,7 +44,7 @@ public class ClientTile {
         b = c;
         c = d;
         d = temp;
-        rotation --;
+        rotation--;
 
         if (protectedCorners != null && protectedCorners.size() == 4) {
             int tmp = protectedCorners.get(0);
@@ -56,16 +57,17 @@ public class ClientTile {
 
     public static Image loadImageById(int tileId) {
         try {
+            //TODO ricordarsi che se è non devo caricare nessuna immagine
+            if (tileId == 0) {
+                tileId = 157;
+            }
+
             String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
-            InputStream is = Tile.class.getResourceAsStream(imagePath);
+            InputStream is = ClientTile.class.getResourceAsStream(imagePath);
 
             if (is == null) {
-                imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web157";
-                is = Tile.class.getResourceAsStream(imagePath);
-
-                if (is == null) {
-                    throw new RuntimeException("Default tile image not found");
-                }
+                System.err.println("[WARN] Tile image not found: " + imagePath + ", using placeholder.");
+                throw new RuntimeException("Tile image not found");
             }
 
             return new Image(is);
@@ -75,11 +77,19 @@ public class ClientTile {
     }
 
     public Image getImage() {
-        return loadImageById(this.id);
+        try {
+            return loadImageById(this.id);
+        } catch (RuntimeException e) {
+            System.err.println("[ERROR] Tile image missing for ID: " + this.id + ", loading placeholder.");
+            InputStream is = getClass().getResourceAsStream("/placeholder.png");
+            if (is == null) {
+                throw new RuntimeException("Placeholder image missing in /images/tiles/placeholder.png");
+            }
+            return new Image(is);
+        }
     }
 
     public int getRotation() {
-        return this.rotation*90;
+        return this.rotation * 90;
     }
 }
-

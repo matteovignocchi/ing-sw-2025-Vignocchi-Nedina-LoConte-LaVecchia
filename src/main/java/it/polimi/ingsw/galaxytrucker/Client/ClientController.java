@@ -63,7 +63,6 @@ public class ClientController {
             }
         }
 
-        System.out.println("INIZIALIZZATO");
 
 
     }
@@ -72,7 +71,6 @@ public class ClientController {
         view.start();
         isConnected = true;
         view.inform("Connected with success");
-        System.out.println("OKAY1 client");
 
 
 
@@ -86,7 +84,6 @@ public class ClientController {
         while (isConnected) {
             switch (view) {
                 case GUIView g -> {
-                    System.out.println("OKAY2 client");
 
                     // Lascio la GUI controllare cosa inviare con resolveMenuChoice o simili
                     while (!g.hasResolvedMenuChoice()) {
