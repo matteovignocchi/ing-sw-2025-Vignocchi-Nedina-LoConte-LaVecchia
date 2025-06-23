@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="700.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane prefHeight="150.0" prefWidth="300.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.NicknameDialogController">
 
     <children>
@@ -19,7 +19,9 @@
 
         <Text fill="#444444" layoutX="155.0" layoutY="185.0" strokeType="OUTSIDE"
               strokeWidth="0.0" text="Insert your nickname"
-              AnchorPane.leftAnchor="150.0">
+              AnchorPane.leftAnchor="136.5"
+              AnchorPane.rightAnchor="136.609375"
+              AnchorPane.topAnchor="150.0">
             <font>
                 <Font name="Impact" size="26.0" />
             </font>
@@ -29,6 +31,7 @@
                    prefHeight="65.0" prefWidth="273.0"
                    layoutX="113.0" layoutY="218.0"
                    AnchorPane.topAnchor="217.0"
+                   styleClass="transparent"
                    AnchorPane.leftAnchor="113.0" />
 
         <Button fx:id="confirmButton"

@@ -10,46 +10,45 @@
             fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.CreateGameMenuController">
 
    <children>
-      <ImageView fitHeight="900.0" fitWidth="900.0" preserveRatio="false" AnchorPane.topAnchor="0.0"
-                 AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <ImageView fitHeight="900.0" fitWidth="908.0" preserveRatio="true"
+                 AnchorPane.bottomAnchor="0.0"
+                 AnchorPane.leftAnchor="0.0"
+                 AnchorPane.rightAnchor="-8.0"
+                 AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../LobbyImage2.png" />
          </image>
       </ImageView>
 
-      <!-- DEMO question -->
-      <Text fx:id="demoQuestionText" text="Demo flight?" textAlignment="CENTER" AnchorPane.topAnchor="180.0"
-            AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="300.0">
+      <Text fx:id="demoQuestionText"
+            fill="#444444"
+            layoutX="357.75"
+            layoutY="240.45"
+            strokeType="OUTSIDE"
+            strokeWidth="0.0" text="Demo flight?"
+            textAlignment="CENTER"
+            AnchorPane.leftAnchor="357.75"
+            AnchorPane.rightAnchor="353.85"
+            AnchorPane.topAnchor="202.0">
          <font>
             <Font name="Impact" size="36.0" />
          </font>
       </Text>
 
-      <!-- DEMO buttons -->
-      <Button fx:id="demoButton" text="Yes" prefWidth="150.0" prefHeight="60.0" AnchorPane.topAnchor="250.0"
-              AnchorPane.leftAnchor="250.0" />
-      <Button fx:id="level2Button" text="No" prefWidth="150.0" prefHeight="60.0" AnchorPane.topAnchor="250.0"
-              AnchorPane.rightAnchor="250.0" />
+      <Button fx:id="demoButton" layoutX="284.0" layoutY="338.0" mnemonicParsing="false" prefHeight="62.0" prefWidth="115.0" text="Yes" AnchorPane.leftAnchor="284.0"/>
+      <Button fx:id="level2Button" layoutX="506.25" layoutY="338.0" mnemonicParsing="false" prefHeight="62.0" prefWidth="115.0" text="No" AnchorPane.rightAnchor="284.0"/>
+      <Button fx:id="exitButton" layoutX="351.0" layoutY="627.75" mnemonicParsing="false" text="Back" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
 
-      <Button fx:id="exitButton" text="Back" prefWidth="120.0" AnchorPane.bottomAnchor="40.0"
-              AnchorPane.leftAnchor="40.0" />
-
-      <!-- PLAYER selection -->
-      <Text fx:id="playersQuestionText" text="How many players?" textAlignment="CENTER"
-            visible="false" AnchorPane.topAnchor="160.0" AnchorPane.leftAnchor="270.0" AnchorPane.rightAnchor="270.0">
+      <Text fx:id="playersQuestionText" fill="#444444" layoutX="308.25" layoutY="238.5" strokeType="OUTSIDE" strokeWidth="0.0" text="How many players?" textAlignment="CENTER" visible="false" AnchorPane.bottomAnchor="653.85" AnchorPane.leftAnchor="308.25" AnchorPane.rightAnchor="305.7" AnchorPane.topAnchor="202.0">
          <font>
             <Font name="Impact" size="36.0" />
          </font>
       </Text>
+      <Button fx:id="twoPlayerButton" layoutX="326.25" layoutY="236.25" mnemonicParsing="false" prefHeight="62.0" text="2 Players" visible="false" AnchorPane.bottomAnchor="517.5" AnchorPane.leftAnchor="337.5" AnchorPane.rightAnchor="337.5" />
+      <Button fx:id="threePlayerButton" layoutX="324.0" layoutY="481.5" mnemonicParsing="false" prefHeight="62.0" text="3 Players" visible="false" AnchorPane.bottomAnchor="405.0" AnchorPane.leftAnchor="337.5" AnchorPane.rightAnchor="337.5" />
+      <Button fx:id="fourPlayerButton" layoutX="338.0" layoutY="355.5" mnemonicParsing="false" prefHeight="62.0" prefWidth="224.0" text="4 Players" visible="false" AnchorPane.bottomAnchor="293.0" AnchorPane.leftAnchor="338.0" AnchorPane.rightAnchor="338.0" />
 
-      <Button fx:id="twoPlayerButton" text="2 Players" visible="false" prefWidth="180.0" prefHeight="50.0"
-              AnchorPane.topAnchor="240.0" AnchorPane.leftAnchor="360.0" />
-      <Button fx:id="threePlayerButton" text="3 Players" visible="false" prefWidth="180.0" prefHeight="50.0"
-              AnchorPane.topAnchor="310.0" AnchorPane.leftAnchor="360.0" />
-      <Button fx:id="fourPlayerButton" text="4 Players" visible="false" prefWidth="180.0" prefHeight="50.0"
-              AnchorPane.topAnchor="380.0" AnchorPane.leftAnchor="360.0" />
 
-      <Button fx:id="backButton" text="Back" visible="false" prefWidth="120.0"
-              AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="40.0" />
+      <Button fx:id="backButton" layoutX="351.0" layoutY="627.75" mnemonicParsing="false" text="Back" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="360.0" AnchorPane.rightAnchor="360.0" />
    </children>
 </AnchorPane>

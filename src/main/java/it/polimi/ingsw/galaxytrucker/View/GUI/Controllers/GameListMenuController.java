@@ -33,11 +33,7 @@ public class GameListMenuController extends GUIController {
 
     @Override
     public void postInitialize() {
-        // Potresti voler ricaricare la lista qui
-        ObservableList<String> testItems = FXCollections.observableArrayList();
-        testItems.add("1. Players: 2 | Demo: Yes");
-        testItems.add("2. Players: 3 | Demo: No");
-        displayGames(testItems);
+
     }
 
     public void displayGames(ObservableList<String> games) {
@@ -63,7 +59,7 @@ public class GameListMenuController extends GUIController {
             int gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) - 1;
 
             if (!inputManager.indexFuture.isDone()) {
-                inputManager.indexFuture.complete(gameId);  // ✅ sblocca askIndex()
+                inputManager.indexFuture.complete(gameId);
             }
 
         } catch (NumberFormatException e) {
@@ -74,7 +70,7 @@ public class GameListMenuController extends GUIController {
     @FXML
     public void back() {
         if (!inputManager.indexFuture.isDone()) {
-            inputManager.indexFuture.complete(-1);  // annullamento
+            inputManager.indexFuture.complete(-1);
         }
         Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.MAIN_MENU));
     }
