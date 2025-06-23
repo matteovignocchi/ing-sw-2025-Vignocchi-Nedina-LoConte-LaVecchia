@@ -32,8 +32,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
-import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.BUILDING_PHASE;
-import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.WAITING_QUEUE;
+import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.*;
 
 public class GUIView extends Application implements View {
 
@@ -182,6 +181,7 @@ public class GUIView extends Application implements View {
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
+                case MAIN_MENU -> setSceneEnum(MAIN_MENU);
                 default -> {}
             }
         });
@@ -195,9 +195,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printListOfCommand() {
-        Platform.runLater(() -> {
-            // TODO: display command options in GUI
-        });
+
     }
 
 //    public String sendAvailableChoices() {
@@ -372,8 +370,30 @@ public class GUIView extends Application implements View {
     }
 
     public void resolveGenericCommand(String command) {
-        commandQueue.offer(command);
+        String translated = switch (command.toUpperCase()) {
+            case "GET_COVERED" -> "getacoveredtile";
+            case "GET_SHOWN" -> "getashowntile";
+            case "RETURN_TILE" -> "returnthetile";
+            case "READY" -> "declareready";
+            case "SPIN_HOURGLASS" -> "spinthehourglass";
+            case "LOOK_PLAYER1", "LOOK_PLAYER2", "LOOK_PLAYER3" -> "watchaplayersship";
+            case "ROTATE_LEFT" -> "leftrotatethetile";
+            case "ROTATE_RIGHT" -> "rightrotatethetile";
+            case "LOGOUT" -> "logout";
+            default -> null;
+        };
+        System.out.println("[DEBUG] Comando ricevuto: " + command + " → " + translated);
+
+        if (translated != null) {
+            commandQueue.offer(translated);
+            System.out.println("[DEBUG] Comando accodato");
+
+        } else {
+            reportError("Unrecognized command: " + command);
+        }
     }
+
+
     public void resolveIndex(int index) {
         if (!inputManager.indexFuture.isDone()) {
             inputManager.indexFuture.complete(index);

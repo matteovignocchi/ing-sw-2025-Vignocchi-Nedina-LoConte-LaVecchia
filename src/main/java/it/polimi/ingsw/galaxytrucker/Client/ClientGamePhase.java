@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
 public enum ClientGamePhase {
+    MAIN_MENU,
     WAITING_IN_LOBBY,
     BOARD_SETUP,
     TILE_MANAGEMENT,

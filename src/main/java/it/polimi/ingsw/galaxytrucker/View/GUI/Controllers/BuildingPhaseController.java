@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Polygon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class BuildingPhaseController extends GUIController {
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
     @FXML private Button deck1Btn, deck2Btn, deck3Btn;
     @FXML private Button hourGlassBtn;
+    @FXML private Button logOutBtn;
     @FXML private GridPane coordinateGridPane;
     @FXML private GridPane graphicGridPane;
     @FXML private ImageView dash;
@@ -45,6 +47,8 @@ public class BuildingPhaseController extends GUIController {
     @FXML private HBox nicknameBox;
     @FXML private Label nicknameLabel;
     @FXML private VBox tilePreviewPane;
+    @FXML private Button leftArrowButton;
+    @FXML private Button rightArrowButton;
 
     private ClientTile currentTile;
     private ClientTile[][] playerGrid = new ClientTile[5][7];
@@ -52,18 +56,20 @@ public class BuildingPhaseController extends GUIController {
 
     @FXML
     public void initialize() {
+        System.out.println("[DEBUG] initialize chiamato");
+
         rotateLeftBtn.setOnAction(e -> rotateTile(-90));
         rotateRightBtn.setOnAction(e -> rotateTile(90));
 
-        getCoveredBtn.setOnAction(e -> completeCommand("deck covered"));
-        getShownBtn.setOnAction(e -> completeCommand("deck shown"));
-        returnTileBtn.setOnAction(e -> completeCommand("return"));
-        setReadyBtn.setOnAction(e -> completeCommand("ready"));
-        hourGlassBtn.setOnAction(e -> completeCommand("hourglass"));
-
-        playerShip1Btn.setOnAction(e -> completeCommand("look player1"));
-        playerShip2Btn.setOnAction(e -> completeCommand("look player2"));
-        playerShip3Btn.setOnAction(e -> completeCommand("look player3"));
+        getCoveredBtn.setOnAction(e -> completeCommand("GET_COVERED"));
+        getShownBtn.setOnAction(e -> completeCommand("GET_SHOWN"));
+        returnTileBtn.setOnAction(e -> completeCommand("RETURN_TILE"));
+        setReadyBtn.setOnAction(e -> completeCommand("READY"));
+        hourGlassBtn.setOnAction(e -> completeCommand("SPIN_HOURGLASS"));
+        logOutBtn.setOnAction(e -> completeCommand("LOGOUT"));
+        playerShip1Btn.setOnAction(e -> completeCommand("LOOK_PLAYER1"));
+        playerShip2Btn.setOnAction(e -> completeCommand("LOOK_PLAYER2"));
+        playerShip3Btn.setOnAction(e -> completeCommand("LOOK_PLAYER3"));
 
         deck1Btn.setOnAction(e -> completeIndex(0));
         deck2Btn.setOnAction(e -> completeIndex(1));
@@ -101,6 +107,8 @@ public class BuildingPhaseController extends GUIController {
         returnTileBtn.setVisible(false);
         rotateLeftBtn.setVisible(false);
         rotateRightBtn.setVisible(false);
+        rightArrowButton.setVisible(false);
+        leftArrowButton.setVisible(false);
     }
 
 
@@ -190,21 +198,21 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void completeCommand(String command) {
-        if (!inputManager.commandFuture.isDone()) {
-            inputManager.commandFuture.complete(command);
+        System.out.println("[DEBUG] Pulsante cliccato con comando: " + command);
+        guiView.resolveGenericCommand(command);
+    }
+
+
+    private void rotateTile(int angle) {
+        currentRotation = (currentRotation + angle + 360) % 360;
+        if (!inputManager.rotationFuture.isDone()) {
+            inputManager.rotationFuture.complete(currentRotation);
         }
     }
 
     private void completeIndex(int index) {
         if (!inputManager.indexFuture.isDone()) {
             inputManager.indexFuture.complete(index);
-        }
-    }
-
-    private void rotateTile(int angle) {
-        currentRotation = (currentRotation + angle + 360) % 360;
-        if (!inputManager.rotationFuture.isDone()) {
-            inputManager.rotationFuture.complete(currentRotation);
         }
     }
 
@@ -282,6 +290,7 @@ public class BuildingPhaseController extends GUIController {
             }
         }
     }
+
 
 }
 
