@@ -5,13 +5,21 @@ import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
 import it.polimi.ingsw.galaxytrucker.View.View;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
@@ -25,6 +33,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.BUILDING_PHASE;
+import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.WAITING_QUEUE;
 
 public class GUIView extends Application implements View {
 
@@ -33,6 +42,8 @@ public class GUIView extends Application implements View {
     private static int port;
     private static ClientController clientController;
     private static VirtualView virtualClientStartup;
+    private SceneEnum sceneEnum;
+
 
 
 
@@ -104,6 +115,7 @@ public class GUIView extends Application implements View {
     }
 
     public void setSceneEnum(SceneEnum sceneEnum) {
+        this.sceneEnum = sceneEnum;
         sceneRouter.setScene(sceneEnum);
     }
 
@@ -117,16 +129,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText(null);
-            alert.setContentText(message);
-            alert.showAndWait();
-        });
+        if (filterDisplayNotification(message, sceneEnum)) {
+            showNotification(message);
+        }
     }
 
     @Override
     public void reportError(String message) {
+        System.err.println("[GUIView] reportError: " + message);
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
@@ -173,7 +183,7 @@ public class GUIView extends Application implements View {
 
     public String askMenuChoice() {
         try {
-            return inputManager.menuChoiceFuture.get(); // blocca
+            return inputManager.menuChoiceFuture.get();
         } catch (Exception e) {
             reportError("Failed to get menu choice: " + e.getMessage());
             return "";
@@ -196,11 +206,15 @@ public class GUIView extends Application implements View {
     @Override
     public void updateState(ClientGamePhase gamePhase) {
         // TODO: switch scene based on game phase
-        switch (gamePhase) {
-            case BOARD_SETUP -> setSceneEnum(BUILDING_PHASE);
-            default -> {}
+        Platform.runLater(() -> {
+            switch (gamePhase) {
+                case BOARD_SETUP -> setSceneEnum(BUILDING_PHASE);
+                case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
+                default -> {}
 
-        }
+            }
+        });
+
 
     }
 
@@ -389,8 +403,11 @@ public class GUIView extends Application implements View {
         ObservableList<String> gameStrings = FXCollections.observableArrayList();
         for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
             int id = entry.getKey();
-            int[] info = entry.getValue(); // [joined, max]
-            gameStrings.add((id + 1) + ". Players: " + info[0] + "/" + info[1]);
+            int[] info = entry.getValue();
+            boolean isDemo = info[2] == 1;
+            String suffix = isDemo ? " DEMO" : "";
+            String desc = id + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+            gameStrings.add(desc);
         }
 
         Platform.runLater(() -> {
@@ -401,12 +418,75 @@ public class GUIView extends Application implements View {
 
         inputManager.indexFuture = new CompletableFuture<>();
         try {
-            return inputManager.indexFuture.get(); // blocca finché utente non sceglie
+            return inputManager.indexFuture.get();
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            reportError("Failed to get index: " + e.getMessage());
             return -1;
         }
     }
+
+    private void showNotification(String message){
+        Platform.runLater(() -> {
+            Scene scene = sceneRouter.getCurrentScene();
+            if (scene == null || scene.getRoot() == null) {
+                System.err.println("[GUIView] inform: scena o root null");
+                return;
+            }
+
+            Parent root = scene.getRoot();
+
+            try {
+                Pane pane = (Pane) root;
+
+                Label label = new Label(message);
+                label.setStyle("-fx-background-color: rgba(0, 0, 0, 0.85); -fx-text-fill: white; -fx-padding: 10px; -fx-background-radius: 8px;");
+                label.setWrapText(true);
+                label.setMaxWidth(300);
+
+                StackPane toast = new StackPane(label);
+                toast.setMouseTransparent(true);
+                toast.setOpacity(0);
+
+                pane.getChildren().add(toast);
+
+                double xOffset = scene.getWidth() - 320;
+                double yOffset = scene.getHeight() - 100;
+
+                toast.setTranslateX(xOffset);
+                toast.setTranslateY(yOffset);
+
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(300), toast);
+                fadeIn.setFromValue(0);
+                fadeIn.setToValue(1);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(3));
+
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(300), toast);
+                fadeOut.setFromValue(1);
+                fadeOut.setToValue(0);
+                fadeOut.setOnFinished(e -> pane.getChildren().remove(toast));
+
+                new SequentialTransition(fadeIn, pause, fadeOut).play();
+
+            } catch (ClassCastException e) {
+                System.err.println("[GUIView] inform: root della scena non è un Pane. Non posso mostrare il toast.");
+            }
+        });
+    }
+
+    private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
+        if (sceneEnum == null) {
+            return false;
+        }
+        return switch (sceneEnum) {
+            case BUILDING_PHASE -> true;
+            case WAITING_QUEUE -> !message.contains("Waiting");
+            case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
+            default -> false;
+        };
+    }
+
+
 
 
 }
