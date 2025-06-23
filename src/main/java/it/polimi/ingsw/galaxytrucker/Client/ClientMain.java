@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
+import it.polimi.ingsw.galaxytrucker.View.GUI.GUIStartupConfig;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -68,14 +69,29 @@ public class ClientMain {
                     scanner.close();
                 }
             }
-            case 2 -> {
+            case 2 ->{
+                VirtualView virtualClient;
+                try {
+                    if (protocolChoice == 1) {
+                        Registry registry = LocateRegistry.getRegistry(host, 1099);
+                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
+                        virtualClient = new VirtualClientRmi(server);
+                    } else {
+                        virtualClient = new VirtualClientSocket(host, port);
+                    }
 
-                GUIView.setStartupConfig(protocolChoice, host, port);
-                System.out.println("Launching GUI...");
-                Application.launch(GUIView.class);
-                System.out.println("GUI closed.");
+                    GUIStartupConfig.protocolChoice = protocolChoice;
+                    GUIStartupConfig.host = host;
+                    GUIStartupConfig.port = port;
+                    GUIStartupConfig.virtualClient = virtualClient;
 
+                    Application.launch(GUIView.class);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+
         }
     }
 

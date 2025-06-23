@@ -47,6 +47,8 @@ public interface View {
     void setTile(ClientTile tile, int row, int col);
     void setCurrentTile(ClientTile tile);
     void setNickName(String cognomePradella);
+    int askGameToJoin(Map<Integer, int[]> availableGames) throws IOException, InterruptedException;
+
 }
 
 //public interface VirtualViewRmi extends VirtualView {

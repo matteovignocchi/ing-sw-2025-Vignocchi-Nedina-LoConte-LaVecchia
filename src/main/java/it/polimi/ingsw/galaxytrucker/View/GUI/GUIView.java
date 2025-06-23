@@ -14,12 +14,17 @@ import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
+
+import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.BUILDING_PHASE;
 
 public class GUIView extends Application implements View {
 
@@ -27,11 +32,30 @@ public class GUIView extends Application implements View {
     private static String host;
     private static int port;
     private static ClientController clientController;
+    private static VirtualView virtualClientStartup;
 
-    public static void setStartupConfig(int protocol, String hostAddress, int serverPort) {
+
+
+
+    public static void setStartupConfig(int protocol, String hostAddress, int serverPort, VirtualView view) {
         protocolChoice = protocol;
         host = hostAddress;
         port = serverPort;
+        virtualClientStartup = view;
+
+
+    }
+
+    private void setAndStartClientController(VirtualView virtualClient) {
+        clientController = new ClientController(this, virtualClient);
+        try {
+            clientController.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("anche qui arrivato");
+
+
     }
 
     private Stage mainStage;
@@ -39,15 +63,19 @@ public class GUIView extends Application implements View {
     private UserInputManager inputManager;
     private GUIModel model;
     private final BlockingQueue<String> menuChoiceQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
+
+
 
 
     @Override
     public void start(Stage primaryStage) {
+        System.out.println("OKAY1 GUI");
         this.mainStage = primaryStage;
         this.model = new GUIModel();
         this.inputManager = new UserInputManager();
 
-        this.sceneRouter = new SceneRouter(mainStage, model, inputManager, this);
+        this.sceneRouter = new SceneRouter(primaryStage, model, inputManager, this);
         sceneRouter.initializeAllScenes();
 
         primaryStage.setTitle("Galaxy Trucker");
@@ -55,21 +83,23 @@ public class GUIView extends Application implements View {
 
         new Thread(() -> {
             try {
-                VirtualView virtualClient;
-                if (protocolChoice == 1) {
-                    java.rmi.registry.Registry registry = java.rmi.registry.LocateRegistry.getRegistry(host, 1099);
-                    VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                    virtualClient = new VirtualClientRmi(server);
-                } else {
-                    virtualClient = new VirtualClientSocket(host, port);
-                }
-                clientController = new ClientController(this, virtualClient);
-                virtualClient.setClientController(clientController);
+                System.out.println("Launching ClientController in GUI thread...");
 
+                VirtualView virtualClient = GUIStartupConfig.virtualClient;
+                if (virtualClient == null) {
+                    reportError("VirtualClient non inizializzato.");
+                    return;
+                }
+
+                clientController = new ClientController(this, virtualClient);
                 clientController.start();
+
             } catch (Exception e) {
-                reportError("Connection error: " + e.getMessage());
+                reportError("Errore durante l'avvio del ClientController: " + e.getMessage());
+                e.printStackTrace();
             }
+            System.out.println("OKAY2 GUI");
+
         }).start();
     }
 
@@ -82,7 +112,7 @@ public class GUIView extends Application implements View {
     }
 
     public void resolveMenuChoice(String choice) {
-        inputManager.menuChoiceFuture.complete(choice);
+        menuChoiceQueue.add(choice);  // ✅ correta
     }
 
     @Override
@@ -141,6 +171,16 @@ public class GUIView extends Application implements View {
         });
     }
 
+    public String askMenuChoice() {
+        try {
+            return inputManager.menuChoiceFuture.get(); // blocca
+        } catch (Exception e) {
+            reportError("Failed to get menu choice: " + e.getMessage());
+            return "";
+        }
+    }
+
+
     @Override
     public void printDashShip(ClientTile[][] ship) {
         Platform.runLater(() -> model.setDashboard(ship));
@@ -156,6 +196,12 @@ public class GUIView extends Application implements View {
     @Override
     public void updateState(ClientGamePhase gamePhase) {
         // TODO: switch scene based on game phase
+        switch (gamePhase) {
+            case BOARD_SETUP -> setSceneEnum(BUILDING_PHASE);
+            default -> {}
+
+        }
+
     }
 
     @Override
@@ -170,15 +216,14 @@ public class GUIView extends Application implements View {
         });
     }
 
-    @Override
-    public String sendAvailableChoices() {
-        try {
-            return inputManager.commandFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get user command: " + e.getMessage());
-            return "";
-        }
-    }
+//    public String sendAvailableChoices() {
+//        try {
+//            return inputManager.commandFuture.get();
+//        } catch (Exception e) {
+//            reportError("Failed to get user command: " + e.getMessage());
+//            return "";
+//        }
+//    }
 
     @Override public Boolean ask(String message) { return false; }
     @Override public boolean askWithTimeout(String message) { return false; }
@@ -207,7 +252,7 @@ public class GUIView extends Application implements View {
     @Override
     public void setTile(ClientTile tile, int row, int col) {
         Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
             ctrl.placeTileAt(tile, row, col);  // Definisci tu questo metodo
         });
     }
@@ -215,7 +260,7 @@ public class GUIView extends Application implements View {
     @Override
     public void setCurrentTile(ClientTile tile) {
         Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
             ctrl.showCurrentTile(tile);  // Questo è il tile che l'utente deve piazzare
         });
     }
@@ -284,13 +329,26 @@ public class GUIView extends Application implements View {
     }
     public void prepareCoordinateInput() {
         Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
            // ctrl.enableGridSelection(); // questo metodo lo definisci tu se vuoi, ad esempio per abilitare highlight, ecc.
         });
     }
-//    public void resolveMenuChoice(String choice) {
-//        menuChoiceQueue.add(choice);
-//    }
+    @Override
+    public String sendAvailableChoices() {
+        try {
+            return commandQueue.take();  // blocca finché non riceve un comando
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            reportError("Interrupted while waiting for command");
+            return null;
+        }
+    }
+
+    public void resolveCommand(String command) {
+        commandQueue.offer(command);
+    }
+
+
 
     public boolean hasResolvedMenuChoice() {
         return !menuChoiceQueue.isEmpty();
@@ -319,14 +377,36 @@ public class GUIView extends Application implements View {
     }
 
     public void resolveGenericCommand(String command) {
-        if (!inputManager.commandFuture.isDone()) {
-            inputManager.commandFuture.complete(command);
-        }
+        commandQueue.offer(command);
     }
     public void resolveIndex(int index) {
         if (!inputManager.indexFuture.isDone()) {
             inputManager.indexFuture.complete(index);
         }
     }
+    @Override
+    public int askGameToJoin(Map<Integer, int[]> availableGames) {
+        ObservableList<String> gameStrings = FXCollections.observableArrayList();
+        for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
+            int id = entry.getKey();
+            int[] info = entry.getValue(); // [joined, max]
+            gameStrings.add((id + 1) + ". Players: " + info[0] + "/" + info[1]);
+        }
+
+        Platform.runLater(() -> {
+            GameListMenuController ctrl = (GameListMenuController) sceneRouter.getController(SceneEnum.JOIN_GAME_MENU);
+            ctrl.displayGames(gameStrings);
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
+        });
+
+        inputManager.indexFuture = new CompletableFuture<>();
+        try {
+            return inputManager.indexFuture.get(); // blocca finché utente non sceglie
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
 
 }

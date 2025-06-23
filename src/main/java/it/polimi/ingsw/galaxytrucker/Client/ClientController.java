@@ -63,6 +63,8 @@ public class ClientController {
             }
         }
 
+        System.out.println("INIZIALIZZATO");
+
 
     }
 
@@ -70,6 +72,9 @@ public class ClientController {
         view.start();
         isConnected = true;
         view.inform("Connected with success");
+        System.out.println("OKAY1 client");
+
+
 
         int gameId = loginLoop();
 
@@ -81,10 +86,14 @@ public class ClientController {
         while (isConnected) {
             switch (view) {
                 case GUIView g -> {
+                    System.out.println("OKAY2 client");
+
                     // Lascio la GUI controllare cosa inviare con resolveMenuChoice o simili
                     while (!g.hasResolvedMenuChoice()) {
                         Thread.sleep(100);
                     }
+//                    String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
+
 
                     String cmd = g.consumeMenuChoice();
 
@@ -250,26 +259,12 @@ public class ClientController {
     }
 
     public int printAvailableGames(Map<Integer, int[]> availableGames) {
-        System.out.println("DEBUG - Available games:");
-        availableGames.forEach((id, info) ->
-                System.out.println("Game " + id + ": Players=" + info[0] + ", Demo=" + info[1])
-        );
-        int choice;
-        view.inform("**Available Games:**");
-        view.inform("0. Return to main menu");
-        view.displayAvailableGames(availableGames);
-        while (true) {
-            try {
-                choice = view.askIndex() + 1;
-            } catch (IOException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            if (choice == 0 || availableGames.containsKey(choice)) {
-                break;
-            }
-            view.reportError("Invalid choice, try again.");
+        try {
+            return view.askGameToJoin(availableGames);
+        } catch (Exception e) {
+            System.out.println("Error while trying to read available games.");
         }
-        return choice;
+        return 0;
     }
 
 
@@ -510,9 +505,23 @@ public class ClientController {
                     }
                 }
             }
-            case GUIView ignored -> {
+            case GUIView g -> {
+                g.printListOfCommand(); // se vuoi popolare l’interfaccia
+
                 while (true) {
-                    handleGUIInteraction(ignored , currentGamePhase);
+                    String key = g.sendAvailableChoices();  // attende comando
+
+                    if (key == null) continue;
+
+                    switch (key) {
+                        case "placethetile" -> { /* ... */ }
+                        case "returnthetile" -> { /* ... */ }
+                        // tutti i comandi possibili...
+                    }
+
+                    if (currentGamePhase != ClientGamePhase.CARD_EFFECT) {
+                        g.printListOfCommand(); // aggiorna pulsanti se serve
+                    }
                 }
             }
             default -> view.reportError("User Interface incorrect");

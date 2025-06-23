@@ -1070,8 +1070,24 @@ public class TUIView implements View {
     
     @Override
     public ClientGamePhase getGamePhase() {return game;}
-    
-    
+
+    @Override
+    public int askGameToJoin(Map<Integer, int[]> availableGames) throws IOException, InterruptedException {
+        inform("**Available Games:**");
+        inform("0. Return to main menu");
+        displayAvailableGames(availableGames);
+        int choice;
+        while (true) {
+            choice = askIndex() + 1;
+            if (choice == 0 || availableGames.containsKey(choice - 1)) {
+                return choice ;
+            }
+            reportError("Invalid choice, try again.");
+        }
+    }
+
+
+
 
 }
 
