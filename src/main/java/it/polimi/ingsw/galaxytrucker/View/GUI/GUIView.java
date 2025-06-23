@@ -37,38 +37,8 @@ import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.WAITING_QUEUE;
 
 public class GUIView extends Application implements View {
 
-    private static int protocolChoice;
-    private static String host;
-    private static int port;
     private static ClientController clientController;
-    private static VirtualView virtualClientStartup;
     private SceneEnum sceneEnum;
-
-
-
-
-
-    public static void setStartupConfig(int protocol, String hostAddress, int serverPort, VirtualView view) {
-        protocolChoice = protocol;
-        host = hostAddress;
-        port = serverPort;
-        virtualClientStartup = view;
-
-
-    }
-
-    private void setAndStartClientController(VirtualView virtualClient) {
-        clientController = new ClientController(this, virtualClient);
-        try {
-            clientController.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("anche qui arrivato");
-
-
-    }
-
     private Stage mainStage;
     private SceneRouter sceneRouter;
     private UserInputManager inputManager;
@@ -192,14 +162,16 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
-        Platform.runLater(() -> model.setDashboard(ship));
+        Platform.runLater(() -> {
+            model.setDashboard(ship);
+            sceneRouter.getController(SceneEnum.BUILDING_PHASE).updateDashboard(ship);
+        });
     }
+
 
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
-        Platform.runLater(() -> {
-            // TODO: implement visual map display
-        });
+        model.setPlayerPositions(playerMaps);
     }
 
     public void updateState(ClientGamePhase gamePhase) {
@@ -255,7 +227,7 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);  // 🔴 Mostra la scena
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
 
         });
 

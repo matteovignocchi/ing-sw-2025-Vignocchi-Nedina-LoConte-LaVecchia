@@ -16,6 +16,9 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class BuildingPhaseController extends GUIController {
@@ -31,6 +34,14 @@ public class BuildingPhaseController extends GUIController {
     @FXML private Button hourGlassBtn;
     @FXML private GridPane coordinateGridPane;
     @FXML private GridPane graphicGridPane;
+    @FXML private ImageView dash;
+    @FXML private ImageView dashDemo;
+    @FXML private ImageView card0;
+    @FXML private ImageView card1;
+    @FXML private ImageView card2;
+    @FXML private ImageView card3;
+    @FXML private ImageView card4;
+    @FXML private ImageView card5;
     @FXML private HBox nicknameBox;
     @FXML private Label nicknameLabel;
     @FXML private VBox tilePreviewPane;
@@ -59,6 +70,123 @@ public class BuildingPhaseController extends GUIController {
         deck3Btn.setOnAction(e -> completeIndex(2));
 
         setupCoordinateGridClickHandler();
+    }
+
+
+
+    @Override
+    public void postInitialize() {
+
+        ClientTile[][] ship = model.getDashboard();
+        for (int row = 0; row < ship.length; row++) {
+            for (int col = 0; col < ship[row].length; col++) {
+                ClientTile tile = ship[row][col];
+                if (tile != null && !tile.type.equals("EMPTYSPACE")) {
+                    placeTileAt(tile, row, col);
+                }
+            }
+        }
+
+
+        ClientTile current = model.getCurrentTile();
+        if (current != null) {
+            showCurrentTile(current);
+        }
+        String nickname = model.getNickname();
+        if (nickname != null && !nickname.isBlank()) {
+            setNickname(nickname);
+
+        }
+        setCommandVisibility(model.isDemo());
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+    }
+
+
+    @FXML
+    private void onButtonClick(ActionEvent event) {
+        Button sourceButton = (Button) event.getSource();
+        String buttonId = sourceButton.getId();
+
+        switch (buttonId) {
+            case "getCoveredBtn" -> guiView.resolveGenericCommand("GET_COVERED");
+            case "getShownBtn" -> guiView.resolveGenericCommand("GET_SHOWN");
+            case "rotateLeftBtn" -> guiView.resolveGenericCommand("ROTATE_LEFT");
+            case "rotateRightBtn" -> guiView.resolveGenericCommand("ROTATE_RIGHT");
+            case "returnTileBtn" -> guiView.resolveGenericCommand("RETURN_TILE");
+            case "logOutBtn" -> guiView.resolveGenericCommand("LOGOUT");
+            case "setReadyBtn" -> guiView.resolveGenericCommand("READY");
+            case "hourGlassBtn" -> guiView.resolveGenericCommand("SPIN_HOURGLASS");
+            case "deck1Btn" -> guiView.resolveIndex(1);
+            case "deck2Btn" -> guiView.resolveIndex(2);
+            case "deck3Btn" -> guiView.resolveIndex(3);
+            default -> guiView.reportError("Unrecognized button: " + buttonId);
+        }
+    }
+
+    private void setCommandVisibility(Boolean demo) {
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+
+        if (demo) {
+            dash.setVisible(false);
+            dashDemo.setVisible(true);
+            hourGlassBtn.setVisible(false);
+            deck1Btn.setVisible(false);
+            deck2Btn.setVisible(false);
+            deck3Btn.setVisible(false);
+            card0.setVisible(false);
+            card1.setVisible(false);
+            card2.setVisible(false);
+            card3.setVisible(false);
+            card4.setVisible(false);
+            card5.setVisible(false);
+
+        } else {
+            dash.setVisible(true);
+            dashDemo.setVisible(false);
+            hourGlassBtn.setVisible(true);
+            deck1Btn.setVisible(true);
+            deck2Btn.setVisible(true);
+            deck3Btn.setVisible(true);
+        }
+        setPlayersButton();
+    }
+    private void setPlayersButton() {
+        Map<String, int[]> mapPosition = model.getPlayerPositions();
+        int size = mapPosition.size();
+        List<String> tmpString = new ArrayList<>();
+        for (String s : mapPosition.keySet()) {
+            tmpString.add(s);
+        }
+        List<String> tmpString2 = new ArrayList<>();
+        for(int i = 0; i < size; i++){
+            if(!tmpString.get(i).equals(model.getNickname())){
+                tmpString2.add(tmpString.get(i));
+            }
+        }
+        switch(size){
+            case 2 -> {
+                playerShip1Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of "+ tmpString2.getFirst());
+            }
+            case 3 -> {
+                playerShip2Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of "+ tmpString2.getFirst());
+                playerShip3Btn.setVisible(true);
+                playerShip3Btn.setText("Player Ship of "+ tmpString2.getLast());
+            }
+            case 4 -> {
+                playerShip1Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of "+ tmpString2.getFirst());
+                playerShip2Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of "+ tmpString2.get(1));
+                playerShip3Btn.setVisible(true);
+                playerShip3Btn.setText("Player Ship of "+ tmpString2.getLast());
+            }
+        }
     }
 
     private void completeCommand(String command) {
@@ -142,54 +270,16 @@ public class BuildingPhaseController extends GUIController {
 
         tilePreviewPane.getChildren().setAll(currentTileView);
     }
-
-
-
     @Override
-    public void postInitialize() {
-
-        ClientTile[][] ship = model.getDashboard();
+    public void updateDashboard(ClientTile[][] ship) {
+        graphicGridPane.getChildren().clear();
         for (int row = 0; row < ship.length; row++) {
             for (int col = 0; col < ship[row].length; col++) {
                 ClientTile tile = ship[row][col];
-                if (tile != null && !tile.type.equals("EMPTYSPACE")) {
+                if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
                     placeTileAt(tile, row, col);
                 }
             }
-        }
-
-
-        ClientTile current = model.getCurrentTile();
-        if (current != null) {
-            showCurrentTile(current);
-        }
-        String nickname = model.getNickname();
-        if (nickname != null && !nickname.isBlank()) {
-            setNickname(nickname);
-
-        }
-
-    }
-
-
-    @FXML
-    private void onButtonClick(ActionEvent event) {
-        Button sourceButton = (Button) event.getSource();
-        String buttonId = sourceButton.getId();
-
-        switch (buttonId) {
-            case "getCoveredBtn" -> guiView.resolveGenericCommand("GET_COVERED");
-            case "getShownBtn" -> guiView.resolveGenericCommand("GET_SHOWN");
-            case "rotateLeftBtn" -> guiView.resolveGenericCommand("ROTATE_LEFT");
-            case "rotateRightBtn" -> guiView.resolveGenericCommand("ROTATE_RIGHT");
-            case "returnTileBtn" -> guiView.resolveGenericCommand("RETURN_TILE");
-            case "logOutBtn" -> guiView.resolveGenericCommand("LOGOUT");
-            case "setReadyBtn" -> guiView.resolveGenericCommand("READY");
-            case "hourGlassBtn" -> guiView.resolveGenericCommand("SPIN_HOURGLASS");
-            case "deck1Btn" -> guiView.resolveIndex(1);
-            case "deck2Btn" -> guiView.resolveIndex(2);
-            case "deck3Btn" -> guiView.resolveIndex(3);
-            default -> guiView.reportError("Unrecognized button: " + buttonId);
         }
     }
 

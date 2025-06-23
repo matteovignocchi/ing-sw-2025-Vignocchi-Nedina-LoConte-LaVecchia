@@ -36,37 +36,15 @@
             </rowConstraints>
         </GridPane>
 
-        <GridPane fx:id="graphicGridPane" layoutX="18.0" layoutY="10.0" prefHeight="530.0" prefWidth="527.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="396.0" AnchorPane.rightAnchor="399.0" AnchorPane.topAnchor="356.0">
-            <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="102.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="102.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints fillHeight="false" maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
-                <RowConstraints fillHeight="false" maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-         <effect>
-            <Glow level="1.0" />
-         </effect>
-        </GridPane>
+        <ImageView fx:id="dashDemo" fitHeight="640.0" fitWidth="528.0" layoutX="413.0" layoutY="270.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="376.0" AnchorPane.rightAnchor="376.0">
+            <image>
+                <Image url="@../Polytechnic/cardboard/cardboard-1.jpg" />
+            </image>
+        </ImageView>
 
         <ImageView fx:id="dash" fitHeight="640.0" fitWidth="528.0" layoutX="413.0" layoutY="270.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="376.0" AnchorPane.rightAnchor="376.0">
             <image>
                 <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
-            </image>
-        </ImageView>
-
-        <ImageView fx:id="dashDemo" fitHeight="640.0" fitWidth="528.0" layoutX="413.0" layoutY="270.0" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="376.0" AnchorPane.rightAnchor="376.0">
-            <image>
-                <Image url="@../Polytechnic/cardboard/cardboard-1.jpg" />
             </image>
         </ImageView>
       <Button fx:id="playerShip1Btn" layoutX="597.0" layoutY="28.0" mnemonicParsing="false" onAction="#onButtonClick" styleClass="blue-button" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="350.0" AnchorPane.topAnchor="0.0" />
@@ -162,6 +140,25 @@
               </ImageView>
           </graphic>
       </Button>
+
+        <GridPane fx:id="graphicGridPane" layoutX="18.0" layoutY="10.0" prefHeight="530.0" prefWidth="527.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="396.0" AnchorPane.rightAnchor="399.0" AnchorPane.topAnchor="356.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="102.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="102.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints fillHeight="false" maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
+                <RowConstraints fillHeight="false" maxHeight="100.0" minHeight="10.0" prefHeight="100.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+        </GridPane>
     </children>
 
     <stylesheets>

@@ -61,7 +61,7 @@ public class Player implements Serializable {
             }
         }
         //place the central unit
-        Dash_Matrix[2][3] = new HousingUnit(3,3,3,3, Human.HUMAN ,0);
+        Dash_Matrix[2][3] = new HousingUnit(3,3,3,3, Human.HUMAN ,idPhoto);
 
         //initialized a matrix with the valid position of the ship
         validStatus = new Status[5][7];
