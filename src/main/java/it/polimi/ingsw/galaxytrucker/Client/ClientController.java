@@ -353,7 +353,7 @@ public class ClientController {
                     ClientGamePhase temp = currentGamePhase;
                     if (lastPhase == ClientGamePhase.CARD_EFFECT
                             && temp != ClientGamePhase.CARD_EFFECT) {
-                        view.printListOfCommand();
+                        v.printListOfCommand();
                     }
                     lastPhase = temp;
 
@@ -361,20 +361,20 @@ public class ClientController {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
-                            view.reportError("Error in sleep");
+                            v.reportError("Error in sleep");
                         }
                         continue;
                     }
 
                     String key = null;
                     try {
-                        key = view.sendAvailableChoices();
+                        key = v.sendAvailableChoices();
                     } catch (Exception e) {
-                        view.reportError(e.getMessage());
+                        v.reportError(e.getMessage());
                     }
 
                     if (key == null) {
-                        if (temp != currentGamePhase) view.printListOfCommand();
+                        if (temp != currentGamePhase) v.printListOfCommand();
                         continue;
                     }
                     switch (key) {
@@ -383,23 +383,23 @@ public class ClientController {
                             try {
                                 tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
-                            view.printTile(tmpTile);
+                            v.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
                             String piedino = "PIEDONIPRADELLA";
                             try {
                                 piedino = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                             if (!piedino.equals("PIEDONIPRADELLA")) {
                                 try {
                                     tmpTile = clientTileFactory.fromJson(piedino);
-                                    view.printTile(tmpTile);
+                                    v.printTile(tmpTile);
                                 } catch (IOException e) {
-                                    view.reportError(e.getMessage());
+                                    v.reportError(e.getMessage());
                                 }
                             }
                         }
@@ -407,37 +407,37 @@ public class ClientController {
                             try {
                                 virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "placethetile" -> {
                             try {
                                 virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
                             } catch (BusinessLogicException e) {
-                                view.reportError("Invalid position. Try again");
+                                v.reportError("Invalid position. Try again");
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "drawacard" -> {
                             try {
                                 virtualClient.drawCard();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "spinthehourglass" -> {
                             try {
                                 virtualClient.rotateGlass();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "declareready" -> {
                             try {
                                 virtualClient.setReady();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                             /**
                              if (!waitForFlightStart()) return;
@@ -451,28 +451,28 @@ public class ClientController {
                             try {
                                 virtualClient.lookDeck();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "watchaplayersship" -> {
                             try {
                                 virtualClient.lookDashBoard();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "rightrotatethetile" -> {
                             try {
                                 rotateRight();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "leftrotatethetile" -> {
                             try {
                                 rotateLeft();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "takereservedtile" -> {
@@ -480,32 +480,32 @@ public class ClientController {
                                 String json = virtualClient.takeReservedTile();
                                 if (json != null) {
                                     tmpTile = clientTileFactory.fromJson(json);
-                                    view.printTile(tmpTile);
+                                    v.printTile(tmpTile);
                                 }
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
                         }
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                v.reportError(e.getMessage());
                             }
-                            view.inform("Returned to main menu");
+                            v.inform("Returned to main menu");
                             return;
                         }
-                        default -> view.reportError("Action not recognized");
+                        default -> v.reportError("Action not recognized");
                     }
                     if (currentGamePhase != ClientGamePhase.CARD_EFFECT) {
-                        view.printListOfCommand();
+                        v.printListOfCommand();
                     }
                 }
             }
             case GUIView g -> {
 
                 while (true) {
-                    String key = g.sendAvailableChoices();  // attende comando
+                    String key = g.sendAvailableChoices();
                     System.out.println("[DEBUG] Comando ricevuto da GUI: " + key);
 
                     if (key == null) continue;
@@ -516,89 +516,91 @@ public class ClientController {
                             try {
                                 tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
-                            view.printTile(tmpTile);
+                            g.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
                             String piedino = "PIEDONIPRADELLA";
                             try {
                                 piedino = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                             if (!piedino.equals("PIEDONIPRADELLA")) {
                                 try {
                                     tmpTile = clientTileFactory.fromJson(piedino);
-                                    view.printTile(tmpTile);
+                                    g.printTile(tmpTile);
                                 } catch (IOException e) {
-                                    view.reportError(e.getMessage());
+                                    g.reportError(e.getMessage());
                                 }
                             }
                         }
                         case "returnthetile" -> {
                             try {
                                 virtualClient.getBackTile(clientTileFactory.toJson(tmpTile));
+                                tmpTile = null;
+                                view.printTile(null);
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "placethetile" -> {
                             try {
                                 virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
                             } catch (BusinessLogicException e) {
-                                view.reportError("Invalid position. Try again");
+                                g.reportError("Invalid position. Try again");
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "drawacard" -> {
                             try {
                                 virtualClient.drawCard();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "spinthehourglass" -> {
                             try {
                                 virtualClient.rotateGlass();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "declareready" -> {
                             try {
                                 virtualClient.setReady();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "watchadeck" -> {
                             try {
                                 virtualClient.lookDeck();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "watchaplayersship" -> {
                             try {
                                 virtualClient.lookDashBoard();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "rightrotatethetile" -> {
                             try {
                                 rotateRight();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "leftrotatethetile" -> {
                             try {
                                 rotateLeft();
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "takereservedtile" -> {
@@ -606,26 +608,26 @@ public class ClientController {
                                 String json = virtualClient.takeReservedTile();
                                 if (json != null) {
                                     tmpTile = clientTileFactory.fromJson(json);
-                                    view.printTile(tmpTile);
+                                    g.printTile(tmpTile);
                                 }
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                         }
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
-                                view.updateState(ClientGamePhase.MAIN_MENU);
+                                g.updateState(ClientGamePhase.MAIN_MENU);
                             } catch (Exception e) {
-                                view.reportError(e.getMessage());
+                                g.reportError(e.getMessage());
                             }
                             return;
                         }
-                        default -> view.reportError("Action not recognized");
+                        default -> g.reportError("Action not recognized");
                     }
 
                     if (currentGamePhase != ClientGamePhase.CARD_EFFECT) {
-                        g.printListOfCommand(); // aggiorna pulsanti se serve
+                        g.printListOfCommand();
                     }
                 }
             }

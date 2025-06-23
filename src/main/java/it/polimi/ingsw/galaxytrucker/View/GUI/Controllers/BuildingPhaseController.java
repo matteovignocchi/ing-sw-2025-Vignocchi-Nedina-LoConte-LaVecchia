@@ -4,6 +4,8 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIModel;
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Polygon;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +52,8 @@ public class BuildingPhaseController extends GUIController {
     @FXML private VBox tilePreviewPane;
     @FXML private Button leftArrowButton;
     @FXML private Button rightArrowButton;
+    @FXML private ImageView currentTileView;
+
 
     private ClientTile currentTile;
     private ClientTile[][] playerGrid = new ClientTile[5][7];
@@ -56,15 +61,34 @@ public class BuildingPhaseController extends GUIController {
 
     @FXML
     public void initialize() {
-        System.out.println("[DEBUG] initialize chiamato");
-
         rotateLeftBtn.setOnAction(e -> rotateTile(-90));
         rotateRightBtn.setOnAction(e -> rotateTile(90));
 
-        getCoveredBtn.setOnAction(e -> completeCommand("GET_COVERED"));
+        getCoveredBtn.setOnAction(e -> {
+                completeCommand("GET_COVERED");
+                getShownBtn.setVisible(false);
+                getCoveredBtn.setVisible(false);
+                returnTileBtn.setVisible(true);
+                rotateLeftBtn.setVisible(true);
+                rotateRightBtn.setVisible(true);
+                setReadyBtn.setVisible(false);
+            });
         getShownBtn.setOnAction(e -> completeCommand("GET_SHOWN"));
-        returnTileBtn.setOnAction(e -> completeCommand("RETURN_TILE"));
-        setReadyBtn.setOnAction(e -> completeCommand("READY"));
+        returnTileBtn.setOnAction(e -> {
+                completeCommand("RETURN_TILE");
+                rotateLeftBtn.setVisible(false);
+                rotateRightBtn.setVisible(false);
+                returnTileBtn.setVisible(false);
+                setReadyBtn.setVisible(true);
+                getShownBtn.setVisible(true);
+                getCoveredBtn.setVisible(true);
+            });
+        setReadyBtn.setOnAction(e -> {
+                    completeCommand("READY");
+                    getCoveredBtn.setVisible(false);
+                    getShownBtn.setVisible(false);
+                    setReadyBtn.setVisible(false);
+                });
         hourGlassBtn.setOnAction(e -> completeCommand("SPIN_HOURGLASS"));
         logOutBtn.setOnAction(e -> completeCommand("LOGOUT"));
         playerShip1Btn.setOnAction(e -> completeCommand("LOOK_PLAYER1"));
@@ -198,17 +222,30 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void completeCommand(String command) {
-        System.out.println("[DEBUG] Pulsante cliccato con comando: " + command);
         guiView.resolveGenericCommand(command);
     }
 
 
     private void rotateTile(int angle) {
-        currentRotation = (currentRotation + angle + 360) % 360;
+        int oldRotation = currentRotation;
+        currentRotation += angle;
+
+        if (currentTileView != null) {
+            Platform.runLater(() -> {
+                RotateTransition rotate = new RotateTransition(Duration.millis(200), currentTileView);
+                rotate.setFromAngle(oldRotation);
+                rotate.setToAngle(currentRotation);
+                rotate.setInterpolator(Interpolator.EASE_BOTH);
+                rotate.play();
+            });
+        }
+
         if (!inputManager.rotationFuture.isDone()) {
-            inputManager.rotationFuture.complete(currentRotation);
+            inputManager.rotationFuture.complete(currentRotation % 360); // se ti serve normalizzato
         }
     }
+
+
 
     private void completeIndex(int index) {
         if (!inputManager.indexFuture.isDone()) {
@@ -272,12 +309,32 @@ public class BuildingPhaseController extends GUIController {
     public void showCurrentTile(ClientTile tile) {
         currentTile = tile;
 
-        ImageView currentTileView = new ImageView(tile.getImage());
-        currentTileView.setFitWidth(100);
-        currentTileView.setFitHeight(100);
+        if (tile == null || tile.getImage() == null) {
+            tilePreviewPane.getChildren().clear();
+            currentTileView = null;
+            return;
+        }
 
-        tilePreviewPane.getChildren().setAll(currentTileView);
+        Platform.runLater(() -> {
+            currentTileView = new ImageView(tile.getImage());
+            currentTileView.setFitWidth(100);
+            currentTileView.setFitHeight(100);
+            currentTileView.setRotate(currentRotation);  // imposta angolo iniziale
+
+            tilePreviewPane.getChildren().setAll(currentTileView);
+        });
     }
+
+
+
+    public void clearCurrentTile() {
+        Platform.runLater(() -> {
+            tilePreviewPane.getChildren().clear();
+            currentTile = null;
+        });
+    }
+
+
     @Override
     public void updateDashboard(ClientTile[][] ship) {
         graphicGridPane.getChildren().clear();
