@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class Tile implements Serializable {
     public int[] corners = new int[4];
     public int idTile;
-    public int rotation = 0;
+    public int rotation;
 
 
     public static Image loadImageById(int tileId) {

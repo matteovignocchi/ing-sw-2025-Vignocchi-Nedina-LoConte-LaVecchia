@@ -1,11 +1,14 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.scene.image.Image;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 public class ClientTile {
     public String type;
@@ -19,6 +22,7 @@ public class ClientTile {
     public List<String> goods = new ArrayList<>();
     public List<String> tokens = new ArrayList<>();
     public List<Integer> protectedCorners = new ArrayList<>();
+    @JsonProperty("rotation")
     public int rotation;
 
     public void rotateRight() {
@@ -96,4 +100,15 @@ public class ClientTile {
     public int getRotation() {
         return this.rotation * 90;
     }
+
+    public int getRotationIndex() {
+        return rotation;
+    }
+
+    public void setRotationIndex(int rotation) {
+        this.rotation = rotation;
+    }
+
+
+
 }

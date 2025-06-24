@@ -16,6 +16,7 @@ import javafx.util.Duration;
 import it.polimi.ingsw.galaxytrucker.View.GUI.*;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class BuildingPhaseController extends GUIController {
 
@@ -274,6 +275,9 @@ public class BuildingPhaseController extends GUIController {
             tileImage.setRotate(tile.getRotation());
             graphicGridPane.add(tileImage, col, row);
         });
+        System.out.printf("Tile at [%d,%d] → id=%d, rawRotation=%d, effectiveDegrees=%d%n",
+                row, col, tile.id, tile.rotation, tile.getRotation());
+
     }
 
     public void clearCurrentTile() {
@@ -418,10 +422,7 @@ public class BuildingPhaseController extends GUIController {
 
         // Click sulla tile per selezionarla
         tilePreviewPane.setOnMouseClicked(e -> {
-            if (!inputManager.indexFuture.isDone()) {
-                inputManager.indexFuture.complete(tileListIndex);
-            }
-
+            guiView.setBufferedIndex(tileListIndex);
             isSelectingTileFromList = false;
             tileList = List.of();
             tilePreviewPane.getChildren().clear();

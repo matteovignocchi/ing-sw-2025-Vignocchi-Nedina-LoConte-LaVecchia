@@ -44,6 +44,9 @@ public class GUIView extends Application implements View {
     private final Queue<String> notificationQueue = new LinkedList<>();
     private boolean isShowingNotification = false;
     private int[] bufferedCoordinate = null;
+    private Integer bufferedIndex = null;
+
+
 
 
 
@@ -131,16 +134,21 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
-        if (bufferedCoordinate != null) {
-            int[] result = bufferedCoordinate;
-            bufferedCoordinate = null;
-            System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
-            return result;
-        } else {
-            reportError("No coordinate selected.");
-            return new int[]{-1, -1};  // attenzione: questo può far fallire la posizione
+        while (bufferedCoordinate == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new int[]{-1, -1};
+            }
         }
+
+        int[] result = bufferedCoordinate;
+        bufferedCoordinate = null;
+        System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
+        return result;
     }
+
 
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
@@ -304,16 +312,25 @@ public class GUIView extends Application implements View {
     public void setNickName(String cognomePradella) {
 
     }
-
+    public void setBufferedIndex(Integer index) {
+        this.bufferedIndex = index;
+    }
     @Override
     public Integer askIndex() {
-        try {
-            return inputManager.indexFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get index: " + e.getMessage());
-            return -1;
+        while (bufferedIndex == null) {
+            try {
+                Thread.sleep(100); // attende polling leggero
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
+            }
         }
+
+        int result = bufferedIndex;
+        bufferedIndex = null;
+        return result;
     }
+
     @Override public Integer askIndexWithTimeout() { return -1; }
     @Override public String choosePlayer() { return null; }
     @Override public void setInt() {}
@@ -353,6 +370,7 @@ public class GUIView extends Application implements View {
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
             model.setCurrentTile(null); // non serve tile singola
+            setBufferedIndex(null);    // reset importante per evitare valori vecchi
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
             ctrl.displayTileSelection(tiles);
         });
