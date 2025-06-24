@@ -89,10 +89,10 @@ public class ClientController {
                     while (!g.hasResolvedMenuChoice()) {
                         Thread.sleep(100);
                     }
-//                    String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
+                   String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
 
 
-                    String cmd = g.consumeMenuChoice();
+                    String cmd2 = g.consumeMenuChoice();
 
                     switch (cmd) {
                         case "1" -> createNewGame();

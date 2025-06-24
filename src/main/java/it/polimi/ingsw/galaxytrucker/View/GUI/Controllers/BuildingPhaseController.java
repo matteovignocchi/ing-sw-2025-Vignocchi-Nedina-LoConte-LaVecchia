@@ -91,9 +91,20 @@ public class BuildingPhaseController extends GUIController {
         hourGlassBtn.setOnAction(e -> completeCommand("SPIN_HOURGLASS"));
         logOutBtn.setOnAction(e -> completeCommand("LOGOUT"));
 
-        playerShip1Btn.setOnAction(e -> completeCommand("LOOK_PLAYER1"));
-        playerShip2Btn.setOnAction(e -> completeCommand("LOOK_PLAYER2"));
-        playerShip3Btn.setOnAction(e -> completeCommand("LOOK_PLAYER3"));
+        playerShip1Btn.setOnAction(e -> {
+            guiView.prepareToViewEnemyDashboard((String) playerShip1Btn.getUserData());
+            completeCommand("LOOK_PLAYER1");
+        });
+
+        playerShip2Btn.setOnAction(e -> {
+            guiView.prepareToViewEnemyDashboard((String) playerShip2Btn.getUserData());
+            completeCommand("LOOK_PLAYER2");
+        });
+
+        playerShip3Btn.setOnAction(e -> {
+            guiView.prepareToViewEnemyDashboard((String) playerShip3Btn.getUserData());
+            completeCommand("LOOK_PLAYER3");
+        });
         reserveBtn1.setOnAction(e -> takeReserved(1));
         reserveBtn2.setOnAction(e -> takeReserved(2));
         deck1Btn.setOnAction(e -> chooseDeck(0));
@@ -328,21 +339,33 @@ public class BuildingPhaseController extends GUIController {
         switch (others.size()) {
             case 1 -> {
                 playerShip1Btn.setVisible(true);
-                playerShip1Btn.setText("Player Ship of " + others.getFirst());
+                String name = others.getFirst();
+                playerShip1Btn.setText("Player Ship of " + name);
+                playerShip1Btn.setUserData(name);
             }
             case 2 -> {
+                String name1 = others.getFirst();
+                String name2 = others.getLast();
                 playerShip2Btn.setVisible(true);
-                playerShip2Btn.setText("Player Ship of " + others.getFirst());
                 playerShip3Btn.setVisible(true);
-                playerShip3Btn.setText("Player Ship of " + others.getLast());
+                playerShip2Btn.setText("Player Ship of " + name1);
+                playerShip2Btn.setUserData(name1);
+                playerShip3Btn.setText("Player Ship of " + name2);
+                playerShip3Btn.setUserData(name2);
             }
             case 3 -> {
+                String name1 = others.getFirst();
+                String name2 = others.get(1);
+                String name3 = others.getLast();
                 playerShip1Btn.setVisible(true);
-                playerShip1Btn.setText("Player Ship of " + others.getFirst());
                 playerShip2Btn.setVisible(true);
-                playerShip2Btn.setText("Player Ship of " + others.get(1));
                 playerShip3Btn.setVisible(true);
-                playerShip3Btn.setText("Player Ship of " + others.getLast());
+                playerShip1Btn.setText("Player Ship of " + name1);
+                playerShip1Btn.setUserData(name1);
+                playerShip2Btn.setText("Player Ship of " + name2);
+                playerShip2Btn.setUserData(name2);
+                playerShip3Btn.setText("Player Ship of " + name3);
+                playerShip3Btn.setUserData(name3);
             }
         }
     }
