@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
@@ -32,11 +31,16 @@ public class BuildingPhaseController extends GUIController {
     @FXML private Button leftArrowButton, rightArrowButton, reserveBtn1, reserveBtn2;
 
 
+    private List<ClientTile> tileList = new ArrayList<>();
+    private int tileListIndex = 0;
+
     private ClientTile currentTile;
     private ImageView currentTileView;
     private int currentRotation = 0;
     private ClientTile[][] playerGrid = new ClientTile[5][7];
     private ClientTile emptySpace = new ClientTile();
+    private boolean isSelectingTileFromList = false;
+
 
 
     @FXML
@@ -127,6 +131,7 @@ public class BuildingPhaseController extends GUIController {
 
 
     public void postInitialize2(){
+        getCoveredBtn.setVisible(false);
         getShownBtn.setVisible(false);
         getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
@@ -214,6 +219,8 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void showCurrentTile(ClientTile tile) {
+        if (isSelectingTileFromList) return;
+
         currentTile = tile;
         currentRotation = tile.getRotation();
 
@@ -374,4 +381,65 @@ public class BuildingPhaseController extends GUIController {
             default ->{}
         }
     }
+
+    public void displayTileSelection(List<ClientTile> tiles) {
+        if (tiles == null || tiles.isEmpty()) {
+            guiView.reportError("No tiles to display.");
+            return;
+        }
+
+        isSelectingTileFromList = true;
+        tileList = tiles;
+        tileListIndex = 0;
+
+        // Nasconde pulsanti inutili
+        getCoveredBtn.setVisible(false);
+        getShownBtn.setVisible(false);
+        setReadyBtn.setVisible(false);
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+
+        // Mostra le frecce
+        leftArrowButton.setVisible(true);
+        rightArrowButton.setVisible(true);
+
+        updateTilePreviewFromList();
+
+        leftArrowButton.setOnAction(e -> {
+            tileListIndex = (tileListIndex - 1 + tileList.size()) % tileList.size();
+            updateTilePreviewFromList();
+        });
+
+        rightArrowButton.setOnAction(e -> {
+            tileListIndex = (tileListIndex + 1) % tileList.size();
+            updateTilePreviewFromList();
+        });
+
+        // Click sulla tile per selezionarla
+        tilePreviewPane.setOnMouseClicked(e -> {
+            if (!inputManager.indexFuture.isDone()) {
+                inputManager.indexFuture.complete(tileListIndex);
+            }
+
+            isSelectingTileFromList = false;
+            tileList = List.of();
+            tilePreviewPane.getChildren().clear();
+            leftArrowButton.setVisible(false);
+            rightArrowButton.setVisible(false);
+        });
+    }
+    private void updateTilePreviewFromList() {
+        if (tileList == null || tileList.isEmpty()) return;
+
+        ClientTile current = tileList.get(tileListIndex);
+        ImageView image = new ImageView(current.getImage());
+        image.setFitWidth(100);
+        image.setFitHeight(100);
+        image.setRotate(current.getRotation());
+
+        tilePreviewPane.getChildren().setAll(image);
+    }
+
+
 }
