@@ -295,8 +295,8 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
             Integer indexObj = askIndex();
             if(indexObj == null) { return; }
 
-            int index = indexObj + 1;
-            if (index < 1 || index > 3) {
+            int index = indexObj; // + 1;
+            if (index < 0 || index > 2) {
                 clientController.reportErrorByController("Invalid choice: please enter 1, 2 or 3.");
                 continue;
             }

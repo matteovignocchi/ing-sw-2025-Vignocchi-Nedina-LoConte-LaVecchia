@@ -56,6 +56,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             String nick = controller.getNickByPlayer(p);
 
             controller.inform("SERVER: Checking your engine power...", nick);
+            controller.printPlayerDashboard(controller.getViewCheck(nick), p, nick);
             int x = controller.getPowerEngineForCard(p);
 
             if (x == 0) {
@@ -203,6 +204,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 "He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_crew));
 
+        /**
         f.setOverlappedPlayersEliminated();
         List<Player> eliminated = f.eliminatePlayers();
         for (Player player : eliminated) controller.handleElimination(player);
@@ -214,6 +216,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
+         */
 
         int idx_enginepower = 0;
         int numCrew = card.getNumCrewmates();
@@ -235,6 +238,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
         controller.removeCrewmates(players.get(idx_enginepower), numCrew);
 
+        /**
         eliminated = f.eliminatePlayers();
         for (Player player : eliminated) controller.handleElimination(player);
         f.orderPlayersInFlightList();
@@ -245,7 +249,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
-
+         */
 
         int idx_firepower = 0;
         controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
@@ -539,12 +543,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
-            //superfluo ? capire se abbinare il lancio del dado al playe effettivamente, oppure semplice generazione di randomici
-            int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
-                    + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
+            Player p;
+            try{
+                p = players.stream().filter(pl -> pl.isConnected() && !pl.isEliminated()).toList().getFirst();
+            } catch (NoSuchElementException e){
+                return;
+            }
+            int res = p.throwDice() + p.throwDice();
 
-            //TODO: leva
-            res = 8;
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, players, i+1);
         }
 

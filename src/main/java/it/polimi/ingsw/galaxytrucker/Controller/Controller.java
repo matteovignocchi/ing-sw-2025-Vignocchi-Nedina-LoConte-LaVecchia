@@ -219,7 +219,7 @@ public class Controller implements Serializable {
         return player;
     }
 
-    private VirtualView getViewCheck(String nickname) throws BusinessLogicException {
+    public VirtualView getViewCheck(String nickname) throws BusinessLogicException {
         VirtualView view = viewsByNickname.get(nickname);
         if (view == null) throw new BusinessLogicException("Player not found");
         return view;
@@ -1293,7 +1293,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.RED);
                             r--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1343,7 +1342,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.YELLOW);
                             g--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1394,7 +1392,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.GREEN);
                             v--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1444,7 +1441,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.BLUE);
                             b--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1509,7 +1505,6 @@ public class Controller implements Serializable {
                         if(vari==null){
                             autoCommandForBattery(p, 1);
                             finish--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1733,18 +1728,12 @@ public class Controller implements Serializable {
     }
 
     public void addHuman() throws BusinessLogicException {
+        broadcastInform("SERVER: Checking all players' ships");
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
             p.setGamePhase(GamePhase.CARD_EFFECT);
-            try {
-                x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
-            } catch (IOException e) {
-                markDisconnected(tmpNick);
-            } catch (Exception e) {
-                markDisconnected(tmpNick);
-                System.err.println("[ERROR] in notifyView: " + e.getMessage());
-            }
+            updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
@@ -1927,7 +1916,10 @@ public class Controller implements Serializable {
                 }
             }
             tmp = getNumCrew(p);
-            if(tmp ==  0) p.setEliminated();
+            if(tmp ==  0){
+                p.setEliminated();
+                inform("SERVER: You have lost all your humans", nick);
+            }
 
         }
     }

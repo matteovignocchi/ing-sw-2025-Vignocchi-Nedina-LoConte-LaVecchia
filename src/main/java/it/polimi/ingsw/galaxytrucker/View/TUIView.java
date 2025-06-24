@@ -191,6 +191,7 @@ public class TUIView implements View {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        inform("Timeout! Automatic choice");
         return false;
     }
 
@@ -251,6 +252,8 @@ public class TUIView implements View {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
+        inform("Timeout! Automatic choice");
         return null;
     }
 
@@ -274,6 +277,7 @@ public class TUIView implements View {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        inform("Timeout! Automatic choice");
         return null;
     }
 
