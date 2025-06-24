@@ -558,9 +558,10 @@ public class GUIView extends Application implements View {
         if(message.toLowerCase().contains("waiting for other players...")) {
             return false;
         }
-        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT){
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
+
         return switch (sceneEnum) {
             case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
