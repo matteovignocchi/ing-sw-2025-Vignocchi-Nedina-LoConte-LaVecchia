@@ -12,7 +12,7 @@ public class PrintDashController extends GUIController {
 
     @FXML private ImageView dashboard1;
     @FXML private ImageView dashboard2;
-    @FXML private GridPane griddashboard;
+    @FXML private GridPane gridDashboard;
     @FXML private Button closeButton;
 
     @FXML
@@ -24,27 +24,24 @@ public class PrintDashController extends GUIController {
     }
 
     public void setIsDemo(boolean isDemo) {
-        // Mostra solo l'immagine corretta
-        dashboard1.setVisible(!isDemo);
-        dashboard2.setVisible(isDemo);
+        dashboard1.setVisible(isDemo);
+        dashboard2.setVisible(!isDemo);
 
-        // Imposta immagini (puoi usare getClass().getResourceAsStream anche qui se preferisci)
-        dashboard1.setImage(new Image(getClass().getResourceAsStream("/Polytechnic/cardboard/cardboard-1.jpg")));
-        dashboard2.setImage(new Image(getClass().getResourceAsStream("/Polytechnic/cardboard/cardboard-1b.jpg")));
     }
 
     public void loadDashboard(ClientTile[][] ship) {
-        griddashboard.getChildren().clear();
+        gridDashboard.getChildren().clear();
 
         for (int row = 0; row < ship.length; row++) {
             for (int col = 0; col < ship[0].length; col++) {
                 ClientTile tile = ship[row][col];
                 if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
                     ImageView image = new ImageView(tile.getImage());
-                    image.setFitWidth(70);
-                    image.setFitHeight(70);
+                    image.setPreserveRatio(true);
+                    image.fitWidthProperty().bind(gridDashboard.widthProperty().divide(ship[0].length));
+                    image.fitHeightProperty().bind(gridDashboard.heightProperty().divide(ship.length));
                     image.setRotate(tile.getRotation());
-                    griddashboard.add(image, col, row);
+                    gridDashboard.add(image, col, row);
                 }
             }
         }
