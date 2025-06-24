@@ -18,13 +18,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 //TODO: corner-case: crash in startGame
-//TODO: corner-case: crash del leader quando deve pescare
-
-//TODO: discorso gestione disconnessioni nei metodi di oleg. disconnetto e poi continuo con esecuzione, o devo returnare. (mandare mail).
-//TODO: sostituire ove possibile v.inform con chiamate a inform metodo controller
 //TODO: capire le eccezione nei metodi che usano i parser!! Gestite male, soprattutto per il discorso markdisconnected
-
-//TODO: pulire il codice
+//TODO: pulire il codice (sostituire ove possibile v.inform con chiamate a inform metodo controller, e metodi simili)
 
 public class Controller implements Serializable {
     private final int gameId;
@@ -62,17 +57,17 @@ public class Controller implements Serializable {
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
         if(isDemo) {
-            fBoard = new FlightCardBoard();
+            fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-           // deck = deckCreator.CreateDemoDeck();
-            deck = deckCreator.CreateMixedDemoDeck();
+            deck = deckCreator.CreateDemoDeck();
+//            deck = deckCreator.CreateMixedDemoDeck();
         }else{
-            fBoard = new FlightCardBoard2();
+            fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             decks = deckCreator.CreateSecondLevelDeck();
-            //decks = deckCreator.CreateOpenSpaceDecks();
+            //decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -219,7 +214,7 @@ public class Controller implements Serializable {
         return player;
     }
 
-    private VirtualView getViewCheck(String nickname) throws BusinessLogicException {
+    public VirtualView getViewCheck(String nickname) throws BusinessLogicException {
         VirtualView view = viewsByNickname.get(nickname);
         if (view == null) throw new BusinessLogicException("Player not found");
         return view;
@@ -263,6 +258,14 @@ public class Controller implements Serializable {
         for(String nickname : nicknames) {
             Player p = getPlayerByNickname(nickname);
             if(p.isConnected()) inform(msg, nickname);
+        }
+    }
+
+    public void broadcastInformExcept(String msg, Player caller){
+        List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
+        for(String nickname : nicknames) {
+            Player p = getPlayerByNickname(nickname);
+            if(p.isConnected() && !p.equals(caller)) inform(msg, nickname);
         }
     }
 
@@ -335,7 +338,6 @@ public class Controller implements Serializable {
     public void handleElimination(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
 
-        //TODO: capire la fase di eliminazione
         p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
         String msg = "\nSERVER: You have been eliminated!";
@@ -1152,8 +1154,6 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO questi tre sono i metodi per la autoCommand che mi permettono di eseguire i controlli automatici , vanno inserii nei casi di disconnessione
-
 
     public void autoCommandForRemoveGoods(Player p, int numOfGoods) throws BusinessLogicException {
         int flag = numOfGoods;
@@ -1204,6 +1204,7 @@ public class Controller implements Serializable {
     public void autoCommandForRemovePlayers(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
+
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile tmpTile = p.getTile(i, j);
@@ -1211,7 +1212,7 @@ public class Controller implements Serializable {
                     case HousingUnit h -> {
                         if(h.getListOfToken().isEmpty()) continue;
                         else {
-                            for(int z=0 ; z<h.getListOfToken().size() ; z++) {
+                            while (flag > 0 && !h.getListOfToken().isEmpty()) {
                                 h.removeHumans(0);
                                 flag--;
                             }
@@ -1223,6 +1224,7 @@ public class Controller implements Serializable {
             }
         }
     }
+
     public void autoCommandForBattery(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
@@ -1251,7 +1253,6 @@ public class Controller implements Serializable {
     }
 
 
-    //TODO: gestire caso null e vedere per il caso delle disconnessioni
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1297,7 +1298,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.RED);
                             r--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1347,7 +1347,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.YELLOW);
                             g--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1398,7 +1397,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.GREEN);
                             v--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1448,7 +1446,6 @@ public class Controller implements Serializable {
                             autoCommandForRemoveSingleGood(p, Colour.BLUE);
                             b--;
                             num--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1513,7 +1510,6 @@ public class Controller implements Serializable {
                         if(vari==null){
                             autoCommandForBattery(p, 1);
                             finish--;
-                            inform("SERVER: Timeout! Automatic choice", nick);
                             continue;
                         }
 
@@ -1544,8 +1540,6 @@ public class Controller implements Serializable {
         printPlayerDashboard(x, p, nick);
     }
 
-    //TODO: Gestione risposte predefinite per timeout,
-    // gestione indici richiesti-coordinate fuori bunds
     public void manageGoods(Player p, List<Colour> list) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1553,18 +1547,17 @@ public class Controller implements Serializable {
 
         while(flag){
             inform("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods", nick);
-            int tmp = askPlayerIndex(p, 3);
+            Integer tmp = askPlayerIndex(p, 3);
 
-            //TODO: gestione timeout/disconnessione
-            //TODO: gestire default
-
-            switch (tmp){
-                case 0 -> addGoods(p, x, list, nick);
-                case 1 -> caseRedistribution(p, x, list, nick);
-                case 2 -> caseRemove(p,x,nick);
-                default -> {
-                    inform("SERVER: Invalid choice. Please try again", nick);
-                    continue;
+            if(tmp!=null){
+                switch (tmp){
+                    case 0 -> addGoods(p, x, list, nick);
+                    case 1 -> caseRedistribution(p, x, list, nick);
+                    case 2 -> caseRemove(p,x,nick);
+                    default -> {
+                        inform("SERVER: Invalid choice. Please try again", nick);
+                        continue;
+                    }
                 }
             }
 
@@ -1589,28 +1582,35 @@ public class Controller implements Serializable {
 
             int[] vari = askPlayerCoordinates(p);
 
-            Tile t = p.getTile(vari[0], vari[1]);
+            Tile t;
+            if(vari==null) t = p.getTile(2,3);
+            else t = p.getTile(vari[0], vari[1]);
+
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
                         inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
                         List<Colour> listGoods = c.getListOfGoods();
                         printListOfGoods(listGoods, nick);
-                        int tmpint = askPlayerIndex(p, listGoods.size());
+                        Integer tmpint = askPlayerIndex(p, listGoods.size());
+                        if(tmpint==null) tmpint = 0;
+                        int idx = tmpint;
 
-                        Colour tmp = c.getListOfGoods().get(tmpint);
-                        tempGood = c.removeGood(tmpint);
+                        Colour tmp = c.getListOfGoods().get(idx);
+                        tempGood = c.removeGood(idx);
                         list.add(tmp);
                     }
 
                     inform("SERVER: Select the index of the good to place", nick);
                     printListOfGoods(list, nick);
-                    int tmpint = askPlayerIndex(p, list.size());
+                    Integer tmpint = askPlayerIndex(p, list.size());
+                    if(tmpint==null) tmpint = 0;
+                    int idx = tmpint;
 
-                    if(list.get(tmpint) == Colour.RED){
+                    if(list.get(idx) == Colour.RED){
                         if(c.isAdvanced()) {
-                            c.addGood(list.get(tmpint));
-                            list.remove(tmpint);
+                            c.addGood(list.get(idx));
+                            list.remove(idx);
                         }
                         else {
                             inform("SERVER: You can't place a dangerous good in a not advanced storage unit", nick);
@@ -1621,8 +1621,8 @@ public class Controller implements Serializable {
                             }
                         }
                     }else {
-                        c.addGood(list.get(tmpint));
-                        list.remove(tmpint);
+                        c.addGood(list.get(idx));
+                        list.remove(idx);
                     }
                 }
                 default -> inform("SERVER: Not valid cell", nick);
@@ -1634,8 +1634,7 @@ public class Controller implements Serializable {
         if(flag) inform("SERVER: Empty list of goods", nick);
     }
 
-    //TODO: gestione default, timeout,
-    // gestione indici/coordinate out of bunds
+
     public void caseRedistribution(Player p , VirtualView v , List<Colour> list , String nick) throws BusinessLogicException {
         printPlayerDashboard(v, p, nick);
 
@@ -1646,7 +1645,10 @@ public class Controller implements Serializable {
             inform("SERVER: Select a storage unit to take the good from", nick);
             coordinates = askPlayerCoordinates(p);
 
-            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+            Tile tmp2;
+            if(coordinates==null) tmp2 = p.getTile(2,3);
+            else tmp2 = p.getTile(coordinates[0], coordinates[1]);
+
             switch (tmp2) {
                 case StorageUnit c -> {
                     List<Colour> tmplist = c.getListOfGoods();
@@ -1658,10 +1660,12 @@ public class Controller implements Serializable {
 
                     printListOfGoods(tmplist, nick);
                     inform("SERVER: Select the index of the good you want to rearrange", nick);
-                    int tmpint = askPlayerIndex(p, tmplist.size());
+                    Integer tmpint = askPlayerIndex(p, tmplist.size());
+                    if(tmpint==null) tmpint = 0;
+                    int idx = tmpint;
 
-                    Colour tmpColor = tmplist.get(tmpint);
-                    c.removeGood(tmpint);
+                    Colour tmpColor = tmplist.get(idx);
+                    c.removeGood(idx);
                     selectStorageUnitForAdd(v, p, tmpColor, nick);
                     printPlayerDashboard(v, p, nick);
                 }
@@ -1671,8 +1675,7 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: gestione default, timeout,
-    // gestione indici/coordinate out of bunds
+
     public void selectStorageUnitForAdd(VirtualView v, Player p , Colour color , String nick) throws BusinessLogicException {
         int[] coordinates;
         boolean exit = false;
@@ -1680,7 +1683,11 @@ public class Controller implements Serializable {
         while (!exit) {
             inform("SERVER: Select a storage unit to place the good in", nick);
             coordinates = askPlayerCoordinates(p);
-            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+
+            Tile tmp2;
+            if(coordinates==null) tmp2 = p.getTile(2,3);
+            else tmp2 = p.getTile(coordinates[0], coordinates[1]);
+
             switch (tmp2) {
                 case StorageUnit c -> {
                     if(c.isFull()) {
@@ -1705,8 +1712,7 @@ public class Controller implements Serializable {
         }
     }
 
-    //TODO: gestione default, timeout,
-    // gestione indici/coordinate out of bunds
+
     public void caseRemove(Player p , VirtualView v , String nick) throws BusinessLogicException {
         int[] coordinates;
         boolean exit = true;
@@ -1715,43 +1721,42 @@ public class Controller implements Serializable {
         while (exit) {
             inform("SERVER: Select a storage unit", nick);
             coordinates = askPlayerCoordinates(p);
-            Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
-            switch (tmp2) {
-                case StorageUnit c -> {
-                    if(!c.getListOfGoods().isEmpty()) {
-                        List<Colour> tmplist = c.getListOfGoods();
-                        printListOfGoods(tmplist, nick);
-                        inform("SERVER: Select the index of the good you want to trash", nick);
-                        int tmpint = askPlayerIndex(p, tmplist.size());
-                        c.removeGood(tmpint);
-                        printPlayerDashboard(v, p, nick);
-                    }else{
-                        inform("SERVER: Empty list of goods", nick);
-                    }
 
+            if(coordinates==null) {
+                autoCommandForRemoveGoods(p, 1);
+            } else {
+                Tile tmp2 = p.getTile(coordinates[0], coordinates[1]);
+                switch (tmp2) {
+                    case StorageUnit c -> {
+                        if(!c.getListOfGoods().isEmpty()) {
+                            List<Colour> tmplist = c.getListOfGoods();
+                            printListOfGoods(tmplist, nick);
+                            inform("SERVER: Select the index of the good you want to trash", nick);
+                            Integer tmpint = askPlayerIndex(p, tmplist.size());
+                            if(tmpint==null) tmpint = 0;
+                            int idx = tmpint;
+
+                            c.removeGood(idx);
+                            printPlayerDashboard(v, p, nick);
+                        }else{
+                            inform("SERVER: Empty list of goods", nick);
+                        }
+
+                    }
+                    default -> inform("SERVER: Not valid cell", nick);
                 }
-                default -> inform("SERVER: Not valid cell", nick);
             }
             if(!askPlayerDecision("SERVER: " + "Do you want to select another storage unit for trashing?", p)) exit = false;
         }
     }
 
     public void addHuman() throws BusinessLogicException {
+        broadcastInform("SERVER: Checking all players' ships");
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
             p.setGamePhase(GamePhase.CARD_EFFECT);
-
             updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
-            /**
-            try {
-                x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
-            } catch (IOException e) {
-                markDisconnected(tmpNick);
-            } catch (Exception e) {
-                markDisconnected(tmpNick);
-                System.err.println("[ERROR] in notifyView: " + e.getMessage());
-            }*/
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
@@ -1765,21 +1770,26 @@ public class Controller implements Serializable {
                                         for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
                                     case PURPLE_ALIEN -> {
-                                        if(p.presenceBrownAlien() || (i == 2 && j == 3)) {
+                                        if(p.presencePurpleAlien() || (i == 2 && j == 3)) {
                                             Human tmp2 = Human.HUMAN;
                                             for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                             continue;
                                         }
-                                        String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
-                                                "next to the purple alien module?";
-                                        if (askPlayerDecision(msg, p)) {
-                                            Human tmp2 = Human.PURPLE_ALIEN;
-                                            h.addHuman(tmp2);
-                                            p.setPurpleAlien();
-                                        } else {
-                                            Human tmp2 = Human.HUMAN;
-                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        try {
+                                            String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
+                                                    "next to the purple alien module?";
+                                            if (askPlayerDecision(msg, p)) {
+                                                Human tmp2 = Human.PURPLE_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setPurpleAlien();
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
                                         }
+
                                     }
                                     case BROWN_ALIEN -> {
                                         if(p.presenceBrownAlien() || (i == 2 && j == 3)){
@@ -1787,15 +1797,19 @@ public class Controller implements Serializable {
                                             for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                             continue;
                                         }
-                                        String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
-                                                "next to the brown alien module?";
-                                        if (askPlayerDecision(msg, p)) {
-                                            Human tmp2 = Human.BROWN_ALIEN;
-                                            h.addHuman(tmp2);
-                                            p.setBrownAlien();
-                                        } else {
-                                            Human tmp2 = Human.HUMAN;
-                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        try {
+                                            String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
+                                                    "next to the brown alien module?";
+                                            if (askPlayerDecision(msg, p)) {
+                                                Human tmp2 = Human.BROWN_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setBrownAlien();
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
                                         }
                                     }
                                 }
@@ -1812,19 +1826,16 @@ public class Controller implements Serializable {
     }
 
 
-
-
-
-
     public void removeCrewmates(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
 
-
         int totalCrew = getNumCrew(p);
+
         if (num >= totalCrew) {
-            p.setEliminated();
-            inform("SERVER: You lost all your crewmates", nick);
+//            p.setEliminated();
+            autoCommandForRemovePlayers(p, totalCrew);
+//            inform("SERVER: You lost all your crewmates", nick);
         } else {
             if(!p.isConnected()){
                 autoCommandForRemovePlayers(p, num);
@@ -1832,17 +1843,14 @@ public class Controller implements Serializable {
             }
             while (num > 0) {
                 if(p.isConnected()){
-                    try {
-                        x.inform("SERVER: Select an Housing unit");
-                    } catch (IOException e) {
-                        markDisconnected(nick);
-                    } catch (Exception e){
-                        markDisconnected(nick);
-                        System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
-                    }
+                    printPlayerDashboard(x, p, nick);
+                    inform("SERVER: Select an housing unit", nick);
                     int[] vari = askPlayerCoordinates(p);
-                    //TODO: gestire caso scadenza timeout (il client non risponde in tempo, askPlayerCoordinates ritorna null)
-                    Tile y = p.getTile(vari[0], vari[1]);
+
+                    Tile y;
+                    if(vari==null) y = p.getTile(2,3);
+                    else y = p.getTile(vari[0], vari[1]);
+
                     switch (y){
                         case HousingUnit h -> {
                             if(h.returnLenght()>0){
@@ -1851,31 +1859,13 @@ public class Controller implements Serializable {
                                 if(tmp == 3) p.setPurpleAlien();
                                 num--;
                             }else{
-                                try{
-                                    x.inform("SERVER: Select a valid housing unit");
-                                    //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-                                } catch (IOException e) {
-                                    markDisconnected(nick);
-                                } catch (Exception e){
-                                    markDisconnected(nick);
-                                    System.err.println("[ERROR] in removeCrewmates " + e.getMessage());
-                                }
+                                inform("SERVER: Select a valid housing unit", nick);
                             }
                         }
-                        default -> {
-                            try {
-                                x.inform("SERVER:  Select a valid housing unit");
-                                //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-                            } catch (IOException e) {
-                                markDisconnected(nick);
-                            } catch (Exception e){
-                                markDisconnected(nick);
-                                System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
-                            }
-                        }
+                        default -> inform("SERVER: Select a valid housing unit", nick);
                     }
 
-                    printPlayerDashboard(x, p, nick);
+//                    printPlayerDashboard(x, p, nick);
                 }else{
                     Tile[][] tmpDash = p.getDashMatrix();
                     for(int i = 0 ; i<5; i++){
@@ -1924,9 +1914,6 @@ public class Controller implements Serializable {
                     default ->{}
                 }
             }
-            tmp = getNumCrew(p);
-            if(tmp ==  0) p.setEliminated();
-
         }
     }
 
@@ -1938,7 +1925,6 @@ public class Controller implements Serializable {
      * @return if the ship is safe
      */
 
-    //TODO: caso default null timeout
     public boolean isProtected(String nick, int d) throws BusinessLogicException {
         boolean flag = false;
         VirtualView x = viewsByNickname.get(nick);
@@ -1967,7 +1953,6 @@ public class Controller implements Serializable {
 //                if (ans) {
 //                    int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
 //
-//                    //TODO: gestire caso default null
 //
 //                    Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
 //                    switch (y) {
@@ -2120,7 +2105,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
-            return true;
+            return true; //TODO: da eliminare e gestire bene questo caso
         }
 
         if(!tmpBoolean){
@@ -2252,13 +2237,16 @@ public class Controller implements Serializable {
         String direction = directions[dir];
         String size = isBig ? "big" : "small";
 
+        /**
         for (Player p : players) {
             String nick = getNickByPlayer(p);
             if(players.indexOf(p)!=0) inform("\nSERVER: Waiting for your turn...", nick);
-        }
+        } */
+
+        broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
-            if(p.isConnected() && !p.isEliminated()){
+            if(p.isConnected()){
                 String nick = getNickByPlayer(p);
                 VirtualView v = getViewCheck(nick);
                 inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
@@ -2311,25 +2299,29 @@ public class Controller implements Serializable {
         } else {
             while (!exit) {
                 coordinates = askPlayerCoordinates(player);
-                if(coordinates == null) return false;
 
-                Tile p = playersByNickname.get(nick).getTile(coordinates[0], coordinates[1]);
-                switch (p) {
-                    case EnergyCell c -> {
-                        int capacity = c.getCapacity();
-                        if (capacity == 0) {
-                            inform("SERVER: You have already used all the batteries for this cell", nick);
-                            if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                                return false;
-                        } else {
-                            c.useBattery();
-                            return true;
+                if(coordinates == null){
+                    autoCommandForBattery(player, 1);
+                } else {
+                    Tile p = playersByNickname.get(nick).getTile(coordinates[0], coordinates[1]);
+
+                    switch (p) {
+                        case EnergyCell c -> {
+                            int capacity = c.getCapacity();
+                            if (capacity == 0) {
+                                inform("SERVER: You have already used all the batteries for this cell", nick);
+                                if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
+                                    return false;
+                            } else {
+                                c.useBattery();
+                                return true;
+                            }
                         }
-                    }
-                    default -> {
-                        inform("SERVER: Not valid cell", nick);
-                        if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                            exit = true;
+                        default -> {
+                            inform("SERVER: Not valid cell", nick);
+                            if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
+                                exit = true;
+                        }
                     }
                 }
             }
@@ -2577,9 +2569,15 @@ public class Controller implements Serializable {
                     default -> inform("SERVER: Not valid position, try again", nickname);
                 }
             } while(flag);
+
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
             checkPlayerAssembly(nickname,  xy[0], xy[1]);
+            /**/System.out.println("DOPO DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
+
         }else{
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
             checkPlayerAssembly(nickname,  2,3);
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
         }
     }
 
@@ -2611,7 +2609,8 @@ public class Controller implements Serializable {
         CardEffectVisitor visitor = new CardEffectVisitor(this);
         card.accept(visitor);
 
-        fBoard.setOverlappedPlayersEliminated();
+        fBoard.checkIfPlayerOverlapped();
+        fBoard.checkIfPlayerNoHumansLeft();
         List<Player> eliminated = fBoard.eliminatePlayers();
         for (Player player : eliminated) handleElimination(player);
         fBoard.orderPlayersInFlightList();

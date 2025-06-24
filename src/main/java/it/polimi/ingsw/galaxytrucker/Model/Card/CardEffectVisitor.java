@@ -52,10 +52,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(OpenSpaceCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
             controller.inform("SERVER: Checking your engine power...", nick);
+            controller.printPlayerDashboard(controller.getViewCheck(nick), p, nick);
             int x = controller.getPowerEngineForCard(p);
 
             if (x == 0) {
@@ -118,6 +121,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(SlaversCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
+
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
@@ -203,6 +208,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 "He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_crew));
 
+        /**
         f.setOverlappedPlayersEliminated();
         List<Player> eliminated = f.eliminatePlayers();
         for (Player player : eliminated) controller.handleElimination(player);
@@ -214,6 +220,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
+         */
 
         int idx_enginepower = 0;
         int numCrew = card.getNumCrewmates();
@@ -235,6 +242,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
         controller.removeCrewmates(players.get(idx_enginepower), numCrew);
 
+        /**
         eliminated = f.eliminatePlayers();
         for (Player player : eliminated) controller.handleElimination(player);
         f.orderPlayersInFlightList();
@@ -245,7 +253,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
-
+         */
 
         int idx_firepower = 0;
         controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
@@ -319,6 +327,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 " He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_firepower));
 
+        /**
         f.setOverlappedPlayersEliminated();
         List<Player> eliminated = f.eliminatePlayers();
         for (Player player : eliminated) controller.handleElimination(player);
@@ -330,7 +339,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
             return;
         }
-
+         */
 
 
         int idx_engine = 0;
@@ -401,6 +410,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         boolean exit = false;
         double smugglers_fire_power = card.getFirePower();
 
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
@@ -423,7 +434,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 exit = true;
             } else if (player_fire_power < smugglers_fire_power) {
 
-                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated flight days";
+                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated goods";
                 controller.inform(msg, nick);
                 controller.removeGoods(p, card.getNumRemovedGoods());
                 controller.inform("SERVER: Checking other players", nick);
@@ -452,6 +463,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(AbandonedShipCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
+
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
@@ -494,6 +507,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(AbandonedStationCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
+
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
@@ -538,12 +553,19 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(MeteoritesRainCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
-        for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
-            //superfluo ? capire se abbinare il lancio del dado al playe effettivamente, oppure semplice generazione di randomici
-            int res = players.stream().filter(Player::isConnected).toList().getFirst().throwDice()
-                    + players.stream().filter(Player::isConnected).toList().getFirst().throwDice();
+        Player p;
+        try{
+            p = players.stream().filter(pl -> pl.isConnected() && !pl.isEliminated()).toList().getFirst();
+        } catch (NoSuchElementException e){
+            return;
+        }
 
-            controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, players, i+1);
+        List<Player> meteoritesPlayers = players.stream().filter(pl -> !pl.isEliminated()).toList();
+
+        for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
+            int res = p.throwDice() + p.throwDice();
+
+            controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, meteoritesPlayers, i+1);
         }
 
     }
@@ -568,6 +590,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
         List<Player> losers = new ArrayList<>();
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
@@ -600,19 +623,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         }
 
         if (!losers.isEmpty()) {
+            Player first;
+            try{
+                first = losers.stream().filter(Player::isConnected).toList().getFirst();
+            } catch(NoSuchElementException e){
+                return;
+            }
 
             for (int i = 0; i < card.getShots_directions().size(); i++){
-                Player first;
-                try{
-                    first = losers.stream().filter(p -> p.isConnected() && !p.isEliminated()).toList().getFirst();
-                } catch(NoSuchElementException e){
-                    return;
-                }
-
                 int res = first.throwDice() + first.throwDice();
                 for (Player p : losers){
-                    if(!p.isEliminated())
-                        controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
+                    controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
             }
         }
@@ -639,6 +660,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         int z = 0;
         int days = card.getDays();
         List<Player> landedPlayers = new ArrayList<>();
+
+        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
