@@ -116,6 +116,9 @@ public class GUIModel {
     public Boolean returnValidity(int a, int b) {
         return mask[a][b];
     }
+    public Boolean[][] getMask() {
+        return mask;
+    }
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) {
         this.nickname = nickname;
