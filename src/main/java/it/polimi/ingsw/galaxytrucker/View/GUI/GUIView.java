@@ -193,7 +193,10 @@ public class GUIView extends Application implements View {
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
-                case EXIT -> setSceneEnum(MAIN_MENU);
+                case EXIT -> {
+                    resolveCommand("LOGOUT");
+                    setSceneEnum(MAIN_MENU);
+                }
                 default -> {}
             }
         });
