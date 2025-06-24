@@ -243,7 +243,7 @@ public class DeckManager implements Serializable {
 
     public List<Deck> CreateMeteoritesDeck() throws CardEffectException {
         List<Integer> directions = new ArrayList<>();
-        directions.add(3);
+        directions.add(0);
         List<Boolean> size = new ArrayList<>();
         size.add(true);
         Card c1 = new MeteoritesRainCard("1", directions, size);

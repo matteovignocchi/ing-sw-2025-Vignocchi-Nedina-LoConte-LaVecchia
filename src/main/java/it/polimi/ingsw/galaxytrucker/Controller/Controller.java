@@ -72,7 +72,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateOpenSpaceDecks();
+            decks = deckCreator.CreateMeteoritesDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1738,9 +1738,6 @@ public class Controller implements Serializable {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
             p.setGamePhase(GamePhase.CARD_EFFECT);
-
-            updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
-            /**
             try {
                 x.updateGameState(enumSerializer.serializeGamePhase(GamePhase.CARD_EFFECT));
             } catch (IOException e) {
@@ -1748,7 +1745,7 @@ public class Controller implements Serializable {
             } catch (Exception e) {
                 markDisconnected(tmpNick);
                 System.err.println("[ERROR] in notifyView: " + e.getMessage());
-            }*/
+            }
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
@@ -1762,21 +1759,26 @@ public class Controller implements Serializable {
                                         for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                     }
                                     case PURPLE_ALIEN -> {
-                                        if(p.presenceBrownAlien() || (i == 2 && j == 3)) {
+                                        if(p.presencePurpleAlien() || (i == 2 && j == 3)) {
                                             Human tmp2 = Human.HUMAN;
                                             for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                             continue;
                                         }
-                                        String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
-                                                "next to the purple alien module?";
-                                        if (askPlayerDecision(msg, p)) {
-                                            Human tmp2 = Human.PURPLE_ALIEN;
-                                            h.addHuman(tmp2);
-                                            p.setPurpleAlien();
-                                        } else {
-                                            Human tmp2 = Human.HUMAN;
-                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        try {
+                                            String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
+                                                    "next to the purple alien module?";
+                                            if (askPlayerDecision(msg, p)) {
+                                                Human tmp2 = Human.PURPLE_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setPurpleAlien();
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
                                         }
+
                                     }
                                     case BROWN_ALIEN -> {
                                         if(p.presenceBrownAlien() || (i == 2 && j == 3)){
@@ -1784,15 +1786,19 @@ public class Controller implements Serializable {
                                             for (int z = 0; z < 2; z++) h.addHuman(tmp2);
                                             continue;
                                         }
-                                        String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
-                                                "next to the brown alien module?";
-                                        if (askPlayerDecision(msg, p)) {
-                                            Human tmp2 = Human.BROWN_ALIEN;
-                                            h.addHuman(tmp2);
-                                            p.setBrownAlien();
-                                        } else {
-                                            Human tmp2 = Human.HUMAN;
-                                            for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        try {
+                                            String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
+                                                    "next to the brown alien module?";
+                                            if (askPlayerDecision(msg, p)) {
+                                                Human tmp2 = Human.BROWN_ALIEN;
+                                                h.addHuman(tmp2);
+                                                p.setBrownAlien();
+                                            } else {
+                                                Human tmp2 = Human.HUMAN;
+                                                for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                            }
+                                        } catch (BusinessLogicException e) {
+                                            throw new RuntimeException(e);
                                         }
                                     }
                                 }
