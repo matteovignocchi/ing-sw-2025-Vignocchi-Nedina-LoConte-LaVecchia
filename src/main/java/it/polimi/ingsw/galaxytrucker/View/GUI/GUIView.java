@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
@@ -208,9 +209,11 @@ public class GUIView extends Application implements View {
 
                 }
                 case EXIT -> {
-                    resolveCommand("LOGOUT");
-                    setSceneEnum(MAIN_MENU);
+                    setSceneEnum(BUILDING_PHASE);
+                    GUIController controller = sceneRouter.getController(BUILDING_PHASE);
+                    controller.postInitializeLogOut();
                 }
+
                 default -> {}
             }
         });
@@ -349,6 +352,7 @@ public class GUIView extends Application implements View {
 
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
+        inputManager.resetAll();
     }
 
     public void askCoordinateAsync(Consumer<int[]> callback) {

@@ -23,6 +23,7 @@ public class UserInputManager {
         createGameDataFuture = new CompletableFuture<>();
     }
 
+
     public void resetCoordinate() {
         coordinateFuture = new CompletableFuture<>();
     }

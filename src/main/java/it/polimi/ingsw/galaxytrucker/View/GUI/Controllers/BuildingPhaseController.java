@@ -294,4 +294,21 @@ public class BuildingPhaseController extends GUIController {
             }
         }
     }
+    public void postInitializeLogOut(){
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+        getShownBtn.setVisible(false);
+        getCoveredBtn.setVisible(false);
+        setReadyBtn.setVisible(false);
+        rightArrowButton.setVisible(false);
+        leftArrowButton.setVisible(false);
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+        deck1Btn.setDisable(true);
+        deck2Btn.setDisable(true);
+        deck3Btn.setDisable(true);
+        hourGlassBtn.setVisible(false);
+    }
 }

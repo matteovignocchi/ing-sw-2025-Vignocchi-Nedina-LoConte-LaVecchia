@@ -77,7 +77,8 @@ public class CreateGameMenuController extends GUIController {
     private void confirmGameData(int playerCount) {
         List<Object> data = List.of(isDemo, playerCount);
         guiView.resolveDataGame(data);  // completa la future che aspetta il ClientController
-        guiView.setSceneEnum(SceneEnum.WAITING_QUEUE);  // o qualunque scena venga dopo
+        guiView.setSceneEnum(SceneEnum.WAITING_QUEUE);
+        setupInitialState();// o qualunque scena venga dopo
     }
 
     @Override
