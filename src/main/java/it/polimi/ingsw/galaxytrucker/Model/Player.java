@@ -242,7 +242,18 @@ public class Player implements Serializable {
      * @return number of tile in the discard pile
      */
     public int checkDiscardPile(){
-        return discardPile.size();
+        int tmp = 0;
+        for(Tile boh : discardPile){
+            switch (boh){
+                case EmptySpace emptySpace->{}
+                default -> tmp++;
+
+            }
+        }
+        return tmp;
+
+
+
     }
 
     /**
