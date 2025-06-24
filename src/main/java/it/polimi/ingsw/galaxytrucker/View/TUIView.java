@@ -34,7 +34,7 @@ public class TUIView implements View {
             "YELLOW", YELLOW,
             "BLUE",   BLUE
     );
-    private static final long TIME_OUT = 300000; //TODO: messo così per debug, capire quanto mettere in definitiva
+    private static final long TIME_OUT = 20000; //TODO: messo così per debug, capire quanto mettere in definitiva
 
 
     //per ora lascio il server come int
