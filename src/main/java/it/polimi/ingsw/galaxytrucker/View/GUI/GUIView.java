@@ -129,7 +129,7 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-    public int[] askCoordinate() throws IOException, InterruptedException {
+    public int[] askCoordinate() {
         try {
             return inputManager.coordinateFuture.get();
         } catch (Exception e) {
@@ -165,11 +165,16 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
+        model.setDashboard(ship);
+
         Platform.runLater(() -> {
-            model.setDashboard(ship);
-            sceneRouter.getController(SceneEnum.BUILDING_PHASE).updateDashboard(ship);
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            if (ctrl != null) {
+                ctrl.updateDashboard(ship); // <-- aggiorna la view!
+            }
         });
     }
+
 
 
     @Override
@@ -301,12 +306,12 @@ public class GUIView extends Application implements View {
 
     @Override
     public void setValidity(int a, int b) {
-
+        model.setValidity(a, b);
     }
 
     @Override
     public void resetValidity(int a, int b) {
-
+        model.resetValidity(a,b);
     }
 
     @Override
@@ -389,6 +394,7 @@ public class GUIView extends Application implements View {
             case "LOOK_PLAYER1", "LOOK_PLAYER2", "LOOK_PLAYER3" -> "watchaplayersship";
             case "ROTATE_LEFT" -> "leftrotatethetile";
             case "ROTATE_RIGHT" -> "rightrotatethetile";
+            case "PLACE_TILE" -> "placethetile";
             case "LOGOUT" -> "logout";
             default -> null;
         };
@@ -526,7 +532,7 @@ public class GUIView extends Application implements View {
             return false;
         }
         return switch (sceneEnum) {
-            case BUILDING_PHASE -> true;
+            case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
             case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
             case NICKNAME_DIALOG -> message.contains("Login");

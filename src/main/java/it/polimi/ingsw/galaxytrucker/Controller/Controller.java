@@ -2719,7 +2719,9 @@ public class Controller implements Serializable {
             m.put(nick, new int[]{
                     p.getPos(),                 // posizione
                     p.getLap(),                 // lap
-                    p.isEliminated() ? 1 : 0    // 1=eliminato, 0=ingame
+                    p.isEliminated() ? 1 : 0  ,  // 1=eliminato, 0=ingame
+                    p.getIdPhoto()
+
             });
         }
         return m;

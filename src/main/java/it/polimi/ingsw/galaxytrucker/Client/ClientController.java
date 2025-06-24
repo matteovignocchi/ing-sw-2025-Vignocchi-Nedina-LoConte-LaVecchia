@@ -503,7 +503,6 @@ public class ClientController {
                 }
             }
             case GUIView g -> {
-
                 while (true) {
                     String key = g.sendAvailableChoices();
                     System.out.println("[DEBUG] Comando ricevuto da GUI: " + key);

@@ -116,6 +116,9 @@ public class GUIModel {
     public Boolean returnValidity(int a, int b) {
         return mask[a][b];
     }
+    public Boolean[][] getMask() {
+        return mask;
+    }
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) {
         this.nickname = nickname;
@@ -124,7 +127,12 @@ public class GUIModel {
         this.playerPositions.clear();
         this.playerPositions.putAll(map);
     }
-
+    public void setValidity(int a , int b){
+        mask[a][b] = false;
+    }
+    public void resetValidity(int a , int b){
+        mask[a][b] = true;
+    }
     public Map<String, int[]> getPlayerPositions() {
         return new HashMap<>(playerPositions);
     }

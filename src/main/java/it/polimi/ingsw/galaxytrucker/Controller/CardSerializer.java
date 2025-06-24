@@ -64,6 +64,8 @@ public class CardSerializer {
                 dto.days = x.getDays();
                 dto.firePower = x.getFirePower();
                 dto.rewardGoods =  x.getRewardGoods();
+                dto.numGoods = x.getNumRemovedGoods();
+
             }
             case FirstWarzoneCard x ->{
                 dto.type = "FIRWARZONECARD";

@@ -34,4 +34,6 @@ public class NicknameDialogController extends GUIController {
     public void postInitialize() {
 
     }
+
+
 }
