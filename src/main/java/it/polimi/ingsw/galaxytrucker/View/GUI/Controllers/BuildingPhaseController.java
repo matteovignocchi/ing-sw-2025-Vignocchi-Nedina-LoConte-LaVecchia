@@ -139,6 +139,12 @@ public class BuildingPhaseController extends GUIController {
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
         setReadyBtn.setVisible(false);
+        if(!model.isDemo()){
+            reserveBtn1.setVisible(false);
+            reserveBtn2.setVisible(false);
+            reserveBtn1.setDisable(true);
+            reserveBtn2.setDisable(true);
+        }
     }
 
     public void postInitialize3(){
@@ -148,6 +154,12 @@ public class BuildingPhaseController extends GUIController {
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
         setReadyBtn.setVisible(false);
+        if(!model.isDemo()){
+            reserveBtn1.setVisible(false);
+            reserveBtn2.setVisible(false);
+            reserveBtn1.setDisable(true);
+            reserveBtn2.setDisable(true);
+        }
 
     }
 
@@ -198,8 +210,8 @@ public class BuildingPhaseController extends GUIController {
 
 
                         // Pulisce preview e resetta
-                        tilePreviewPane.getChildren().clear();
-                        currentTileView = null;
+//                        tilePreviewPane.getChildren().clear();
+//                        currentTileView = null;
 
                         event.setDropCompleted(true);
                     } else {
@@ -315,6 +327,8 @@ public class BuildingPhaseController extends GUIController {
             deck3Btn.setDisable(false);
             reserveBtn1.setVisible(true);
             reserveBtn2.setVisible(true);
+            reserveBtn1.setDisable(false);
+            reserveBtn2.setDisable(false);
 
         }
         setPlayersButton();
@@ -428,7 +442,7 @@ public class BuildingPhaseController extends GUIController {
             guiView.setBufferedIndex(tileListIndex);
             isSelectingTileFromList = false;
             tileList = List.of();
-            tilePreviewPane.getChildren().clear();
+//            tilePreviewPane.getChildren().clear();
             leftArrowButton.setVisible(false);
             rightArrowButton.setVisible(false);
         });
