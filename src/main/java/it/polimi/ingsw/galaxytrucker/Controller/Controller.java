@@ -2579,9 +2579,15 @@ public class Controller implements Serializable {
                     default -> inform("SERVER: Not valid position, try again", nickname);
                 }
             } while(flag);
+
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
             checkPlayerAssembly(nickname,  xy[0], xy[1]);
+            /**/System.out.println("DOPO DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
+
         }else{
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
             checkPlayerAssembly(nickname,  2,3);
+            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
         }
     }
 
