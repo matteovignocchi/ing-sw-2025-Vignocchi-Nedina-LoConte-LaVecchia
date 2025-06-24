@@ -22,10 +22,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -137,10 +134,11 @@ public class GUIView extends Application implements View {
         if (bufferedCoordinate != null) {
             int[] result = bufferedCoordinate;
             bufferedCoordinate = null;
+            System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
             return result;
         } else {
             reportError("No coordinate selected.");
-            return new int[]{-1, -1};
+            return new int[]{-1, -1};  // attenzione: questo può far fallire la posizione
         }
     }
 
@@ -206,7 +204,11 @@ public class GUIView extends Application implements View {
                     setSceneEnum(BUILDING_PHASE);
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
-
+                }
+                case TILE_MANAGEMENT_AFTER_RESERVED->{
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize3();
                 }
                 case EXIT -> {
                     setSceneEnum(BUILDING_PHASE);
@@ -419,6 +421,7 @@ public class GUIView extends Application implements View {
             case "ROTATE_LEFT" -> "leftrotatethetile";
             case "ROTATE_RIGHT" -> "rightrotatethetile";
             case "PLACE_TILE" -> "placethetile";
+            case "RESERVE_TILE" -> "takereservedtile";
             case "LOGOUT" -> "logout";
             default -> null;
         };
