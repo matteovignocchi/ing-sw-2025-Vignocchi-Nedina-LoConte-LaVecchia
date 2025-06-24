@@ -565,8 +565,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = p.throwDice() + p.throwDice();
 
-            //TODO: levare
-            res = 7;
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, meteoritesPlayers, i+1);
         }
 
