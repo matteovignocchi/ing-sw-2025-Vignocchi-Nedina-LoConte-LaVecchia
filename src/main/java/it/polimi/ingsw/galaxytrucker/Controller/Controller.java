@@ -38,7 +38,7 @@ public class Controller implements Serializable {
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
-    private transient final Consumer<Integer> onGameEnd;
+    private transient Consumer<Integer> onGameEnd;
     private GamePhase principalGamePhase;
     private int numberOfEnter =0;
     private final int TIME_OUT = 30;
@@ -349,12 +349,13 @@ public class Controller implements Serializable {
         }
     }
 
-    public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener) {
+    public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener, Consumer<Integer> onGameEndListener) {
         this.viewsByNickname = new ConcurrentHashMap<>();
         this.hourglass = new Hourglass(hourglassListener);
         this.cardSerializer = new CardSerializer();
         this.tileSerializer = new TileSerializer();
         this.enumSerializer = new EnumSerializer();
+        this.onGameEnd = onGameEndListener;
         initPingScheduler();
     }
 
@@ -385,7 +386,9 @@ public class Controller implements Serializable {
                     String msg = "SERVER: " + "You win by timeout!";
                     inform(msg, winner);
                 }
-                onGameEnd.accept(gameId);
+                if (onGameEnd != null) {
+                    onGameEnd.accept(gameId);
+                }
             }, 1, TimeUnit.MINUTES);
         }
     }
@@ -854,8 +857,9 @@ public class Controller implements Serializable {
                 informAndNotify("SERVER: " + "Game over. Thank you for playing!", nick);
             }
         }
-
-        onGameEnd.accept(this.gameId);
+        if (onGameEnd != null) {
+            onGameEnd.accept(gameId);
+        }
     }
 
     public String showDeck (int idxDeck){
@@ -2677,7 +2681,9 @@ public class Controller implements Serializable {
                 markDisconnected(nick);
             }
         });
-        onGameEnd.accept(gameId);
+        if (onGameEnd != null) {
+            onGameEnd.accept(gameId);
+        }
     }
 
     public Map<String,int[] > getPlayersPosition(){
@@ -2719,5 +2725,11 @@ public class Controller implements Serializable {
         return m;
     }
 
+    public void shutdownHourglass() {
+        if (hourglass != null) {
+            hourglass.shutdown();
+            hourglass = null;
+        }
+    }
 }
 

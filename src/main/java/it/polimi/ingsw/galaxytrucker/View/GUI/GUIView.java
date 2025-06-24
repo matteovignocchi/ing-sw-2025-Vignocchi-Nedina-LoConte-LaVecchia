@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
@@ -36,6 +37,7 @@ public class GUIView extends Application implements View {
 
     private static ClientController clientController;
     private SceneEnum sceneEnum;
+    private ClientGamePhase gamePhase;
     private Stage mainStage;
     private SceneRouter sceneRouter;
     private UserInputManager inputManager;
@@ -44,6 +46,8 @@ public class GUIView extends Application implements View {
     private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
     private final Queue<String> notificationQueue = new LinkedList<>();
     private boolean isShowingNotification = false;
+    private int[] bufferedCoordinate = null;
+
 
 
 
@@ -130,12 +134,18 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
-        try {
-            return inputManager.coordinateFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get coordinates: " + e.getMessage());
+        if (bufferedCoordinate != null) {
+            int[] result = bufferedCoordinate;
+            bufferedCoordinate = null;
+            return result;
+        } else {
+            reportError("No coordinate selected.");
             return new int[]{-1, -1};
         }
+    }
+
+    public void setBufferedCoordinate(int[] coordinate) {
+        this.bufferedCoordinate = coordinate;
     }
 
     @Override
@@ -183,6 +193,7 @@ public class GUIView extends Application implements View {
     }
 
     public void updateState(ClientGamePhase gamePhase) {
+        this.gamePhase= gamePhase;
         Platform.runLater(() -> {
             switch (gamePhase) {
                 case BOARD_SETUP -> {
@@ -191,6 +202,18 @@ public class GUIView extends Application implements View {
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
+                case TILE_MANAGEMENT -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
+
+                }
+                case EXIT -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    GUIController controller = sceneRouter.getController(BUILDING_PHASE);
+                    controller.postInitializeLogOut();
+                }
+
                 default -> {}
             }
         });
@@ -316,7 +339,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public ClientGamePhase getGamePhase() {
-        return null;
+        return gamePhase;
     }
 
     @Override public void printListOfGoods(List<String> goods) {}
@@ -329,6 +352,7 @@ public class GUIView extends Application implements View {
 
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
+        inputManager.resetAll();
     }
 
     public void askCoordinateAsync(Consumer<int[]> callback) {
@@ -529,6 +553,9 @@ public class GUIView extends Application implements View {
             return message.toLowerCase().contains("login successful");
         }
         if(message.toLowerCase().contains("waiting for other players...")) {
+            return false;
+        }
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT){
             return false;
         }
         return switch (sceneEnum) {

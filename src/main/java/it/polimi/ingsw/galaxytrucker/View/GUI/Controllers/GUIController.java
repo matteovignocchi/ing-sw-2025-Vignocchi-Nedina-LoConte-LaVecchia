@@ -33,11 +33,13 @@ public abstract class GUIController {
         this.guiView = guiView;
     }
     public abstract void postInitialize();
-
+    public void postInitializeLogOut(){}
 
 
     public void updateDashboard(ClientTile[][] ship) {
     }
 
+    public void postInitialize2() {
+    }
 }
 

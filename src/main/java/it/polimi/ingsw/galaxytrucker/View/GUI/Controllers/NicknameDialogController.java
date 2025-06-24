@@ -23,17 +23,20 @@ public class NicknameDialogController extends GUIController {
         String nickname = nicknameField.getText().trim();
         if (!nickname.isEmpty()) {
             model.setNickname(nickname);
-            inputManager.nicknameFuture.complete(nickname);
-            sceneRouter.setScene(SceneEnum.MAIN_MENU);
+            if (!inputManager.nicknameFuture.isDone())
+                inputManager.nicknameFuture.complete(nickname);
+                inputManager.resetAll();
         } else {
             guiView.reportError("Nickname cannot be empty.");
         }
+
     }
 
     @Override
     public void postInitialize() {
-
     }
+
+
 
 
 }

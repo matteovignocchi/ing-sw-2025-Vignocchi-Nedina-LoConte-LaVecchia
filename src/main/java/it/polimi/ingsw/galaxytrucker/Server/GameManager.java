@@ -47,7 +47,6 @@ public class GameManager {
     public synchronized void joinGame(int gameId, VirtualView v, String nickname) throws BusinessLogicException, IOException, Exception {
         Controller controller = getControllerCheck(gameId);
 
-        //if (controller.getPlayerByNickname(nickname) == null)
         safeSave(gameId, controller);
         controller.addPlayer(nickname, v);
         nicknameToGameId.put(nickname, gameId);
@@ -113,6 +112,7 @@ public class GameManager {
         Controller controller = games.remove(gameId);
         if (controller != null) {
             controller.shutdownPing();
+            controller.shutdownHourglass();
             for (String nick : controller.getPlayersByNickname().keySet()) {
                 nicknameToGameId.remove(nick);
                 loggedInUsers.remove(nick);
@@ -212,7 +212,9 @@ public class GameManager {
         synchronized (controller) {
             safeSave(gameId, controller);
             controller.drawCardManagement(nickname);
-            safeSave(gameId, controller);
+            if (games.containsKey(gameId)) {
+                safeSave(gameId, controller);
+            }
         }
     }
 
@@ -273,7 +275,11 @@ public class GameManager {
     //Rimuove il file di salvataggio di quel gameId quando il gioco viene definitivamente cancellato (ad esempio perché è finito o abbandonato).
     //Non lancia eccezioni se il file non esiste.
     private void deleteSavedGame(int gameId) {
-        new File(savesDir, "game_" + gameId + ".sav").delete();
+        File f = new File(savesDir, "game_" + gameId + ".sav");
+        System.out.println("⏏ Cancello save in: " + f.getAbsolutePath());
+        if (f.exists() && !f.delete()) {
+            System.err.println("I cannot delete the game " + gameId);
+        }
     }
 
     //controlla se esiste saves/
@@ -285,30 +291,35 @@ public class GameManager {
         File dir = savesDir;
         if (!dir.exists()) return;
         int maxId = 0;
-        File[] files = dir.listFiles((d,n)->n.matches("game_\\d+\\.sav"));
-        if(files != null) {
-            for (File f : files) {
-                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f))) {
-                    Controller controller = (Controller) in.readObject();
-                    controller.reinitializeAfterLoad(h -> {
-                        try {
-                            controller.onHourglassStateChange(h);
-                        } catch (BusinessLogicException ex) {
-                            System.err.println("Error in the callback hourglass: " + ex.getMessage());
-                        }
-                    });
-                    int id = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
-                    controller.getPlayersByNickname().values().forEach(p -> p.setConnected(false));
-                    games.put(id, controller);
-                    for (String nicnkname : controller.getPlayersByNickname().keySet()){
-                        nicknameToGameId.put(nicnkname, id);
-                    }
-                    maxId = Math.max(maxId, id);
-                } catch (Exception e) {
-                    System.err.println("Loading error " + f + ": " + e.getMessage());
-                }
+
+        File[] files = dir.listFiles((d,n) -> n.matches("game_\\d+\\.sav"));
+        if (files != null) for (File f : files) {
+            try (var in = new ObjectInputStream(new FileInputStream(f))) {
+                Controller controller = (Controller) in.readObject();
+                int gameId = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
+                controller.reinitializeAfterLoad(
+                        h -> {
+                            try { controller.onHourglassStateChange(h); }
+                            catch (BusinessLogicException ex) {
+                                System.err.println("Error in hourglass callback: " + ex.getMessage());
+                            }
+                        },
+                        this::removeGame
+                );
+                controller.getPlayersByNickname()
+                        .values()
+                        .forEach(p -> p.setConnected(false));
+
+                games.put(gameId, controller);
+                controller.getPlayersByNickname().keySet()
+                        .forEach(nick -> nicknameToGameId.put(nick, gameId));
+                maxId = Math.max(maxId, gameId);
+
+            } catch (Exception e) {
+                System.err.println("Loading error " + f + ": " + e.getMessage());
             }
         }
+
         idCounter.set(maxId + 1);
     }
 
@@ -332,7 +343,12 @@ public class GameManager {
         return games.entrySet().stream()
                 .filter(e -> {
                     Controller c = e.getValue();
-                    return c.countConnectedPlayers() < c.getMaxPlayers();
+                    int connected    = c.countConnectedPlayers();
+                    int originalSize = c.getPlayersByNickname().size();
+                    int maxPlayers   = c.getMaxPlayers();
+                    return connected > 0
+                            && connected == originalSize
+                            && connected < maxPlayers;
                 })
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

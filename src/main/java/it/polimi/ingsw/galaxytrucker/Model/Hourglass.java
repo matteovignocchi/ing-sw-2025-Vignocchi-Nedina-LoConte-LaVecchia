@@ -14,6 +14,7 @@ public class Hourglass implements Serializable {
     private ScheduledFuture<?> scheduledFuture;
 
     public Hourglass(Consumer<Hourglass> controllerCallBack) {
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         this.controllerCallBack = controllerCallBack;
     }
 
@@ -40,6 +41,8 @@ public class Hourglass implements Serializable {
             scheduler.shutdownNow();
         }
     }
+
+    public void shutdown() {scheduler.shutdownNow();}
 
     public synchronized int  getFlips() { return flips; }
 
