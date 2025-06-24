@@ -2,12 +2,17 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GUIModel {
     private ClientTile[][] dashboard = new ClientTile[5][7];
     private Boolean[][] mask = new Boolean[5][7];
     private ClientTile currentTile;
     private boolean isDemo;
     private String nickname;
+    private Map<String, int[]> playerPositions = new HashMap<>();
+
 
     // Getters/Setters
     public ClientTile[][] getDashboard() { return dashboard; }
@@ -114,5 +119,13 @@ public class GUIModel {
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+    public void setPlayerPositions(Map<String, int[]> map) {
+        this.playerPositions.clear();
+        this.playerPositions.putAll(map);
+    }
+
+    public Map<String, int[]> getPlayerPositions() {
+        return new HashMap<>(playerPositions);
     }
 }

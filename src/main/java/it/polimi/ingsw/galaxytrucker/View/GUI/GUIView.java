@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
-import it.polimi.ingsw.galaxytrucker.Server.VirtualServer;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
 import it.polimi.ingsw.galaxytrucker.View.View;
@@ -22,66 +21,37 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
-import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.BUILDING_PHASE;
-import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.WAITING_QUEUE;
+import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.*;
 
 public class GUIView extends Application implements View {
 
-    private static int protocolChoice;
-    private static String host;
-    private static int port;
     private static ClientController clientController;
-    private static VirtualView virtualClientStartup;
     private SceneEnum sceneEnum;
-
-
-
-
-
-    public static void setStartupConfig(int protocol, String hostAddress, int serverPort, VirtualView view) {
-        protocolChoice = protocol;
-        host = hostAddress;
-        port = serverPort;
-        virtualClientStartup = view;
-
-
-    }
-
-    private void setAndStartClientController(VirtualView virtualClient) {
-        clientController = new ClientController(this, virtualClient);
-        try {
-            clientController.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println("anche qui arrivato");
-
-
-    }
-
     private Stage mainStage;
     private SceneRouter sceneRouter;
     private UserInputManager inputManager;
     private GUIModel model;
     private final BlockingQueue<String> menuChoiceQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
+    private final Queue<String> notificationQueue = new LinkedList<>();
+    private boolean isShowingNotification = false;
+
 
 
 
 
     @Override
     public void start(Stage primaryStage) {
-        this.mainStage = primaryStage;
+        mainStage = primaryStage;
         this.model = new GUIModel();
         this.inputManager = new UserInputManager();
 
@@ -93,8 +63,6 @@ public class GUIView extends Application implements View {
 
         new Thread(() -> {
             try {
-                System.out.println("Launching ClientController in GUI thread...");
-
                 VirtualView virtualClient = GUIStartupConfig.virtualClient;
                 if (virtualClient == null) {
                     reportError("VirtualClient non inizializzato.");
@@ -123,15 +91,20 @@ public class GUIView extends Application implements View {
     }
 
     public void resolveMenuChoice(String choice) {
-        menuChoiceQueue.add(choice);  // ✅ correta
+        menuChoiceQueue.add(choice);
     }
 
     @Override
     public void inform(String message) {
         if (filterDisplayNotification(message, sceneEnum)) {
-            showNotification(message);
+            synchronized (notificationQueue) {
+                notificationQueue.offer(message);
+            }
+            showNextNotificationIfIdle();
+        } else {
         }
     }
+
 
     @Override
     public void reportError(String message) {
@@ -192,14 +165,16 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
-        Platform.runLater(() -> model.setDashboard(ship));
+        Platform.runLater(() -> {
+            model.setDashboard(ship);
+            sceneRouter.getController(SceneEnum.BUILDING_PHASE).updateDashboard(ship);
+        });
     }
+
 
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
-        Platform.runLater(() -> {
-            // TODO: implement visual map display
-        });
+        model.setPlayerPositions(playerMaps);
     }
 
     public void updateState(ClientGamePhase gamePhase) {
@@ -210,6 +185,7 @@ public class GUIView extends Application implements View {
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
+                case MAIN_MENU -> setSceneEnum(MAIN_MENU);
                 default -> {}
             }
         });
@@ -218,24 +194,28 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printTile(ClientTile tile) {
-        Platform.runLater(() -> model.setCurrentTile(tile));
-    }
-
-    @Override
-    public void printListOfCommand() {
         Platform.runLater(() -> {
-            // TODO: display command options in GUI
+            model.setCurrentTile(tile);
+
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            if (ctrl != null) {
+                if (tile == null) {
+                    ctrl.clearCurrentTile();
+                } else {
+                    ctrl.showCurrentTile(tile);
+                }
+            } else {
+                System.err.println("[GUIView] WARNING: BUILDING_PHASE controller not initialized yet.");
+            }
         });
     }
 
-//    public String sendAvailableChoices() {
-//        try {
-//            return inputManager.commandFuture.get();
-//        } catch (Exception e) {
-//            reportError("Failed to get user command: " + e.getMessage());
-//            return "";
-//        }
-//    }
+
+
+    @Override
+    public void printListOfCommand() {
+
+    }
 
     @Override public Boolean ask(String message) { return false; }
     @Override public boolean askWithTimeout(String message) { return false; }
@@ -255,7 +235,7 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);  // 🔴 Mostra la scena
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
 
         });
 
@@ -284,7 +264,7 @@ public class GUIView extends Application implements View {
     public void setCurrentTile(ClientTile tile) {
         Platform.runLater(() -> {
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
-            ctrl.showCurrentTile(tile);  // Questo è il tile che l'utente deve piazzare
+            ctrl.showCurrentTile(tile);
         });
     }
 
@@ -297,7 +277,7 @@ public class GUIView extends Application implements View {
     @Override
     public Integer askIndex() {
         try {
-            return inputManager.indexFuture.get();  // blocca finché un controller non completa
+            return inputManager.indexFuture.get();
         } catch (Exception e) {
             reportError("Failed to get index: " + e.getMessage());
             return -1;
@@ -359,7 +339,7 @@ public class GUIView extends Application implements View {
     @Override
     public String sendAvailableChoices() {
         try {
-            return commandQueue.take();  // blocca finché non riceve un comando
+            return commandQueue.take();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             reportError("Interrupted while waiting for command");
@@ -400,8 +380,30 @@ public class GUIView extends Application implements View {
     }
 
     public void resolveGenericCommand(String command) {
-        commandQueue.offer(command);
+        String translated = switch (command.toUpperCase()) {
+            case "GET_COVERED" -> "getacoveredtile";
+            case "GET_SHOWN" -> "getashowntile";
+            case "RETURN_TILE" -> "returnthetile";
+            case "READY" -> "declareready";
+            case "SPIN_HOURGLASS" -> "spinthehourglass";
+            case "LOOK_PLAYER1", "LOOK_PLAYER2", "LOOK_PLAYER3" -> "watchaplayersship";
+            case "ROTATE_LEFT" -> "leftrotatethetile";
+            case "ROTATE_RIGHT" -> "rightrotatethetile";
+            case "LOGOUT" -> "logout";
+            default -> null;
+        };
+        System.out.println("[DEBUG] Comando ricevuto: " + command + " → " + translated);
+
+        if (translated != null) {
+            commandQueue.offer(translated);
+            System.out.println("[DEBUG] Comando accodato");
+
+        } else {
+            reportError("Unrecognized command: " + command);
+        }
     }
+
+
     public void resolveIndex(int index) {
         if (!inputManager.indexFuture.isDone()) {
             inputManager.indexFuture.complete(index);
@@ -437,12 +439,25 @@ public class GUIView extends Application implements View {
         }
     }
 
+    private void showNextNotificationIfIdle() {
+        if (isShowingNotification) return;
+
+        String nextMessage;
+        synchronized (notificationQueue) {
+            nextMessage = notificationQueue.poll();
+        }
+
+        if (nextMessage != null) {
+            isShowingNotification = true;
+            showNotification(nextMessage);
+        }
+    }
+
 
     private void showNotification(String message) {
         Platform.runLater(() -> {
             Scene scene = sceneRouter.getCurrentScene();
             if (scene == null || scene.getRoot() == null) {
-                System.err.println("[GUIView] inform: scena o root null");
                 return;
             }
 
@@ -456,9 +471,9 @@ public class GUIView extends Application implements View {
                 -fx-font-family: "Impact";
                 -fx-font-size: 19px;
                 -fx-text-fill: #000000;
-                -fx-background-color: rgba(255, 223, 0, 0.85); /* giallo oro semi-trasparente */
+                -fx-background-color: rgba(255, 223, 0, 0.85); 
                 -fx-padding: 10px 18px;
-                -fx-background-radius: 0; /* rettangolare */
+                -fx-background-radius: 0; 
                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
             """);
                 label.setWrapText(true);
@@ -485,12 +500,17 @@ public class GUIView extends Application implements View {
                 FadeTransition fadeOut = new FadeTransition(Duration.millis(300), toast);
                 fadeOut.setFromValue(1);
                 fadeOut.setToValue(0);
-                fadeOut.setOnFinished(e -> pane.getChildren().remove(toast));
+                fadeOut.setOnFinished(e -> {
+                    pane.getChildren().remove(toast);
+                    isShowingNotification = false;
+                    showNextNotificationIfIdle();
+                });
+
 
                 new SequentialTransition(fadeIn, pause, fadeOut).play();
 
             } catch (ClassCastException e) {
-                System.err.println("[GUIView] inform: root della scena non è un Pane. Non posso mostrare il toast.");
+                reportError("ClassCastException: " + e.getMessage());
             }
         });
     }
@@ -502,16 +522,16 @@ public class GUIView extends Application implements View {
         if (sceneEnum == null) {
             return message.toLowerCase().contains("login successful");
         }
+        if(message.toLowerCase().contains("waiting for other players...")) {
+            return false;
+        }
         return switch (sceneEnum) {
             case BUILDING_PHASE -> true;
-            case WAITING_QUEUE -> !message.contains("Waiting");
+            case WAITING_QUEUE -> message.toLowerCase().contains("joined");
             case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
             case NICKNAME_DIALOG -> message.contains("Login");
             default -> false;
         };
     }
-
-
-
 
 }
