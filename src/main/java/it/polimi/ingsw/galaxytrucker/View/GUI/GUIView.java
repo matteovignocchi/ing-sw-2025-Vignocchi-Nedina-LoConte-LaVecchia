@@ -203,7 +203,7 @@ public class GUIView extends Application implements View {
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
                 case TILE_MANAGEMENT -> {
                     setSceneEnum(BUILDING_PHASE);
-                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+//                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
 
                 }
@@ -340,7 +340,14 @@ public class GUIView extends Application implements View {
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
     @Override public void printPileCovered() {}
-    @Override public void printPileShown(List<ClientTile> tiles) {}
+    @Override
+    public void printPileShown(List<ClientTile> tiles) {
+        Platform.runLater(() -> {
+            model.setCurrentTile(null); // non serve tile singola
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            ctrl.displayTileSelection(tiles);
+        });
+    }
     @Override public void printCard(ClientCard card) {}
     @Override public void printDeck(List<ClientCard> deck) {}
 

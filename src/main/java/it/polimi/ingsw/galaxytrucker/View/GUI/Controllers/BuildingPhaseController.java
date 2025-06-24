@@ -30,6 +30,9 @@ public class BuildingPhaseController extends GUIController {
     @FXML private VBox tilePreviewPane;
     @FXML private Button leftArrowButton, rightArrowButton;
 
+    private List<ClientTile> tileList = new ArrayList<>();
+    private int tileListIndex = 0;
+
     private ClientTile currentTile;
     private ImageView currentTileView;
     private int currentRotation = 0;
@@ -113,6 +116,7 @@ public class BuildingPhaseController extends GUIController {
 
 
     public void postInitialize2(){
+        getCoveredBtn.setVisible(false);
         getShownBtn.setVisible(false);
         getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
@@ -294,4 +298,64 @@ public class BuildingPhaseController extends GUIController {
             }
         }
     }
+
+    public void displayTileSelection(List<ClientTile> tiles) {
+        if (tiles == null || tiles.isEmpty()) {
+            guiView.reportError("No tiles to display.");
+            return;
+        }
+
+        tileList = tiles;
+        tileListIndex = 0;
+
+        // Nasconde pulsanti inutili
+        getCoveredBtn.setVisible(false);
+        getShownBtn.setVisible(false);
+        setReadyBtn.setVisible(false);
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+
+        // Mostra le frecce
+        leftArrowButton.setVisible(true);
+        rightArrowButton.setVisible(true);
+
+        updateTilePreviewFromList();
+
+        leftArrowButton.setOnAction(e -> {
+            tileListIndex = (tileListIndex - 1 + tileList.size()) % tileList.size();
+            updateTilePreviewFromList();
+        });
+
+        rightArrowButton.setOnAction(e -> {
+            tileListIndex = (tileListIndex + 1) % tileList.size();
+            updateTilePreviewFromList();
+        });
+
+        // Click sulla tile per selezionarla
+        tilePreviewPane.setOnMouseClicked(e -> {
+            if (!inputManager.indexFuture.isDone()) {
+                inputManager.indexFuture.complete(tileListIndex);
+            }
+
+            // Pulisce tutto
+            tileList = List.of();
+            tilePreviewPane.getChildren().clear();
+            leftArrowButton.setVisible(false);
+            rightArrowButton.setVisible(false);
+        });
+    }
+    private void updateTilePreviewFromList() {
+        if (tileList == null || tileList.isEmpty()) return;
+
+        ClientTile current = tileList.get(tileListIndex);
+        ImageView image = new ImageView(current.getImage());
+        image.setFitWidth(100);
+        image.setFitHeight(100);
+        image.setRotate(current.getRotation());
+
+        tilePreviewPane.getChildren().setAll(image);
+    }
+
+
 }
