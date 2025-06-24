@@ -209,6 +209,7 @@ public class GUIView extends Application implements View {
                     setSceneEnum(BUILDING_PHASE);
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize3();
+
                 }
                 case EXIT -> {
                     setSceneEnum(BUILDING_PHASE);

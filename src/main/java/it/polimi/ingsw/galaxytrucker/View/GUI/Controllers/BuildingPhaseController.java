@@ -1,7 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
-import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
@@ -40,6 +39,8 @@ public class BuildingPhaseController extends GUIController {
     private int currentRotation = 0;
     private ClientTile[][] playerGrid = new ClientTile[5][7];
     private ClientTile emptySpace = new ClientTile();
+    private boolean isSelectingTileFromList = false;
+
 
 
     @FXML
@@ -218,6 +219,8 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void showCurrentTile(ClientTile tile) {
+        if (isSelectingTileFromList) return;
+
         currentTile = tile;
         currentRotation = tile.getRotation();
 
@@ -385,6 +388,7 @@ public class BuildingPhaseController extends GUIController {
             return;
         }
 
+        isSelectingTileFromList = true;
         tileList = tiles;
         tileListIndex = 0;
 
@@ -418,7 +422,7 @@ public class BuildingPhaseController extends GUIController {
                 inputManager.indexFuture.complete(tileListIndex);
             }
 
-            // Pulisce tutto
+            isSelectingTileFromList = false;
             tileList = List.of();
             tilePreviewPane.getChildren().clear();
             leftArrowButton.setVisible(false);
