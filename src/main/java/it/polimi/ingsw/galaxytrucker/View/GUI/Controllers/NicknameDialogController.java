@@ -32,6 +32,9 @@ public class NicknameDialogController extends GUIController {
 
     @Override
     public void postInitialize() {
-
     }
+
+
+
+
 }

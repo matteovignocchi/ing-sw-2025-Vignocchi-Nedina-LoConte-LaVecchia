@@ -36,6 +36,7 @@ public class GameListMenuController extends GUIController {
 
     }
 
+
     public void displayGames(ObservableList<String> games) {
         Platform.runLater(() -> {
             gameListView.setItems(games);

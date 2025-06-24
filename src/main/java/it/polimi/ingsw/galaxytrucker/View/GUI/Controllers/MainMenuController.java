@@ -37,4 +37,5 @@ public class MainMenuController extends GUIController {
     @Override
     public void postInitialize() {
     }
+
 }
