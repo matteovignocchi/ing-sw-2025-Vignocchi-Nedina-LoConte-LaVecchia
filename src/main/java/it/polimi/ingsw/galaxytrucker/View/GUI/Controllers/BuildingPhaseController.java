@@ -1,6 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
+import it.polimi.ingsw.galaxytrucker.Model.Tile.EmptySpace;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
@@ -28,7 +29,8 @@ public class BuildingPhaseController extends GUIController {
     @FXML private HBox nicknameBox;
     @FXML private Label nicknameLabel;
     @FXML private VBox tilePreviewPane;
-    @FXML private Button leftArrowButton, rightArrowButton;
+    @FXML private Button leftArrowButton, rightArrowButton, reserveBtn1, reserveBtn2;
+
 
     private List<ClientTile> tileList = new ArrayList<>();
     private int tileListIndex = 0;
@@ -37,9 +39,12 @@ public class BuildingPhaseController extends GUIController {
     private ImageView currentTileView;
     private int currentRotation = 0;
     private ClientTile[][] playerGrid = new ClientTile[5][7];
+    private ClientTile emptySpace = new ClientTile();
+
 
     @FXML
     public void initialize() {
+        emptySpace.id = 0;
         rotateLeftBtn.setOnAction(e -> {
             completeCommand("ROTATE_LEFT");
             rotateTile(-90);
@@ -56,6 +61,10 @@ public class BuildingPhaseController extends GUIController {
             rotateLeftBtn.setVisible(true);
             rotateRightBtn.setVisible(true);
             setReadyBtn.setVisible(false);
+            reserveBtn1.setVisible(false);
+            reserveBtn2.setVisible(false);
+            reserveBtn1.setDisable(true);
+            reserveBtn2.setDisable(true);
         });
         getShownBtn.setOnAction(e -> completeCommand("GET_SHOWN"));
         returnTileBtn.setOnAction(e -> {
@@ -66,6 +75,10 @@ public class BuildingPhaseController extends GUIController {
             setReadyBtn.setVisible(true);
             getShownBtn.setVisible(true);
             getCoveredBtn.setVisible(true);
+            reserveBtn1.setVisible(true);
+            reserveBtn2.setVisible(true);
+            reserveBtn1.setDisable(false);
+            reserveBtn2.setDisable(false);
         });
         setReadyBtn.setOnAction(e -> {
             completeCommand("READY");
@@ -79,7 +92,8 @@ public class BuildingPhaseController extends GUIController {
         playerShip1Btn.setOnAction(e -> completeCommand("LOOK_PLAYER1"));
         playerShip2Btn.setOnAction(e -> completeCommand("LOOK_PLAYER2"));
         playerShip3Btn.setOnAction(e -> completeCommand("LOOK_PLAYER3"));
-
+        reserveBtn1.setOnAction(e -> takeReserved(1));
+        reserveBtn2.setOnAction(e -> takeReserved(2));
         deck1Btn.setOnAction(e -> completeIndex(0));
         deck2Btn.setOnAction(e -> completeIndex(1));
         deck3Btn.setOnAction(e -> completeIndex(2));
@@ -125,6 +139,18 @@ public class BuildingPhaseController extends GUIController {
         setReadyBtn.setVisible(false);
     }
 
+    public void postInitialize3(){
+        getShownBtn.setVisible(false);
+        getCoveredBtn.setVisible(false);
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(true);
+        rotateRightBtn.setVisible(true);
+        setReadyBtn.setVisible(false);
+
+    }
+
+
+
     private void setupCoordinateGridClickHandler() {
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
@@ -161,6 +187,12 @@ public class BuildingPhaseController extends GUIController {
                         guiView.setBufferedCoordinate(new int[]{r, c});
 
                         guiView.resolveGenericCommand("PLACE_TILE");
+                        if(!model.isDemo()){
+                            reserveBtn1.setVisible(true);
+                            reserveBtn2.setVisible(true);
+                            reserveBtn1.setDisable(false);
+                            reserveBtn2.setDisable(false);
+                        }
 
 
                         // Pulisce preview e resetta
@@ -226,11 +258,19 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void placeTileAt(ClientTile tile, int row, int col) {
-        ImageView tileImage = new ImageView(tile.getImage());
-        tileImage.setFitWidth(70);
-        tileImage.setFitHeight(70);
-        tileImage.setRotate(tile.getRotation());
-        Platform.runLater(() -> graphicGridPane.add(tileImage, col, row));
+        Platform.runLater(() -> {
+            graphicGridPane.getChildren().removeIf(node -> {
+                Integer nodeRow = GridPane.getRowIndex(node);
+                Integer nodeCol = GridPane.getColumnIndex(node);
+                return nodeRow != null && nodeCol != null && nodeRow == row && nodeCol == col;
+            });
+
+            ImageView tileImage = new ImageView(tile.getImage());
+            tileImage.setFitWidth(70);
+            tileImage.setFitHeight(70);
+            tileImage.setRotate(tile.getRotation());
+            graphicGridPane.add(tileImage, col, row);
+        });
     }
 
     public void clearCurrentTile() {
@@ -268,6 +308,9 @@ public class BuildingPhaseController extends GUIController {
             deck1Btn.setVisible(true);
             deck2Btn.setVisible(true);
             deck3Btn.setVisible(true);
+            reserveBtn1.setVisible(true);
+            reserveBtn2.setVisible(true);
+
         }
         setPlayersButton();
     }
@@ -296,6 +339,43 @@ public class BuildingPhaseController extends GUIController {
                 playerShip3Btn.setVisible(true);
                 playerShip3Btn.setText("Player Ship of " + others.getLast());
             }
+        }
+    }
+    public void postInitializeLogOut(){
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+        getShownBtn.setVisible(false);
+        getCoveredBtn.setVisible(false);
+        setReadyBtn.setVisible(false);
+        rightArrowButton.setVisible(false);
+        leftArrowButton.setVisible(false);
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+        deck1Btn.setDisable(true);
+        deck2Btn.setDisable(true);
+        deck3Btn.setDisable(true);
+        hourGlassBtn.setVisible(false);
+    }
+    private void takeReserved(int a){
+
+        switch(a){
+            case 1 ->{
+                if(!guiView.returnValidity(0,5)){
+                    guiView.setBufferedCoordinate(new int[]{0, 5});
+                    completeCommand("RESERVE_TILE");
+                    placeTileAt(emptySpace,0,5);
+                }
+            }
+            case 2 ->{
+                if(!guiView.returnValidity(0,6)){
+                    guiView.setBufferedCoordinate(new int[]{0, 6});
+                    completeCommand("RESERVE_TILE");
+                    placeTileAt(emptySpace,0,6);
+                }
+            }
+            default ->{}
         }
     }
 

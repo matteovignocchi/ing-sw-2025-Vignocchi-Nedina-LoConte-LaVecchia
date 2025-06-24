@@ -29,17 +29,8 @@ public class ControllerTest {
 
         @Override public void updateGameState(String phase) { states.add(phase); }
         @Override public void updateMapPosition(Map<String,int[]> position) { maps.add(position); }
-
-        @Override
-        public void setStart() throws Exception {
-
-        }
-
-        @Override
-        public String askInformationAboutStart() throws Exception {
-            return "";
-        }
-
+        @Override public void setStart() throws Exception {}
+        @Override public String askInformationAboutStart() throws Exception {return "";}
         @Override public void showUpdate(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {}
         @Override public void setTile(String jsonTmp) { lastTileJson = jsonTmp; }
         @Override public void inform(String message) { messages.add(message); }

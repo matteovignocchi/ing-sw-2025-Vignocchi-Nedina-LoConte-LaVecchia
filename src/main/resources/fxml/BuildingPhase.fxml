@@ -29,16 +29,16 @@
                 <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
             </image>
         </ImageView>
-      <Button fx:id="playerShip1Btn" layoutX="597.0" layoutY="28.0" mnemonicParsing="false"  styleClass="blue-button" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="350.0" AnchorPane.topAnchor="0.0" />
+      <Button fx:id="playerShip1Btn" layoutX="597.0" layoutY="28.0" mnemonicParsing="false" styleClass="blue-button" AnchorPane.leftAnchor="350.0" AnchorPane.rightAnchor="350.0" AnchorPane.topAnchor="0.0" />
 
-        <Button fx:id="getCoveredBtn" layoutX="456.0" layoutY="235.0" mnemonicParsing="false"  styleClass="blue-button" text="Get Covered" AnchorPane.leftAnchor="436.0" />
-        <Button fx:id="getShownBtn" layoutX="728.0" layoutY="235.0" maxWidth="133.0" mnemonicParsing="false"  prefWidth="133.0" styleClass="blue-button" text="Get Shown" AnchorPane.rightAnchor="436.0" />
-      <Button fx:id="returnTileBtn" layoutX="543.0" layoutY="71.0" mnemonicParsing="false"  styleClass="blue-button" text="Return Tile" AnchorPane.leftAnchor="580.0" AnchorPane.rightAnchor="580.0" AnchorPane.topAnchor="85.0" />
+        <Button fx:id="getCoveredBtn" layoutX="456.0" layoutY="235.0" mnemonicParsing="false" styleClass="blue-button" text="Get Covered" AnchorPane.leftAnchor="436.0" />
+        <Button fx:id="getShownBtn" layoutX="728.0" layoutY="235.0" maxWidth="133.0" mnemonicParsing="false" prefWidth="133.0" styleClass="blue-button" text="Get Shown" AnchorPane.rightAnchor="436.0" />
+      <Button fx:id="returnTileBtn" layoutX="543.0" layoutY="71.0" mnemonicParsing="false" styleClass="blue-button" text="Return Tile" AnchorPane.leftAnchor="580.0" AnchorPane.rightAnchor="580.0" AnchorPane.topAnchor="85.0" />
       <Button fx:id="playerShip2Btn" layoutX="-157.0" layoutY="336.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="409.0" rotate="270.0" styleClass="blue-button" stylesheets="@css/GameButton.css" AnchorPane.leftAnchor="-183.0" />
       <Button fx:id="playerShip3Btn" layoutX="-147.0" layoutY="346.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="409.0" rotate="90.0" styleClass="blue-button" stylesheets="@css/GameButton.css" AnchorPane.rightAnchor="-183.0" />
-      <Button fx:id="logOutBtn" layoutX="110.0" layoutY="632.0" mnemonicParsing="false"  styleClass="transparent-button" stylesheets="@css/Button.css" text="Logout" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" />
-      <Button fx:id="setReadyBtn" layoutX="1082.0" layoutY="634.0" mnemonicParsing="false"  stylesheets="@css/Button.css" text="Set Ready" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
-      <Button fx:id="hourGlassBtn" layoutX="132.0" layoutY="173.0" mnemonicParsing="false"  styleClass="blue-button" text="Spin the Hourglass" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
+      <Button fx:id="logOutBtn" layoutX="110.0" layoutY="632.0" mnemonicParsing="false" styleClass="transparent-button" stylesheets="@css/Button.css" text="Logout" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" />
+      <Button fx:id="setReadyBtn" layoutX="1082.0" layoutY="634.0" mnemonicParsing="false" stylesheets="@css/Button.css" text="Set Ready" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+      <Button fx:id="hourGlassBtn" layoutX="132.0" layoutY="173.0" mnemonicParsing="false" styleClass="blue-button" text="Spin the Hourglass" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
         <ImageView fx:id="card0" fitHeight="143.0" fitWidth="74.0" layoutX="1078.0" layoutY="100.0" preserveRatio="true" AnchorPane.rightAnchor="110.0" AnchorPane.topAnchor="10.0">
          <image>
             <Image url="@../Polytechnic/cards/GT-cards_I_IT_0121.jpg" />
@@ -74,7 +74,7 @@
                 <Label fx:id="nicknameLabel" prefHeight="42.0" prefWidth="322.0" styleClass="blue-nickname" text="NicknamePlaceHolder" />
             </children>
         </HBox>
-        <Button fx:id="deck3Btn" layoutX="907.0" layoutY="277.0" mnemonicParsing="false"  rotate="-9.5" styleClass="transparent-button" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="10.0">
+        <Button fx:id="deck3Btn" layoutX="907.0" layoutY="277.0" mnemonicParsing="false" rotate="-9.5" styleClass="transparent-button" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="10.0">
         <graphic>
             <ImageView fitHeight="143.0" fitWidth="74.0" preserveRatio="true">
                 <image>
@@ -83,7 +83,7 @@
             </ImageView>
         </graphic>
     </Button>
-      <Button fx:id="deck1Btn" layoutX="885.0" layoutY="187.0" mnemonicParsing="false"  rotate="6.3" styleClass="transparent-button" AnchorPane.rightAnchor="221.0" AnchorPane.topAnchor="10.0">
+      <Button fx:id="deck1Btn" layoutX="885.0" layoutY="187.0" mnemonicParsing="false" rotate="6.3" styleClass="transparent-button" AnchorPane.rightAnchor="221.0" AnchorPane.topAnchor="10.0">
           <graphic>
               <ImageView fitHeight="143.0" fitWidth="74.0" layoutX="1089.0" layoutY="423.0" preserveRatio="true">
                   <image>
@@ -92,7 +92,7 @@
               </ImageView>
           </graphic>
       </Button>
-      <Button fx:id="deck2Btn" layoutX="983.0" layoutY="174.0" mnemonicParsing="false"  rotate="-4.1" styleClass="transparent-button" AnchorPane.rightAnchor="105.0" AnchorPane.topAnchor="10.0">
+      <Button fx:id="deck2Btn" layoutX="983.0" layoutY="174.0" mnemonicParsing="false" rotate="-4.1" styleClass="transparent-button" AnchorPane.rightAnchor="105.0" AnchorPane.topAnchor="10.0">
           <graphic>
               <ImageView fitHeight="143.0" fitWidth="74.0" preserveRatio="true">
                   <image>
@@ -102,7 +102,7 @@
           </graphic>
       </Button>
 
-        <GridPane fx:id="graphicGridPane" layoutX="18.0" layoutY="10.0" prefHeight="530.0" prefWidth="527.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="396.0" AnchorPane.rightAnchor="399.0" AnchorPane.topAnchor="356.0">
+        <GridPane fx:id="graphicGridPane" layoutX="18.0" layoutY="10.0" prefHeight="530.0" prefWidth="527.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="395.0" AnchorPane.rightAnchor="398.0" AnchorPane.topAnchor="354.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="102.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -149,7 +149,7 @@
                 </ImageView>
             </graphic>
         </Button>
-      <Button fx:id="rotateRightBtn" layoutX="399.0" layoutY="244.0"  styleClass="transparent-button" AnchorPane.bottomAnchor="460.0" AnchorPane.rightAnchor="570.0">
+      <Button fx:id="rotateRightBtn" layoutX="399.0" layoutY="244.0" styleClass="transparent-button" AnchorPane.bottomAnchor="460.0" AnchorPane.rightAnchor="570.0">
          <graphic>
             <ImageView fitHeight="32.0" fitWidth="32.0" preserveRatio="true">
                <image>
@@ -176,6 +176,8 @@
                 <RowConstraints fillHeight="false" maxHeight="121.0" minHeight="10.0" prefHeight="121.0" vgrow="SOMETIMES" />
             </rowConstraints>
         </GridPane>
+      <Button fx:id="reserveBtn1" mnemonicParsing="false" prefHeight="80.0" prefWidth="80.0" styleClass="transparent-button" AnchorPane.leftAnchor="742.0" AnchorPane.topAnchor="340.0" />
+      <Button fx:id="reserveBtn2" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="80.0" prefWidth="80.0" styleClass="transparent-button" AnchorPane.leftAnchor="825.0" AnchorPane.topAnchor="340.0" />
     </children>
 
     <stylesheets>

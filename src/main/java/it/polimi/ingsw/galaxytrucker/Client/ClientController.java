@@ -685,6 +685,7 @@ public class ClientController {
         if (jsonTile.equals("PIEDINIPRADELLA")) {
             ClientTile tmpEmpty = new ClientTile();
             tmpEmpty.type = "EMPTYSPACE";
+            tmpEmpty.id = 0;
             Dash_Matrix[a][b] = tmpEmpty;
         } else {
 

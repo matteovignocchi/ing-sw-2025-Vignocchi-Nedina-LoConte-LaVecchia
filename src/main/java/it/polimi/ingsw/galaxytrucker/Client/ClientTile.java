@@ -60,10 +60,14 @@ public class ClientTile {
             //TODO ricordarsi che se è non devo caricare nessuna immagine
             if (tileId == 0) {
                 tileId = 157;
+                String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".png";
+                InputStream is = ClientTile.class.getResourceAsStream(imagePath);
+                return new Image(is);
             }
-
             String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
             InputStream is = ClientTile.class.getResourceAsStream(imagePath);
+
+
 
             if (is == null) {
                 System.err.println("[WARN] Tile image not found: " + imagePath + ", using placeholder.");
