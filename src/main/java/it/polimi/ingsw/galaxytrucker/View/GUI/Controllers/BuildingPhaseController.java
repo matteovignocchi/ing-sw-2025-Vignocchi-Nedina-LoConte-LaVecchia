@@ -96,9 +96,9 @@ public class BuildingPhaseController extends GUIController {
         playerShip3Btn.setOnAction(e -> completeCommand("LOOK_PLAYER3"));
         reserveBtn1.setOnAction(e -> takeReserved(1));
         reserveBtn2.setOnAction(e -> takeReserved(2));
-        deck1Btn.setOnAction(e -> completeIndex(0));
-        deck2Btn.setOnAction(e -> completeIndex(1));
-        deck3Btn.setOnAction(e -> completeIndex(2));
+        deck1Btn.setOnAction(e -> chooseDeck(0));
+        deck2Btn.setOnAction(e -> chooseDeck(1));
+        deck3Btn.setOnAction(e -> chooseDeck(2));
 
         setupCoordinateGridClickHandler();
     }
@@ -255,11 +255,6 @@ public class BuildingPhaseController extends GUIController {
         guiView.resolveGenericCommand(command);
     }
 
-    private void completeIndex(int index) {
-        if (!inputManager.indexFuture.isDone()) {
-            inputManager.indexFuture.complete(index);
-        }
-    }
 
     public void placeTileAt(ClientTile tile, int row, int col) {
         Platform.runLater(() -> {
@@ -315,6 +310,9 @@ public class BuildingPhaseController extends GUIController {
             deck1Btn.setVisible(true);
             deck2Btn.setVisible(true);
             deck3Btn.setVisible(true);
+            deck1Btn.setDisable(false);
+            deck2Btn.setDisable(false);
+            deck3Btn.setDisable(false);
             reserveBtn1.setVisible(true);
             reserveBtn2.setVisible(true);
 
@@ -384,6 +382,11 @@ public class BuildingPhaseController extends GUIController {
             }
             default ->{}
         }
+    }
+
+    private void chooseDeck(int index){
+        guiView.setBufferedIndex(index);
+        completeCommand("DECK");
     }
 
     public void displayTileSelection(List<ClientTile> tiles) {

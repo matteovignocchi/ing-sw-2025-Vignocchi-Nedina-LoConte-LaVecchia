@@ -12,10 +12,13 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -45,6 +48,7 @@ public class GUIView extends Application implements View {
     private boolean isShowingNotification = false;
     private int[] bufferedCoordinate = null;
     private Integer bufferedIndex = null;
+
 
 
 
@@ -376,7 +380,54 @@ public class GUIView extends Application implements View {
         });
     }
     @Override public void printCard(ClientCard card) {}
-    @Override public void printDeck(List<ClientCard> deck) {}
+
+    @Override
+    public void printDeck(List<ClientCard> deck) {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDeck.fxml"));
+                AnchorPane root = loader.load();
+
+                // Ottieni i tre pannelli (meglio usare fx:id se possibile)
+                Pane leftPane = (Pane) root.getChildren().get(1);
+                Pane centerPane = (Pane) root.getChildren().get(2);
+                Pane rightPane = (Pane) root.getChildren().get(3);
+                List<Pane> panes = List.of(leftPane, centerPane, rightPane);
+
+                for (int i = 0; i < Math.min(deck.size(), 3); i++) {
+                    ClientCard card = deck.get(i);
+                    ImageView imageView = new ImageView(card.getImage());
+                    imageView.setFitWidth(280);
+                    imageView.setFitHeight(430);
+                    panes.get(i).getChildren().add(imageView);
+                }
+
+                // Crea una nuova finestra
+                Stage popupStage = new Stage();
+                popupStage.setTitle("Deck");
+
+                // Imposta la scena
+                Scene popupScene = new Scene(root);
+                popupStage.setScene(popupScene);
+
+                // Centra la finestra sullo schermo
+                popupStage.centerOnScreen();
+
+                // (Opzionale) Imposta come modale rispetto alla finestra principale
+                // popupStage.initModality(Modality.WINDOW_MODAL);
+                // popupStage.initOwner(mainStage);
+
+                popupStage.show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                reportError("Errore nel caricamento del file PrintDeck.fxml: " + e.getMessage());
+            }
+        });
+    }
+
+
+
 
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
@@ -448,6 +499,7 @@ public class GUIView extends Application implements View {
             case "ROTATE_RIGHT" -> "rightrotatethetile";
             case "PLACE_TILE" -> "placethetile";
             case "RESERVE_TILE" -> "takereservedtile";
+            case "DECK" -> "watchadeck";
             case "LOGOUT" -> "logout";
             default -> null;
         };
@@ -584,9 +636,10 @@ public class GUIView extends Application implements View {
         if(message.toLowerCase().contains("waiting for other players...")) {
             return false;
         }
-        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT){
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
+
         return switch (sceneEnum) {
             case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
