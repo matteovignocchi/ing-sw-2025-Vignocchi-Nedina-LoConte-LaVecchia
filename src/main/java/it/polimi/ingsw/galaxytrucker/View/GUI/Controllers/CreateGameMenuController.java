@@ -53,7 +53,9 @@ public class CreateGameMenuController extends GUIController {
 
         backButton.setOnAction(e -> setupInitialState());
 
-        exitButton.setOnAction(e -> Platform.runLater(() -> guiView.setSceneEnum(SceneEnum.MAIN_MENU)));
+        exitButton.setOnAction(e -> {
+            guiView.resolveDataGame(List.of());
+        });
     }
 
     private void showPlayerSelection() {

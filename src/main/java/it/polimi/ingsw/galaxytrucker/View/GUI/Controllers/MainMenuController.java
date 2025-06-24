@@ -19,12 +19,10 @@ public class MainMenuController extends GUIController {
     public void initialize() {
         joinButton.setOnAction(event -> {
             guiView.resolveMenuChoice("2");
-            guiView.setSceneEnum(SceneEnum.JOIN_GAME_MENU);
         });
 
         createButton.setOnAction(event -> {
             guiView.resolveMenuChoice("1");
-            guiView.setSceneEnum(SceneEnum.CREATE_GAME_MENU);
         });
 
         logoutButton.setOnAction(event -> {
