@@ -5,4 +5,9 @@ public  class WaitingQueueController extends GUIController{
     public void postInitialize() {
 
     }
+
+    @Override
+    public void postInitialize2() {
+
+    }
 }

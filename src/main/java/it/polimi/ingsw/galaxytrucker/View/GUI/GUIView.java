@@ -191,6 +191,11 @@ public class GUIView extends Application implements View {
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
+                case TILE_MANAGEMENT -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
+                }
                 default -> {}
             }
         });

@@ -106,6 +106,16 @@ public class BuildingPhaseController extends GUIController {
         leftArrowButton.setVisible(false);
     }
 
+    public void postInitialize2(){
+        completeCommand("GET_COVERED");
+        getShownBtn.setVisible(false);
+        getCoveredBtn.setVisible(false);
+        returnTileBtn.setVisible(true);
+        rotateLeftBtn.setVisible(true);
+        rotateRightBtn.setVisible(true);
+        setReadyBtn.setVisible(false);
+    }
+
     private void setupCoordinateGridClickHandler() {
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {

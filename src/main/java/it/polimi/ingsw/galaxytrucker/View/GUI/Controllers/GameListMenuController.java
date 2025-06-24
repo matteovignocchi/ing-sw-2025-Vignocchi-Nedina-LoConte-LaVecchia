@@ -36,6 +36,11 @@ public class GameListMenuController extends GUIController {
 
     }
 
+    @Override
+    public void postInitialize2() {
+
+    }
+
     public void displayGames(ObservableList<String> games) {
         Platform.runLater(() -> {
             gameListView.setItems(games);

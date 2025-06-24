@@ -84,4 +84,9 @@ public class CreateGameMenuController extends GUIController {
     public void postInitialize() {
         // se serve setup dopo il caricamento completo
     }
+
+    @Override
+    public void postInitialize2() {
+
+    }
 }
