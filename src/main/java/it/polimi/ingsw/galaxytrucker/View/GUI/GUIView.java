@@ -44,6 +44,8 @@ public class GUIView extends Application implements View {
     private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
     private final Queue<String> notificationQueue = new LinkedList<>();
     private boolean isShowingNotification = false;
+    private int[] bufferedCoordinate = null;
+
 
 
 
@@ -130,12 +132,18 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
-        try {
-            return inputManager.coordinateFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get coordinates: " + e.getMessage());
+        if (bufferedCoordinate != null) {
+            int[] result = bufferedCoordinate;
+            bufferedCoordinate = null;
+            return result;
+        } else {
+            reportError("No coordinate selected.");
             return new int[]{-1, -1};
         }
+    }
+
+    public void setBufferedCoordinate(int[] coordinate) {
+        this.bufferedCoordinate = coordinate;
     }
 
     @Override
@@ -191,6 +199,12 @@ public class GUIView extends Application implements View {
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
+                case TILE_MANAGEMENT -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
+
+                }
                 default -> {}
             }
         });
