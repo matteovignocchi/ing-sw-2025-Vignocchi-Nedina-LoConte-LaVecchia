@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard;
 
+import it.polimi.ingsw.galaxytrucker.Controller.Controller;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 
 import java.io.Serializable;
@@ -26,8 +28,9 @@ public class FlightCardBoard implements Serializable {
     protected int blueGoodBonus;
     protected int malusBrokenTile;
     protected List<Player> orderedPlayersInFlight;
+    protected Controller controller;
 
-    public FlightCardBoard() {
+    public FlightCardBoard(Controller controller) {
         //si inizia a contare da 1 le posizioni
         this.spacesNumber = 18;
         this.bonusFirstPosition = 4;
@@ -41,6 +44,7 @@ public class FlightCardBoard implements Serializable {
         this.blueGoodBonus = 1;
         this.malusBrokenTile = -1;
         this.orderedPlayersInFlight = new ArrayList<Player>();
+        this.controller = controller;
     }
 
     public int getBonusRedCargo() {
@@ -253,7 +257,7 @@ public class FlightCardBoard implements Serializable {
      * another one with a higher number of laps and a higher position on the board
      */
 
-    public void setOverlappedPlayersEliminated() {
+    public void checkIfPlayerOverlapped() {
         for(Player p : orderedPlayersInFlight) {
             if(p.isEliminated()) continue;
             for(Player other : orderedPlayersInFlight) {
@@ -262,6 +266,17 @@ public class FlightCardBoard implements Serializable {
                     p.setEliminated();
                     break;
                 }
+            }
+        }
+    }
+
+    public void checkIfPlayerNoHumansLeft() throws BusinessLogicException {
+        for(Player p : orderedPlayersInFlight) {
+            if(p.isEliminated()) continue;
+            if(p.getTotalHuman()==0){
+                p.setEliminated();
+                String nick = controller.getNickByPlayer(p);
+                controller.inform("SERVER: You have lost all your crewmates", nick);
             }
         }
     }

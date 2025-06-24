@@ -62,17 +62,17 @@ public class Controller implements Serializable {
 
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
         if(isDemo) {
-            fBoard = new FlightCardBoard();
+            fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             deck = deckCreator.CreateDemoDeck();
 //            deck = deckCreator.CreateMixedDemoDeck();
         }else{
-            fBoard = new FlightCardBoard2();
+            fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateMeteoritesDeck();
+            decks = deckCreator.CreateOpenSpaceDecks();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -263,6 +263,14 @@ public class Controller implements Serializable {
         for(String nickname : nicknames) {
             Player p = getPlayerByNickname(nickname);
             if(p.isConnected()) inform(msg, nickname);
+        }
+    }
+
+    public void broadcastInformExcept(String msg, Player caller){
+        List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
+        for(String nickname : nicknames) {
+            Player p = getPlayerByNickname(nickname);
+            if(p.isConnected() && !p.equals(caller)) inform(msg, nickname);
         }
     }
 
@@ -1204,6 +1212,7 @@ public class Controller implements Serializable {
     public void autoCommandForRemovePlayers(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
+
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile tmpTile = p.getTile(i, j);
@@ -1211,7 +1220,7 @@ public class Controller implements Serializable {
                     case HousingUnit h -> {
                         if(h.getListOfToken().isEmpty()) continue;
                         else {
-                            for(int z=0 ; z<h.getListOfToken().size() ; z++) {
+                            while (flag > 0 && !h.getListOfToken().isEmpty()) {
                                 h.removeHumans(0);
                                 flag--;
                             }
@@ -1223,6 +1232,7 @@ public class Controller implements Serializable {
             }
         }
     }
+
     public void autoCommandForBattery(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
@@ -1815,11 +1825,12 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
 
-
         int totalCrew = getNumCrew(p);
+
         if (num >= totalCrew) {
-            p.setEliminated();
-            inform("SERVER: You lost all your crewmates", nick);
+//            p.setEliminated();
+            autoCommandForRemovePlayers(p, totalCrew);
+//            inform("SERVER: You lost all your crewmates", nick);
         } else {
             if(!p.isConnected()){
                 autoCommandForRemovePlayers(p, num);
@@ -1827,14 +1838,7 @@ public class Controller implements Serializable {
             }
             while (num > 0) {
                 if(p.isConnected()){
-                    try {
-                        x.inform("SERVER: Select an Housing unit");
-                    } catch (IOException e) {
-                        markDisconnected(nick);
-                    } catch (Exception e){
-                        markDisconnected(nick);
-                        System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
-                    }
+                    inform("SERVER: Select an housing unit", nick);
                     int[] vari = askPlayerCoordinates(p);
                     //TODO: gestire caso scadenza timeout (il client non risponde in tempo, askPlayerCoordinates ritorna null)
                     Tile y = p.getTile(vari[0], vari[1]);
@@ -1846,28 +1850,10 @@ public class Controller implements Serializable {
                                 if(tmp == 3) p.setPurpleAlien();
                                 num--;
                             }else{
-                                try{
-                                    x.inform("SERVER: Select a valid housing unit");
-                                    //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-                                } catch (IOException e) {
-                                    markDisconnected(nick);
-                                } catch (Exception e){
-                                    markDisconnected(nick);
-                                    System.err.println("[ERROR] in removeCrewmates " + e.getMessage());
-                                }
+                                inform("SERVER: Select a valid housing unit", nick);
                             }
                         }
-                        default -> {
-                            try {
-                                x.inform("SERVER:  Select a valid housing unit");
-                                //x.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
-                            } catch (IOException e) {
-                                markDisconnected(nick);
-                            } catch (Exception e){
-                                markDisconnected(nick);
-                                System.err.println("[ERROR] in removeCrewmates: " + e.getMessage());
-                            }
-                        }
+                        default -> inform("SERVER: Select a valid housing unit", nick);
                     }
 
                     printPlayerDashboard(x, p, nick);
@@ -1919,12 +1905,6 @@ public class Controller implements Serializable {
                     default ->{}
                 }
             }
-            tmp = getNumCrew(p);
-            if(tmp ==  0){
-                p.setEliminated();
-                inform("SERVER: You have lost all your humans", nick);
-            }
-
         }
     }
 
@@ -2118,7 +2098,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
-            return true;
+            //return true;
         }
 
         if(!tmpBoolean){
@@ -2250,13 +2230,16 @@ public class Controller implements Serializable {
         String direction = directions[dir];
         String size = isBig ? "big" : "small";
 
+        /**
         for (Player p : players) {
             String nick = getNickByPlayer(p);
             if(players.indexOf(p)!=0) inform("\nSERVER: Waiting for your turn...", nick);
-        }
+        } */
+
+        broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
 
         for (Player p : players) {
-            if(p.isConnected() && !p.isEliminated()){
+            if(p.isConnected()){
                 String nick = getNickByPlayer(p);
                 VirtualView v = getViewCheck(nick);
                 inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
@@ -2615,7 +2598,8 @@ public class Controller implements Serializable {
         CardEffectVisitor visitor = new CardEffectVisitor(this);
         card.accept(visitor);
 
-        fBoard.setOverlappedPlayersEliminated();
+        fBoard.checkIfPlayerOverlapped();
+        fBoard.checkIfPlayerNoHumansLeft();
         List<Player> eliminated = fBoard.eliminatePlayers();
         for (Player player : eliminated) handleElimination(player);
         fBoard.orderPlayersInFlightList();

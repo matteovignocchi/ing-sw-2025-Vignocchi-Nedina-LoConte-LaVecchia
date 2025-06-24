@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard;
 
+import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 
 import java.io.Serializable;
@@ -11,7 +12,8 @@ import java.util.ArrayList;
  */
 public class FlightCardBoard2 extends FlightCardBoard implements Serializable {
 
-    public FlightCardBoard2() {
+    public FlightCardBoard2(Controller controller) {
+        super(controller);
         this.spacesNumber = 24;
         this.bonusFirstPosition = 8;
         this.bonusSecondPosition = 6;

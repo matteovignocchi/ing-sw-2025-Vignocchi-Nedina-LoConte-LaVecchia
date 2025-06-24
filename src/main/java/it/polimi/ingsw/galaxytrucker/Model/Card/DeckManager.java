@@ -109,9 +109,9 @@ public class DeckManager implements Serializable {
     }
 
     public List<Deck> CreateSlaversDecks() throws CardEffectException {
-        Card c1 = new SlaversCard("1", 13, 5, 2, 1);
-        Card c2 = new SlaversCard("2", 13, 5, 2, 1);
-        Card c3 = new SlaversCard("3", 13, 5, 2, 1);
+        Card c1 = new SlaversCard("1", 13, 5, 4, 1);
+        Card c2 = new SlaversCard("2", 13, 5, 4, 1);
+        Card c3 = new SlaversCard("3", 13, 5, 4, 1);
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
