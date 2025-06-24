@@ -94,20 +94,25 @@ public class BuildingPhaseController extends GUIController {
                 }
             }
         }
-        if (model.getCurrentTile() != null) {
-            showCurrentTile(model.getCurrentTile());
-        }
-        setNickname(model.getNickname());
-        setCommandVisibility(model.isDemo());
+
+        clearCurrentTile(); // <-- rimuove tile trascinabile se c'era
+
+        // Mostra pulsanti per BOARD_SETUP
         returnTileBtn.setVisible(false);
         rotateLeftBtn.setVisible(false);
         rotateRightBtn.setVisible(false);
+        getShownBtn.setVisible(true);
+        getCoveredBtn.setVisible(true);
+        setReadyBtn.setVisible(true);
         rightArrowButton.setVisible(false);
         leftArrowButton.setVisible(false);
+
+        setNickname(model.getNickname());
+        setCommandVisibility(model.isDemo());
     }
 
+
     public void postInitialize2(){
-        //completeCommand("GET_COVERED");
         getShownBtn.setVisible(false);
         getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
@@ -121,6 +126,7 @@ public class BuildingPhaseController extends GUIController {
             for (int col = 0; col < 7; col++) {
                 final int r = row;
                 final int c = col;
+
                 Button tileButton = new Button();
                 tileButton.setStyle("-fx-background-color: transparent;");
                 tileButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -147,19 +153,22 @@ public class BuildingPhaseController extends GUIController {
                             return;
                         }
 
-                        if (!inputManager.coordinateFuture.isDone()) {
-                            inputManager.coordinateFuture.complete(new int[]{r, c});
-                        }
+                        // Salva coordinate per quando askCoordinate sarà chiamato
+                        guiView.setBufferedCoordinate(new int[]{r, c});
 
+                        guiView.resolveGenericCommand("PLACE_TILE");
+
+
+                        // Pulisce preview e resetta
                         tilePreviewPane.getChildren().clear();
                         currentTileView = null;
+
                         event.setDropCompleted(true);
                     } else {
                         event.setDropCompleted(false);
                     }
                     event.consume();
                 });
-
 
                 coordinateGridPane.add(tileButton, c, r);
             }
@@ -183,13 +192,19 @@ public class BuildingPhaseController extends GUIController {
             currentTileView.setRotate(currentRotation);
 
             currentTileView.setOnDragDetected(event -> {
-                completeCommand("PLACE_TILE");
+                returnTileBtn.setVisible(false);
                 Dragboard db = currentTileView.startDragAndDrop(TransferMode.MOVE);
                 ClipboardContent content = new ClipboardContent();
                 content.putString("tile");
                 db.setContent(content);
-                db.setDragView(currentTileView.snapshot(null, null));
+                db.setDragView(currentTileView.snapshot(null, null));                System.out.println("ci siamo arrivati");
+                System.out.println("ci siamo arrivati prade");
+
+
                 event.consume();
+                System.out.println("ci siamo arrivati");
+
+
             });
 
             tilePreviewPane.getChildren().setAll(currentTileView);

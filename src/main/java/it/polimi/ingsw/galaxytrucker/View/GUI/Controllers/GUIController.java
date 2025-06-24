@@ -39,5 +39,7 @@ public abstract class GUIController {
     public void updateDashboard(ClientTile[][] ship) {
     }
 
+    public void postInitialize2() {
+    }
 }
 
