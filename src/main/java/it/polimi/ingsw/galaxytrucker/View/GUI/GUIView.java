@@ -36,6 +36,7 @@ public class GUIView extends Application implements View {
 
     private static ClientController clientController;
     private SceneEnum sceneEnum;
+    private ClientGamePhase gamePhase;
     private Stage mainStage;
     private SceneRouter sceneRouter;
     private UserInputManager inputManager;
@@ -191,6 +192,7 @@ public class GUIView extends Application implements View {
     }
 
     public void updateState(ClientGamePhase gamePhase) {
+        this.gamePhase= gamePhase;
         Platform.runLater(() -> {
             switch (gamePhase) {
                 case BOARD_SETUP -> {
@@ -205,6 +207,7 @@ public class GUIView extends Application implements View {
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
 
                 }
+                case EXIT -> setSceneEnum(MAIN_MENU);
                 default -> {}
             }
         });
@@ -330,7 +333,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public ClientGamePhase getGamePhase() {
-        return null;
+        return gamePhase;
     }
 
     @Override public void printListOfGoods(List<String> goods) {}
@@ -543,6 +546,9 @@ public class GUIView extends Application implements View {
             return message.toLowerCase().contains("login successful");
         }
         if(message.toLowerCase().contains("waiting for other players...")) {
+            return false;
+        }
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT){
             return false;
         }
         return switch (sceneEnum) {
