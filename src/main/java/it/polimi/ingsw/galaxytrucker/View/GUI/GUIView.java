@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDashController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -16,9 +17,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -48,6 +51,9 @@ public class GUIView extends Application implements View {
     private boolean isShowingNotification = false;
     private int[] bufferedCoordinate = null;
     private Integer bufferedIndex = null;
+    private boolean previewingEnemyDashboard = false;
+    private String bufferedPlayerName = null;
+
 
 
 
@@ -125,9 +131,14 @@ public class GUIView extends Application implements View {
             alert.showAndWait();
         });
     }
-
     @Override
     public String askString() {
+        if (bufferedPlayerName != null) {
+            String result = bufferedPlayerName;
+            bufferedPlayerName = null;
+            return result;
+        }
+
         try {
             return inputManager.nicknameFuture.get();
         } catch (Exception e) {
@@ -185,14 +196,58 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
-        model.setDashboard(ship);
+        if (previewingEnemyDashboard) {
+            previewingEnemyDashboard = false;  // resetta subito il flag
 
-        Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
-            if (ctrl != null) {
-                ctrl.updateDashboard(ship); // <-- aggiorna la view!
-            }
-        });
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDash.fxml"));
+                    AnchorPane root = loader.load();
+                    PrintDashController ctrl = loader.getController();
+                    ctrl.setIsDemo(model.isDemo());        // mostrerà l'immagine giusta
+                    ctrl.loadDashboard(ship);              // popola la griglia
+
+                    GridPane grid = (GridPane) root.lookup("#enemyGrid");
+
+                    if (grid != null) {
+                        grid.getChildren().clear();
+
+                        for (int row = 0; row < ship.length; row++) {
+                            for (int col = 0; col < ship[0].length; col++) {
+                                ClientTile tile = ship[row][col];
+                                if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
+                                    ImageView image = new ImageView(tile.getImage());
+                                    image.setFitWidth(70);
+                                    image.setFitHeight(70);
+                                    image.setRotate(tile.getRotation());
+                                    grid.add(image, col, row);
+                                }
+                            }
+                        }
+                    }
+
+                    Stage popup = new Stage();
+                    popup.setTitle("Ship of " + bufferedPlayerName);
+                    popup.setScene(new Scene(root));
+                    popup.centerOnScreen();
+                    popup.show();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    reportError("Errore caricando EnemyDashboard.fxml: " + e.getMessage());
+                }
+            });
+        } else {
+            // normale: aggiorna il modello
+            model.setDashboard(ship);
+
+            Platform.runLater(() -> {
+                BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+                if (ctrl != null) {
+                    ctrl.updateDashboard(ship);
+                }
+            });
+        }
     }
 
 
@@ -278,11 +333,10 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
-
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU); // ✅ Solo ora cambiamo scena
         });
-
     }
+
 
     @Override
     public void setTile(ClientTile tile, int row, int col) {
@@ -416,6 +470,12 @@ public class GUIView extends Application implements View {
                 // (Opzionale) Imposta come modale rispetto alla finestra principale
                 // popupStage.initModality(Modality.WINDOW_MODAL);
                 // popupStage.initOwner(mainStage);
+                Button done = (Button) root.lookup("#done");
+                if (done != null) {
+                    done.setOnAction(e -> popupStage.close());
+                } else {
+                    reportError("Done button non trovato nel file FXML.");
+                }
 
                 popupStage.show();
 
@@ -636,6 +696,9 @@ public class GUIView extends Application implements View {
         if(message.toLowerCase().contains("waiting for other players...")) {
             return false;
         }
+        if(message.toLowerCase().contains("choose deck")) {
+            return false;
+        }
         if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
@@ -648,5 +711,12 @@ public class GUIView extends Application implements View {
             default -> false;
         };
     }
+    public void prepareToViewEnemyDashboard(String enemyName) {
+        this.previewingEnemyDashboard = true;
+        this.bufferedPlayerName = enemyName;
+        System.out.println(""+ enemyName);
+    }
+
+
 
 }

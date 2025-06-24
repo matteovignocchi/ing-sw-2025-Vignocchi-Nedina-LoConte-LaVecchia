@@ -89,10 +89,10 @@ public class ClientController {
                     while (!g.hasResolvedMenuChoice()) {
                         Thread.sleep(100);
                     }
-//                    String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
+                   String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
 
 
-                    String cmd = g.consumeMenuChoice();
+                    String cmd2 = g.consumeMenuChoice();
 
                     switch (cmd) {
                         case "1" -> createNewGame();
@@ -236,8 +236,16 @@ public class ClientController {
                     view.reportError("Game creation failed");
                 }
             }
-            case GUIView v -> {
-                List<Object> data = v.askCreateGameData();
+            case GUIView g -> {
+                Platform.runLater(() -> {
+                    g.setSceneEnum(SceneEnum.CREATE_GAME_MENU);
+                });
+
+                List<Object> data = g.askCreateGameData();
+                if (data.isEmpty()) {
+                    Platform.runLater(() -> g.setSceneEnum(SceneEnum.MAIN_MENU));
+                    return; // esce e torna al ciclo principale
+                }
                 boolean demo = (boolean) data.get(0);
                 int numberOfPlayer = (int) data.get(1);
                 int response = virtualClient.sendGameRequest("CREATE", numberOfPlayer, demo);
@@ -247,7 +255,7 @@ public class ClientController {
                     if (!started) return;
                     startGame();
                 } else {
-                    v.reportError("Game creation failed");
+                    g.reportError("Game creation failed");
                 }
         }
             default -> {
@@ -266,7 +274,18 @@ public class ClientController {
 
 
     public void joinExistingGame() throws Exception {
-        view.inform("Joining Existing Game...");
+        switch (view){
+            case GUIView g -> {
+                Platform.runLater(() -> {
+                    g.setSceneEnum(SceneEnum.JOIN_GAME_MENU);
+                });
+            }
+            case TUIView v -> {
+                v.inform("Joining Existing Game...");
+            }
+            default -> {}
+        }
+
         int gameId = sendGameRequestFromController("JOIN", 0, true);
         if (gameId > 0) {
             virtualClient.setGameId(gameId);
@@ -503,6 +522,7 @@ public class ClientController {
                 }
             }
             case GUIView g -> {
+                printMyDashBoardByController();
                 while (true) {
                     String key = g.sendAvailableChoices();
                     System.out.println("[DEBUG] Comando ricevuto da GUI: " + key);
