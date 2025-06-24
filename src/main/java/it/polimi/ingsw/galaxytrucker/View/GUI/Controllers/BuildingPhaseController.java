@@ -166,14 +166,6 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void rotateTile(int angle) {
-//        currentRotation += angle;
-//        if (currentTile != null) {
-//            if (angle > 0) currentTile.rotateRight();
-//            else currentTile.rotateLeft();
-//        }
-//        if (currentTileView != null) {
-//            currentTileView.setRotate(currentRotation);
-//        }
         if (!inputManager.rotationFuture.isDone()) {
             inputManager.rotationFuture.complete(currentRotation % 360);
         }

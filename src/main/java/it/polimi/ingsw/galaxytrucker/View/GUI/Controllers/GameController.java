@@ -10,7 +10,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-public abstract class GameController extends GUIController{
+public class GameController extends GUIController{
     @FXML
     private Pane demo1;
     @FXML
@@ -133,4 +133,6 @@ public abstract class GameController extends GUIController{
     public void postInitialize() {
 
     }
+
+
 }
