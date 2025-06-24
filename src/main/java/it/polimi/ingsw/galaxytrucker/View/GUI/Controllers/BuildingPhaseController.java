@@ -107,7 +107,6 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void postInitialize2(){
-        completeCommand("GET_COVERED");
         getShownBtn.setVisible(false);
         getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
@@ -167,14 +166,14 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void rotateTile(int angle) {
-        currentRotation += angle;
-        if (currentTile != null) {
-            if (angle > 0) currentTile.rotateRight();
-            else currentTile.rotateLeft();
-        }
-        if (currentTileView != null) {
-            currentTileView.setRotate(currentRotation);
-        }
+//        currentRotation += angle;
+//        if (currentTile != null) {
+//            if (angle > 0) currentTile.rotateRight();
+//            else currentTile.rotateLeft();
+//        }
+//        if (currentTileView != null) {
+//            currentTileView.setRotate(currentRotation);
+//        }
         if (!inputManager.rotationFuture.isDone()) {
             inputManager.rotationFuture.complete(currentRotation % 360);
         }
@@ -192,12 +191,14 @@ public class BuildingPhaseController extends GUIController {
 
             currentTileView.setOnDragDetected(event -> {
                 completeCommand("PLACE_TILE");
+                returnTileBtn.setVisible(false);
                 Dragboard db = currentTileView.startDragAndDrop(TransferMode.MOVE);
                 ClipboardContent content = new ClipboardContent();
                 content.putString("tile");
                 db.setContent(content);
                 db.setDragView(currentTileView.snapshot(null, null));
                 event.consume();
+
             });
 
             tilePreviewPane.getChildren().setAll(currentTileView);
