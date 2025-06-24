@@ -163,6 +163,10 @@ public class Player implements Serializable {
         return id;
     }
 
+    public int getIdPhoto(){
+        return idPhoto;
+    }
+
     public boolean isConnected() { return connected; }
 
     public void setConnected(boolean connected) { this.connected = connected; }

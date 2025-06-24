@@ -563,7 +563,7 @@ public class TUIView implements View {
             case "SMUGGLERSCARD"  -> {
                 inform("=== Smugglers ===");
                 inform(centerKV("Fire power", String.valueOf(card.firePower), 20));
-                inform(centerKV("Removed goods", String.valueOf(card.rewardGoods), 20));
+                inform(centerKV("Removed goods", String.valueOf(card.numGoods), 20));
                 inform(centerKV("Flight Days", String.valueOf(card.days), 20));
                 inform("Reward goods: " + joinGoods(card.rewardGoods));
             }
