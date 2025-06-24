@@ -1,10 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDashController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -433,7 +430,48 @@ public class GUIView extends Application implements View {
             ctrl.displayTileSelection(tiles);
         });
     }
-    @Override public void printCard(ClientCard card) {}
+    @Override
+    public void printCard(ClientCard card) {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintCard.fxml"));
+                AnchorPane root = loader.load();
+
+                PrintCardController ctrl = loader.getController();
+
+                Pane cardPane = (Pane) root.getChildren().get(1);
+
+                ImageView imageView = new ImageView(card.getImage());
+                imageView.setPreserveRatio(true);
+                imageView.setSmooth(true);
+                imageView.setCache(true);
+
+
+                imageView.fitWidthProperty().bind(cardPane.widthProperty());
+                imageView.fitHeightProperty().bind(cardPane.heightProperty());
+
+                cardPane.getChildren().add(imageView);
+
+                Stage popupStage = new Stage();
+                popupStage.setTitle("Card");
+                popupStage.setScene(new Scene(root, 720, 500));
+                popupStage.centerOnScreen();
+
+                Button done = (Button) root.lookup("#done");
+                if (done != null) {
+                    done.setOnAction(e -> popupStage.close());
+                } else {
+                    reportError("Done button non trovato nel file PrintCard.fxml.");
+                }
+
+                popupStage.show();
+
+            } catch (IOException e) {
+                reportError("Errore nel caricamento del file PrintCard.fxml: " + e.getMessage());
+            }
+        });
+    }
+
 
     @Override
     public void printDeck(List<ClientCard> deck) {
