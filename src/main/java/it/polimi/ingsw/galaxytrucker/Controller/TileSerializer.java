@@ -2,6 +2,7 @@ package it.polimi.ingsw.galaxytrucker.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.DtoConvention.TileDTO;
@@ -85,62 +86,103 @@ public class TileSerializer {
     /**
      * Converte il DTO in una vera Tile del model
      */
-    private Tile fromDTO(TileDTO dto) {
-        // per leggibilità
-        int a = dto.a, b = dto.b, c = dto.c, d = dto.d, id = dto.id , rotation = dto.rotation;
-
-        switch (dto.type) {
-            case "EMPTYSPACE" -> {
-                return new EmptySpace();                          // id 157 già fissato nel costruttore
-            }
-            case "ENGINE" -> {
-                return new Engine(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
-            }
-            case "CANNON" -> {
-                return new Cannon(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
-            }
-            case "MULTIJOINT" -> {
-                return new MultiJoint(a, b, c, d, id);            // (a,b,c,d,id)
-            }
-            case "ENERGYCELL" -> {
-                return new EnergyCell(a, b, c, d, dto.capacity, id);   // (a,b,c,d,capacity,id)
-            }
-            case "SHIELD" -> {
-                Shield s = new Shield(a, b, c, d, id);            // costruttore base
-                // copia vettore protectedCorners dal DTO
-                for (int i = 0; i < 4 && i < dto.protectedCorners.size(); i++)
-                    s.setProtectedCorner(i, dto.protectedCorners.get(i));
-                return s;
-            }
+//    private Tile fromDTO(TileDTO dto) {
+//        // per leggibilità
+//        int a = dto.a, b = dto.b, c = dto.c, d = dto.d, id = dto.id , rotation = dto.rotation;
+//
+//        switch (dto.type) {
+//            case "EMPTYSPACE" -> {
+//                return new EmptySpace();                          // id 157 già fissato nel costruttore
+//            }
+//            case "ENGINE" -> {
+//                return new Engine(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
+//            }
+//            case "CANNON" -> {
+//                return new Cannon(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
+//            }
+//            case "MULTIJOINT" -> {
+//                return new MultiJoint(a, b, c, d, id);            // (a,b,c,d,id)
+//            }
+//            case "ENERGYCELL" -> {
+//                return new EnergyCell(a, b, c, d, dto.capacity, id);   // (a,b,c,d,capacity,id)
+//            }
+//            case "SHIELD" -> {
+//                Shield s = new Shield(a, b, c, d, id);            // costruttore base
+//                // copia vettore protectedCorners dal DTO
+//                for (int i = 0; i < 4 && i < dto.protectedCorners.size(); i++)
+//                    s.setProtectedCorner(i, dto.protectedCorners.get(i));
+//                return s;
+//            }
+//            case "STORAGEUNIT" -> {
+//                StorageUnit su = new StorageUnit(a, b, c, d, dto.max, dto.advance, id);
+//                if (dto.goods != null) {
+//                    for (String gStr : dto.goods) {
+//                        Colour colour = Colour.valueOf(gStr);
+//                        try {
+//                            su.addGood(colour);
+//                        } catch (Exception ignored) {
+//                        }
+//                    }
+//                }
+//                return su;
+//            }
+//            case "HOUSINGUNIT" -> {
+//                Human hType = Human.valueOf(dto.human);
+//                HousingUnit hu = new HousingUnit(a, b, c, d, hType, id);
+//                hu.setSize(dto.max);          // max capacity
+//                if (dto.tokens != null) {
+//                    for (String tok : dto.tokens) {
+//                        Human token = Human.valueOf(tok);
+//                        try {
+//                            hu.addHuman(token);
+//                        } catch (Exception ignored) {
+//                        }
+//                    }
+//                }
+//                return hu;
+//            }
+//            default -> throw new IllegalArgumentException("Tipo di tile sconosciuto: " + dto.type);
+//        }
+//    }
+    public Tile fromDTO(TileDTO dto) {
+        Tile tile = switch (dto.type.toUpperCase()) {
+            case "ENGINE" -> new Engine(dto.a, dto.b, dto.c, dto.d, dto.idDouble, dto.id);
+            case "CANNON" -> new Cannon(dto.a, dto.b, dto.c, dto.d, dto.idDouble, dto.id);
+            case "ENERGYCELL" -> new EnergyCell(dto.a, dto.b, dto.c, dto.d, dto.capacity, dto.id);
+            case "MULTIJOINT" -> new MultiJoint(dto.a, dto.b, dto.c, dto.d, dto.id);
             case "STORAGEUNIT" -> {
-                StorageUnit su = new StorageUnit(a, b, c, d, dto.max, dto.advance, id);
-                if (dto.goods != null) {
-                    for (String gStr : dto.goods) {
-                        Colour colour = Colour.valueOf(gStr);
-                        try {
-                            su.addGood(colour);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
-                return su;
+                StorageUnit su = new StorageUnit(dto.a, dto.b, dto.c, dto.d, dto.max, dto.advance, dto.id);
+                if (dto.goods != null)
+                    for (String g : dto.goods)
+                        su.addGood(Colour.valueOf(g));
+                yield su;
             }
             case "HOUSINGUNIT" -> {
-                Human hType = Human.valueOf(dto.human);
-                HousingUnit hu = new HousingUnit(a, b, c, d, hType, id);
-                hu.setSize(dto.max);          // max capacity
-                if (dto.tokens != null) {
+                HousingUnit hu = new HousingUnit(dto.a, dto.b, dto.c, dto.d, Human.valueOf(dto.human), dto.id);
+                hu.setSize(dto.max);
+                if (dto.tokens != null)
                     for (String tok : dto.tokens) {
-                        Human token = Human.valueOf(tok);
                         try {
-                            hu.addHuman(token);
-                        } catch (Exception ignored) {
+                            hu.addHuman(Human.valueOf(tok));
+                        } catch (BusinessLogicException e) {
+                            throw new RuntimeException(e);
                         }
                     }
-                }
-                return hu;
+                yield hu;
             }
-            default -> throw new IllegalArgumentException("Tipo di tile sconosciuto: " + dto.type);
-        }
+            case "SHIELD" -> {
+                Shield s = new Shield(dto.a, dto.b, dto.c, dto.d, dto.id);
+                for (int i = 0; i < 4 && i < dto.protectedCorners.size(); i++)
+                    s.setProtectedCorner(i, dto.protectedCorners.get(i));
+                yield s;
+            }
+            case "EMPTYSPACE" -> new EmptySpace();
+            default -> throw new IllegalArgumentException("Unknown tile type: " + dto.type);
+        };
+
+        // ✅ FINAL FIX: assegna la rotazione al model
+        tile.rotation = dto.rotation;
+        return tile;
     }
+
 }

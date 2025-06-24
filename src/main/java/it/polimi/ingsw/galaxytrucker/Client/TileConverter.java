@@ -17,6 +17,7 @@ public class TileConverter {
         dto.goods = tile.goods;
         dto.tokens = tile.tokens;
         dto.protectedCorners = tile.protectedCorners;
+        dto.rotation = tile.rotation;
         return dto;
     }
 }

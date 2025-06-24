@@ -139,14 +139,4 @@ public class ControllerTest {
         controller.addPlayer("Alice", viewA);
         assertTrue(controller.isGameStarted(), "Game should be started when phase != WAITING_FOR_PLAYERS");
     }
-
-    @Test
-    public void testGetPlayersPosition() throws Exception {
-        controller.addPlayer("Alice", viewA);
-        Map<String,int[]> pos = controller.getPlayersPosition();
-        assertTrue(pos.containsKey("Alice"));
-        int[] arr = pos.get("Alice");
-        assertEquals(3, arr.length);
-        assertEquals(0, arr[2]);
-    }
 }

@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDashController;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -12,10 +13,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -44,6 +50,13 @@ public class GUIView extends Application implements View {
     private final Queue<String> notificationQueue = new LinkedList<>();
     private boolean isShowingNotification = false;
     private int[] bufferedCoordinate = null;
+    private Integer bufferedIndex = null;
+    private boolean previewingEnemyDashboard = false;
+    private String bufferedPlayerName = null;
+
+
+
+
 
 
 
@@ -118,9 +131,14 @@ public class GUIView extends Application implements View {
             alert.showAndWait();
         });
     }
-
     @Override
     public String askString() {
+        if (bufferedPlayerName != null) {
+            String result = bufferedPlayerName;
+            bufferedPlayerName = null;
+            return result;
+        }
+
         try {
             return inputManager.nicknameFuture.get();
         } catch (Exception e) {
@@ -131,16 +149,21 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
-        if (bufferedCoordinate != null) {
-            int[] result = bufferedCoordinate;
-            bufferedCoordinate = null;
-            System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
-            return result;
-        } else {
-            reportError("No coordinate selected.");
-            return new int[]{-1, -1};  // attenzione: questo può far fallire la posizione
+        while (bufferedCoordinate == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new int[]{-1, -1};
+            }
         }
+
+        int[] result = bufferedCoordinate;
+        bufferedCoordinate = null;
+        System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
+        return result;
     }
+
 
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
@@ -173,15 +196,50 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
-        model.setDashboard(ship);
+        if (previewingEnemyDashboard) {
+            previewingEnemyDashboard = false;
 
-        Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
-            if (ctrl != null) {
-                ctrl.updateDashboard(ship); // <-- aggiorna la view!
-            }
-        });
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDash.fxml"));
+                    AnchorPane root = loader.load();
+
+                    PrintDashController ctrl = loader.getController();
+                    ctrl.setIsDemo(model.isDemo());
+                    ctrl.loadDashboard(ship);
+
+                    Stage popup = new Stage();
+                    popup.setTitle("Ship of " + bufferedPlayerName);
+                    bufferedPlayerName = null;
+                    Scene popupScene = new Scene(root);
+                    popup.setScene(popupScene);
+                    popup.centerOnScreen();
+
+                    Button done = (Button) root.lookup("#closeButton");
+                    if (done != null) {
+                        done.setOnAction(e -> popup.close());
+                    } else {
+                        reportError("Done button non trovato nel file PrintDash.fxml.");
+                    }
+
+                    popup.show();
+
+                } catch (IOException e) {
+                    reportError("Errore caricando PrintDash.fxml: " + e.getMessage());
+                }
+            });
+        } else {
+            model.setDashboard(ship);
+
+            Platform.runLater(() -> {
+                BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+                if (ctrl != null) {
+                    ctrl.updateDashboard(ship);
+                }
+            });
+        }
     }
+
 
 
 
@@ -266,11 +324,10 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
-
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU); // ✅ Solo ora cambiamo scena
         });
-
     }
+
 
     @Override
     public void setTile(ClientTile tile, int row, int col) {
@@ -304,18 +361,36 @@ public class GUIView extends Application implements View {
     public void setNickName(String cognomePradella) {
 
     }
-
+    public void setBufferedIndex(Integer index) {
+        this.bufferedIndex = index;
+    }
     @Override
     public Integer askIndex() {
-        try {
-            return inputManager.indexFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get index: " + e.getMessage());
-            return -1;
+        while (bufferedIndex == null) {
+            try {
+                Thread.sleep(100); // attende polling leggero
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
+            }
+        }
+
+        int result = bufferedIndex;
+        bufferedIndex = null;
+        return result;
+    }
+
+    @Override public Integer askIndexWithTimeout() { return -1; }
+    @Override
+    public String choosePlayer() {
+        if (bufferedPlayerName != null) {
+            String result = bufferedPlayerName;
+            return result;
+        } else {
+            reportError("Nessun nome giocatore selezionato.");
+            return null;
         }
     }
-    @Override public Integer askIndexWithTimeout() { return -1; }
-    @Override public String choosePlayer() { return null; }
     @Override public void setInt() {}
 
     @Override
@@ -353,12 +428,66 @@ public class GUIView extends Application implements View {
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
             model.setCurrentTile(null); // non serve tile singola
+            setBufferedIndex(null);    // reset importante per evitare valori vecchi
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
             ctrl.displayTileSelection(tiles);
         });
     }
     @Override public void printCard(ClientCard card) {}
-    @Override public void printDeck(List<ClientCard> deck) {}
+
+    @Override
+    public void printDeck(List<ClientCard> deck) {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDeck.fxml"));
+                AnchorPane root = loader.load();
+
+                // Ottieni i tre pannelli (meglio usare fx:id se possibile)
+                Pane leftPane = (Pane) root.getChildren().get(1);
+                Pane centerPane = (Pane) root.getChildren().get(2);
+                Pane rightPane = (Pane) root.getChildren().get(3);
+                List<Pane> panes = List.of(leftPane, centerPane, rightPane);
+
+                for (int i = 0; i < Math.min(deck.size(), 3); i++) {
+                    ClientCard card = deck.get(i);
+                    ImageView imageView = new ImageView(card.getImage());
+                    imageView.setFitWidth(280);
+                    imageView.setFitHeight(430);
+                    panes.get(i).getChildren().add(imageView);
+                }
+
+                // Crea una nuova finestra
+                Stage popupStage = new Stage();
+                popupStage.setTitle("Deck");
+
+                // Imposta la scena
+                Scene popupScene = new Scene(root);
+                popupStage.setScene(popupScene);
+
+                // Centra la finestra sullo schermo
+                popupStage.centerOnScreen();
+
+                // (Opzionale) Imposta come modale rispetto alla finestra principale
+                // popupStage.initModality(Modality.WINDOW_MODAL);
+                // popupStage.initOwner(mainStage);
+                Button done = (Button) root.lookup("#done");
+                if (done != null) {
+                    done.setOnAction(e -> popupStage.close());
+                } else {
+                    reportError("Done button non trovato nel file FXML.");
+                }
+
+                popupStage.show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                reportError("Errore nel caricamento del file PrintDeck.fxml: " + e.getMessage());
+            }
+        });
+    }
+
+
+
 
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
@@ -430,6 +559,7 @@ public class GUIView extends Application implements View {
             case "ROTATE_RIGHT" -> "rightrotatethetile";
             case "PLACE_TILE" -> "placethetile";
             case "RESERVE_TILE" -> "takereservedtile";
+            case "DECK" -> "watchadeck";
             case "LOGOUT" -> "logout";
             default -> null;
         };
@@ -566,6 +696,9 @@ public class GUIView extends Application implements View {
         if(message.toLowerCase().contains("waiting for other players...")) {
             return false;
         }
+        if(message.toLowerCase().contains("choose deck")) {
+            return false;
+        }
         if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
@@ -578,5 +711,12 @@ public class GUIView extends Application implements View {
             default -> false;
         };
     }
+    public void prepareToViewEnemyDashboard(String enemyName) {
+        this.previewingEnemyDashboard = true;
+        this.bufferedPlayerName = enemyName;
+        System.out.println(""+ enemyName);
+    }
+
+
 
 }

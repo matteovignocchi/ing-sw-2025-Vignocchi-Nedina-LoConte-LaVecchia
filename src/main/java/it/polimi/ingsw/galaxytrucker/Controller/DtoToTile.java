@@ -33,6 +33,7 @@ public class DtoToTile {
             case "EMPTYSPACE" -> new EmptySpace();
             default -> throw new IllegalArgumentException("Tipo di tile sconosciuto: " + dto.type);
         };
+        tile.rotation = dto.rotation;
         return tile;
     }
 

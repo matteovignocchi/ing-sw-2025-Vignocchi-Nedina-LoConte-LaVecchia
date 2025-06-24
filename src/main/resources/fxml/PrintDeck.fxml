@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="570.0" prefWidth="880.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDeckController">
+   <children>
+      <ImageView fitHeight="570.0" fitWidth="880.0">
+         <image>
+            <Image url="@../Background_image_game.jpg" />
+         </image>
+      </ImageView>
+      <Pane fx:id="leftPane" layoutX="21.0" layoutY="10.0" prefHeight="430.0" prefWidth="280.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">
+      </Pane>
+      <Pane fx:id="rightPane" layoutX="579.0" layoutY="10.0" prefHeight="430.0" prefWidth="280.0" AnchorPane.bottomAnchor="80.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="70.0">
+      </Pane>
+      <Pane fx:id="centerPane" layoutX="297.0" layoutY="10.0" prefHeight="430.0" prefWidth="280.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="300.0" AnchorPane.topAnchor="70.0">
+      </Pane>
+      <Button fx:id="done" layoutX="413.0" layoutY="513.0" mnemonicParsing="false" text="Done" AnchorPane.leftAnchor="391.0" AnchorPane.rightAnchor="391.0" />
+   </children>
+</AnchorPane>
