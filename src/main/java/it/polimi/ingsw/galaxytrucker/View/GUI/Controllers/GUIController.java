@@ -41,5 +41,9 @@ public abstract class GUIController {
 
     public void postInitialize2() {
     }
+
+    public void postInitialize3() {
+
+    }
 }
 

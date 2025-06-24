@@ -22,10 +22,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -137,10 +134,11 @@ public class GUIView extends Application implements View {
         if (bufferedCoordinate != null) {
             int[] result = bufferedCoordinate;
             bufferedCoordinate = null;
+            System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
             return result;
         } else {
             reportError("No coordinate selected.");
-            return new int[]{-1, -1};
+            return new int[]{-1, -1};  // attenzione: questo può far fallire la posizione
         }
     }
 
@@ -204,8 +202,13 @@ public class GUIView extends Application implements View {
                 case MAIN_MENU -> setSceneEnum(MAIN_MENU);
                 case TILE_MANAGEMENT -> {
                     setSceneEnum(BUILDING_PHASE);
-                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+//                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
+                }
+                case TILE_MANAGEMENT_AFTER_RESERVED->{
+                    setSceneEnum(BUILDING_PHASE);
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize3();
 
                 }
                 case EXIT -> {
@@ -346,7 +349,14 @@ public class GUIView extends Application implements View {
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
     @Override public void printPileCovered() {}
-    @Override public void printPileShown(List<ClientTile> tiles) {}
+    @Override
+    public void printPileShown(List<ClientTile> tiles) {
+        Platform.runLater(() -> {
+            model.setCurrentTile(null); // non serve tile singola
+            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
+            ctrl.displayTileSelection(tiles);
+        });
+    }
     @Override public void printCard(ClientCard card) {}
     @Override public void printDeck(List<ClientCard> deck) {}
 
@@ -419,6 +429,7 @@ public class GUIView extends Application implements View {
             case "ROTATE_LEFT" -> "leftrotatethetile";
             case "ROTATE_RIGHT" -> "rightrotatethetile";
             case "PLACE_TILE" -> "placethetile";
+            case "RESERVE_TILE" -> "takereservedtile";
             case "LOGOUT" -> "logout";
             default -> null;
         };
@@ -555,9 +566,10 @@ public class GUIView extends Application implements View {
         if(message.toLowerCase().contains("waiting for other players...")) {
             return false;
         }
-        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT){
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
+
         return switch (sceneEnum) {
             case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
