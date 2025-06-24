@@ -34,6 +34,7 @@ public class Player implements Serializable {
     private boolean isEliminated;
     private GamePhase gamePhase;
     private Tile lastTile;
+    private boolean semaforoPradella;
 
     /**
      * constructor that initialize all the variables
@@ -250,9 +251,8 @@ public class Player implements Serializable {
 
             }
         }
+        System.out.println("differnt Discard Pile" + tmp);
         return tmp;
-
-
 
     }
 
@@ -356,12 +356,54 @@ public class Player implements Serializable {
      * @param b column of the matrix
      */
     public void removeTile(int a, int b) throws BusinessLogicException {
-        addToDiscardPile(Dash_Matrix[a][b]);
+        if(semaforoPradella) addToDiscardPile(Dash_Matrix[a][b]);
+        Tile tmp = Dash_Matrix[a][b];
         Dash_Matrix[a][b] = new EmptySpace();
         validStatus[a][b] = Status.FREE;
-//        if (a == 2 && b == 3) {
-//            this.setEliminated();
-//        }
+        switch(tmp){
+            case HousingUnit housingUnit->{
+                if(housingUnit.getListOfToken().size()==1){
+                    switch(housingUnit.getTypeOfConnections()){
+                        case BROWN_ALIEN -> setBrownAlien();
+                        case PURPLE_ALIEN ->  setPurpleAlien();
+                        default -> {}
+                    }
+                }
+                if(!housingUnit.getType().equals(Human.HUMAN)){
+                    checkNearAlien(a, b);
+                }
+            }
+            default ->{}
+        }
+    }
+    public void checkNearAlien(int a, int b) throws BusinessLogicException {
+        int[] tmp = {1, 0, -1, 0};
+        int[] tmp2 = {0, 1, 0, -1};
+        for (int i = 0; i < 4; i++) {
+            if(isOutOfBounds(a + tmp[i], b + tmp2[i])) continue;
+            Tile tmp3 = Dash_Matrix[a+tmp[i]][b+tmp2[i]];
+            switch (tmp3){
+                case HousingUnit housingUnit->{
+                    if(housingUnit.getListOfToken().size()==1){
+                        switch(housingUnit.getTypeOfConnections()){
+                            case BROWN_ALIEN -> {
+                                setBrownAlien();
+                                housingUnit.removeHumans(0);
+                            }
+                            case PURPLE_ALIEN ->  {
+                                setPurpleAlien();
+                                housingUnit.removeHumans(0);
+                            }
+                            default -> {}
+                        }
+                    }
+                }
+                default ->{}
+            }
+        }
+
+
+
     }
 
     /**
@@ -508,11 +550,13 @@ public class Player implements Serializable {
                             Tile nearTmp = Dash_Matrix[nx][ny];
                             switch (nearTmp){
                                 case HousingUnit e1-> {
-                                   if(e1.getType() != Human.HUMAN){
+                                   if(e1.getType() != Human.HUMAN ){
                                        e.setTypeOfConnections(e1.getType());
-                                   }else {
-                                       e.setTypeOfConnections(Human.PRADELLA);
                                        e1.setConnected(true);
+                                       e.setConnected(true);
+                                   }else {
+                                       e1.setConnected(true);
+                                       e.setConnected(true);
                                    }
                                 }
                                 default -> {}
@@ -603,7 +647,6 @@ public class Player implements Serializable {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
 
-
     public boolean isIsolated(int x, int y) {
         Tile tmp = Dash_Matrix[x][y];
         if(tmp == null) return true;
@@ -638,8 +681,10 @@ public class Player implements Serializable {
             if(tmpBo) flag = true;
         }
         controlOfConnection();
+        semaforoPradella = false;
         removeTile(x, y);
         addTile(x,y,tmp);
+        semaforoPradella = true;
     }
 
     public boolean controlAssembly2(int xx, int yy) throws BusinessLogicException {
