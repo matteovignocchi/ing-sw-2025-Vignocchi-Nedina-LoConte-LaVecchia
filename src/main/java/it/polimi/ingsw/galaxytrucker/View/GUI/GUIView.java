@@ -301,12 +301,12 @@ public class GUIView extends Application implements View {
 
     @Override
     public void setValidity(int a, int b) {
-
+        model.setValidity(a, b);
     }
 
     @Override
     public void resetValidity(int a, int b) {
-
+        model.resetValidity(a,b);
     }
 
     @Override

@@ -124,7 +124,12 @@ public class GUIModel {
         this.playerPositions.clear();
         this.playerPositions.putAll(map);
     }
-
+    public void setValidity(int a , int b){
+        mask[a][b] = false;
+    }
+    public void resetValidity(int a , int b){
+        mask[a][b] = true;
+    }
     public Map<String, int[]> getPlayerPositions() {
         return new HashMap<>(playerPositions);
     }
