@@ -1079,7 +1079,7 @@ public class TUIView implements View {
         int choice;
         while (true) {
             choice = askIndex() + 1;
-            if (choice == 0 || availableGames.containsKey(choice - 1)) {
+            if (choice == 0 || availableGames.containsKey(choice)) {
                 return choice ;
             }
             reportError("Invalid choice, try again.");

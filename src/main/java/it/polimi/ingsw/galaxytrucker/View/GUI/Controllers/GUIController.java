@@ -33,5 +33,9 @@ public abstract class GUIController {
         this.guiView = guiView;
     }
     public abstract void postInitialize();
+
+    public void updateDashboard(ClientTile[][] ship) {
+    }
+
 }
 

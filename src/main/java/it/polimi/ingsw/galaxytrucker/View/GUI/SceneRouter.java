@@ -47,7 +47,7 @@ public class SceneRouter {
                     continue;
                 }
 
-                controller.setGuiView(guiView); // <-- QUI lo passi
+                controller.setGuiView(guiView);
                 controller.setModel(model);
                 controller.setInputManager(inputManager);
                 controller.setSceneRouter(this);
@@ -68,7 +68,13 @@ public class SceneRouter {
         } else {
             System.err.println("Scene not found: " + sceneEnum);
         }
+        stage.centerOnScreen();
     }
+
+    public Scene getCurrentScene() {
+        return stage.getScene();
+    }
+
 
     public GUIController getController(SceneEnum sceneEnum) {
         return controllers.get(sceneEnum);

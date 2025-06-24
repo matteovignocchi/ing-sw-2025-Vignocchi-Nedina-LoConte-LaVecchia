@@ -7,7 +7,7 @@ public class UserInputManager {
 
     public CompletableFuture<String> nicknameFuture = new CompletableFuture<>();
     public CompletableFuture<String> menuChoiceFuture = new CompletableFuture<>();
-    public CompletableFuture<String> commandFuture = new CompletableFuture<>();
+//    public CompletableFuture<String> commandFuture = new CompletableFuture<>();
     public CompletableFuture<int[]> coordinateFuture = new CompletableFuture<>();
     public CompletableFuture<Integer> indexFuture = new CompletableFuture<>();
     public CompletableFuture<Integer> rotationFuture = new CompletableFuture<>();
@@ -16,7 +16,7 @@ public class UserInputManager {
     public void resetAll() {
         nicknameFuture = new CompletableFuture<>();
         menuChoiceFuture = new CompletableFuture<>();
-        commandFuture = new CompletableFuture<>();
+//        commandFuture = new CompletableFuture<>();
         coordinateFuture = new CompletableFuture<>();
         indexFuture = new CompletableFuture<>();
         rotationFuture = new CompletableFuture<>();
@@ -31,9 +31,9 @@ public class UserInputManager {
         indexFuture = new CompletableFuture<>();
     }
 
-    public void resetCommand() {
-        commandFuture = new CompletableFuture<>();
-    }
+//    public void resetCommand() {
+//        commandFuture = new CompletableFuture<>();
+//    }
 
     public void resetRotation() {
         rotationFuture = new CompletableFuture<>();
