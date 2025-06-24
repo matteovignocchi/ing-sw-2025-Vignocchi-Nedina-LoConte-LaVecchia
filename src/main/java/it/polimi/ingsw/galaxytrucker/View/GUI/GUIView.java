@@ -16,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -278,11 +279,10 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
-
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU); // ✅ Solo ora cambiamo scena
         });
-
     }
+
 
     @Override
     public void setTile(ClientTile tile, int row, int col) {
@@ -416,6 +416,12 @@ public class GUIView extends Application implements View {
                 // (Opzionale) Imposta come modale rispetto alla finestra principale
                 // popupStage.initModality(Modality.WINDOW_MODAL);
                 // popupStage.initOwner(mainStage);
+                Button done = (Button) root.lookup("#done");
+                if (done != null) {
+                    done.setOnAction(e -> popupStage.close());
+                } else {
+                    reportError("Done button non trovato nel file FXML.");
+                }
 
                 popupStage.show();
 
@@ -634,6 +640,9 @@ public class GUIView extends Application implements View {
             return message.toLowerCase().contains("login successful");
         }
         if(message.toLowerCase().contains("waiting for other players...")) {
+            return false;
+        }
+        if(message.toLowerCase().contains("choose deck")) {
             return false;
         }
         if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
