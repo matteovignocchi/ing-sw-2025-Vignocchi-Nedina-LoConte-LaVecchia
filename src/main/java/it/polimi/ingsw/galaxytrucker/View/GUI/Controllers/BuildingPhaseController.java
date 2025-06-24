@@ -107,7 +107,7 @@ public class BuildingPhaseController extends GUIController {
     }
 
     public void postInitialize2(){
-        completeCommand("GET_COVERED");
+        //completeCommand("GET_COVERED");
         getShownBtn.setVisible(false);
         getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
@@ -167,14 +167,6 @@ public class BuildingPhaseController extends GUIController {
     }
 
     private void rotateTile(int angle) {
-        currentRotation += angle;
-        if (currentTile != null) {
-            if (angle > 0) currentTile.rotateRight();
-            else currentTile.rotateLeft();
-        }
-        if (currentTileView != null) {
-            currentTileView.setRotate(currentRotation);
-        }
         if (!inputManager.rotationFuture.isDone()) {
             inputManager.rotationFuture.complete(currentRotation % 360);
         }
