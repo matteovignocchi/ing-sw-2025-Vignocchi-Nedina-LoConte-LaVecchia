@@ -1,85 +1,142 @@
+
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
+import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.Node;
-import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.List;
 
-
-public class PrintListOfGoodController extends GUIController{
+public class PrintListOfGoodController extends GUIController {
 
     @FXML private Pane goodPane;
-    @FXML private Button addGood;
-    @FXML private Button rearranges;
-    @FXML private Button trash;
-    @FXML private Button leftBtn;
-    @FXML private Button rightBtn;
+    @FXML private Button addGood, rearranges, trash, leftBtn, rightBtn;
+    private int currentGoodIndex = 0;
+    private List<String> loadedGoods;
 
     public void setupForActionSelection(GUIView gui) {
+        System.out.println("[LOG] setupForActionSelection() → mostra i 3 pulsanti");
+
+        goodPane.setVisible(false);
         addGood.setVisible(true);
         rearranges.setVisible(true);
         trash.setVisible(true);
+        leftBtn.setVisible(false);
+        rightBtn.setVisible(false);
 
-        addGood.setOnAction(e -> gui.setBufferedIndex(0));
-        rearranges.setOnAction(e -> gui.setBufferedIndex(1));
-        trash.setOnAction(e -> gui.setBufferedIndex(2));
+        addGood.setOnAction(e -> {
+            gui.setBufferedIndex(0);
+            closeWindow();
+        });
+        rearranges.setOnAction(e -> {
+            gui.setBufferedIndex(1);
+            closeWindow();
+        });
+        trash.setOnAction(e -> {
+            gui.setBufferedIndex(2);
+            closeWindow();
+        });
     }
 
-    public void setupForGoodsIndexSelection(GUIView gui) {
+    public void setupForGoodsIndexSelection() {
+        System.out.println("[LOG] setupForGoodsIndexSelection() → mostra la lista di goods");
+
+        goodPane.setVisible(true);
+        addGood.setVisible(false);
+        rearranges.setVisible(false);
+        trash.setVisible(false);
         leftBtn.setVisible(true);
         rightBtn.setVisible(true);
-
-        for (int i = 0; i < goodPane.getChildren().size(); i++) {
-            Node node = goodPane.getChildren().get(i);
-            int index = i;
-            node.setOnMouseClicked(e -> gui.setBufferedIndex(index));
-        }
     }
 
     public void loadGoods(List<String> goods) {
-        goodPane.getChildren().clear();
-
-        double paneWidth = goodPane.getPrefWidth();
-        double paneHeight = goodPane.getPrefHeight();
-
-        int max = goods.size();
-        double imageSize = Math.min(paneWidth / max, paneHeight); // dimensione massima disponibile
-
-        for (int i = 0; i < max; i++) {
-            String color = goods.get(i).toUpperCase();
-
-            ImageView goodImage = new ImageView(getImageForGood(color));
-            goodImage.setPreserveRatio(true);
-            goodImage.setFitWidth(imageSize);
-            goodImage.setFitHeight(imageSize);
-
-            StackPane wrapper = new StackPane(goodImage);
-            wrapper.setPrefSize(imageSize, imageSize);
-            wrapper.setLayoutX(i * imageSize);
-            wrapper.setLayoutY((paneHeight - imageSize) / 2); // centrato verticalmente
-
-            goodPane.getChildren().add(wrapper);
-        }
+        this.loadedGoods = goods;
+        this.currentGoodIndex = 0;
+        showGood(null);
     }
 
-    private String getImageForGood(String color) {
-        return switch (color) {
+    public void showGood(GUIView gui) {
+        goodPane.getChildren().clear();
+
+        if (loadedGoods == null || loadedGoods.isEmpty()) return;
+
+        String color = loadedGoods.get(currentGoodIndex).toUpperCase();
+        String path = switch (color) {
             case "BLUE" -> "/BluGood.png";
             case "RED" -> "/RedGood.png";
             case "GREEN" -> "/GreenGood.png";
             case "YELLOW" -> "/YellowGood.png";
-            default -> "/UnknownGood.png";
+            default -> "/placeholder.png";
         };
+
+        ImageView iv = new ImageView(new Image(getClass().getResource(path).toExternalForm()));
+
+        iv.setPreserveRatio(true);
+        iv.setSmooth(true);
+        iv.setCache(true);
+        iv.setCursor(Cursor.HAND); // 👈 mostra la "manina"
+
+        iv.fitWidthProperty().bind(goodPane.widthProperty());
+        iv.fitHeightProperty().bind(goodPane.heightProperty());
+
+        iv.setOnMouseClicked(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(150), iv);
+            st.setFromX(1.0);
+            st.setFromY(1.0);
+            st.setToX(0.85);
+            st.setToY(0.85);
+            st.setAutoReverse(true);
+            st.setCycleCount(2);
+            st.setOnFinished(ev -> {
+                if (gui != null) gui.setBufferedIndex(currentGoodIndex);
+                closeWindow();
+            });
+            st.play();
+        });
+
+        goodPane.getChildren().add(iv);
     }
 
+    public void configureNavigation(GUIView gui) {
+        leftBtn.setVisible(true);
+        rightBtn.setVisible(true);
+
+        leftBtn.setOnAction(e -> {
+            currentGoodIndex = (currentGoodIndex - 1 + loadedGoods.size()) % loadedGoods.size();
+            showGood(gui);
+        });
+
+        rightBtn.setOnAction(e -> {
+            currentGoodIndex = (currentGoodIndex + 1) % loadedGoods.size();
+            showGood(gui);
+        });
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) goodPane.getScene().getWindow();
+        stage.close();
+    }
+
+    public void reset() {
+        addGood.setVisible(false);
+        rearranges.setVisible(false);
+        trash.setVisible(false);
+        leftBtn.setVisible(false);
+        rightBtn.setVisible(false);
+
+        for (Node node : goodPane.getChildren()) {
+            node.setOnMouseClicked(null);
+        }
+    }
 
     @Override
-    public void postInitialize() {
-
-    }
+    public void postInitialize() {}
 }
