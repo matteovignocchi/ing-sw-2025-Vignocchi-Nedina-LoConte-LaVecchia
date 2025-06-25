@@ -373,19 +373,9 @@ public class GameController extends GUIController {
         tileImage.setFitHeight(70);
         tileImage.setRotate(tile.getRotation());
         cell.getChildren().add(tileImage);
-        if (tile.tokens == null) {
-            System.out.println("[DEBUG] tile.tokens è null a (" + row + "," + col + ")");
-        } else if (tile.tokens.isEmpty()) {
-            System.out.println("[DEBUG] tile.tokens è vuoto a (" + row + "," + col + ")");
-        } else {
-            for (int i = 0; i < tile.tokens.size(); i++) {
-                System.out.println("tile.tokens[" + i + "] = " + tile.tokens.get(i));
-            }
-        }
         // Umani
         for (int i = 0; i < tile.tokens.size(); i++) {
 
-            System.out.println("tile.tokens: " + tile.tokens.get(i));
             String tokenType = tile.tokens.get(i);
             ImageView token = new ImageView(getTokenImage(tokenType));
             token.setFitWidth(26);
@@ -394,7 +384,6 @@ public class GameController extends GUIController {
             token.setTranslateX(i * 17); // offset orizzontale
             token.setTranslateY(2);
             cell.getChildren().add(token);
-            System.out.println("ho printato tua madre "+ i);
         }
 
         for (int i = 0; i < tile.capacity; i++) {
@@ -409,12 +398,6 @@ public class GameController extends GUIController {
 
         // Merci
         List<String> goods = tile.goods;
-        if (goods == null || goods.isEmpty()) {
-            System.out.println("[DEBUG] No goods in tile (" + row + "," + col + ")");
-        } else {
-            System.out.println("[DEBUG] Goods in tile (" + row + "," + col + "): " + goods);
-        }
-
         if (goods != null) {
             for (int i = 0; i < goods.size(); i++) {
                 String goodType = goods.get(i);
@@ -481,10 +464,8 @@ public class GameController extends GUIController {
 
         var stream = getClass().getResourceAsStream(path);
         if (stream == null) {
-            System.err.println("[TOKEN IMAGE] Immagine mancante per: " + tokenType + " → " + path);
             return new Image("https://via.placeholder.com/16x16.png?text=?");
         }
-        System.err.println("[DEBUG] Caricamento token: " + tokenType + " → path: " + path);
 
 
         return new Image(stream);

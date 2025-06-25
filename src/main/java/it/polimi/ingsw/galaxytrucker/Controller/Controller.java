@@ -1593,7 +1593,6 @@ public class Controller implements Serializable {
 
             int[] vari = askPlayerCoordinates(p);
 
-            printListOfGoods(list, nick);
             Tile t;
             if(vari==null) t = p.getTile(2,3);
             else t = p.getTile(vari[0], vari[1]);
@@ -1605,8 +1604,8 @@ public class Controller implements Serializable {
                         List<Colour> listGoods = c.getListOfGoods();
 
                         printListOfGoods(listGoods, nick);
-
                         Integer tmpint = askPlayerIndex(p, listGoods.size());
+
                         if(tmpint==null) tmpint = 0;
                         int idx = tmpint;
 
@@ -1616,8 +1615,10 @@ public class Controller implements Serializable {
                     }
 
                     inform("SERVER: Select the index of the good to place", nick);
+
                     printListOfGoods(list, nick);
                     Integer tmpint = askPlayerIndex(p, list.size());
+
                     if(tmpint==null) tmpint = 0;
                     int idx = tmpint;
 
@@ -1633,6 +1634,7 @@ public class Controller implements Serializable {
                                 list.remove(tempGood);
                                 tempGood = null;
                             }
+
                         }
                     }else {
                         c.addGood(list.get(idx));

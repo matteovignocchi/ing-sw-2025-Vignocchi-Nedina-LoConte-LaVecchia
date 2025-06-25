@@ -434,9 +434,16 @@ public class GUIView extends Application implements View {
     }
 
     @Override
+
     public Integer askIndexWithTimeout() {
-        long deadline = System.currentTimeMillis() + 20_000;
-        lastAskIndexTimestamp = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        if (now - lastAskIndexTimestamp < 300) {
+            System.out.println("[DEBUG] askIndexWithTimeout ignorato (chiamata duplicata)");
+            return -1;
+        }
+
+        lastAskIndexTimestamp = now;
+        long deadline = now + 20_000;
 
         long waitStart = System.currentTimeMillis();
         while (!showGoodActionPrompt && System.currentTimeMillis() - waitStart < 300) {
@@ -448,15 +455,13 @@ public class GUIView extends Application implements View {
         }
 
         Platform.runLater(() -> {
-            System.out.println("[LOG] Dentro Platform.runLater - showGoodActionPrompt = " + showGoodActionPrompt);
-
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGoods.fxml"));
                 AnchorPane root = loader.load();
                 PrintListOfGoodController ctrl = loader.getController();
 
                 if (showGoodActionPrompt) {
-                    ctrl.loadGoods(bufferedGoods);
+                    ctrl.loadGoods(bufferedGoods, this);
                     ctrl.setupForGoodsIndexSelection();
                     ctrl.configureNavigation(this);
                 } else {
@@ -480,26 +485,24 @@ public class GUIView extends Application implements View {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                return -1;
+                return 0;
             }
         }
 
         if (bufferedIndex == null) {
             reportError("Timeout su askIndex.");
-            return -1;
+            return 0;
         }
 
         int res = bufferedIndex;
         bufferedIndex = null;
 
-        // Timeout di conferma implicita
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {}
-        if (System.currentTimeMillis() - lastAskIndexTimestamp > 400) {
-            System.out.println("[DEBUG] Indice good confermato: " + res);
-        }
+//        // Delay di conferma
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException ignored) {}
 
+        System.out.println("[DEBUG] Indice good confermato: " + res);
         return res;
     }
 
@@ -571,12 +574,12 @@ public class GUIView extends Application implements View {
         bufferedCoordinate = null;
 
         // Se entro 500ms askCoordinate non è richiamato di nuovo, consideriamo confermato
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ignored) {}
-        if (System.currentTimeMillis() - lastAskCoordinateTimestamp > 400) {
-            System.out.println("[DEBUG] Coordinate confermate: " + Arrays.toString(result));
-        }
+//        try {
+//            Thread.sleep(500);
+//        } catch (InterruptedException ignored) {}
+//        if (System.currentTimeMillis() - lastAskCoordinateTimestamp > 400) {
+//            System.out.println("[DEBUG] Coordinate confermate: " + Arrays.toString(result));
+//        }
 
         return result;
     }
@@ -931,12 +934,16 @@ public class GUIView extends Application implements View {
         if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
             return false;
         }
+        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
+            System.out.println(message);
+        }
 
         return switch (sceneEnum) {
             case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
             case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
             case NICKNAME_DIALOG -> message.contains("Login");
+            case GAME_PHASE -> true;
             default -> false;
         };
     }

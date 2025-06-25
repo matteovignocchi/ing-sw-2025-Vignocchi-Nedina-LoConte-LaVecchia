@@ -57,10 +57,10 @@ public class PrintListOfGoodController extends GUIController {
         rightBtn.setVisible(true);
     }
 
-    public void loadGoods(List<String> goods) {
+    public void loadGoods(List<String> goods, GUIView guiView) {
         this.loadedGoods = goods;
         this.currentGoodIndex = 0;
-        showGood(null);
+        showGood(guiView);
     }
 
     public void showGood(GUIView gui) {
@@ -70,7 +70,7 @@ public class PrintListOfGoodController extends GUIController {
 
         String color = loadedGoods.get(currentGoodIndex).toUpperCase();
         String path = switch (color) {
-            case "BLUE" -> "/BluGood.png";
+            case "BLUE" -> "/BlueGood.png";
             case "RED" -> "/RedGood.png";
             case "GREEN" -> "/GreenGood.png";
             case "YELLOW" -> "/YellowGood.png";

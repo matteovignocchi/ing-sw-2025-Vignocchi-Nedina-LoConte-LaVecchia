@@ -339,8 +339,9 @@ public class DeckManager implements Serializable {
         List<Colour> list2= new ArrayList<>();
         List<List<Colour>> list = new ArrayList<>();
         list1.add(Colour.RED);
-        list1.add(Colour.RED);
+        list1.add(Colour.BLUE);
         list1.add(Colour.YELLOW);
+        list1.add(Colour.GREEN);
         list2.add(Colour.YELLOW);
         list2.add(Colour.BLUE);
         list2.add(Colour.GREEN);
