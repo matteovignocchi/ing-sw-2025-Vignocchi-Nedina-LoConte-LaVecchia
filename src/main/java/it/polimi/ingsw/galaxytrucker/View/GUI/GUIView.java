@@ -290,10 +290,17 @@ public class GUIView extends Application implements View {
                     GUIController controller = sceneRouter.getController(BUILDING_PHASE);
                     controller.postInitializeLogOut();
                 }
-                case WAITING_FOR_TURN  , DRAW_PHASE->{
+                case WAITING_FOR_TURN ->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
                     controller.postInitialize();
+                }
+                case DRAW_PHASE ->{
+                    setSceneEnum(GAME_PHASE);
+                    sceneRouter.getController(GAME_PHASE).postInitialize();
+                    sceneRouter.getController(GAME_PHASE).postInitialize2();
+
+
                 }
 
                 default -> {}
@@ -731,6 +738,7 @@ public class GUIView extends Application implements View {
             case "RESERVE_TILE" -> "takereservedtile";
             case "DECK" -> "watchadeck";
             case "LOGOUT" -> "logout";
+            case "DRAW" -> "drawacard";
             default -> null;
         };
         System.out.println("[DEBUG] Comando ricevuto: " + command + " → " + translated);

@@ -155,6 +155,46 @@ public class GameController extends GUIController {
         guiView.resolveGenericCommand(command);
     }
 
+    private void setPlayersButton() {
+        Map<String, int[]> mapPosition = model.getPlayerPositions();
+        List<String> others = mapPosition.keySet().stream()
+                .filter(name -> !name.equals(model.getNickname())).toList();
+
+        switch (others.size()) {
+            case 1 -> {
+                playerShip1Btn.setVisible(true);
+                String name = others.getFirst();
+                playerShip1Btn.setText("Player Ship of " + name);
+                playerShip1Btn.setUserData(name);
+            }
+            case 2 -> {
+                String name1 = others.getFirst();
+                String name2 = others.getLast();
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of " + name1);
+                playerShip2Btn.setUserData(name1);
+                playerShip3Btn.setText("Player Ship of " + name2);
+                playerShip3Btn.setUserData(name2);
+            }
+            case 3 -> {
+                String name1 = others.getFirst();
+                String name2 = others.get(1);
+                String name3 = others.getLast();
+                playerShip1Btn.setVisible(true);
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of " + name1);
+                playerShip1Btn.setUserData(name1);
+                playerShip2Btn.setText("Player Ship of " + name2);
+                playerShip2Btn.setUserData(name2);
+                playerShip3Btn.setText("Player Ship of " + name3);
+                playerShip3Btn.setUserData(name3);
+            }
+        }
+    }
+
+
     public void updateMapPosition(Map<String, int[]> playerMaps, boolean isDemo) {
         Map<Integer, Pane> paneMap = isDemo ? demoMap : pathMap;
 
@@ -194,6 +234,11 @@ public class GameController extends GUIController {
         updateDashboard(model.getDashboard());
         setCommandVisibility(model.isDemo());
     }
+    @Override
+    public void postInitialize2(){
+        DrawButton.setVisible(true);
+        DrawButton.setDisable(false);
+    }
     private void setCommandVisibility(boolean demo) {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
@@ -204,6 +249,10 @@ public class GameController extends GUIController {
         yesButton.setVisible(false);
         noButton.setVisible(false);
 
+
+        DrawButton.setVisible(false);
+        DrawButton.setDisable(true);
+        setPlayersButton();
 
         if (demo) {
              ship1.setVisible(true);
@@ -325,44 +374,44 @@ public class GameController extends GUIController {
 //            cell.getChildren().add(token);
 //        }
     }
-    private void setPlayersButton() {
-        Map<String, int[]> mapPosition = model.getPlayerPositions();
-        List<String> others = mapPosition.keySet().stream()
-                .filter(name -> !name.equals(model.getNickname())).toList();
-
-        switch (others.size()) {
-            case 1 -> {
-                playerShip1Btn.setVisible(true);
-                String name = others.getFirst();
-                playerShip1Btn.setText("Player Ship of " + name);
-                playerShip1Btn.setUserData(name);
-            }
-            case 2 -> {
-                String name1 = others.getFirst();
-                String name2 = others.getLast();
-                playerShip2Btn.setVisible(true);
-                playerShip3Btn.setVisible(true);
-                playerShip2Btn.setText("Player Ship of " + name1);
-                playerShip2Btn.setUserData(name1);
-                playerShip3Btn.setText("Player Ship of " + name2);
-                playerShip3Btn.setUserData(name2);
-            }
-            case 3 -> {
-                String name1 = others.getFirst();
-                String name2 = others.get(1);
-                String name3 = others.getLast();
-                playerShip1Btn.setVisible(true);
-                playerShip2Btn.setVisible(true);
-                playerShip3Btn.setVisible(true);
-                playerShip1Btn.setText("Player Ship of " + name1);
-                playerShip1Btn.setUserData(name1);
-                playerShip2Btn.setText("Player Ship of " + name2);
-                playerShip2Btn.setUserData(name2);
-                playerShip3Btn.setText("Player Ship of " + name3);
-                playerShip3Btn.setUserData(name3);
-            }
-        }
-    }
+//    private void setPlayersButton() {
+//        Map<String, int[]> mapPosition = model.getPlayerPositions();
+//        List<String> others = mapPosition.keySet().stream()
+//                .filter(name -> !name.equals(model.getNickname())).toList();
+//
+//        switch (others.size()) {
+//            case 1 -> {
+//                playerShip1Btn.setVisible(true);
+//                String name = others.getFirst();
+//                playerShip1Btn.setText("Player Ship of " + name);
+//                playerShip1Btn.setUserData(name);
+//            }
+//            case 2 -> {
+//                String name1 = others.getFirst();
+//                String name2 = others.getLast();
+//                playerShip2Btn.setVisible(true);
+//                playerShip3Btn.setVisible(true);
+//                playerShip2Btn.setText("Player Ship of " + name1);
+//                playerShip2Btn.setUserData(name1);
+//                playerShip3Btn.setText("Player Ship of " + name2);
+//                playerShip3Btn.setUserData(name2);
+//            }
+//            case 3 -> {
+//                String name1 = others.getFirst();
+//                String name2 = others.get(1);
+//                String name3 = others.getLast();
+//                playerShip1Btn.setVisible(true);
+//                playerShip2Btn.setVisible(true);
+//                playerShip3Btn.setVisible(true);
+//                playerShip1Btn.setText("Player Ship of " + name1);
+//                playerShip1Btn.setUserData(name1);
+//                playerShip2Btn.setText("Player Ship of " + name2);
+//                playerShip2Btn.setUserData(name2);
+//                playerShip3Btn.setText("Player Ship of " + name3);
+//                playerShip3Btn.setUserData(name3);
+//            }
+//        }
+//    }
 
     public void showYesNoButtons(String message) {
         messageText.setText(message);
