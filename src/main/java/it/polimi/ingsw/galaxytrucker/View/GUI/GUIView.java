@@ -52,14 +52,7 @@ public class GUIView extends Application implements View {
     private Integer bufferedIndex = null;
     private boolean previewingEnemyDashboard = false;
     private String bufferedPlayerName = null;
-
-
-
-
-
-
-
-
+    private volatile Boolean bufferedBoolean;
 
 
     @Override
@@ -167,6 +160,7 @@ public class GUIView extends Application implements View {
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
     }
+    public void setBufferedBoolean(Boolean value) {this.bufferedBoolean = value;}
 
     @Override
     public void updateView(String nickname,
@@ -323,8 +317,6 @@ public class GUIView extends Application implements View {
     }
 
     @Override public Boolean ask(String message) { return false; }
-    @Override public boolean askWithTimeout(String message) { return false; }
-    @Override public int[] askCoordinatesWithTimeout() { return new int[0]; }
 
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
@@ -396,7 +388,94 @@ public class GUIView extends Application implements View {
         return result;
     }
 
-    @Override public Integer askIndexWithTimeout() { return -1; }
+    @Override
+    public boolean askWithTimeout(String message) {
+        long timeout = 20_000; // 20 secondi
+        long deadline = System.currentTimeMillis() + timeout;
+
+        bufferedBoolean = null; // reset
+
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.showYesNoButtons(message); // mostra pulsanti nella GUI
+            } else {
+                reportError("Controller non disponibile per askWithTimeout.");
+            }
+        });
+
+        while (bufferedBoolean == null && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+
+        if (bufferedBoolean == null) {
+            reportError("Timeout su askWithTimeout.");
+            return false;
+        }
+
+        boolean result = bufferedBoolean;
+        bufferedBoolean = null;
+        return result;
+    }
+
+
+    @Override
+    public int[] askCoordinatesWithTimeout() {
+        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
+        while (bufferedCoordinate == null) {
+            if (System.currentTimeMillis() > deadline) {
+                reportError("Timeout su askCoordinate.");
+                return new int[]{-1, -1};
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new int[]{-1, -1};
+            }
+        }
+
+        int[] result = bufferedCoordinate;
+        bufferedCoordinate = null;
+        System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
+        return result;
+    }
+
+
+
+
+
+
+
+
+
+    @Override
+    public Integer askIndexWithTimeout() {
+        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
+        while (bufferedIndex == null) {
+            if (System.currentTimeMillis() > deadline) {
+                reportError("Timeout su askIndex.");
+                return -1;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
+            }
+        }
+
+        int result = bufferedIndex;
+        bufferedIndex = null;
+        return result;
+    }
     @Override
     public String choosePlayer() {
         if (bufferedPlayerName != null) {

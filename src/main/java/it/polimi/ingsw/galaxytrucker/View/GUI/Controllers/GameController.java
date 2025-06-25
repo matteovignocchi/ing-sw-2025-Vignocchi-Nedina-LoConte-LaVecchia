@@ -4,6 +4,7 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -64,6 +65,10 @@ public class GameController extends GUIController {
     @FXML private Pane path22;
     @FXML private Pane path23;
     @FXML private Pane path24;
+
+    @FXML private Label promptLabel;
+    @FXML private Button yesButton;
+    @FXML private Button noButton;
 
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
     @FXML private Button logout , DrawButton;
@@ -273,5 +278,28 @@ public class GameController extends GUIController {
 //            cell.getChildren().add(token);
 //        }
     }
+
+    public void showYesNoButtons(String message) {
+        promptLabel.setText(message);
+        promptLabel.setVisible(true);
+        yesButton.setVisible(true);
+        noButton.setVisible(true);
+
+        yesButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(true);
+            hidePrompt();
+        });
+        noButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(false);
+            hidePrompt();
+        });
+    }
+
+    private void hidePrompt() {
+        promptLabel.setVisible(false);
+        yesButton.setVisible(false);
+        noButton.setVisible(false);
+    }
+
 
 }
