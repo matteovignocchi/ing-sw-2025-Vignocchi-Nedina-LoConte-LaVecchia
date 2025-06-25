@@ -113,3 +113,10 @@
     -fx-font-size: 22px;
     -fx-text-fill: #FFE6F0;
 }
+
+
+.message-text {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-fill: white;
+}
