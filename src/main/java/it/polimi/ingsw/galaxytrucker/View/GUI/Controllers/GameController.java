@@ -1,5 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
+import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,6 +11,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,8 +69,20 @@ public class GameController extends GUIController {
     @FXML private Pane path22;
     @FXML private Pane path23;
     @FXML private Pane path24;
+    @FXML private Pane cardPane;
+    @FXML private Label nicknametext;
+    @FXML private Label credits;
+    @FXML private Label enginepower;
+    @FXML private Label firepower;
+    @FXML private Label purplealien;
+    @FXML private Label brownalien;
+    @FXML private Label numofhumans;
+    @FXML private Label energycell;
 
-    @FXML private Label promptLabel;
+
+
+    @FXML private TextFlow messageTextFlow;
+    @FXML private Text messageText;
     @FXML private Button yesButton;
     @FXML private Button noButton;
 
@@ -75,6 +90,7 @@ public class GameController extends GUIController {
     @FXML private Button logout , DrawButton;
     private final Map<Integer, Pane> demoMap = new HashMap<>();
     private final Map<Integer, Pane> pathMap = new HashMap<>();
+    private ClientCard currentCard;
 
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
@@ -227,6 +243,12 @@ public class GameController extends GUIController {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
         // oppure disabilita click, bottoni, ecc.
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+        yesButton.setVisible(false);
+        noButton.setVisible(false);
+
 
         DrawButton.setVisible(false);
         DrawButton.setDisable(true);
@@ -243,6 +265,7 @@ public class GameController extends GUIController {
             dashboard1.setVisible(false);
             dashboard2.setVisible(true);
         }
+        setPlayersButton();
     }
 
 
@@ -308,6 +331,29 @@ public class GameController extends GUIController {
         }
     }
 
+    public void showCurrentCard(ClientCard card) {
+        currentCard = card;
+        cardPane.getChildren().clear();
+
+        if (card == null || card.getImage() == null) return;
+
+        ImageView imageView = new ImageView(card.getImage());
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        imageView.fitWidthProperty().bind(cardPane.widthProperty());
+        imageView.fitHeightProperty().bind(cardPane.heightProperty());
+
+        cardPane.getChildren().add(imageView);
+    }
+
+
+    public void clearCurrentTile() {
+        currentCard = null;
+        cardPane.getChildren().clear();
+    }
+
+
     public void placeTileWithTokens(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
         cell.getChildren().clear();
@@ -328,10 +374,48 @@ public class GameController extends GUIController {
 //            cell.getChildren().add(token);
 //        }
     }
+    private void setPlayersButton() {
+        Map<String, int[]> mapPosition = model.getPlayerPositions();
+        List<String> others = mapPosition.keySet().stream()
+                .filter(name -> !name.equals(model.getNickname())).toList();
+
+        switch (others.size()) {
+            case 1 -> {
+                playerShip1Btn.setVisible(true);
+                String name = others.getFirst();
+                playerShip1Btn.setText("Player Ship of " + name);
+                playerShip1Btn.setUserData(name);
+            }
+            case 2 -> {
+                String name1 = others.getFirst();
+                String name2 = others.getLast();
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of " + name1);
+                playerShip2Btn.setUserData(name1);
+                playerShip3Btn.setText("Player Ship of " + name2);
+                playerShip3Btn.setUserData(name2);
+            }
+            case 3 -> {
+                String name1 = others.getFirst();
+                String name2 = others.get(1);
+                String name3 = others.getLast();
+                playerShip1Btn.setVisible(true);
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of " + name1);
+                playerShip1Btn.setUserData(name1);
+                playerShip2Btn.setText("Player Ship of " + name2);
+                playerShip2Btn.setUserData(name2);
+                playerShip3Btn.setText("Player Ship of " + name3);
+                playerShip3Btn.setUserData(name3);
+            }
+        }
+    }
 
     public void showYesNoButtons(String message) {
-        promptLabel.setText(message);
-        promptLabel.setVisible(true);
+        messageText.setText(message);
+        messageTextFlow.setVisible(true);
         yesButton.setVisible(true);
         noButton.setVisible(true);
 
@@ -339,17 +423,30 @@ public class GameController extends GUIController {
             guiView.setBufferedBoolean(true);
             hidePrompt();
         });
+
         noButton.setOnAction(e -> {
             guiView.setBufferedBoolean(false);
             hidePrompt();
         });
     }
 
+
     private void hidePrompt() {
-        promptLabel.setVisible(false);
+        messageTextFlow.setVisible(false);
         yesButton.setVisible(false);
         noButton.setVisible(false);
+        messageText.setText("");
     }
 
+    public void updateStatsLabels(String nickname, double firePower, int enginePower, int creditsVal, boolean purple, boolean brown, int humans, int energy) {
+        nicknametext.setText(nickname);
+        firepower.setText("Fire Power: " + firePower);
+        enginepower.setText("Engine Power: " + enginePower);
+        credits.setText("Credits: " + creditsVal);
+        purplealien.setText("Purple Alien: " + (purple ? "Yes" : "No"));
+        brownalien.setText("Brown Alien: " + (brown ? "Yes" : "No"));
+        numofhumans.setText("Number of Humans: " + humans);
+        energycell.setText("Number of energy Cell: " + energy);
+    }
 
 }
