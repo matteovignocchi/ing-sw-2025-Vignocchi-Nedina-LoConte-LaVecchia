@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -206,7 +207,7 @@ public class GameController extends GUIController {
             if (pos == null || pos.length < 2) continue;
 
             int position = pos[0]; // es. da 1 a 24
-            int shipId = pos[1];   // id della nave associata
+            int shipId = pos[3];   // id della nave associata
 
             Pane cell = paneMap.get(position);
             if (cell == null) continue;
@@ -219,15 +220,15 @@ public class GameController extends GUIController {
         }
     }
     private Image getShipImage(int id) {
-        String path = "/RedRocket.png";
+        String path = switch (id){
+            case 33 ->  "/BlueRocket.png";
+            case 34 ->  "/GreenRocket.png";
+            case 52 ->  "/RedRocket.png";
+            case 61 ->  "/YellowRockt.png";
+            default -> "/placeholder.png";
+        };
         return new Image(getClass().getResourceAsStream(path));
     }
-
-
-
-
-
-
     @Override
     public void postInitialize() {
         initializeGrid(); // inizializza le celle della dashboard
@@ -239,6 +240,14 @@ public class GameController extends GUIController {
         DrawButton.setVisible(true);
         DrawButton.setDisable(false);
     }
+    public void postInitialize3(){
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+
+    }
+
+
     private void setCommandVisibility(boolean demo) {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
@@ -358,60 +367,68 @@ public class GameController extends GUIController {
         StackPane cell = cellStackPanes[row][col];
         cell.getChildren().clear();
 
+        // Immagine base della tile
         ImageView tileImage = new ImageView(tile.getImage());
         tileImage.setFitWidth(70);
         tileImage.setFitHeight(70);
         tileImage.setRotate(tile.getRotation());
-
         cell.getChildren().add(tileImage);
+        if (tile.tokens == null) {
+            System.out.println("[DEBUG] tile.tokens è null a (" + row + "," + col + ")");
+        } else if (tile.tokens.isEmpty()) {
+            System.out.println("[DEBUG] tile.tokens è vuoto a (" + row + "," + col + ")");
+        } else {
+            for (int i = 0; i < tile.tokens.size(); i++) {
+                System.out.println("tile.tokens[" + i + "] = " + tile.tokens.get(i));
+            }
+        }
+        // Umani
+        for (int i = 0; i < tile.tokens.size(); i++) {
 
-        // Aggiungi token (es. umani)
-//        for (int i = 0; i < tile.numCrewmates; i++) {
-//            ImageView token = new ImageView(getTokenImage("human")); // metodo tuo
-//            token.setFitWidth(15);
-//            token.setFitHeight(15);
-//            StackPane.setAlignment(token, Pos.TOP_LEFT); // o altra posizione
-//            cell.getChildren().add(token);
-//        }
+            System.out.println("tile.tokens: " + tile.tokens.get(i));
+            String tokenType = tile.tokens.get(i);
+            ImageView token = new ImageView(getTokenImage(tokenType));
+            token.setFitWidth(26);
+            token.setFitHeight(32);
+            StackPane.setAlignment(token, Pos.CENTER);
+            token.setTranslateX(i * 17); // offset orizzontale
+            token.setTranslateY(2);
+            cell.getChildren().add(token);
+            System.out.println("ho printato tua madre "+ i);
+        }
+
+        for (int i = 0; i < tile.capacity; i++) {
+            ImageView token = new ImageView(getTokenImage("EnergyCell"));
+            token.setFitWidth(22);
+            token.setFitHeight(22);
+            StackPane.setAlignment(token, Pos.CENTER);
+            token.setTranslateX(-i * 8);
+            token.setTranslateY(1);
+            cell.getChildren().add(token);
+        }
+
+        // Merci
+        List<String> goods = tile.goods;
+        if (goods == null || goods.isEmpty()) {
+            System.out.println("[DEBUG] No goods in tile (" + row + "," + col + ")");
+        } else {
+            System.out.println("[DEBUG] Goods in tile (" + row + "," + col + "): " + goods);
+        }
+
+        if (goods != null) {
+            for (int i = 0; i < goods.size(); i++) {
+                String goodType = goods.get(i);
+                ImageView token = new ImageView(getTokenImage(goodType));
+                token.setFitWidth(15);
+                token.setFitHeight(15);
+                StackPane.setAlignment(token, Pos.BOTTOM_LEFT);
+                token.setTranslateX(i * 17);
+                token.setTranslateY(-2);
+                cell.getChildren().add(token);
+            }
+        }
+
     }
-//    private void setPlayersButton() {
-//        Map<String, int[]> mapPosition = model.getPlayerPositions();
-//        List<String> others = mapPosition.keySet().stream()
-//                .filter(name -> !name.equals(model.getNickname())).toList();
-//
-//        switch (others.size()) {
-//            case 1 -> {
-//                playerShip1Btn.setVisible(true);
-//                String name = others.getFirst();
-//                playerShip1Btn.setText("Player Ship of " + name);
-//                playerShip1Btn.setUserData(name);
-//            }
-//            case 2 -> {
-//                String name1 = others.getFirst();
-//                String name2 = others.getLast();
-//                playerShip2Btn.setVisible(true);
-//                playerShip3Btn.setVisible(true);
-//                playerShip2Btn.setText("Player Ship of " + name1);
-//                playerShip2Btn.setUserData(name1);
-//                playerShip3Btn.setText("Player Ship of " + name2);
-//                playerShip3Btn.setUserData(name2);
-//            }
-//            case 3 -> {
-//                String name1 = others.getFirst();
-//                String name2 = others.get(1);
-//                String name3 = others.getLast();
-//                playerShip1Btn.setVisible(true);
-//                playerShip2Btn.setVisible(true);
-//                playerShip3Btn.setVisible(true);
-//                playerShip1Btn.setText("Player Ship of " + name1);
-//                playerShip1Btn.setUserData(name1);
-//                playerShip2Btn.setText("Player Ship of " + name2);
-//                playerShip2Btn.setUserData(name2);
-//                playerShip3Btn.setText("Player Ship of " + name3);
-//                playerShip3Btn.setUserData(name3);
-//            }
-//        }
-//    }
 
     public void showYesNoButtons(String message) {
         messageText.setText(message);
@@ -448,5 +465,30 @@ public class GameController extends GUIController {
         numofhumans.setText("Number of Humans: " + humans);
         energycell.setText("Number of energy Cell: " + energy);
     }
+
+    private Image getTokenImage(String tokenType) {
+        String path = switch (tokenType.toLowerCase()) {
+            case "human" -> "/Human.png";
+            case "purple_alien" -> "/PurpleAlien.png";
+            case "brown_alien" -> "/BrownAlien.png";
+            case "red" -> "/RedGood.png";
+            case "yellow" -> "/YellowGood.png";
+            case "green" -> "/GreenGood.png";
+            case "blue" -> "/BlueGood.png";
+            case "energycell" -> "/EnergyCell.png";
+            default -> "/placeholder.png";
+        };
+
+        var stream = getClass().getResourceAsStream(path);
+        if (stream == null) {
+            System.err.println("[TOKEN IMAGE] Immagine mancante per: " + tokenType + " → " + path);
+            return new Image("https://via.placeholder.com/16x16.png?text=?");
+        }
+        System.err.println("[DEBUG] Caricamento token: " + tokenType + " → path: " + path);
+
+
+        return new Image(stream);
+    }
+
 
 }

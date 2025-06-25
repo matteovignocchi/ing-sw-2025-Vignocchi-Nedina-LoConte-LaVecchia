@@ -64,11 +64,59 @@
 .chat-message {
     -fx-font-family: "Impact";
     -fx-font-size: 22px;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
 }
 
 .nickname {
     -fx-font-family: "Impact";
     -fx-font-size: 22px;
     -fx-text-fill: #ffee04;
+}
+
+.engine {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #ff0404;
+}
+.credits {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #ffffff;
+}
+.nickname {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #ffee04;
+}
+.firepower {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #04bcff;
+}
+.purplealien{
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #A640C7;
+}
+.brownalien{
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #B25A26;
+}
+.energyCell{
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #26D12D;
+}
+.humans{
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #FFE6F0;
+}
+
+
+.message-text {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-fill: white;
 }

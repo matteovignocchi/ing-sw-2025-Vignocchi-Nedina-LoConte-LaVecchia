@@ -149,11 +149,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             } else if (player_fire_power < slavers_fire_power) {
                 int lostCrewmates = card.getNumCrewmates();
-                String msg = "SERVER: You have been defeated by Slavers. You'll lose " + lostCrewmates + " crewmates\n" +
-                        "SERVER: Checking other players";
+                String msg = "SERVER: You have been defeated by Slavers. You'll lose " + lostCrewmates + " crewmates";
                 controller.inform(msg, nick);
 
                 controller.removeCrewmates(p, card.getNumCrewmates());
+
+                msg = "SERVER: Checking other players...";
+                controller.inform(msg, nick);
 
             } else {
                 String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" +
@@ -565,6 +567,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = p.throwDice() + p.throwDice();
 
+            //TODO: levare
+            res = 7;
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, meteoritesPlayers, i+1);
         }
 

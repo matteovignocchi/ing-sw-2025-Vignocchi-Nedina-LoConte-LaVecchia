@@ -109,6 +109,31 @@ public class ClientTile {
         this.rotation = rotation;
     }
 
+    public List<String> getGoods() {
+        return goods;
+    }
+
+    public List<String> getTokens() {
+        return tokens;
+    }
+
+    public int getNumHumans() {
+        // Conta i token "BASIC" (o altro filtro che usi per "umano")
+        return (int) tokens.stream().filter(t -> t.equalsIgnoreCase("BASIC")).count();
+    }
+
+    public int getNumBatteries() {
+        return (int) tokens.stream().filter(t -> t.equalsIgnoreCase("BATTERY")).count();
+    }
+
+    public boolean hasPurpleAlien() {
+        return tokens.contains("PURPLE");
+    }
+
+    public boolean hasBrownAlien() {
+        return tokens.contains("BROWN");
+    }
+
 
 
 }

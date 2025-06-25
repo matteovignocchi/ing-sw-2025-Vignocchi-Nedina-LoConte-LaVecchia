@@ -16,7 +16,8 @@ public class TileSerializer {
 
     public TileDTO toDTO(Tile tile) {
         TileDTO dto = new TileDTO();
-        dto.type = tile.getClass().getSimpleName().toUpperCase();
+
+        // Informazioni comuni
         dto.a = tile.controlCorners(0);
         dto.b = tile.controlCorners(1);
         dto.c = tile.controlCorners(2);
@@ -24,32 +25,97 @@ public class TileSerializer {
         dto.id = tile.getIdTile();
         dto.rotation = tile.rotation;
 
-        switch (dto.type) {
-            case "ENGINE" -> dto.idDouble = ((Engine) tile).isDouble();
-            case  "CANNON" -> dto.idDouble = ((Cannon) tile).isDouble();
-            case "STORAGEUNIT" -> {
-                StorageUnit s = (StorageUnit) tile;
+        // Valori di default/null-safe
+        dto.type = tile.getClass().getSimpleName().toUpperCase();
+        dto.idDouble = false;
+        dto.advance = false;
+        dto.max = 0;
+        dto.capacity = 0;
+        dto.tokens = List.of();
+        dto.goods = List.of();
+        dto.protectedCorners = new ArrayList<>();
+
+        // Switch dinamico su tipo reale della tile
+        switch (tile) {
+            case Engine e -> {
+                dto.type = "ENGINE";
+                dto.idDouble = e.isDouble();
+            }
+
+            case Cannon c -> {
+                dto.type = "CANNON";
+                dto.idDouble = c.isDouble();
+            }
+
+            case StorageUnit s -> {
+                dto.type = "STORAGEUNIT";
                 dto.advance = s.isAdvanced();
                 dto.max = s.getMax();
-                dto.goods = s.getListOfGoods().stream().map(Enum::name).toList();
+                dto.goods = s.getListOfGoods() != null ?
+                        s.getListOfGoods().stream().map(Enum::name).toList() :
+                        List.of();
             }
-            case "HOUSINGUNIT" -> {
-                HousingUnit h = (HousingUnit) tile;
-                dto.human = h.getType().name();
+
+            case HousingUnit h -> {
+                dto.type = "HOUSINGUNIT";
+                dto.human = h.getType() != null ? h.getType().name() : null;
                 dto.max = h.returnLenght();
-                dto.tokens = h.getListOfToken().stream().map(Enum::name).toList();
+                dto.tokens = h.getListOfToken() != null ?
+                        h.getListOfToken().stream().map(Enum::name).toList() :
+                        List.of();
             }
-            case "SHIELD" -> {
-                Shield s = (Shield) tile;
-                for (int i = 0; i < 4; i++) dto.protectedCorners.add(s.getProtectedCorner(i));
+
+            case Shield s -> {
+                dto.type = "SHIELD";
+                for (int i = 0; i < 4; i++) {
+                    dto.protectedCorners.add(s.getProtectedCorner(i));
+                }
             }
-            case "ENERGYCELL" -> {
-                EnergyCell tmp = (EnergyCell) tile;
-                dto.capacity = tmp.getCapacity();
+
+            case EnergyCell ec -> {
+                dto.type = "ENERGYCELL";
+                dto.capacity = ec.getCapacity();
             }
+            default -> {}
+
+            // eventuali altri tipi (Connector, Cabin, ecc.) possono essere aggiunti qui
         }
+        System.out.println("[DEBUG] tile.class = " + tile.getClass().getName());
+
+        if (tile instanceof HousingUnit h) {
+            System.out.println("[DEBUG] TOKENS IN DTO: " + h.getListOfToken());
+
+            dto.tokens = h.getListOfToken().stream().map(Enum::name).toList();
+            dto.human = h.getType().name();
+            dto.max = h.returnLenght();
+        }
+
+        if (tile instanceof StorageUnit s) {
+            dto.goods = s.getListOfGoods().stream().map(Enum::name).toList();
+            dto.max = s.getMax();
+            dto.advance = s.isAdvanced();
+        }
+
+        if (tile instanceof EnergyCell ec) {
+            dto.capacity = ec.getCapacity();
+        }
+
+        if (tile instanceof Cannon c) {
+            dto.idDouble = c.isDouble();
+        }
+
+        if (tile instanceof Engine e) {
+            dto.idDouble = e.isDouble();
+        }
+
+        if (tile instanceof Shield s) {
+            for (int i = 0; i < 4; i++) dto.protectedCorners.add(s.getProtectedCorner(i));
+        }
+
+
         return dto;
     }
+
 
     public String toJson(Tile tile) throws JsonProcessingException {
         return mapper.writeValueAsString(toDTO(tile));
@@ -86,64 +152,6 @@ public class TileSerializer {
     /**
      * Converte il DTO in una vera Tile del model
      */
-//    private Tile fromDTO(TileDTO dto) {
-//        // per leggibilità
-//        int a = dto.a, b = dto.b, c = dto.c, d = dto.d, id = dto.id , rotation = dto.rotation;
-//
-//        switch (dto.type) {
-//            case "EMPTYSPACE" -> {
-//                return new EmptySpace();                          // id 157 già fissato nel costruttore
-//            }
-//            case "ENGINE" -> {
-//                return new Engine(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
-//            }
-//            case "CANNON" -> {
-//                return new Cannon(a, b, c, d, dto.idDouble, id);  // (a,b,c,d,isDouble,id)
-//            }
-//            case "MULTIJOINT" -> {
-//                return new MultiJoint(a, b, c, d, id);            // (a,b,c,d,id)
-//            }
-//            case "ENERGYCELL" -> {
-//                return new EnergyCell(a, b, c, d, dto.capacity, id);   // (a,b,c,d,capacity,id)
-//            }
-//            case "SHIELD" -> {
-//                Shield s = new Shield(a, b, c, d, id);            // costruttore base
-//                // copia vettore protectedCorners dal DTO
-//                for (int i = 0; i < 4 && i < dto.protectedCorners.size(); i++)
-//                    s.setProtectedCorner(i, dto.protectedCorners.get(i));
-//                return s;
-//            }
-//            case "STORAGEUNIT" -> {
-//                StorageUnit su = new StorageUnit(a, b, c, d, dto.max, dto.advance, id);
-//                if (dto.goods != null) {
-//                    for (String gStr : dto.goods) {
-//                        Colour colour = Colour.valueOf(gStr);
-//                        try {
-//                            su.addGood(colour);
-//                        } catch (Exception ignored) {
-//                        }
-//                    }
-//                }
-//                return su;
-//            }
-//            case "HOUSINGUNIT" -> {
-//                Human hType = Human.valueOf(dto.human);
-//                HousingUnit hu = new HousingUnit(a, b, c, d, hType, id);
-//                hu.setSize(dto.max);          // max capacity
-//                if (dto.tokens != null) {
-//                    for (String tok : dto.tokens) {
-//                        Human token = Human.valueOf(tok);
-//                        try {
-//                            hu.addHuman(token);
-//                        } catch (Exception ignored) {
-//                        }
-//                    }
-//                }
-//                return hu;
-//            }
-//            default -> throw new IllegalArgumentException("Tipo di tile sconosciuto: " + dto.type);
-//        }
-//    }
     public Tile fromDTO(TileDTO dto) {
         Tile tile = switch (dto.type.toUpperCase()) {
             case "ENGINE" -> new Engine(dto.a, dto.b, dto.c, dto.d, dto.idDouble, dto.id);
@@ -179,8 +187,6 @@ public class TileSerializer {
             case "EMPTYSPACE" -> new EmptySpace();
             default -> throw new IllegalArgumentException("Unknown tile type: " + dto.type);
         };
-
-        // ✅ FINAL FIX: assegna la rotazione al model
         tile.rotation = dto.rotation;
         return tile;
     }

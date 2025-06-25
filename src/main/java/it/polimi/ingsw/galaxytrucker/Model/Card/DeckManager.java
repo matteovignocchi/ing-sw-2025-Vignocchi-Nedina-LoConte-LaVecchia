@@ -74,304 +74,307 @@ public class DeckManager implements Serializable {
 
     //TODO: SOLO PER DEBUGGING, ELIMINARE TUTTI STI METODI UNA VOLTA FINITI
 
-//    public List<Deck> CreateOpenSpaceDecks() throws CardEffectException {
-//        Card c1 = new OpenSpaceCard("1");
-//        Card c2 = new OpenSpaceCard("2");
-//        Card c3 = new OpenSpaceCard("3");
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateStardustDecks() throws CardEffectException {
-//        Card c1 = new StardustCard("1");
-//        Card c2 = new StardustCard("2");
-//        Card c3 = new StardustCard("3");
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateSlaversDecks() throws CardEffectException {
-//        Card c1 = new SlaversCard("1", 13, 5, 4, 1);
-//        Card c2 = new SlaversCard("2", 13, 5, 4, 1);
-//        Card c3 = new SlaversCard("3", 13, 5, 4, 1);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateAbandonedShipDecks() throws CardEffectException {
-//        Card c1 = new AbandonedShipCard("1", 3, 6, 1);
-//        Card c2 = new AbandonedShipCard("2", 3, 6, 1);
-//        Card c3 = new AbandonedShipCard("3", 3, 6, 1);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateAbandonedStationDecks() throws CardEffectException {
-//        List<Colour> list1= new ArrayList<>();
-//        list1.add(Colour.RED);
-//        list1.add(Colour.RED);
-//        list1.add(Colour.YELLOW);
-//        list1.add(Colour.YELLOW);
-//        list1.add(Colour.BLUE);
-//        list1.add(Colour.BLUE);
-//        list1.add(Colour.GREEN);
-//        list1.add(Colour.GREEN);
-//        Card c1 = new AbandonedStationCard("1", 3, 2, list1);
-//        Card c2 = new AbandonedStationCard("2", 3, 2, list1);
-//        Card c3 = new AbandonedStationCard("3", 3, 2, list1);
-//
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreatePlagueDeck() throws CardEffectException {
-//        Card c1 = new PlaugeCard("1");
-//        Card c2 = new PlaugeCard("2");
-//        Card c3 = new PlaugeCard("3");
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreatePiratesDeck() throws CardEffectException {
-//        List<Integer> dir1 = new ArrayList<>();
-//        dir1.add(0);
-//        dir1.add(1);
-//        dir1.add(2);
-//        dir1.add(3);
-//        List<Boolean> size1 = new ArrayList<>();
-//        size1.add(false);
-//        size1.add(false);
-//        size1.add(true);
-//        size1.add(true);
-//        Card c1 = new PiratesCard("1", 2, 3, 5, dir1, size1);
-//        Card c2 = new PiratesCard("2", 2, 3, 5, dir1, size1);
-//        Card c3 = new PiratesCard("3", 2, 3, 5, dir1, size1);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreatePlanetsDeck() throws CardEffectException {
-//        List<Colour> list1= new ArrayList<>();
-//        List<Colour> list2= new ArrayList<>();
-//        List<List<Colour>> list = new ArrayList<>();
-//        list1.add(Colour.RED);
-//        list1.add(Colour.RED);
-//        list1.add(Colour.YELLOW);
-//        list2.add(Colour.YELLOW);
-//        list2.add(Colour.BLUE);
-//        list2.add(Colour.GREEN);
-//        list.add(list1);
-//        list.add(list2);
-//        Card c1 = new PlanetsCard("1", list, 4);
-//        Card c2 = new PlanetsCard("2", list, 4);
-//        Card c3 = new PlanetsCard("3", list, 4);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateMeteoritesDeck() throws CardEffectException {
-//        List<Integer> directions = new ArrayList<>();
-//        directions.add(0);
-//        List<Boolean> size = new ArrayList<>();
-//        size.add(true);
-//        Card c1 = new MeteoritesRainCard("1", directions, size);
-//        Card c2 = new MeteoritesRainCard("2", directions, size);
-//        Card c3 = new MeteoritesRainCard("3", directions, size);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateFirstWarzone() throws CardEffectException {
-//        List<Integer> dir = new ArrayList<>();
-//        dir.add(0);
-//        List<Boolean> size = new ArrayList<>();
-//        size.add(false);
-//        Card c1 = new FirstWarzoneCard("1", 30, 1, dir, size);
-//        Card c2 = new FirstWarzoneCard("2", 30, 1, dir, size);
-//        Card c3 = new FirstWarzoneCard("3", 30, 1, dir, size);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateSmugglersDecks() throws CardEffectException {
-//        List<Colour> list1= new ArrayList<>();
-//        list1.add(Colour.RED);
-//        list1.add(Colour.RED);
-//        list1.add(Colour.YELLOW);
-//        list1.add(Colour.YELLOW);
-//        list1.add(Colour.GREEN);
-//        list1.add(Colour.GREEN);
-//        list1.add(Colour.BLUE);
-//        list1.add(Colour.BLUE);
-//        Card c1 = new SmugglersCard("1", 4, 1, 2, list1);
-//        Card c2 = new SmugglersCard("2", 4, 1, 2, list1);
-//        Card c3 = new SmugglersCard("3", 4, 1, 2, list1);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public List<Deck> CreateSecondWarzoneDecks() throws CardEffectException {
-//        List<Integer> dir = new ArrayList<>();
-//        dir.add(0);
-//        dir.add(1);
-//        List<Boolean> size = new ArrayList<>();
-//        size.add(false);
-//        size.add(true);
-//        Card c1 = new SecondWarzoneCard("0", 3, 2, dir, size);
-//        Card c2 = new SecondWarzoneCard("1", 3, 2, dir, size);
-//        Card c3 = new SecondWarzoneCard("2", 3, 2, dir, size);
-//        Deck deck1 = new Deck();
-//        Deck deck2 = new Deck();
-//        Deck deck3 = new Deck();
-//        deck1.add(c1);
-//        deck2.add(c2);
-//        deck3.add(c3);
-//        List<Deck> decks = new ArrayList<>();
-//        decks.add(deck1);
-//        decks.add(deck2);
-//        decks.add(deck3);
-//        return decks;
-//    }
-//
-//    public Deck CreatePlanetsDemoDeck() throws CardEffectException {
-//        List<Colour> list1= new ArrayList<>();
-//        List<Colour> list2= new ArrayList<>();
-//        List<List<Colour>> list = new ArrayList<>();
-//        list1.add(Colour.RED);
-//        list1.add(Colour.RED);
-//        list1.add(Colour.YELLOW);
-//        list2.add(Colour.YELLOW);
-//        list2.add(Colour.BLUE);
-//        list2.add(Colour.GREEN);
-//        list.add(list1);
-//        list.add(list2);
-//        Card c1 = new PlanetsCard("0", list, 4);
-//        Deck deck1 = new Deck();
-//        deck1.add(c1);
-//        return deck1;
-//    }
-//
-//    public Deck CreateMixedDemoDeck() throws CardEffectException {
-//        List<Colour> list1= new ArrayList<>();
-//        List<Colour> list2= new ArrayList<>();
-//        List<List<Colour>> list = new ArrayList<>();
-//        list1.add(Colour.RED);
-//        list1.add(Colour.RED);
-//        list1.add(Colour.YELLOW);
-//        list2.add(Colour.YELLOW);
-//        list2.add(Colour.BLUE);
-//        list2.add(Colour.GREEN);
-//        list.add(list1);
-//        list.add(list2);
-//        Card c1 = new PlanetsCard("0", list, 4);
-//        Deck deck1 = new Deck();
-//        deck1.add(c1);
-//
-//        List<Integer> directions = new ArrayList<>();
-//        directions.add(2);
-//        List<Boolean> size = new ArrayList<>();
-//        size.add(true);
-//        Card c2 = new MeteoritesRainCard("1", directions, size);
-//        deck1.add(c2);
-//        return deck1;
-//    }
+    public List<Deck> CreateOpenSpaceDecks() throws CardEffectException {
+        Card c1 = new OpenSpaceCard("1");
+        Card c2 = new OpenSpaceCard("2");
+        Card c3 = new OpenSpaceCard("3");
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateStardustDecks() throws CardEffectException {
+        Card c1 = new StardustCard("1");
+        Card c2 = new StardustCard("2");
+        Card c3 = new StardustCard("3");
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateSlaversDecks() throws CardEffectException {
+        Card c1 = new SlaversCard("1", 13, 5, 3, 1);
+        Card c2 = new SlaversCard("2", 13, 5, 3, 1);
+        Card c3 = new SlaversCard("3", 13, 5, 3, 1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateAbandonedShipDecks() throws CardEffectException {
+        Card c1 = new AbandonedShipCard("1", 3, 6, 1);
+        Card c2 = new AbandonedShipCard("2", 3, 6, 1);
+        Card c3 = new AbandonedShipCard("3", 3, 6, 1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateAbandonedStationDecks() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.BLUE);
+        list1.add(Colour.BLUE);
+        list1.add(Colour.GREEN);
+        list1.add(Colour.GREEN);
+        Card c1 = new AbandonedStationCard("1", 3, 2, list1);
+        Card c2 = new AbandonedStationCard("2", 3, 2, list1);
+        Card c3 = new AbandonedStationCard("3", 3, 2, list1);
+
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreatePlagueDeck() throws CardEffectException {
+        Card c1 = new PlaugeCard("1");
+        Card c2 = new PlaugeCard("2");
+        Card c3 = new PlaugeCard("3");
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreatePiratesDeck() throws CardEffectException {
+        List<Integer> dir1 = new ArrayList<>();
+        dir1.add(0);
+        dir1.add(1);
+        dir1.add(2);
+        dir1.add(3);
+        List<Boolean> size1 = new ArrayList<>();
+        size1.add(false);
+        size1.add(false);
+        size1.add(true);
+        size1.add(true);
+        Card c1 = new PiratesCard("1", 2, 3, 5, dir1, size1);
+        Card c2 = new PiratesCard("2", 2, 3, 5, dir1, size1);
+        Card c3 = new PiratesCard("3", 2, 3, 5, dir1, size1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreatePlanetsDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("1", list, 4);
+        Card c2 = new PlanetsCard("2", list, 4);
+        Card c3 = new PlanetsCard("3", list, 4);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateMeteoritesDeck() throws CardEffectException {
+        List<Integer> directions = new ArrayList<>();
+        directions.add(1);
+        directions.add(2);
+        List<Boolean> size = new ArrayList<>();
+        size.add(true);
+        size.add(true);
+        Card c1 = new MeteoritesRainCard("1", directions, size);
+        Card c2 = new MeteoritesRainCard("2", directions, size);
+        Card c3 = new MeteoritesRainCard("3", directions, size);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateFirstWarzone() throws CardEffectException {
+        List<Integer> dir = new ArrayList<>();
+        dir.add(0);
+        List<Boolean> size = new ArrayList<>();
+        size.add(false);
+        Card c1 = new FirstWarzoneCard("1", 30, 1, dir, size);
+        Card c2 = new FirstWarzoneCard("2", 30, 1, dir, size);
+        Card c3 = new FirstWarzoneCard("3", 30, 1, dir, size);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateSmugglersDecks() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.YELLOW);
+        list1.add(Colour.GREEN);
+        list1.add(Colour.GREEN);
+        list1.add(Colour.BLUE);
+        list1.add(Colour.BLUE);
+        Card c1 = new SmugglersCard("1", 4, 1, 4, list1);
+        Card c2 = new SmugglersCard("2", 4, 1, 4, list1);
+        Card c3 = new SmugglersCard("3", 4, 1, 4, list1);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public List<Deck> CreateSecondWarzoneDecks() throws CardEffectException {
+        List<Integer> dir = new ArrayList<>();
+        dir.add(0);
+        dir.add(1);
+        List<Boolean> size = new ArrayList<>();
+        size.add(false);
+        size.add(true);
+        Card c1 = new SecondWarzoneCard("0", 3, 2, dir, size);
+        Card c2 = new SecondWarzoneCard("1", 3, 2, dir, size);
+        Card c3 = new SecondWarzoneCard("2", 3, 2, dir, size);
+        Deck deck1 = new Deck();
+        Deck deck2 = new Deck();
+        Deck deck3 = new Deck();
+        deck1.add(c1);
+        deck2.add(c2);
+        deck3.add(c3);
+        List<Deck> decks = new ArrayList<>();
+        decks.add(deck1);
+        decks.add(deck2);
+        decks.add(deck3);
+        return decks;
+    }
+
+    public Deck CreatePlanetsDemoDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("1_0114", list, 4);
+        Deck deck1 = new Deck();
+        deck1.add(c1);
+        return deck1;
+    }
+
+    public Deck CreateMixedDemoDeck() throws CardEffectException {
+        List<Colour> list1= new ArrayList<>();
+        List<Colour> list2= new ArrayList<>();
+        List<List<Colour>> list = new ArrayList<>();
+        list1.add(Colour.RED);
+        list1.add(Colour.RED);
+        list1.add(Colour.YELLOW);
+        list2.add(Colour.YELLOW);
+        list2.add(Colour.BLUE);
+        list2.add(Colour.GREEN);
+        list.add(list1);
+        list.add(list2);
+        Card c1 = new PlanetsCard("0", list, 4);
+        Deck deck1 = new Deck();
+        deck1.add(c1);
+
+        List<Integer> directions = new ArrayList<>();
+        directions.add(2);
+        List<Boolean> size = new ArrayList<>();
+        size.add(true);
+        Card c2 = new MeteoritesRainCard("1", directions, size);
+        deck1.add(c2);
+        return deck1;
+    }
+
 }
