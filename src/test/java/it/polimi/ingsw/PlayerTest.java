@@ -272,15 +272,23 @@ class PlayerTest {
 
     @Test
     void testControlAssemblyRemovesBadConnections() throws BusinessLogicException {
+        // preparo una DASH vuota
         Tile[][] custom = new Tile[5][7];
         for(int i=0;i<5;i++) for(int j=0;j<7;j++) custom[i][j] = new EmptySpace();
-        Cannon bad = new Cannon(0,4,0,0,false,7);
-        Cannon victim = new Cannon(0,4,0,0,false,8);
-        custom[2][3] = bad;
-        custom[2][4] = victim;
+        // qua usiamo un HousingUnit (non un Cannon) come "bad"
+        HousingUnit bad = new HousingUnit(0, 4, 0, 0, Human.HUMAN, 7);
+        // invece il "victim" può restare un Cannon
+        Cannon victim = new Cannon(0, 4, 0, 0, false, 8);
+
+        custom[2][3] = bad;      // punto di controllo
+        custom[2][4] = victim;   // tile da validare
+
         demoPlayer.modifyDASH(custom);
 
+        // chiamo il controllo: ora non va in ClassCastException
         demoPlayer.controlAssembly(2,3);
+
+        // mi aspetto che la validità di [2][4] sia FREE
         assertEquals(Status.FREE, demoPlayer.validityCheck(2,4));
     }
 

@@ -27,7 +27,7 @@ public class FlightCardBoard implements Serializable {
     protected int greenGoodBonus;
     protected int blueGoodBonus;
     protected int malusBrokenTile;
-    protected List<Player> orderedPlayersInFlight;
+    public List<Player> orderedPlayersInFlight;
     protected Controller controller;
 
     public FlightCardBoard(Controller controller) {
