@@ -475,9 +475,6 @@ public class Player implements Serializable {
         return discardPile;
     }
 
-    public void removeTileInDiscardPile(Tile tile) {
-        discardPile.remove(tile);
-    }
 
 
     //tile placement validation methods
@@ -623,31 +620,31 @@ public class Player implements Serializable {
     }
 
 
-    private boolean hasBadConnection(int x, int y) {
-        int[] dx = {-1, 0, 1, 0};
-        int[] dy = {0, 1, 0, -1};
-        int[] opp = {2, 3, 0, 1};
+//    private boolean hasBadConnection(int x, int y) {
+//        int[] dx = {-1, 0, 1, 0};
+//        int[] dy = {0, 1, 0, -1};
+//        int[] opp = {2, 3, 0, 1};
+//
+//        for (int i = 0; i < 4; i++) {
+//            int nx = x + dx[i];
+//            int ny = y + dy[i];
+//            if (isOutOfBounds(nx, ny)) continue;
+//            if (validStatus[nx][ny] == Status.FREE) continue;
+//
+//            int currentSide = Dash_Matrix[x][y].controlCorners(i);
+//            int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+//            if (currentSide == 0 || nearSide == 0) continue;
+//
+//            if (!connected(currentSide, nearSide) && currentSide != 0) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
-        for (int i = 0; i < 4; i++) {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-            if (isOutOfBounds(nx, ny)) continue;
-            if (validStatus[nx][ny] == Status.FREE) continue;
-
-            int currentSide = Dash_Matrix[x][y].controlCorners(i);
-            int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
-            if (currentSide == 0 || nearSide == 0) continue;
-
-            if (!connected(currentSide, nearSide) && currentSide != 0) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 
-
-    private boolean isOutOfBounds(int x, int y) {
+    public boolean isOutOfBounds(int x, int y) {
         return x < 0 || y < 0 || x >= 5 || y >= 7;
     }
 

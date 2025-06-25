@@ -3,6 +3,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
 import it.polimi.ingsw.galaxytrucker.Client.*;
 import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -195,48 +196,38 @@ public class GUIView extends Application implements View {
     @Override
     public void printDashShip(ClientTile[][] ship) {
         if (previewingEnemyDashboard) {
-            previewingEnemyDashboard = false;  // resetta subito il flag
+            previewingEnemyDashboard = false;
 
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDash.fxml"));
                     AnchorPane root = loader.load();
+
                     PrintDashController ctrl = loader.getController();
-                    ctrl.setIsDemo(model.isDemo());        // mostrerà l'immagine giusta
-                    ctrl.loadDashboard(ship);              // popola la griglia
-
-                    GridPane grid = (GridPane) root.lookup("#enemyGrid");
-
-                    if (grid != null) {
-                        grid.getChildren().clear();
-
-                        for (int row = 0; row < ship.length; row++) {
-                            for (int col = 0; col < ship[0].length; col++) {
-                                ClientTile tile = ship[row][col];
-                                if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
-                                    ImageView image = new ImageView(tile.getImage());
-                                    image.setFitWidth(70);
-                                    image.setFitHeight(70);
-                                    image.setRotate(tile.getRotation());
-                                    grid.add(image, col, row);
-                                }
-                            }
-                        }
-                    }
+                    ctrl.setIsDemo(model.isDemo());
+                    ctrl.loadDashboard(ship);
 
                     Stage popup = new Stage();
                     popup.setTitle("Ship of " + bufferedPlayerName);
-                    popup.setScene(new Scene(root));
+                    bufferedPlayerName = null;
+                    Scene popupScene = new Scene(root);
+                    popup.setScene(popupScene);
                     popup.centerOnScreen();
+
+                    Button done = (Button) root.lookup("#closeButton");
+                    if (done != null) {
+                        done.setOnAction(e -> popup.close());
+                    } else {
+                        reportError("Done button non trovato nel file PrintDash.fxml.");
+                    }
+
                     popup.show();
 
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    reportError("Errore caricando EnemyDashboard.fxml: " + e.getMessage());
+                    reportError("Errore caricando PrintDash.fxml: " + e.getMessage());
                 }
             });
         } else {
-            // normale: aggiorna il modello
             model.setDashboard(ship);
 
             Platform.runLater(() -> {
@@ -247,6 +238,8 @@ public class GUIView extends Application implements View {
             });
         }
     }
+
+
 
 
     @Override
@@ -404,7 +397,16 @@ public class GUIView extends Application implements View {
     }
 
     @Override public Integer askIndexWithTimeout() { return -1; }
-    @Override public String choosePlayer() { return null; }
+    @Override
+    public String choosePlayer() {
+        if (bufferedPlayerName != null) {
+            String result = bufferedPlayerName;
+            return result;
+        } else {
+            reportError("Nessun nome giocatore selezionato.");
+            return null;
+        }
+    }
     @Override public void setInt() {}
 
     @Override
@@ -447,7 +449,48 @@ public class GUIView extends Application implements View {
             ctrl.displayTileSelection(tiles);
         });
     }
-    @Override public void printCard(ClientCard card) {}
+    @Override
+    public void printCard(ClientCard card) {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintCard.fxml"));
+                AnchorPane root = loader.load();
+
+                PrintCardController ctrl = loader.getController();
+
+                Pane cardPane = (Pane) root.getChildren().get(1);
+
+                ImageView imageView = new ImageView(card.getImage());
+                imageView.setPreserveRatio(true);
+                imageView.setSmooth(true);
+                imageView.setCache(true);
+
+
+                imageView.fitWidthProperty().bind(cardPane.widthProperty());
+                imageView.fitHeightProperty().bind(cardPane.heightProperty());
+
+                cardPane.getChildren().add(imageView);
+
+                Stage popupStage = new Stage();
+                popupStage.setTitle("Card");
+                popupStage.setScene(new Scene(root, 720, 500));
+                popupStage.centerOnScreen();
+
+                Button done = (Button) root.lookup("#done");
+                if (done != null) {
+                    done.setOnAction(e -> popupStage.close());
+                } else {
+                    reportError("Done button non trovato nel file PrintCard.fxml.");
+                }
+
+                popupStage.show();
+
+            } catch (IOException e) {
+                reportError("Errore nel caricamento del file PrintCard.fxml: " + e.getMessage());
+            }
+        });
+    }
+
 
     @Override
     public void printDeck(List<ClientCard> deck) {
