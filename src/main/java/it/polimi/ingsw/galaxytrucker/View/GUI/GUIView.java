@@ -257,10 +257,13 @@ public class GUIView extends Application implements View {
             Platform.runLater(() -> {
                 BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
                 GameController ctrl2 = (GameController) sceneRouter.getController(GAME_PHASE);
-                ctrl2.updateDashboard(ship);
-                if (ctrl != null ) {
-                    ctrl.updateDashboard(ship);
-
+                Scene currentScene = sceneRouter.getCurrentScene();
+                Scene gameScene = sceneRouter.getScene(GAME_PHASE);
+                //TODO CAPIRE SE SERVE
+                if (ctrl2 != null && currentScene == gameScene) {
+                    ctrl2.updateDashboard(ship);
+                } else {
+                    System.out.println("[DEBUG] GameController non inizializzato o scena non attiva. Salto updateDashboard.");
                 }
             });
         }
@@ -285,10 +288,18 @@ public class GUIView extends Application implements View {
        return model.getPlayerPositions();
     }
 
-    public void updateState(ClientGamePhase gamePhase) {
-        this.gamePhase= gamePhase;
+    public void updateState(ClientGamePhase newPhase) {
+
+        //TODO CAPIRE SE SERVE
+        System.out.println("[DEBUG] updateState ricevuto: " + newPhase);
+        if (newPhase == this.gamePhase) {
+            System.out.println("[DEBUG] Fase invariata, non aggiorno: " + newPhase);
+            return;
+        }
+        this.gamePhase = newPhase;
+
         Platform.runLater(() -> {
-            switch (gamePhase) {
+            switch (newPhase) {
                 case BOARD_SETUP -> {
                     setSceneEnum(BUILDING_PHASE);
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
@@ -309,7 +320,12 @@ public class GUIView extends Application implements View {
                 case EXIT -> {
                     setSceneEnum(EXIT_PHASE);
                     GUIController controller = sceneRouter.getController(EXIT_PHASE);
-                    controller.postInitialize();
+                    if (controller != null) {
+                        controller.postInitialize();
+
+                    } else {
+                        reportError("Controller EXIT_PHASE non disponibile.");
+                    }
                 }
                 case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
@@ -972,8 +988,8 @@ public class GUIView extends Application implements View {
     public void triggerGoodActionPrompt() {
         this.showGoodActionPrompt = true;
     }
-    public void resetGUIState() {
-        // Reset del modello
+
+    private void clearModelAndBuffers() {
         if (model != null) {
             model.setDashboard(new ClientTile[5][7]);
             model.setCurrentTile(null);
@@ -990,7 +1006,6 @@ public class GUIView extends Application implements View {
             model.setDemo(false);
         }
 
-        // Reset dei buffer
         bufferedCoordinate = null;
         bufferedIndex = null;
         bufferedPlayerName = null;
@@ -999,24 +1014,20 @@ public class GUIView extends Application implements View {
         bufferedGoods = List.of();
 
         model.reset();
-        sceneRouter.reinitializeAllScenes();
+        inputManager.resetAll();
+    }
 
-        // Reset delle code
+    public void resetGUIState() {
+        clearModelAndBuffers();
+        sceneRouter.reinitializeAllScenes();
         menuChoiceQueue.clear();
         commandQueue.clear();
         notificationQueue.clear();
         isShowingNotification = false;
-
-        // Reset fase e scena
         gamePhase = null;
         sceneEnum = null;
-
-        // (Opzionale) Reset degli input pending
-        if (inputManager != null) {
-            inputManager.resetAll(); // assicurati che esista
-        }
-
         System.out.println("[DEBUG] GUIView state resettato completamente.");
     }
+
 
 }

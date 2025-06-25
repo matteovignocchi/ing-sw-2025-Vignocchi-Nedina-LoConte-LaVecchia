@@ -633,8 +633,6 @@ public class ClientController {
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
-                                g.resetGUIState();
-                                g.updateState(ClientGamePhase.MAIN_MENU);
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());
                             }
@@ -833,8 +831,12 @@ public class ClientController {
     }
 
     public void updateGameStateByController(String phase) {
-
         ClientGamePhase gamePhase = clientEnumFactory.describeGamePhase(phase);
+        if (gamePhase == this.currentGamePhase) {
+            System.out.println("[DEBUG] Fase invariata, salto updateState: " + gamePhase);
+            return;
+        }
+
         this.currentGamePhase = gamePhase;
         view.updateState(gamePhase);
     }
