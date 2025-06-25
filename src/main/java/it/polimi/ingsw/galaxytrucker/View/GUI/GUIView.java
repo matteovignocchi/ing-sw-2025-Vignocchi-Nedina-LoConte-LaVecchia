@@ -56,6 +56,10 @@ public class GUIView extends Application implements View {
     private volatile Boolean bufferedBoolean;
     private boolean showGoodActionPrompt = false;
     private List<String> bufferedGoods = List.of();
+    private volatile long lastAskCoordinateTimestamp = 0;
+    private volatile long lastAskIndexTimestamp = 0;
+
+
 
 
     @Override
@@ -425,64 +429,50 @@ public class GUIView extends Application implements View {
     @Override
     public Integer askIndexWithTimeout() {
         long deadline = System.currentTimeMillis() + 20_000;
+        lastAskIndexTimestamp = System.currentTimeMillis();
 
-        if (showGoodActionPrompt) {
-            showGoodActionPrompt = false;
-
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGood.fxml"));
-                    AnchorPane root = loader.load();
-
-                    PrintListOfGoodController ctrl = loader.getController();
-                    ctrl.loadGoods(bufferedGoods);
-                    ctrl.setupForGoodsIndexSelection(this);
-                    Stage stage = new Stage();
-                    System.out.println("dovrebbe essere juscito1");
-//                    stage.initModality(Modality.APPLICATION_MODAL);
-//                    stage.initOwner(logoutButton.getScene().getWindow());
-
-                    stage.setTitle("Select a Good");
-                    stage.setScene(new Scene(root));
-                    stage.setResizable(false);
-                    stage.centerOnScreen();
-                    stage.show();
-
-                } catch (IOException e) {
-                    reportError("Errore caricando PrintListOfGood.fxml: " + e.getMessage());
-                }
-            });
-        } else {
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGood.fxml"));
-                    AnchorPane root = loader.load();
-
-                    PrintListOfGoodController ctrl = loader.getController();
-                    ctrl.setupForActionSelection(this);
-                    Stage stage = new Stage();
-                    System.out.println("dovrebbe essere juscito2");
-
-//                    stage.initModality(Modality.APPLICATION_MODAL);
-
-                    stage.setTitle("Choose what to do");
-                    stage.setScene(new Scene(root));
-                    stage.setResizable(false);
-                    stage.centerOnScreen();
-                    stage.show();
-
-                } catch (IOException e) {
-                    reportError("Errore caricando PrintListOfGood.fxml: " + e.getMessage());
-                }
-            });
-
+        long waitStart = System.currentTimeMillis();
+        while (!showGoodActionPrompt && System.currentTimeMillis() - waitStart < 300) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
 
-        while (bufferedIndex == null && System.currentTimeMillis() <= deadline) {
+        Platform.runLater(() -> {
+            System.out.println("[LOG] Dentro Platform.runLater - showGoodActionPrompt = " + showGoodActionPrompt);
+
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGoods.fxml"));
+                AnchorPane root = loader.load();
+                PrintListOfGoodController ctrl = loader.getController();
+
+                if (showGoodActionPrompt) {
+                    ctrl.loadGoods(bufferedGoods);
+                    ctrl.setupForGoodsIndexSelection();
+                    ctrl.configureNavigation(this);
+                } else {
+                    ctrl.setupForActionSelection(this);
+                }
+
+                showGoodActionPrompt = false;
+
+                Stage stage = new Stage();
+                stage.setTitle("Goods");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.centerOnScreen();
+                stage.show();
+            } catch (IOException ex) {
+                reportError("Errore nel caricamento PrintListOfGood.fxml: " + ex.getMessage());
+            }
+        });
+
+        while (bufferedIndex == null && System.currentTimeMillis() < deadline) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
                 return -1;
             }
         }
@@ -492,9 +482,18 @@ public class GUIView extends Application implements View {
             return -1;
         }
 
-        int result = bufferedIndex;
+        int res = bufferedIndex;
         bufferedIndex = null;
-        return result;
+
+        // Timeout di conferma implicita
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {}
+        if (System.currentTimeMillis() - lastAskIndexTimestamp > 400) {
+            System.out.println("[DEBUG] Indice good confermato: " + res);
+        }
+
+        return res;
     }
 
 
@@ -536,6 +535,8 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinatesWithTimeout() {
+        lastAskCoordinateTimestamp = System.currentTimeMillis();
+
         Platform.runLater(() -> {
             GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
             if (ctrl != null) {
@@ -544,13 +545,13 @@ public class GUIView extends Application implements View {
                 reportError("GameController non disponibile.");
             }
         });
+
         long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
                 reportError("Timeout su askCoordinate.");
                 return new int[]{-1, -1};
             }
-
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -561,7 +562,15 @@ public class GUIView extends Application implements View {
 
         int[] result = bufferedCoordinate;
         bufferedCoordinate = null;
-        System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
+
+        // Se entro 500ms askCoordinate non è richiamato di nuovo, consideriamo confermato
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {}
+        if (System.currentTimeMillis() - lastAskCoordinateTimestamp > 400) {
+            System.out.println("[DEBUG] Coordinate confermate: " + Arrays.toString(result));
+        }
+
         return result;
     }
 
@@ -606,9 +615,15 @@ public class GUIView extends Application implements View {
         return gamePhase;
     }
 
-    @Override public void printListOfGoods(List<String> goods) {
-        triggerGoodActionPrompt();
+    @Override
+    public void printListOfGoods(List<String> goods) {
+        System.out.println("[LOG] printListOfGoods() chiamato con: " + goods);
+
         this.bufferedGoods = goods;
+        this.showGoodActionPrompt = true;
+
+        System.out.println("[LOG] showGoodActionPrompt = true");
+
     }
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
@@ -935,6 +950,8 @@ public class GUIView extends Application implements View {
 
     public void ErPuzzo(){
     }
+
+
 
 
 

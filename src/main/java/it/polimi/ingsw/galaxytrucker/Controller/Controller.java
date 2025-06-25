@@ -1577,11 +1577,11 @@ public class Controller implements Serializable {
 
         while (!list.isEmpty() && flag) {
             inform("SERVER: Select a storage unit", nick);
-            printListOfGoods(list, nick);
             printPlayerDashboard(x, p, nick);
 
             int[] vari = askPlayerCoordinates(p);
 
+            printListOfGoods(list, nick);
             Tile t;
             if(vari==null) t = p.getTile(2,3);
             else t = p.getTile(vari[0], vari[1]);
@@ -1591,7 +1591,9 @@ public class Controller implements Serializable {
                     if(c.isFull()){
                         inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
                         List<Colour> listGoods = c.getListOfGoods();
+
                         printListOfGoods(listGoods, nick);
+
                         Integer tmpint = askPlayerIndex(p, listGoods.size());
                         if(tmpint==null) tmpint = 0;
                         int idx = tmpint;
