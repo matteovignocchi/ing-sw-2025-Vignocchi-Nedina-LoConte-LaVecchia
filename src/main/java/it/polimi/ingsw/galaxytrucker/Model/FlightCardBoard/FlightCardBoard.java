@@ -46,46 +46,79 @@ public class FlightCardBoard implements Serializable {
         this.controller = controller;
     }
 
+    /**
+     * @return credits for a red good
+     */
     public int getBonusRedCargo() {
         return redGoodBonus;
     }
 
+    /**
+     * @return credits for a yellow good
+     */
     public int getBonusYellowCargo() {
         return yellowGoodBonus;
     }
 
+    /**
+     * @return credits for a green good
+     */
     public int getBonusGreenCargo() {
         return greenGoodBonus;
     }
 
+    /**
+     * @return credits for a blue good
+     */
     public int getBonusBlueCargo() {
         return blueGoodBonus;
     }
 
+    /**
+     * @return malus for a broken tile
+     */
     public int getBrokenMalus(){
         return malusBrokenTile;
     }
 
+    /**
+     * @return credits for the best ship award
+     */
     public int getBonusBestShip() {
         return bonusBestShip;
     }
 
+    /**
+     * @return reward credits for the first position
+     */
     public int getBonusFirstPosition(){
         return bonusFirstPosition;
     }
 
+    /**
+     * @return reward credits for the second position
+     */
     public int getBonusSecondPosition(){
         return bonusSecondPosition;
     }
 
+    /**
+     * @return reward credits for the third position
+     */
     public int getBonusThirdPosition(){
         return bonusThirdPosition;
     }
 
+    /**
+     * @return reward credits for the fourth position
+     */
     public int getBonusFourthPosition(){
         return bonusFourthPosition;
     }
 
+    /**
+     * @return in-flight ordered players' list
+     */
     public List<Player> getOrderedPlayers(){ return new ArrayList<>(orderedPlayersInFlight); }
 
     /**
