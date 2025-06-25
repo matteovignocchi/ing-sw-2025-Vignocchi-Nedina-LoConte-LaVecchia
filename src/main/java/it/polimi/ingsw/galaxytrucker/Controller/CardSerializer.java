@@ -83,7 +83,16 @@ public class CardSerializer {
                 dto.directions = x.getShotsDirections();
                 dto.sizes = x.getShotsSize();
             }
+            case StardustCard s->{
+                dto.type = "STARDUSTCARD";
+                dto.idCard = s.getIdCard();
+            }
+            case OpenSpaceCard o ->{
+                dto.type = "OPENSPACECARD";
+                dto.idCard = o.getIdCard();
+            }
             default -> dto.type = card.getClass().getSimpleName().toUpperCase();
+
         }
         return dto;
     }

@@ -30,7 +30,7 @@ public class ClientMain {
                         "                          |___/                                     \n"
         );
 
-        String host = "localhost";
+        String host = "192.168.1.97";
         int port = 30001;
         Scanner scanner = new Scanner(System.in);
 

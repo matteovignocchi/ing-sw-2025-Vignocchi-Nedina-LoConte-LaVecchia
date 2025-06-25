@@ -756,187 +756,6 @@ public class Player implements Serializable {
      * @return the amount of exposed connectors
      */
 
-//    public int countExposedConnectors() {
-//        int tmp = 0;
-//        //inner matrix check
-//        for (int i = 1; i < 5; i++) {
-//            for (int j = 1; j < 7; j++) {
-//                int a, b;
-//                if (validStatus[i][j] == Status.USED) {
-//                    a = Dash_Matrix[i][j].controlCorners(0);
-//                    b = Dash_Matrix[i - 1][j].controlCorners(2);
-//                    if ((a < 4 && a != 0) && (a + b == a)) {
-//                        tmp++;
-//                    }
-//                    a = Dash_Matrix[i][j].controlCorners(1);
-//                    b = Dash_Matrix[i][j + 1].controlCorners(3);
-//                    if ((a < 4 && a != 0) && (a + b == a)) {
-//                        tmp++;
-//                    }
-//                    a = Dash_Matrix[i][j].controlCorners(2);
-//                    b = Dash_Matrix[i + 1][j].controlCorners(0);
-//                    if ((a < 4 && a != 0) && (a + b == a)) {
-//                        tmp++;
-//                    }
-//                    a = Dash_Matrix[i][j].controlCorners(3);
-//                    b = Dash_Matrix[i][j - 1].controlCorners(1);
-//                    if ((a < 4 && a != 0) && (a + b == a)) {
-//                        tmp++;
-//                    }
-//                }
-//            }
-//        }
-//        //first row check
-//        for (int i = 1; i < 6; i++) {
-//            int a, b;
-//            if (validStatus[0][i] == Status.USED) {
-//                a = Dash_Matrix[0][i].controlCorners(3);
-//                b = Dash_Matrix[0][i - 1].controlCorners(1);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[0][i].controlCorners(2);
-//                b = Dash_Matrix[1][i].controlCorners(0);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[0][i].controlCorners(1);
-//                b = Dash_Matrix[0][i + 1].controlCorners(3);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[0][i].controlCorners(0);
-//                if ((a < 4 && a != 0)) {
-//                    tmp++;
-//                }
-//            }
-//        }
-//        //last row check
-//        for (int i = 1; i < 6; i++) {
-//            int a, b;
-//            if (validStatus[4][i] == Status.USED) {
-//                a = Dash_Matrix[4][i].controlCorners(3);
-//                b = Dash_Matrix[4][i - 1].controlCorners(1);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[4][i].controlCorners(0);
-//                b = Dash_Matrix[3][i].controlCorners(2);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[4][i].controlCorners(1);
-//                b = Dash_Matrix[4][i + 1].controlCorners(3);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[4][i].controlCorners(2);
-//                if ((a < 4 && a != 0)) {
-//                    tmp++;
-//                }
-//            }
-//        }
-//        //first column check
-//        for (int i = 1; i < 4; i++) {
-//            int a, b;
-//            if (validStatus[i][0] == Status.USED) {
-//                a = Dash_Matrix[i][0].controlCorners(0);
-//                b = Dash_Matrix[i - 1][0].controlCorners(2);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[i][0].controlCorners(1);
-//                b = Dash_Matrix[i][1].controlCorners(3);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[i][0].controlCorners(2);
-//                b = Dash_Matrix[i + 1][0].controlCorners(0);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//
-//                a = Dash_Matrix[i][0].controlCorners(3);
-//                if (a < 4 && a != 0) {
-//                    tmp++;
-//                }
-//            }
-//        }
-//        //last column check
-//        for (int i = 1; i < 4; i++) {
-//            int a, b;
-//            if (validStatus[i][6] == Status.USED) {
-//                a = Dash_Matrix[i][6].controlCorners(0);
-//                b = Dash_Matrix[i - 1][6].controlCorners(2);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[i][6].controlCorners(3);
-//                b = Dash_Matrix[i][5].controlCorners(1);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//                a = Dash_Matrix[i][6].controlCorners(2);
-//                b = Dash_Matrix[i + 1][6].controlCorners(0);
-//                if ((a < 4 && a != 0) && (a + b == a)) {
-//                    tmp++;
-//                }
-//
-//                a = Dash_Matrix[i][6].controlCorners(1);
-//                if (a < 4 && a != 0) {
-//                    tmp++;
-//                }
-//            }
-//        }
-//        int a, b;
-//        //this checks the connectors of the tiles facing outward from the ship, not connected to any other tile
-//        if (validStatus[4][0] == Status.USED ) {
-//            a = Dash_Matrix[4][0].controlCorners(0);
-//            b = Dash_Matrix[3][0].controlCorners(2);
-//            if ((a < 4 && a != 0) && (a + b == a)) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][0].controlCorners(1);
-//            b = Dash_Matrix[4][1].controlCorners(3);
-//            if ((a < 4 && a != 0) && (a + b == a)) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][0].controlCorners(2);
-//            if (a < 4 && a != 0) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][0].controlCorners(3);
-//            if (a < 4 && a != 0) {
-//                tmp++;
-//            }
-//        }
-//        if (validStatus[4][6] == Status.USED) {
-//            a = Dash_Matrix[4][6].controlCorners(0);
-//            b = Dash_Matrix[3][6].controlCorners(2);
-//            if ((a < 4 && a != 0) && (a + b == a)) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][6].controlCorners(3);
-//            b = Dash_Matrix[4][5].controlCorners(1);
-//            if ((a < 4 && a != 0) && (a + b == a)) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][6].controlCorners(2);
-//            if (a < 4 && a != 0) {
-//                tmp++;
-//            }
-//            a = Dash_Matrix[4][6].controlCorners(1);
-//            if (a < 4 && a != 0) {
-//                tmp++;
-//            }
-//        }
-//        //the result
-//        return tmp;
-//    }
-
-    //directional removal methods
-
-
     //metodo che si rifa q uello che controllAssembly
     public int countExposedConnectors() {
         int count = 0;
@@ -1170,6 +989,20 @@ public class Player implements Serializable {
                 Dash_Matrix[0][6] = new EmptySpace();
                 validStatus[0][6] = Status.FREE;
             }
+    }
+
+    public void destroyAll() throws BusinessLogicException {
+        for(int j = 0;j<5;j++){
+            for(int k = 0;k<7;k++){
+                Tile t = Dash_Matrix[j][k];
+                switch (t) {
+                    case EmptySpace c  -> {}
+                    default -> {
+                        removeTile(j , k);
+                    }
+                }
+            }
+        }
     }
 
 }
