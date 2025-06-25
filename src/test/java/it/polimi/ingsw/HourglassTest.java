@@ -21,28 +21,21 @@ class HourglassTest {
 
     @BeforeEach
     void setUp() {
-        // Flag che il callback imposterà quando viene chiamato
         callbackInvoked = new AtomicBoolean(false);
         hg = new Hourglass(h -> callbackInvoked.set(true));
     }
 
     @Test
     void testFlipIncrementsFlipsAndSetsOngoing() {
-        // All’inizio non ho flip, stato EXPIRED
         assertEquals(0, hg.getFlips());
         assertEquals(HourglassState.EXPIRED, hg.getState());
 
         hg.flip();
 
-        // Dopo un flip
         assertEquals(1, hg.getFlips(), "getFlips() deve essere 1 dopo il primo flip");
         assertEquals(HourglassState.ONGOING, hg.getState(), "lo stato deve essere ONGOING subito dopo flip()");
     }
 
-    /**
-     * Usa reflection per recuperare il Runnable che è stato programmato
-     * dentro scheduledFuture.
-     */
     private Runnable getScheduledTask() throws Exception {
         Field f = Hourglass.class.getDeclaredField("scheduledFuture");
         f.setAccessible(true);
@@ -56,26 +49,21 @@ class HourglassTest {
     void testCallbackAndStateAfterRunningScheduledTask() throws Exception {
         hg.flip();
 
-        // Estraiamo e facciamo girare subito il "timeout"
         Runnable task = getScheduledTask();
         task.run();
 
-        // Il callback deve essere invocato
         assertTrue(callbackInvoked.get(), "dopo run() del scheduledFuture il callback deve essere chiamato");
-        // E lo stato deve tornare a EXPIRED
         assertEquals(HourglassState.EXPIRED, hg.getState(), "dopo expiry lo stato deve essere EXPIRED");
     }
 
     @Test
     void testMultipleFlipsInvokeCallbackEachTime() throws Exception {
-        // --- primo flip ---
         hg.flip();
         Runnable t1 = getScheduledTask();
         t1.run();
         assertTrue(callbackInvoked.get(), "primo flip deve invocare callback");
         assertEquals(1, hg.getFlips());
 
-        // reset flag e secondo flip
         callbackInvoked.set(false);
         hg.flip();
         assertEquals(2, hg.getFlips(), "dopo due flip getFlips() deve restituire 2");
@@ -86,14 +74,10 @@ class HourglassTest {
 
     @Test
     void testCancelShutsDownSchedulerAndCancelsFuture() throws Exception {
-        // 1) inietto lo scheduler “mai esecutore”
         injectScheduler(neverScheduler());
 
-        // 2) flip() + cancel()
         hg.flip();
         hg.cancel();
-
-        // 3) verifico che scheduledFuture sia stato cancellato
         Field sfField = Hourglass.class.getDeclaredField("scheduledFuture");
         sfField.setAccessible(true);
         ScheduledFuture<?> sf = (ScheduledFuture<?>) sfField.get(hg);
@@ -101,7 +85,6 @@ class HourglassTest {
         assertNotNull(sf, "scheduledFuture non deve essere null dopo flip()");
         assertTrue(sf.isCancelled(), "cancel() deve aver chiamato scheduledFuture.cancel(false)");
 
-        // 4) verifico che lo scheduler sia shutdown
         Field schedField = Hourglass.class.getDeclaredField("scheduler");
         schedField.setAccessible(true);
         ScheduledExecutorService scheduler = (ScheduledExecutorService) schedField.get(hg);
@@ -111,17 +94,12 @@ class HourglassTest {
 
     @Test
     void testShutdownAlwaysShutsDownScheduler() throws Exception {
-        // prendo il scheduler currente
         Field schedField = Hourglass.class.getDeclaredField("scheduler");
         schedField.setAccessible(true);
         ScheduledExecutorService before = (ScheduledExecutorService) schedField.get(hg);
 
         assertFalse(before.isShutdown(), "all’inizio lo scheduler NON deve essere shutdown");
-
-        // chiamo shutdown()
         hg.shutdown();
-
-        // rilevo di nuovo dal campo private
         ScheduledExecutorService after = (ScheduledExecutorService) schedField.get(hg);
         assertTrue(after.isShutdown(), "shutdown() deve shutdownNow() il scheduler");
     }
@@ -138,8 +116,7 @@ class HourglassTest {
 
         hg.flip();
         hg.cancel();
-
-        Thread.sleep(50); // attendiamo un pochino
+        Thread.sleep(50);
         assertFalse(callbackInvoked.get(), "callback non deve essere invocato dopo cancel");
         assertEquals(HourglassState.ONGOING, hg.getState());
     }
@@ -153,7 +130,6 @@ class HourglassTest {
         return new ScheduledThreadPoolExecutor(1) {
             @Override
             public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-                // non esegue mai command.run()
                 return new ScheduledFuture<>() {
                     @Override public long getDelay(TimeUnit u) { return 0; }
                     @Override public int compareTo(java.util.concurrent.Delayed o) { return 0; }

@@ -240,6 +240,14 @@ public class GameController extends GUIController {
         DrawButton.setVisible(true);
         DrawButton.setDisable(false);
     }
+    public void postInitialize3(){
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+
+    }
+
+
     private void setCommandVisibility(boolean demo) {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
@@ -365,19 +373,9 @@ public class GameController extends GUIController {
         tileImage.setFitHeight(70);
         tileImage.setRotate(tile.getRotation());
         cell.getChildren().add(tileImage);
-        if (tile.tokens == null) {
-            System.out.println("[DEBUG] tile.tokens è null a (" + row + "," + col + ")");
-        } else if (tile.tokens.isEmpty()) {
-            System.out.println("[DEBUG] tile.tokens è vuoto a (" + row + "," + col + ")");
-        } else {
-            for (int i = 0; i < tile.tokens.size(); i++) {
-                System.out.println("tile.tokens[" + i + "] = " + tile.tokens.get(i));
-            }
-        }
         // Umani
         for (int i = 0; i < tile.tokens.size(); i++) {
 
-            System.out.println("tile.tokens: " + tile.tokens.get(i));
             String tokenType = tile.tokens.get(i);
             ImageView token = new ImageView(getTokenImage(tokenType));
             token.setFitWidth(26);
@@ -386,7 +384,6 @@ public class GameController extends GUIController {
             token.setTranslateX(i * 17); // offset orizzontale
             token.setTranslateY(2);
             cell.getChildren().add(token);
-            System.out.println("ho printato tua madre "+ i);
         }
 
         for (int i = 0; i < tile.capacity; i++) {
@@ -400,20 +397,20 @@ public class GameController extends GUIController {
         }
 
         // Merci
-        List<String> goods = tile.goods; // Assumo getGoods() → List<String>
+        List<String> goods = tile.goods;
         if (goods != null) {
             for (int i = 0; i < goods.size(); i++) {
-                System.out.println("[DEBUG] Tile at " + row + "," + col + " → tokens = " + tile.tokens);
                 String goodType = goods.get(i);
                 ImageView token = new ImageView(getTokenImage(goodType));
-                token.setFitWidth(32);
-                token.setFitHeight(32);
-                StackPane.setAlignment(token, Pos.CENTER);
+                token.setFitWidth(15);
+                token.setFitHeight(15);
+                StackPane.setAlignment(token, Pos.BOTTOM_LEFT);
                 token.setTranslateX(i * 17);
                 token.setTranslateY(-2);
                 cell.getChildren().add(token);
             }
         }
+
     }
 
     public void showYesNoButtons(String message) {
@@ -467,10 +464,8 @@ public class GameController extends GUIController {
 
         var stream = getClass().getResourceAsStream(path);
         if (stream == null) {
-            System.err.println("[TOKEN IMAGE] Immagine mancante per: " + tokenType + " → " + path);
             return new Image("https://via.placeholder.com/16x16.png?text=?");
         }
-        System.err.println("[DEBUG] Caricamento token: " + tokenType + " → path: " + path);
 
 
         return new Image(stream);

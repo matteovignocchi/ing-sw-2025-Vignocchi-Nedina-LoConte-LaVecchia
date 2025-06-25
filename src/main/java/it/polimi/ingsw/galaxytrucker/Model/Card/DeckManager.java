@@ -339,14 +339,15 @@ public class DeckManager implements Serializable {
         List<Colour> list2= new ArrayList<>();
         List<List<Colour>> list = new ArrayList<>();
         list1.add(Colour.RED);
-        list1.add(Colour.RED);
+        list1.add(Colour.BLUE);
         list1.add(Colour.YELLOW);
+        list1.add(Colour.GREEN);
         list2.add(Colour.YELLOW);
         list2.add(Colour.BLUE);
         list2.add(Colour.GREEN);
         list.add(list1);
         list.add(list2);
-        Card c1 = new PlanetsCard("0", list, 4);
+        Card c1 = new PlanetsCard("1_0114", list, 4);
         Deck deck1 = new Deck();
         deck1.add(c1);
         return deck1;

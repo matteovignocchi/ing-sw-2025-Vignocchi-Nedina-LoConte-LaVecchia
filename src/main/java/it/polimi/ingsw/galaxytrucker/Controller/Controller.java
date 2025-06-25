@@ -60,8 +60,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            deck = deckCreator.CreateDemoDeck();
-//            deck = deckCreator.CreateMixedDemoDeck();
+//            deck = deckCreator.CreatePlanetsDemoDeck();
+            deck = deckCreator.CreateMixedDemoDeck();
         }else{
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
@@ -1593,7 +1593,6 @@ public class Controller implements Serializable {
 
             int[] vari = askPlayerCoordinates(p);
 
-            printListOfGoods(list, nick);
             Tile t;
             if(vari==null) t = p.getTile(2,3);
             else t = p.getTile(vari[0], vari[1]);
@@ -1605,8 +1604,8 @@ public class Controller implements Serializable {
                         List<Colour> listGoods = c.getListOfGoods();
 
                         printListOfGoods(listGoods, nick);
-
                         Integer tmpint = askPlayerIndex(p, listGoods.size());
+
                         if(tmpint==null) tmpint = 0;
                         int idx = tmpint;
 
@@ -1616,8 +1615,10 @@ public class Controller implements Serializable {
                     }
 
                     inform("SERVER: Select the index of the good to place", nick);
+
                     printListOfGoods(list, nick);
                     Integer tmpint = askPlayerIndex(p, list.size());
+
                     if(tmpint==null) tmpint = 0;
                     int idx = tmpint;
 
@@ -1633,6 +1634,7 @@ public class Controller implements Serializable {
                                 list.remove(tempGood);
                                 tempGood = null;
                             }
+
                         }
                     }else {
                         c.addGood(list.get(idx));
@@ -1686,6 +1688,7 @@ public class Controller implements Serializable {
                 }
                 default -> reportError("Not valid cell", nick);
             }
+            printPlayerDashboard(v, p, nick);
             if(!askPlayerDecision("SERVER: Do you want to select another storage unit for the rearranging?", p)) exit = false;
         }
     }
