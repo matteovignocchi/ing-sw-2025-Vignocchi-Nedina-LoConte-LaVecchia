@@ -179,7 +179,13 @@ public class GUIView extends Application implements View {
                            int numberOfEnergy) {
         Platform.runLater(() -> {
             model.setNickname(nickname);
-            // TODO: bind additional stats to UI
+            model.setFirePower(firePower);
+            model.setEnginePower(powerEngine);
+            model.setCredits(credits);
+            model.setPurpleAlien(purpleAlien);
+            model.setBrownAlien(brownAlien);
+            model.setNumberOfEnergy(numberOfEnergy);
+            model.setNumberOfHumans(numberOfHuman);
         });
     }
 
@@ -443,8 +449,8 @@ public class GUIView extends Application implements View {
     @Override
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
-            model.setCurrentTile(null); // non serve tile singola
-            setBufferedIndex(null);    // reset importante per evitare valori vecchi
+            model.setCurrentTile(null);
+            setBufferedIndex(null);
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
             ctrl.displayTileSelection(tiles);
         });
@@ -452,41 +458,17 @@ public class GUIView extends Application implements View {
     @Override
     public void printCard(ClientCard card) {
         Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintCard.fxml"));
-                AnchorPane root = loader.load();
+            model.setCurrentCard(card);
 
-                PrintCardController ctrl = loader.getController();
-
-                Pane cardPane = (Pane) root.getChildren().get(1);
-
-                ImageView imageView = new ImageView(card.getImage());
-                imageView.setPreserveRatio(true);
-                imageView.setSmooth(true);
-                imageView.setCache(true);
-
-
-                imageView.fitWidthProperty().bind(cardPane.widthProperty());
-                imageView.fitHeightProperty().bind(cardPane.heightProperty());
-
-                cardPane.getChildren().add(imageView);
-
-                Stage popupStage = new Stage();
-                popupStage.setTitle("Card");
-                popupStage.setScene(new Scene(root, 720, 500));
-                popupStage.centerOnScreen();
-
-                Button done = (Button) root.lookup("#done");
-                if (done != null) {
-                    done.setOnAction(e -> popupStage.close());
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            if (ctrl != null) {
+                if (card == null) {
+                    ctrl.clearCurrentTile();
                 } else {
-                    reportError("Done button non trovato nel file PrintCard.fxml.");
+                    ctrl.showCurrentCard(card);
                 }
-
-                popupStage.show();
-
-            } catch (IOException e) {
-                reportError("Errore nel caricamento del file PrintCard.fxml: " + e.getMessage());
+            } else {
+                System.err.println("[GUIView] WARNING: BUILDING_PHASE controller not initialized yet.");
             }
         });
     }

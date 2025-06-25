@@ -1,9 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
+import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -11,6 +13,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -64,11 +67,24 @@ public class GameController extends GUIController {
     @FXML private Pane path22;
     @FXML private Pane path23;
     @FXML private Pane path24;
+    @FXML private Pane cardPane;
+    @FXML private Label nicknametext;
+    @FXML private Label position;
+    @FXML private Label credits;
+    @FXML private Label enginepower;
+    @FXML private Label firepower;
+    @FXML private Label purplealien;
+    @FXML private Label brownalien;
+    @FXML private Label numofhumans;
+    @FXML private Label energycell;
+
+
 
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
     @FXML private Button logout , DrawButton;
     private final Map<Integer, Pane> demoMap = new HashMap<>();
     private final Map<Integer, Pane> pathMap = new HashMap<>();
+    private ClientCard currentCard;
 
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
@@ -188,6 +204,7 @@ public class GameController extends GUIController {
             dashboard1.setVisible(false);
             dashboard2.setVisible(true);
         }
+        setPlayersButton();
     }
 
 
@@ -253,6 +270,29 @@ public class GameController extends GUIController {
         }
     }
 
+    public void showCurrentCard(ClientCard card) {
+        currentCard = card;
+        cardPane.getChildren().clear();
+
+        if (card == null || card.getImage() == null) return;
+
+        ImageView imageView = new ImageView(card.getImage());
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        imageView.fitWidthProperty().bind(cardPane.widthProperty());
+        imageView.fitHeightProperty().bind(cardPane.heightProperty());
+
+        cardPane.getChildren().add(imageView);
+    }
+
+
+    public void clearCurrentTile() {
+        currentCard = null;
+        cardPane.getChildren().clear();
+    }
+
+
     public void placeTileWithTokens(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
         cell.getChildren().clear();
@@ -272,6 +312,44 @@ public class GameController extends GUIController {
 //            StackPane.setAlignment(token, Pos.TOP_LEFT); // o altra posizione
 //            cell.getChildren().add(token);
 //        }
+    }
+    private void setPlayersButton() {
+        Map<String, int[]> mapPosition = model.getPlayerPositions();
+        List<String> others = mapPosition.keySet().stream()
+                .filter(name -> !name.equals(model.getNickname())).toList();
+
+        switch (others.size()) {
+            case 1 -> {
+                playerShip1Btn.setVisible(true);
+                String name = others.getFirst();
+                playerShip1Btn.setText("Player Ship of " + name);
+                playerShip1Btn.setUserData(name);
+            }
+            case 2 -> {
+                String name1 = others.getFirst();
+                String name2 = others.getLast();
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip2Btn.setText("Player Ship of " + name1);
+                playerShip2Btn.setUserData(name1);
+                playerShip3Btn.setText("Player Ship of " + name2);
+                playerShip3Btn.setUserData(name2);
+            }
+            case 3 -> {
+                String name1 = others.getFirst();
+                String name2 = others.get(1);
+                String name3 = others.getLast();
+                playerShip1Btn.setVisible(true);
+                playerShip2Btn.setVisible(true);
+                playerShip3Btn.setVisible(true);
+                playerShip1Btn.setText("Player Ship of " + name1);
+                playerShip1Btn.setUserData(name1);
+                playerShip2Btn.setText("Player Ship of " + name2);
+                playerShip2Btn.setUserData(name2);
+                playerShip3Btn.setText("Player Ship of " + name3);
+                playerShip3Btn.setUserData(name3);
+            }
+        }
     }
 
 }

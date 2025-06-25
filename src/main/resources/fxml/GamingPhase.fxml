@@ -124,6 +124,7 @@
       <Button fx:id="playerShip1Btn" layoutX="216.0" layoutY="26.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" styleClass="blue-button" text="Button" />
       <Button fx:id="playerShip2Btn" layoutX="392.0" layoutY="339.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" rotate="-24.4" styleClass="blue-button" text="Button" />
       <Button fx:id="playerShip3Btn" layoutX="31.0" layoutY="339.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" rotate="29.1" styleClass="blue-button" text="Button" />
+      <Pane fx:id="cardPane" layoutX="519.0" layoutY="436.0" prefHeight="250.0" prefWidth="180.0" AnchorPane.leftAnchor="1050.0" />
    </children>
    <stylesheets>
       <URL value="@css/Button.css" />
