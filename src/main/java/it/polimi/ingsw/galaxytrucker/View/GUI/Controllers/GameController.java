@@ -374,44 +374,44 @@ public class GameController extends GUIController {
 //            cell.getChildren().add(token);
 //        }
     }
-    private void setPlayersButton() {
-        Map<String, int[]> mapPosition = model.getPlayerPositions();
-        List<String> others = mapPosition.keySet().stream()
-                .filter(name -> !name.equals(model.getNickname())).toList();
-
-        switch (others.size()) {
-            case 1 -> {
-                playerShip1Btn.setVisible(true);
-                String name = others.getFirst();
-                playerShip1Btn.setText("Player Ship of " + name);
-                playerShip1Btn.setUserData(name);
-            }
-            case 2 -> {
-                String name1 = others.getFirst();
-                String name2 = others.getLast();
-                playerShip2Btn.setVisible(true);
-                playerShip3Btn.setVisible(true);
-                playerShip2Btn.setText("Player Ship of " + name1);
-                playerShip2Btn.setUserData(name1);
-                playerShip3Btn.setText("Player Ship of " + name2);
-                playerShip3Btn.setUserData(name2);
-            }
-            case 3 -> {
-                String name1 = others.getFirst();
-                String name2 = others.get(1);
-                String name3 = others.getLast();
-                playerShip1Btn.setVisible(true);
-                playerShip2Btn.setVisible(true);
-                playerShip3Btn.setVisible(true);
-                playerShip1Btn.setText("Player Ship of " + name1);
-                playerShip1Btn.setUserData(name1);
-                playerShip2Btn.setText("Player Ship of " + name2);
-                playerShip2Btn.setUserData(name2);
-                playerShip3Btn.setText("Player Ship of " + name3);
-                playerShip3Btn.setUserData(name3);
-            }
-        }
-    }
+//    private void setPlayersButton() {
+//        Map<String, int[]> mapPosition = model.getPlayerPositions();
+//        List<String> others = mapPosition.keySet().stream()
+//                .filter(name -> !name.equals(model.getNickname())).toList();
+//
+//        switch (others.size()) {
+//            case 1 -> {
+//                playerShip1Btn.setVisible(true);
+//                String name = others.getFirst();
+//                playerShip1Btn.setText("Player Ship of " + name);
+//                playerShip1Btn.setUserData(name);
+//            }
+//            case 2 -> {
+//                String name1 = others.getFirst();
+//                String name2 = others.getLast();
+//                playerShip2Btn.setVisible(true);
+//                playerShip3Btn.setVisible(true);
+//                playerShip2Btn.setText("Player Ship of " + name1);
+//                playerShip2Btn.setUserData(name1);
+//                playerShip3Btn.setText("Player Ship of " + name2);
+//                playerShip3Btn.setUserData(name2);
+//            }
+//            case 3 -> {
+//                String name1 = others.getFirst();
+//                String name2 = others.get(1);
+//                String name3 = others.getLast();
+//                playerShip1Btn.setVisible(true);
+//                playerShip2Btn.setVisible(true);
+//                playerShip3Btn.setVisible(true);
+//                playerShip1Btn.setText("Player Ship of " + name1);
+//                playerShip1Btn.setUserData(name1);
+//                playerShip2Btn.setText("Player Ship of " + name2);
+//                playerShip2Btn.setUserData(name2);
+//                playerShip3Btn.setText("Player Ship of " + name3);
+//                playerShip3Btn.setUserData(name3);
+//            }
+//        }
+//    }
 
     public void showYesNoButtons(String message) {
         messageText.setText(message);
