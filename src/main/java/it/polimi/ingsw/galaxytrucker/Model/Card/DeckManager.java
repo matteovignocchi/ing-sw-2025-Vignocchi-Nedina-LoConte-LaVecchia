@@ -344,7 +344,7 @@ public class DeckManager implements Serializable {
         list2.add(Colour.GREEN);
         list.add(list1);
         list.add(list2);
-        Card c1 = new PlanetsCard("0", list, 4);
+        Card c1 = new PlanetsCard("1_0114", list, 4);
         Deck deck1 = new Deck();
         deck1.add(c1);
         return deck1;

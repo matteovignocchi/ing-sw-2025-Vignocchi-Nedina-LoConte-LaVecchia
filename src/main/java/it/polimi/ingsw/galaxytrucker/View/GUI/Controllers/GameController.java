@@ -240,6 +240,14 @@ public class GameController extends GUIController {
         DrawButton.setVisible(true);
         DrawButton.setDisable(false);
     }
+    public void postInitialize3(){
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+
+    }
+
+
     private void setCommandVisibility(boolean demo) {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
@@ -400,20 +408,26 @@ public class GameController extends GUIController {
         }
 
         // Merci
-        List<String> goods = tile.goods; // Assumo getGoods() → List<String>
+        List<String> goods = tile.goods;
+        if (goods == null || goods.isEmpty()) {
+            System.out.println("[DEBUG] No goods in tile (" + row + "," + col + ")");
+        } else {
+            System.out.println("[DEBUG] Goods in tile (" + row + "," + col + "): " + goods);
+        }
+
         if (goods != null) {
             for (int i = 0; i < goods.size(); i++) {
-                System.out.println("[DEBUG] Tile at " + row + "," + col + " → tokens = " + tile.tokens);
                 String goodType = goods.get(i);
                 ImageView token = new ImageView(getTokenImage(goodType));
-                token.setFitWidth(32);
-                token.setFitHeight(32);
-                StackPane.setAlignment(token, Pos.CENTER);
+                token.setFitWidth(200);
+                token.setFitHeight(200);
+                StackPane.setAlignment(token, Pos.BOTTOM_LEFT);
                 token.setTranslateX(i * 17);
                 token.setTranslateY(-2);
                 cell.getChildren().add(token);
             }
         }
+
     }
 
     public void showYesNoButtons(String message) {
