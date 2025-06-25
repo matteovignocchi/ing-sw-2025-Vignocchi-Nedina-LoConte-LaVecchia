@@ -1,10 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDashController;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -251,10 +249,20 @@ public class GUIView extends Application implements View {
     }
 
 
-
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
         model.setPlayerPositions(playerMaps);
+
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.updateMapPosition(playerMaps, model.isDemo());
+            }
+        });
+    }
+
+    public Map<String, int[]> getPlayerPositions() {
+       return model.getPlayerPositions();
     }
 
     public void updateState(ClientGamePhase gamePhase) {
@@ -283,11 +291,17 @@ public class GUIView extends Application implements View {
                     GUIController controller = sceneRouter.getController(BUILDING_PHASE);
                     controller.postInitializeLogOut();
                 }
+                case WAITING_FOR_TURN  , DRAW_PHASE->{
+                    setSceneEnum(GAME_PHASE);
+                    GUIController controller = sceneRouter.getController(GAME_PHASE);
+                    controller.postInitialize();
+                }
 
                 default -> {}
             }
         });
     }
+
 
 
     @Override
@@ -716,6 +730,19 @@ public class GUIView extends Application implements View {
         this.bufferedPlayerName = enemyName;
         System.out.println(""+ enemyName);
     }
+    public void preparePlayerCoordinateInput() {
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            ctrl.enableDashboardCoordinateSelection(coords -> {
+                setBufferedCoordinate(coords);
+                resolveGenericCommand("COORD_SELECTED");
+            });
+        });
+    }
+
+    public void ErPuzzo(){
+    }
+
 
 
 

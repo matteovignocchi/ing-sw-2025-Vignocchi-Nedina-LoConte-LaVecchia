@@ -89,12 +89,12 @@ public class ClientController {
                     while (!g.hasResolvedMenuChoice()) {
                         Thread.sleep(100);
                     }
-                   String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
+//                   String cmd = g.sendAvailableChoices();  // blocca fino a quando viene risolta
 
 
                     String cmd2 = g.consumeMenuChoice();
 
-                    switch (cmd) {
+                    switch (cmd2) {
                         case "1" -> createNewGame();
                         case "2" -> joinExistingGame();
                         case "3" -> {
@@ -636,6 +636,7 @@ public class ClientController {
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
+                                g.ErPuzzo();
                                 g.updateState(ClientGamePhase.MAIN_MENU);
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());
