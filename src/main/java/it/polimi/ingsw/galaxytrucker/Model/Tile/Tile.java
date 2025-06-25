@@ -23,6 +23,7 @@ public abstract class Tile implements Serializable {
     public int[] corners = new int[4];
     public int idTile;
     public int rotation;
+    public String type;
 
 
     public static Image loadImageById(int tileId) {

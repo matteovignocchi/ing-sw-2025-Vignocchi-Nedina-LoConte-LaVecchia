@@ -97,12 +97,11 @@
         </rowConstraints>
       </GridPane>
       <Button fx:id="logout" layoutX="38.0" layoutY="635.0" mnemonicParsing="false" text="Logout" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" />
-      <Button layoutX="354.0" layoutY="575.0" mnemonicParsing="false" prefWidth="77.0" styleClass="blue-button" text="Yes" AnchorPane.rightAnchor="780.0" AnchorPane.topAnchor="500.0" />
-      <Button layoutX="503.0" layoutY="575.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="77.0" styleClass="blue-button" text="No" AnchorPane.rightAnchor="650.0" AnchorPane.topAnchor="500.0" />
-      <Button layoutX="513.0" layoutY="572.0" mnemonicParsing="false" styleClass="blue-button" text="Draw Card" AnchorPane.rightAnchor="690.0" AnchorPane.topAnchor="500.0" />
-      <HBox fx:id="messageBox" layoutX="30.0" layoutY="450.0" prefHeight="208.0" prefWidth="396.0">
+      <Button fx:id="yesButton" layoutX="354.0" layoutY="575.0" mnemonicParsing="false" prefWidth="77.0" styleClass="blue-button" text="Yes" AnchorPane.rightAnchor="780.0" AnchorPane.topAnchor="500.0" />
+      <Button fx:id="noButton" layoutX="503.0" layoutY="575.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="77.0" styleClass="blue-button" text="No" AnchorPane.rightAnchor="650.0" AnchorPane.topAnchor="500.0" />
+      <HBox fx:id="messageBox" layoutX="30.0" layoutY="450.0" prefHeight="208.0" prefWidth="396.0" styleClass="chat-message">
          <children>
-            <TextFlow fx:id="messageTextFlow" prefHeight="208.0" prefWidth="395.0">
+            <TextFlow fx:id="messageTextFlow" prefHeight="208.0" prefWidth="395.0" styleClass="chat-message">
                <children>
                   <Text fx:id="messageText" styleClass="chat-message" text="" wrappingWidth="360.0" />
                </children>
@@ -112,15 +111,19 @@
       <VBox layoutX="728.0" layoutY="444.0" prefHeight="256.0" prefWidth="538.0">
          <children>
             <Label fx:id="nicknametext" styleClass="nickname" />
-            <Label fx:id="position" styleClass="chat-message" text="Position:" />
             <Label fx:id="credits" styleClass="chat-message" text="Credits:" />
-            <Label fx:id="enginepower" styleClass="chat-message" text="Engine Power:" />
-            <Label fx:id="firepower" styleClass="chat-message" text="Fire Power:" />
-            <Label fx:id="purplealien" styleClass="chat-message" text="Purple Alien:" />
-            <Label fx:id="brownalien" styleClass="chat-message" text="Brown Alien:" />
-            <Label fx:id="numofhumans" styleClass="chat-message" text="Number of Humans:" />
-            <Label fx:id="energycell" styleClass="chat-message" text="Number of energy Cell:" />
+            <Label fx:id="enginepower" styleClass="engine" text="Engine Power:" />
+            <Label fx:id="firepower" styleClass="firepower" text="Fire Power:" />
+            <Label fx:id="purplealien" styleClass="purplealien" text="Purple Alien:" />
+            <Label fx:id="brownalien" styleClass="brownalien" text="Brown Alien:" />
+            <Label fx:id="numofhumans" styleClass="humans" text="Number of Humans:" />
+            <Label fx:id="energycell" styleClass="energyCell" text="Number of energy Cell:" />
          </children></VBox>
+      <Button fx:id="DrawButton" layoutX="185.0" layoutY="355.0" mnemonicParsing="false" prefHeight="159.0" prefWidth="307.0" styleClass="blue-button" text="Draw Card" AnchorPane.bottomAnchor="100.0" />
+      <Button fx:id="playerShip1Btn" layoutX="216.0" layoutY="26.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" styleClass="blue-button" text="Button" />
+      <Button fx:id="playerShip2Btn" layoutX="392.0" layoutY="339.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" rotate="-24.4" styleClass="blue-button" text="Button" />
+      <Button fx:id="playerShip3Btn" layoutX="31.0" layoutY="339.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="239.0" rotate="29.1" styleClass="blue-button" text="Button" />
+      <Pane fx:id="cardPane" layoutX="519.0" layoutY="436.0" prefHeight="250.0" prefWidth="180.0" AnchorPane.leftAnchor="1050.0" />
    </children>
    <stylesheets>
       <URL value="@css/Button.css" />

@@ -1,10 +1,9 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.BuildingPhaseController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GUIController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.GameListMenuController;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.PrintDashController;
+import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
+import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -24,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -53,12 +53,11 @@ public class GUIView extends Application implements View {
     private Integer bufferedIndex = null;
     private boolean previewingEnemyDashboard = false;
     private String bufferedPlayerName = null;
-
-
-
-
-
-
+    private volatile Boolean bufferedBoolean;
+    private boolean showGoodActionPrompt = false;
+    private List<String> bufferedGoods = List.of();
+    private volatile long lastAskCoordinateTimestamp = 0;
+    private volatile long lastAskIndexTimestamp = 0;
 
 
 
@@ -149,7 +148,21 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
+            } else {
+                reportError("GameController non disponibile.");
+            }
+        });
+        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
         while (bufferedCoordinate == null) {
+            if (System.currentTimeMillis() > deadline) {
+                reportError("Timeout su askCoordinate.");
+                return new int[]{-1, -1};
+            }
+
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -168,19 +181,30 @@ public class GUIView extends Application implements View {
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
     }
+    public void setBufferedBoolean(Boolean value) {this.bufferedBoolean = value;}
 
     @Override
-    public void updateView(String nickname,
-                           double firePower,
-                           int powerEngine,
-                           int credits,
-                           boolean purpleAlien,
-                           boolean brownAlien,
-                           int numberOfHuman,
-                           int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         Platform.runLater(() -> {
             model.setNickname(nickname);
-            // TODO: bind additional stats to UI
+            model.setFirePower(firePower);
+            model.setEnginePower(powerEngine);
+            model.setCredits(credits);
+            model.setPurpleAlien(purpleAlien);
+            model.setBrownAlien(brownAlien);
+            model.setNumberOfEnergy(numberOfEnergy);
+            model.setNumberOfHumans(numberOfHuman);
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.updateStatsLabels(
+                        nickname,
+                        firePower,
+                        powerEngine,
+                        credits,
+                        purpleAlien,
+                        brownAlien,
+                        numberOfHuman,
+                        numberOfEnergy);}
         });
     }
 
@@ -246,6 +270,17 @@ public class GUIView extends Application implements View {
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
         model.setPlayerPositions(playerMaps);
+
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.updateMapPosition(playerMaps, model.isDemo());
+            }
+        });
+    }
+
+    public Map<String, int[]> getPlayerPositions() {
+       return model.getPlayerPositions();
     }
 
     public void updateState(ClientGamePhase gamePhase) {
@@ -270,15 +305,28 @@ public class GUIView extends Application implements View {
 
                 }
                 case EXIT -> {
-                    setSceneEnum(BUILDING_PHASE);
-                    GUIController controller = sceneRouter.getController(BUILDING_PHASE);
-                    controller.postInitializeLogOut();
+                    setSceneEnum(EXIT_PHASE);
+                    GUIController controller = sceneRouter.getController(EXIT_PHASE);
+                    controller.postInitialize();
+                }
+                case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
+                    setSceneEnum(GAME_PHASE);
+                    GUIController controller = sceneRouter.getController(GAME_PHASE);
+                    controller.postInitialize();
+                }
+                case DRAW_PHASE ->{
+                    setSceneEnum(GAME_PHASE);
+                    sceneRouter.getController(GAME_PHASE).postInitialize();
+                    sceneRouter.getController(GAME_PHASE).postInitialize2();
+
+
                 }
 
                 default -> {}
             }
         });
     }
+
 
 
     @Override
@@ -307,8 +355,6 @@ public class GUIView extends Application implements View {
     }
 
     @Override public Boolean ask(String message) { return false; }
-    @Override public boolean askWithTimeout(String message) { return false; }
-    @Override public int[] askCoordinatesWithTimeout() { return new int[0]; }
 
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
@@ -380,7 +426,156 @@ public class GUIView extends Application implements View {
         return result;
     }
 
-    @Override public Integer askIndexWithTimeout() { return -1; }
+    @Override
+    public Integer askIndexWithTimeout() {
+        long deadline = System.currentTimeMillis() + 20_000;
+        lastAskIndexTimestamp = System.currentTimeMillis();
+
+        long waitStart = System.currentTimeMillis();
+        while (!showGoodActionPrompt && System.currentTimeMillis() - waitStart < 300) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+
+        Platform.runLater(() -> {
+            System.out.println("[LOG] Dentro Platform.runLater - showGoodActionPrompt = " + showGoodActionPrompt);
+
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGoods.fxml"));
+                AnchorPane root = loader.load();
+                PrintListOfGoodController ctrl = loader.getController();
+
+                if (showGoodActionPrompt) {
+                    ctrl.loadGoods(bufferedGoods);
+                    ctrl.setupForGoodsIndexSelection();
+                    ctrl.configureNavigation(this);
+                } else {
+                    ctrl.setupForActionSelection(this);
+                }
+
+                showGoodActionPrompt = false;
+
+                Stage stage = new Stage();
+                stage.setTitle("Goods");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.centerOnScreen();
+                stage.show();
+            } catch (IOException ex) {
+                reportError("Errore nel caricamento PrintListOfGood.fxml: " + ex.getMessage());
+            }
+        });
+
+        while (bufferedIndex == null && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                return -1;
+            }
+        }
+
+        if (bufferedIndex == null) {
+            reportError("Timeout su askIndex.");
+            return -1;
+        }
+
+        int res = bufferedIndex;
+        bufferedIndex = null;
+
+        // Timeout di conferma implicita
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {}
+        if (System.currentTimeMillis() - lastAskIndexTimestamp > 400) {
+            System.out.println("[DEBUG] Indice good confermato: " + res);
+        }
+
+        return res;
+    }
+
+
+    @Override
+    public boolean askWithTimeout(String message) {
+        long timeout = 20_000; // 20 secondi
+        long deadline = System.currentTimeMillis() + timeout;
+
+        bufferedBoolean = null; // reset
+
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.showYesNoButtons(message); // mostra pulsanti nella GUI
+            } else {
+                reportError("Controller non disponibile per askWithTimeout.");
+            }
+        });
+
+        while (bufferedBoolean == null && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+
+        if (bufferedBoolean == null) {
+            reportError("Timeout su askWithTimeout.");
+            return false;
+        }
+
+        boolean result = bufferedBoolean;
+        bufferedBoolean = null;
+        return result;
+    }
+
+
+    @Override
+    public int[] askCoordinatesWithTimeout() {
+        lastAskCoordinateTimestamp = System.currentTimeMillis();
+
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
+            } else {
+                reportError("GameController non disponibile.");
+            }
+        });
+
+        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
+        while (bufferedCoordinate == null) {
+            if (System.currentTimeMillis() > deadline) {
+                reportError("Timeout su askCoordinate.");
+                return new int[]{-1, -1};
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new int[]{-1, -1};
+            }
+        }
+
+        int[] result = bufferedCoordinate;
+        bufferedCoordinate = null;
+
+        // Se entro 500ms askCoordinate non è richiamato di nuovo, consideriamo confermato
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ignored) {}
+        if (System.currentTimeMillis() - lastAskCoordinateTimestamp > 400) {
+            System.out.println("[DEBUG] Coordinate confermate: " + Arrays.toString(result));
+        }
+
+        return result;
+    }
+
+
+
     @Override
     public String choosePlayer() {
         if (bufferedPlayerName != null) {
@@ -420,20 +615,46 @@ public class GUIView extends Application implements View {
         return gamePhase;
     }
 
-    @Override public void printListOfGoods(List<String> goods) {}
+    @Override
+    public void printListOfGoods(List<String> goods) {
+        System.out.println("[LOG] printListOfGoods() chiamato con: " + goods);
+
+        this.bufferedGoods = goods;
+        this.showGoodActionPrompt = true;
+
+        System.out.println("[LOG] showGoodActionPrompt = true");
+
+    }
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
     @Override public void printPileCovered() {}
     @Override
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
-            model.setCurrentTile(null); // non serve tile singola
-            setBufferedIndex(null);    // reset importante per evitare valori vecchi
+            model.setCurrentTile(null);
+            setBufferedIndex(null);
             BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
             ctrl.displayTileSelection(tiles);
         });
     }
-    @Override public void printCard(ClientCard card) {}
+    @Override
+    public void printCard(ClientCard card) {
+        Platform.runLater(() -> {
+            model.setCurrentCard(card);
+
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            if (ctrl != null) {
+                if (card == null) {
+                    ctrl.clearCurrentTile();
+                } else {
+                    ctrl.showCurrentCard(card);
+                }
+            } else {
+                System.err.println("[GUIView] WARNING: BUILDING_PHASE controller not initialized yet.");
+            }
+        });
+    }
+
 
     @Override
     public void printDeck(List<ClientCard> deck) {
@@ -561,6 +782,7 @@ public class GUIView extends Application implements View {
             case "RESERVE_TILE" -> "takereservedtile";
             case "DECK" -> "watchadeck";
             case "LOGOUT" -> "logout";
+            case "DRAW" -> "drawacard";
             default -> null;
         };
         System.out.println("[DEBUG] Comando ricevuto: " + command + " → " + translated);
@@ -716,7 +938,71 @@ public class GUIView extends Application implements View {
         this.bufferedPlayerName = enemyName;
         System.out.println(""+ enemyName);
     }
+    public void preparePlayerCoordinateInput() {
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
+            ctrl.enableDashboardCoordinateSelection(coords -> {
+                setBufferedCoordinate(coords);
+                resolveGenericCommand("COORD_SELECTED");
+            });
+        });
+    }
+
+    public void ErPuzzo(){
+    }
 
 
+
+
+
+    public void triggerGoodActionPrompt() {
+        this.showGoodActionPrompt = true;
+    }
+    public void resetGUIState() {
+        // Reset del modello
+        if (model != null) {
+            model.setDashboard(new ClientTile[5][7]);
+            model.setCurrentTile(null);
+            model.setCurrentCard(null);
+            model.setNickname(null);
+            model.setFirePower(0);
+            model.setEnginePower(0);
+            model.setCredits(0);
+            model.setNumberOfHumans(0);
+            model.setNumberOfEnergy(0);
+            model.setPurpleAlien(false);
+            model.setBrownAlien(false);
+            model.setPlayerPositions(new HashMap<>());
+            model.setDemo(false);
+        }
+
+        // Reset dei buffer
+        bufferedCoordinate = null;
+        bufferedIndex = null;
+        bufferedPlayerName = null;
+        bufferedBoolean = null;
+        showGoodActionPrompt = false;
+        bufferedGoods = List.of();
+
+        model.reset();
+        sceneRouter.reinitializeAllScenes();
+
+        // Reset delle code
+        menuChoiceQueue.clear();
+        commandQueue.clear();
+        notificationQueue.clear();
+        isShowingNotification = false;
+
+        // Reset fase e scena
+        gamePhase = null;
+        sceneEnum = null;
+
+        // (Opzionale) Reset degli input pending
+        if (inputManager != null) {
+            inputManager.resetAll(); // assicurati che esista
+        }
+
+        System.out.println("[DEBUG] GUIView state resettato completamente.");
+    }
 
 }

@@ -66,8 +66,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateMeteoritesDeck();
+            decks = deckCreator.CreateSecondLevelDeck();
+//            decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1589,11 +1589,11 @@ public class Controller implements Serializable {
 
         while (!list.isEmpty() && flag) {
             inform("SERVER: Select a storage unit", nick);
-            printListOfGoods(list, nick);
             printPlayerDashboard(x, p, nick);
 
             int[] vari = askPlayerCoordinates(p);
 
+            printListOfGoods(list, nick);
             Tile t;
             if(vari==null) t = p.getTile(2,3);
             else t = p.getTile(vari[0], vari[1]);
@@ -1603,7 +1603,9 @@ public class Controller implements Serializable {
                     if(c.isFull()){
                         inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
                         List<Colour> listGoods = c.getListOfGoods();
+
                         printListOfGoods(listGoods, nick);
+
                         Integer tmpint = askPlayerIndex(p, listGoods.size());
                         if(tmpint==null) tmpint = 0;
                         int idx = tmpint;
@@ -1639,6 +1641,7 @@ public class Controller implements Serializable {
                 }
                 default -> reportError("Not valid cell", nick);
             }
+            printPlayerDashboard(x, p, nick);
 
             if(!askPlayerDecision("SERVER: Do you want to continue to add goods?", p)) flag = false;
         }
@@ -1779,7 +1782,9 @@ public class Controller implements Serializable {
                                 switch (tmp) {
                                     case PRADELLA -> {
                                         Human tmp2 = Human.HUMAN;
-                                        for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        for (int z = 0; z < 2; z++) {
+                                            System.out.println("[DEBUG] AGGIUNGO a (" + i + "," + j + ") = " + h.getListOfToken());
+                                            h.addHuman(tmp2);}
                                     }
                                     case PURPLE_ALIEN -> {
                                         if(p.presencePurpleAlien() || (i == 2 && j == 3)) {
@@ -1831,6 +1836,7 @@ public class Controller implements Serializable {
                     }
                 }
             }
+            printPlayerDashboard(x,p ,tmpNick);
             //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani

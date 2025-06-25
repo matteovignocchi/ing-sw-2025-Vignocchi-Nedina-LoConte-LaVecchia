@@ -673,7 +673,7 @@ public class Player implements Serializable {
             removeTile(0,5);
             removeTile(0,6);
         }
-        Tile tmp = getTile(x,y);
+        HousingUnit tmp = (HousingUnit) getTile(x,y);
 
         boolean flag = true;
         while(flag){
