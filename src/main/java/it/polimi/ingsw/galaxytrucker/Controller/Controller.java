@@ -2041,6 +2041,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
+//            updateGamePhase(Nickname , v , GamePhase.EXIT); update fatto dopo
             return true; //TODO: da eliminare e gestire bene questo caso
         }
 
