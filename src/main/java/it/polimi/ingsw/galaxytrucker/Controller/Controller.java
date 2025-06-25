@@ -60,8 +60,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            deck = deckCreator.CreatePlanetsDemoDeck();
-//            deck = deckCreator.CreateMixedDemoDeck();
+//            deck = deckCreator.CreatePlanetsDemoDeck();
+            deck = deckCreator.CreateMixedDemoDeck();
         }else{
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
