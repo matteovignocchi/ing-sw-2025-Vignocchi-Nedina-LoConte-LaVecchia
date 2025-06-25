@@ -1672,6 +1672,7 @@ public class Controller implements Serializable {
                 }
                 default -> inform("SERVER: Not valid cell", nick);
             }
+            printPlayerDashboard(v, p, nick);
             if(!askPlayerDecision("SERVER: Do you want to select another storage unit for the rearranging?", p)) exit = false;
         }
     }
