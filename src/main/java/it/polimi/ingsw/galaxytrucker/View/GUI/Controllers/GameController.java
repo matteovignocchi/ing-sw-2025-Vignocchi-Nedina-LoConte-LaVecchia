@@ -80,6 +80,10 @@ public class GameController extends GUIController {
 
 
 
+    @FXML private Label promptLabel;
+    @FXML private Button yesButton;
+    @FXML private Button noButton;
+
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
     @FXML private Button logout , DrawButton;
     private final Map<Integer, Pane> demoMap = new HashMap<>();
@@ -351,5 +355,28 @@ public class GameController extends GUIController {
             }
         }
     }
+
+    public void showYesNoButtons(String message) {
+        promptLabel.setText(message);
+        promptLabel.setVisible(true);
+        yesButton.setVisible(true);
+        noButton.setVisible(true);
+
+        yesButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(true);
+            hidePrompt();
+        });
+        noButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(false);
+            hidePrompt();
+        });
+    }
+
+    private void hidePrompt() {
+        promptLabel.setVisible(false);
+        yesButton.setVisible(false);
+        noButton.setVisible(false);
+    }
+
 
 }
