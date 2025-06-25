@@ -206,7 +206,7 @@ public class GameController extends GUIController {
             if (pos == null || pos.length < 2) continue;
 
             int position = pos[0]; // es. da 1 a 24
-            int shipId = pos[1];   // id della nave associata
+            int shipId = pos[3];   // id della nave associata
 
             Pane cell = paneMap.get(position);
             if (cell == null) continue;
@@ -219,7 +219,13 @@ public class GameController extends GUIController {
         }
     }
     private Image getShipImage(int id) {
-        String path = "/RedRocket.png";
+        String path = switch (id){
+            case 33 ->  "/BlueRocket.png";
+            case 34 ->  "/GreenRocket.png";
+            case 52 ->  "/RedRocket.png";
+            case 61 ->  "/YellowRockt.png";
+            default -> "/placeholder.png";
+        };
         return new Image(getClass().getResourceAsStream(path));
     }
 

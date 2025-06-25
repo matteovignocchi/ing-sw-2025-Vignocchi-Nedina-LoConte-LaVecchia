@@ -141,7 +141,21 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinate() {
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
+            } else {
+                reportError("GameController non disponibile.");
+            }
+        });
+        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
         while (bufferedCoordinate == null) {
+            if (System.currentTimeMillis() > deadline) {
+                reportError("Timeout su askCoordinate.");
+                return new int[]{-1, -1};
+            }
+
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -284,9 +298,9 @@ public class GUIView extends Application implements View {
 
                 }
                 case EXIT -> {
-                    setSceneEnum(BUILDING_PHASE);
-                    GUIController controller = sceneRouter.getController(BUILDING_PHASE);
-                    controller.postInitializeLogOut();
+                    setSceneEnum(EXIT_PHASE);
+                    GUIController controller = sceneRouter.getController(EXIT_PHASE);
+                    controller.postInitialize();
                 }
                 case WAITING_FOR_TURN ->{
                     setSceneEnum(GAME_PHASE);
@@ -443,6 +457,14 @@ public class GUIView extends Application implements View {
 
     @Override
     public int[] askCoordinatesWithTimeout() {
+        Platform.runLater(() -> {
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
+            } else {
+                reportError("GameController non disponibile.");
+            }
+        });
         long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {

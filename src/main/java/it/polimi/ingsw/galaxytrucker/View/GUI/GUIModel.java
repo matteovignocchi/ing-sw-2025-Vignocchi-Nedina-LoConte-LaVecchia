@@ -16,7 +16,7 @@ public class GUIModel {
     private ClientCard card;
     private double firePower;
     private int enginePower;
-    private int credits;
+    public int credits;
     private int numberOfHumans;
     private int numberOfEnergy;
     private boolean purpleAlien;
@@ -173,5 +173,9 @@ public class GUIModel {
 
     public Map<String, int[]> getPlayerPositions() {
         return new HashMap<>(playerPositions);
+    }
+
+    public int getMyPosition(String playerName){
+        return playerPositions.get(playerName)[0];
     }
 }
