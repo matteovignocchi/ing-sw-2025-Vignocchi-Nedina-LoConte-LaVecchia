@@ -54,7 +54,7 @@ public class GUIView extends Application implements View {
     private String bufferedPlayerName = null;
     private volatile Boolean bufferedBoolean;
     private boolean showGoodActionPrompt = false;
-    private boolean showGoodsIndexSelection = false;
+    private List<String> bufferedGoods = List.of();
 
 
     @Override
@@ -420,10 +420,10 @@ public class GUIView extends Application implements View {
                     AnchorPane root = loader.load();
 
                     PrintListOfGoodController ctrl = loader.getController();
-                    ctrl.setupForActionSelection(this);
-
+                    ctrl.loadGoods(bufferedGoods);
+                    ctrl.setupForGoodsIndexSelection(this);
                     Stage stage = new Stage();
-                    stage.setTitle("Choose what to do");
+                    stage.setTitle("Select a Good");
                     stage.setScene(new Scene(root));
                     stage.setResizable(false);
                     stage.centerOnScreen();
@@ -433,21 +433,16 @@ public class GUIView extends Application implements View {
                     reportError("Errore caricando PrintListOfGood.fxml: " + e.getMessage());
                 }
             });
-        }
-
-        if (showGoodsIndexSelection) {
-            showGoodsIndexSelection = false;
-
+        } else {
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGood.fxml"));
                     AnchorPane root = loader.load();
 
                     PrintListOfGoodController ctrl = loader.getController();
-                    ctrl.setupForGoodsIndexSelection(this);
-
+                    ctrl.setupForActionSelection(this);
                     Stage stage = new Stage();
-                    stage.setTitle("Select a Good");
+                    stage.setTitle("Choose what to do");
                     stage.setScene(new Scene(root));
                     stage.setResizable(false);
                     stage.centerOnScreen();
@@ -580,7 +575,10 @@ public class GUIView extends Application implements View {
         return gamePhase;
     }
 
-    @Override public void printListOfGoods(List<String> goods) {}
+    @Override public void printListOfGoods(List<String> goods) {
+        triggerGoodActionPrompt();
+        this.bufferedGoods = goods;
+    }
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
     @Override public void printPileCovered() {}
@@ -913,8 +911,5 @@ public class GUIView extends Application implements View {
         this.showGoodActionPrompt = true;
     }
 
-    public void triggerGoodsIndexSelection() {
-        this.showGoodsIndexSelection = true;
-    }
 
 }
