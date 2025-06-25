@@ -419,8 +419,8 @@ public class GameController extends GUIController {
             for (int i = 0; i < goods.size(); i++) {
                 String goodType = goods.get(i);
                 ImageView token = new ImageView(getTokenImage(goodType));
-                token.setFitWidth(200);
-                token.setFitHeight(200);
+                token.setFitWidth(15);
+                token.setFitHeight(15);
                 StackPane.setAlignment(token, Pos.BOTTOM_LEFT);
                 token.setTranslateX(i * 17);
                 token.setTranslateY(-2);

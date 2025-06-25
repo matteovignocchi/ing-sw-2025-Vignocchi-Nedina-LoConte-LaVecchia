@@ -254,11 +254,13 @@ public class GUIView extends Application implements View {
             });
         } else {
             model.setDashboard(ship);
-
             Platform.runLater(() -> {
                 BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
-                if (ctrl != null) {
+                GameController ctrl2 = (GameController) sceneRouter.getController(GAME_PHASE);
+                ctrl2.updateDashboard(ship);
+                if (ctrl != null ) {
                     ctrl.updateDashboard(ship);
+
                 }
             });
         }
