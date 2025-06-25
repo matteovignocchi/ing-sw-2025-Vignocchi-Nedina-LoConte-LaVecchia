@@ -79,4 +79,11 @@ public class SceneRouter {
     public GUIController getController(SceneEnum sceneEnum) {
         return controllers.get(sceneEnum);
     }
+    public void reinitializeAllScenes() {
+        scenes.clear();
+        controllers.clear();
+        initializeAllScenes(); // già definito, ricarica tutto da zero
+    }
+
+
 }

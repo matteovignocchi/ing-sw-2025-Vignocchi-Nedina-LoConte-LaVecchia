@@ -633,7 +633,7 @@ public class ClientController {
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
-                                g.ErPuzzo();
+                                g.resetGUIState();
                                 g.updateState(ClientGamePhase.MAIN_MENU);
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());

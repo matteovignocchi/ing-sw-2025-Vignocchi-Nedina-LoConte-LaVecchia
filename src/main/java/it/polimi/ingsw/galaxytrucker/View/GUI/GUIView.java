@@ -23,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -308,7 +309,7 @@ public class GUIView extends Application implements View {
                     GUIController controller = sceneRouter.getController(EXIT_PHASE);
                     controller.postInitialize();
                 }
-                case WAITING_FOR_TURN ->{
+                case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
                     controller.postInitialize();
@@ -957,6 +958,51 @@ public class GUIView extends Application implements View {
     public void triggerGoodActionPrompt() {
         this.showGoodActionPrompt = true;
     }
+    public void resetGUIState() {
+        // Reset del modello
+        if (model != null) {
+            model.setDashboard(new ClientTile[5][7]);
+            model.setCurrentTile(null);
+            model.setCurrentCard(null);
+            model.setNickname(null);
+            model.setFirePower(0);
+            model.setEnginePower(0);
+            model.setCredits(0);
+            model.setNumberOfHumans(0);
+            model.setNumberOfEnergy(0);
+            model.setPurpleAlien(false);
+            model.setBrownAlien(false);
+            model.setPlayerPositions(new HashMap<>());
+            model.setDemo(false);
+        }
 
+        // Reset dei buffer
+        bufferedCoordinate = null;
+        bufferedIndex = null;
+        bufferedPlayerName = null;
+        bufferedBoolean = null;
+        showGoodActionPrompt = false;
+        bufferedGoods = List.of();
+
+        model.reset();
+        sceneRouter.reinitializeAllScenes();
+
+        // Reset delle code
+        menuChoiceQueue.clear();
+        commandQueue.clear();
+        notificationQueue.clear();
+        isShowingNotification = false;
+
+        // Reset fase e scena
+        gamePhase = null;
+        sceneEnum = null;
+
+        // (Opzionale) Reset degli input pending
+        if (inputManager != null) {
+            inputManager.resetAll(); // assicurati che esista
+        }
+
+        System.out.println("[DEBUG] GUIView state resettato completamente.");
+    }
 
 }

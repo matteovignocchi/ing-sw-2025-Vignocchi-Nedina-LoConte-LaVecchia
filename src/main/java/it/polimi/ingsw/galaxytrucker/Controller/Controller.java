@@ -67,7 +67,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             decks = deckCreator.CreateSecondLevelDeck();
-            //decks = deckCreator.CreatePlanetsDeck();
+//            decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1629,6 +1629,7 @@ public class Controller implements Serializable {
                 }
                 default -> inform("SERVER: Not valid cell", nick);
             }
+            printPlayerDashboard(x, p, nick);
 
             if(!askPlayerDecision("SERVER: Do you want to continue to add goods?", p)) flag = false;
         }
@@ -1769,7 +1770,9 @@ public class Controller implements Serializable {
                                 switch (tmp) {
                                     case PRADELLA -> {
                                         Human tmp2 = Human.HUMAN;
-                                        for (int z = 0; z < 2; z++) h.addHuman(tmp2);
+                                        for (int z = 0; z < 2; z++) {
+                                            System.out.println("[DEBUG] AGGIUNGO a (" + i + "," + j + ") = " + h.getListOfToken());
+                                            h.addHuman(tmp2);}
                                     }
                                     case PURPLE_ALIEN -> {
                                         if(p.presencePurpleAlien() || (i == 2 && j == 3)) {
@@ -1821,6 +1824,7 @@ public class Controller implements Serializable {
                     }
                 }
             }
+            printPlayerDashboard(x,p ,tmpNick);
             //in tutte le abitazioni normali metto 2 human
             //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
             //se è connessa -> mettere umani
@@ -2107,6 +2111,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
+            updateGamePhase(Nickname , v , GamePhase.EXIT);
             return true; //TODO: da eliminare e gestire bene questo caso
         }
 
