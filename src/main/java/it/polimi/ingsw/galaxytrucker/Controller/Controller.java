@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 //TODO: corner-case: crash in startGame
-//TODO: capire le eccezione nei metodi che usano i parser!! Gestite male, soprattutto per il discorso markdisconnected
+//TODO: controllare le eccezioni e capire le eccezione nei metodi che usano i parser!! Gestite male, soprattutto per il discorso markdisconnected
 //TODO: pulire il codice (sostituire ove possibile v.inform con chiamate a inform metodo controller, e metodi simili)
 
 public class Controller implements Serializable {
@@ -250,6 +250,18 @@ public class Controller implements Serializable {
         } catch(Exception e){
             markDisconnected(msg);
             System.err.println("[ERROR] in inform: " + e);
+        }
+    }
+
+    public void reportError(String msg, String nick){
+        VirtualView v = viewsByNickname.get(nick);
+        try{
+            v.reportError(msg);
+        } catch (IOException e){
+            markDisconnected(msg);
+        } catch(Exception e){
+            markDisconnected(msg);
+            System.err.println("[ERROR] in reportError: " + e);
         }
     }
 
@@ -629,21 +641,21 @@ public class Controller implements Serializable {
                     hourglass.flip();
                     broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
                 } else {
-                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
-                    inform(msg, nickname);
+                    String msg = "You cannot flip the hourglass: It's still running";
+                    reportError(msg, nickname);
                 }
                 break;
             case 2:
                 if(state == HourglassState.ONGOING){
-                    String msg = "\nSERVER: " + "You cannot flip the hourglass: It's still running";
-                    inform(msg, nickname);
+                    String msg = "You cannot flip the hourglass: It's still running";
+                    reportError(msg, nickname);
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
                     broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
                 } else {
-                    String msg = "\nSERVER: You cannot flip the hourglass for the last time: " +
+                    String msg = "You cannot flip the hourglass for the last time: " +
                             "You are not ready";
-                    inform(msg, nickname);
+                    reportError(msg, nickname);
                 }
                 break;
             default: throw new BusinessLogicException("\nImpossible to flip the hourglass another time!");
@@ -935,7 +947,7 @@ public class Controller implements Serializable {
                 if (idx == null) return null;
 
                 if (idx < 0 || idx >= len) {
-                    inform("SERVER: Index out of range. Please try again", nick);
+                    reportError("Index out of range. Please try again", nick);
                     continue;
                 }
                 return idx;
@@ -1313,10 +1325,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: There are not red goods in this storage unit. Try again", nick);
+                                if(!flag) reportError("There are not red goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: Not valid cell. Try again", nick);
+                            default -> reportError("Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1362,10 +1374,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: There are not yellow goods in this storage unit. Try again", nick);
+                                if(!flag) reportError("There are not yellow goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: Not valid cell. Try again", nick);
+                            default -> reportError("Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1412,10 +1424,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: There are not green goods in this storage unit. Try again", nick);
+                                if(!flag) reportError("There are not green goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: Not valid cell. Try again", nick);
+                            default -> reportError("Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1461,10 +1473,10 @@ public class Controller implements Serializable {
                                         break;
                                     }
                                 }
-                                if(!flag) inform("SERVER: There are not blue goods in this storage unit. Try again", nick);
+                                if(!flag) reportError("There are not blue goods in this storage unit. Try again", nick);
                                 else flag=false;
                             }
-                            default -> inform("SERVER: Not valid cell. Try again", nick);
+                            default -> reportError("Not valid cell. Try again", nick);
                         }
                     }else{
                         for(int index =0 ; index <5 ; index++){
@@ -1519,9 +1531,9 @@ public class Controller implements Serializable {
                                 if(c.getCapacity() != 0){
                                     c.useBattery();
                                     finish--;
-                                } else inform("SERVER: Empty energy cell. Try again", nick);
+                                } else reportError("Empty energy cell. Try again", nick);
                             }
-                            default -> inform("SERVER: Not valid cell. Try again", nick);
+                            default -> reportError("Not valid cell. Try again", nick);
                         }
                     }else{
                         autoCommandForBattery(p, 1);
@@ -1555,7 +1567,7 @@ public class Controller implements Serializable {
                     case 1 -> caseRedistribution(p, x, list, nick);
                     case 2 -> caseRemove(p,x,nick);
                     default -> {
-                        inform("SERVER: Invalid choice. Please try again", nick);
+                        reportError("Invalid choice. Please try again", nick);
                         continue;
                     }
                 }
@@ -1571,7 +1583,7 @@ public class Controller implements Serializable {
         Colour tempGood = null;
 
         if(list.isEmpty()){
-            inform("SERVER: Empty list of goods", nick);
+            reportError("Empty list of goods", nick);
             return;
         }
 
@@ -1615,7 +1627,7 @@ public class Controller implements Serializable {
                             list.remove(idx);
                         }
                         else {
-                            inform("SERVER: You can't place a dangerous good in a not advanced storage unit", nick);
+                            reportError("You can't place a dangerous good in a not advanced storage unit", nick);
                             if(tempGood!=null){
                                 c.addGood(tempGood);
                                 list.remove(tempGood);
@@ -1627,14 +1639,14 @@ public class Controller implements Serializable {
                         list.remove(idx);
                     }
                 }
-                default -> inform("SERVER: Not valid cell", nick);
+                default -> reportError("Not valid cell", nick);
             }
             printPlayerDashboard(x, p, nick);
 
             if(!askPlayerDecision("SERVER: Do you want to continue to add goods?", p)) flag = false;
         }
 
-        if(flag) inform("SERVER: Empty list of goods", nick);
+        if(flag) reportError("Empty list of goods", nick);
     }
 
 
@@ -1657,7 +1669,7 @@ public class Controller implements Serializable {
                     List<Colour> tmplist = c.getListOfGoods();
 
                     if(tmplist.isEmpty()){
-                        inform("SERVER: Empty storage unit", nick);
+                        reportError("Empty storage unit", nick);
                         break;
                     }
 
@@ -1672,7 +1684,7 @@ public class Controller implements Serializable {
                     selectStorageUnitForAdd(v, p, tmpColor, nick);
                     printPlayerDashboard(v, p, nick);
                 }
-                default -> inform("SERVER: Not valid cell", nick);
+                default -> reportError("Not valid cell", nick);
             }
             printPlayerDashboard(v, p, nick);
             if(!askPlayerDecision("SERVER: Do you want to select another storage unit for the rearranging?", p)) exit = false;
@@ -1695,21 +1707,21 @@ public class Controller implements Serializable {
             switch (tmp2) {
                 case StorageUnit c -> {
                     if(c.isFull()) {
-                        inform("SERVER: This storage unit is full. Try again", nick);
+                        reportError("This storage unit is full. Try again", nick);
                         continue;
                     }
                     if(color == Colour.RED) {
                         if(c.isAdvanced()) {
                             c.addGood(color);
                             exit = true;
-                        } else inform("SERVER: You can't place a dangerous good in a not advanced storage unit", nick);
+                        } else reportError("You can't place a dangerous good in a not advanced storage unit", nick);
                     }else {
                         c.addGood(color);
                         exit = true;
                     }
                 }
                 default -> {
-                    inform("SERVER: Not valid cell", nick);
+                    reportError("Not valid cell", nick);
                     //if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage Unit? , if not you will loose the goods", p)) exit = true;
                 }
             }
@@ -1743,11 +1755,11 @@ public class Controller implements Serializable {
                             c.removeGood(idx);
                             printPlayerDashboard(v, p, nick);
                         }else{
-                            inform("SERVER: Empty list of goods", nick);
+                            reportError("Empty list of goods", nick);
                         }
 
                     }
-                    default -> inform("SERVER: Not valid cell", nick);
+                    default -> reportError("Not valid cell", nick);
                 }
             }
             if(!askPlayerDecision("SERVER: " + "Do you want to select another storage unit for trashing?", p)) exit = false;
@@ -1866,10 +1878,10 @@ public class Controller implements Serializable {
                                 if(tmp == 3) p.setPurpleAlien();
                                 num--;
                             }else{
-                                inform("SERVER: Select a valid housing unit", nick);
+                                reportError("Select a valid housing unit", nick);
                             }
                         }
-                        default -> inform("SERVER: Select a valid housing unit", nick);
+                        default -> reportError("Select a valid housing unit", nick);
                     }
 
 //                    printPlayerDashboard(x, p, nick);
@@ -1983,89 +1995,7 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param type dimension of the attack, true if it is big
      */
-//    public void defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
-//
-//
-//        String direction = "";
-//        int direction2 = dir2;
-//        switch (dir) {
-//            case 0 -> {
-//                direction = "Nord";
-//                direction2 = dir2+4;
-//            }
-//            case 1 -> {
-//                direction = "East";
-//                direction2 = dir2+5;
-//            }
-//            case 2 -> {
-//                direction = "South";
-//                direction2 = dir2+4;
-//            }
-//            case 3 -> {
-//                direction = "West";
-//                direction2 = dir2+5;
-//            }
-//        }
-//        String nick = getNickByPlayer(p);
-//        Tile[][] tmpDash = p.getDashMatrix();
-//        try {
-//            viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
-//            viewsByNickname.get(nick).inform(" SHIP BEFORE THE ATTACK ");
-//            viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
-//        } catch (Exception e) {
-//            markDisconnected(nick);
-//        }
-//        if (dir == 0) {
-//            if (dir2 > 3 && dir2 < 11) {
-//                if (type || (!isProtected(nick, dir) && !type)) {
-//                    scriptOfDefence(nick , tmpDash , dir2);
-//                } else {
-//                    try {
-//                        viewsByNickname.get(nick).inform("you are safe");
-//                    } catch (Exception e) {
-//                        markDisconnected(nick);
-//                    }
-//                }
-//            }
-//        } else if (dir == 2) {
-//            if (dir2 > 3 && dir2 < 11) {
-//                if (type || (!isProtected(nick, dir) && !type)) {
-//                    scriptOfDefence(nick , tmpDash , dir2);
-//                } else {
-//                    try {
-//                        viewsByNickname.get(nick).inform("you are safe");
-//                    } catch (Exception e) {
-//                        markDisconnected(nick);
-//                    }
-//                }
-//            }
-//        } else if (dir == 1) {
-//            if (dir2 > 4 && dir2 < 10) {
-//                if (type || (!isProtected(nick, dir) && !type)) {
-//                    scriptOfDefence(nick , tmpDash , dir2);
-//                } else {
-//                    try {
-//                        viewsByNickname.get(nick).inform("you are safe");
-//                    } catch (Exception e) {
-//                        markDisconnected(nick);
-//                    }
-//                }
-//            }
-//        } else if (dir == 3) {
-//            if (dir2 > 4 && dir2 < 10) {
-//                if (type || (!isProtected(nick, dir) && !type)) {
-//                    scriptOfDefence(nick , tmpDash , dir2);
-//                } else {
-//                    try {
-//                        viewsByNickname.get(nick).inform("you are safe");
-//                    } catch (Exception e) {
-//                        markDisconnected(nick);
-//                    }
-//                }
-//            }
-//        }
-//
-//    }
+
     public boolean defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
@@ -2112,7 +2042,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
-            updateGamePhase(Nickname , v , GamePhase.EXIT);
+//            updateGamePhase(Nickname , v , GamePhase.EXIT); update fatto dopo
             return true; //TODO: da eliminare e gestire bene questo caso
         }
 
@@ -2132,126 +2062,17 @@ public class Controller implements Serializable {
      * @param dir  cardinal direction of the attack
      * @param isBig dimension of the attack, true if it is big
      */
-//    public void defenceFromMeteorite(int dir, boolean type, int dir2) throws BusinessLogicException {
-//
-//        String direction = "";
-//        int direction2 = dir2;
-//        switch (dir) {
-//            case 0 -> {
-//                direction = "Nord";
-//                direction2 = dir2+4;
-//            }
-//            case 1 -> {
-//                direction = "East";
-//                direction2 = dir2+5;
-//            }
-//            case 2 -> {
-//                direction = "South";
-//                direction2 = dir2+4;
-//            }
-//            case 3 -> {
-//                direction = "West";
-//                direction2 = dir2+5;
-//            }
-//        }
-//
-//        for (String nick : playersByNickname.keySet()) {
-//
-//            Player p = getPlayerCheck(nick);
-//            VirtualView v = getViewCheck(nick);
-//            Tile[][] tmpDash = playersByNickname.get(nick).getDashMatrix();
-//            try {
-//                viewsByNickname.get(nick).inform("the attack is coming from "+direction+" on the section "+direction2);
-//                viewsByNickname.get(nick).inform("ship before the attack");
-//                viewsByNickname.get(nick).printPlayerDashboard(tileSerializer.toJsonMatrix(tmpDash));
-//            } catch (Exception e) {
-//                markDisconnected(nick);
-//            }
-//            if (dir == 0) {
-//                if (dir2 > 3 && dir2 < 11) {
-//                    if (type && !checkProtection(dir, dir2, nick)) {
-//                            scriptOfDefence(nick, p, v, dir2 , dir);
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                    if (!type && playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-//                        if (!isProtected(nick,dir)) {
-//                            scriptOfDefence(nick, p, v, dir2 , dir);
-//                        }
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                }
-//            } else if (dir == 2) {
-//                if (dir2 > 3 && dir2 < 11) {
-//                    if (type && checkProtection(dir, dir2, nick)) {
-//                        scriptOfDefence(nick, p, v, dir2 , dir);
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-//                        if (!isProtected(nick, dir)) {
-//                            scriptOfDefence(nick, p, v , dir2 ,dir);
-//                        }
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                }
-//            } else if (dir == 1 || dir == 3) {
-//                if (dir2 > 4 && dir2 < 10) {
-//                    if (type && !checkProtection(dir, dir2, nick)) {
-//                        scriptOfDefence(nick, p, v , dir2 , dir);
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                    if (!type && !playersByNickname.get(nick).checkNoConnector(dir, dir2)) {
-//                        if (!isProtected(nick, dir)) {
-//                            scriptOfDefence(nick, p, v, dir2 , dir);
-//                        }
-//                    }else {
-//                        try {
-//                            viewsByNickname.get(nick).inform("you are safe");
-//                        } catch (Exception e) {
-//                            markDisconnected(nick);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     public void defenceFromMeteorite(int dir, boolean isBig, int dir2, List<Player> players, int numMeteorite) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
         String size = isBig ? "big" : "small";
 
-        /**
-        for (Player p : players) {
+        for(Player p : players){
+            if(players.getFirst().equals(p) || !p.isConnected()) continue;
             String nick = getNickByPlayer(p);
-            if(players.indexOf(p)!=0) inform("\nSERVER: Waiting for your turn...", nick);
-        } */
-
-        broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+            inform("\nSERVER: Waiting for your turn...", nick);
+        }
 
         for (Player p : players) {
             if(p.isConnected()){
@@ -2308,28 +2129,26 @@ public class Controller implements Serializable {
             while (!exit) {
                 coordinates = askPlayerCoordinates(player);
 
-                if(coordinates == null){
-                    autoCommandForBattery(player, 1);
-                } else {
-                    Tile p = playersByNickname.get(nick).getTile(coordinates[0], coordinates[1]);
+                Tile p;
+                if(coordinates == null) p = playersByNickname.get(nick).getTile(2,3);
+                else p = playersByNickname.get(nick).getTile(coordinates[0], coordinates[1]);
 
-                    switch (p) {
-                        case EnergyCell c -> {
-                            int capacity = c.getCapacity();
-                            if (capacity == 0) {
-                                inform("SERVER: You have already used all the batteries for this cell", nick);
-                                if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                                    return false;
-                            } else {
-                                c.useBattery();
-                                return true;
-                            }
-                        }
-                        default -> {
-                            inform("SERVER: Not valid cell", nick);
+                switch (p) {
+                    case EnergyCell c -> {
+                        int capacity = c.getCapacity();
+                        if (capacity == 0) {
+                            reportError("You have already used all the batteries for this cell", nick);
                             if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
-                                exit = true;
+                                return false;
+                        } else {
+                            c.useBattery();
+                            return true;
                         }
+                    }
+                    default -> {
+                        reportError("Not valid cell", nick);
+                        if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
+                            exit = true;
                     }
                 }
             }
@@ -2572,9 +2391,9 @@ public class Controller implements Serializable {
                 switch (tmp) {
                     case HousingUnit h -> {
                         if(h.getType() == Human.HUMAN) flag = false;
-                        else inform("SERVER: Not valid position, try again", nickname);
+                        else reportError("Not valid position, try again", nickname);
                     }
-                    default -> inform("SERVER: Not valid position, try again", nickname);
+                    default -> reportError("Not valid position, try again", nickname);
                 }
             } while(flag);
 
