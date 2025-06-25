@@ -67,7 +67,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             decks = deckCreator.CreateSecondLevelDeck();
-            //decks = deckCreator.CreatePlanetsDeck();
+//            decks = deckCreator.CreatePlanetsDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -2105,6 +2105,7 @@ public class Controller implements Serializable {
 
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans", Nickname);
+            updateGamePhase(Nickname , v , GamePhase.EXIT);
             return true; //TODO: da eliminare e gestire bene questo caso
         }
 

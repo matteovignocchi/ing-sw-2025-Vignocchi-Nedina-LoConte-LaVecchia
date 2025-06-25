@@ -10,6 +10,8 @@ public enum SceneEnum {
     JOIN_GAME_MENU("/fxml/GameListMenu.fxml"),
     WAITING_QUEUE("/fxml/WaitingQueue.fxml"),
     NICKNAME_DIALOG("/fxml/NicknameDialog.fxml"),
+    PRINT_GOODS("/fxml/PrintListOfGood.fxml"),
+
     EXIT_PHASE("/fxml/Finale.fxml");
     private final String value;
     SceneEnum(final String value) {

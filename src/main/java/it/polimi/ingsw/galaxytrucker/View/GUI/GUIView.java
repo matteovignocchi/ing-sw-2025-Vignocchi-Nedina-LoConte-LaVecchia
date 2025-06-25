@@ -23,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -304,7 +305,7 @@ public class GUIView extends Application implements View {
                     GUIController controller = sceneRouter.getController(EXIT_PHASE);
                     controller.postInitialize();
                 }
-                case WAITING_FOR_TURN ->{
+                case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
                     controller.postInitialize();
@@ -437,6 +438,10 @@ public class GUIView extends Application implements View {
                     ctrl.loadGoods(bufferedGoods);
                     ctrl.setupForGoodsIndexSelection(this);
                     Stage stage = new Stage();
+                    System.out.println("dovrebbe essere juscito1");
+//                    stage.initModality(Modality.APPLICATION_MODAL);
+//                    stage.initOwner(logoutButton.getScene().getWindow());
+
                     stage.setTitle("Select a Good");
                     stage.setScene(new Scene(root));
                     stage.setResizable(false);
@@ -456,6 +461,10 @@ public class GUIView extends Application implements View {
                     PrintListOfGoodController ctrl = loader.getController();
                     ctrl.setupForActionSelection(this);
                     Stage stage = new Stage();
+                    System.out.println("dovrebbe essere juscito2");
+
+//                    stage.initModality(Modality.APPLICATION_MODAL);
+
                     stage.setTitle("Choose what to do");
                     stage.setScene(new Scene(root));
                     stage.setResizable(false);
