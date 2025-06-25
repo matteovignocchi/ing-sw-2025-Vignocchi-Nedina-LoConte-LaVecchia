@@ -11,6 +11,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +71,6 @@ public class GameController extends GUIController {
     @FXML private Pane path24;
     @FXML private Pane cardPane;
     @FXML private Label nicknametext;
-    @FXML private Label position;
     @FXML private Label credits;
     @FXML private Label enginepower;
     @FXML private Label firepower;
@@ -80,7 +81,8 @@ public class GameController extends GUIController {
 
 
 
-    @FXML private Label promptLabel;
+    @FXML private TextFlow messageTextFlow;
+    @FXML private Text messageText;
     @FXML private Button yesButton;
     @FXML private Button noButton;
 
@@ -196,6 +198,12 @@ public class GameController extends GUIController {
         // Mostra/nasconde sfondi o bottoni demo in base al flag
         // esempio: demo1.setVisible(demo);
         // oppure disabilita click, bottoni, ecc.
+        playerShip1Btn.setVisible(false);
+        playerShip2Btn.setVisible(false);
+        playerShip3Btn.setVisible(false);
+        yesButton.setVisible(false);
+        noButton.setVisible(false);
+
 
         if (demo) {
              ship1.setVisible(true);
@@ -357,8 +365,8 @@ public class GameController extends GUIController {
     }
 
     public void showYesNoButtons(String message) {
-        promptLabel.setText(message);
-        promptLabel.setVisible(true);
+        messageText.setText(message);
+        messageTextFlow.setVisible(true);
         yesButton.setVisible(true);
         noButton.setVisible(true);
 
@@ -366,17 +374,30 @@ public class GameController extends GUIController {
             guiView.setBufferedBoolean(true);
             hidePrompt();
         });
+
         noButton.setOnAction(e -> {
             guiView.setBufferedBoolean(false);
             hidePrompt();
         });
     }
 
+
     private void hidePrompt() {
-        promptLabel.setVisible(false);
+        messageTextFlow.setVisible(false);
         yesButton.setVisible(false);
         noButton.setVisible(false);
+        messageText.setText("");
     }
 
+    public void updateStatsLabels(String nickname, double firePower, int enginePower, int creditsVal, boolean purple, boolean brown, int humans, int energy) {
+        nicknametext.setText(nickname);
+        firepower.setText("Fire Power: " + firePower);
+        enginepower.setText("Engine Power: " + enginePower);
+        credits.setText("Credits: " + creditsVal);
+        purplealien.setText("Purple Alien: " + (purple ? "Yes" : "No"));
+        brownalien.setText("Brown Alien: " + (brown ? "Yes" : "No"));
+        numofhumans.setText("Number of Humans: " + humans);
+        energycell.setText("Number of energy Cell: " + energy);
+    }
 
 }

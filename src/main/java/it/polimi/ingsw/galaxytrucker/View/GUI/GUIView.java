@@ -163,14 +163,7 @@ public class GUIView extends Application implements View {
     public void setBufferedBoolean(Boolean value) {this.bufferedBoolean = value;}
 
     @Override
-    public void updateView(String nickname,
-                           double firePower,
-                           int powerEngine,
-                           int credits,
-                           boolean purpleAlien,
-                           boolean brownAlien,
-                           int numberOfHuman,
-                           int numberOfEnergy) {
+    public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         Platform.runLater(() -> {
             model.setNickname(nickname);
             model.setFirePower(firePower);
@@ -180,6 +173,17 @@ public class GUIView extends Application implements View {
             model.setBrownAlien(brownAlien);
             model.setNumberOfEnergy(numberOfEnergy);
             model.setNumberOfHumans(numberOfHuman);
+            GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+            if (ctrl != null) {
+                ctrl.updateStatsLabels(
+                        nickname,
+                        firePower,
+                        powerEngine,
+                        credits,
+                        purpleAlien,
+                        brownAlien,
+                        numberOfHuman,
+                        numberOfEnergy);}
         });
     }
 
