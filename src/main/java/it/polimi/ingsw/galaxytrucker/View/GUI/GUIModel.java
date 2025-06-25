@@ -178,4 +178,20 @@ public class GUIModel {
     public int getMyPosition(String playerName){
         return playerPositions.get(playerName)[0];
     }
+    public void reset() {
+        this.dashboard = new ClientTile[5][7];
+        this.mask = new Boolean[5][7];
+        this.currentTile = null;
+        this.card = null;
+        this.firePower = 0;
+        this.enginePower = 0;
+        this.credits = 0;
+        this.numberOfHumans = 0;
+        this.numberOfEnergy = 0;
+        this.purpleAlien = false;
+        this.brownAlien = false;
+        this.nickname = null;
+        this.playerPositions.clear();
+    }
+
 }
