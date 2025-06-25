@@ -53,6 +53,8 @@ public class GUIView extends Application implements View {
     private boolean previewingEnemyDashboard = false;
     private String bufferedPlayerName = null;
     private volatile Boolean bufferedBoolean;
+    private boolean showGoodActionPrompt = false;
+    private List<String> bufferedGoods = List.of();
 
 
     @Override
@@ -420,6 +422,74 @@ public class GUIView extends Application implements View {
     }
 
     @Override
+    public Integer askIndexWithTimeout() {
+        long deadline = System.currentTimeMillis() + 20_000;
+
+        if (showGoodActionPrompt) {
+            showGoodActionPrompt = false;
+
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGood.fxml"));
+                    AnchorPane root = loader.load();
+
+                    PrintListOfGoodController ctrl = loader.getController();
+                    ctrl.loadGoods(bufferedGoods);
+                    ctrl.setupForGoodsIndexSelection(this);
+                    Stage stage = new Stage();
+                    stage.setTitle("Select a Good");
+                    stage.setScene(new Scene(root));
+                    stage.setResizable(false);
+                    stage.centerOnScreen();
+                    stage.show();
+
+                } catch (IOException e) {
+                    reportError("Errore caricando PrintListOfGood.fxml: " + e.getMessage());
+                }
+            });
+        } else {
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGood.fxml"));
+                    AnchorPane root = loader.load();
+
+                    PrintListOfGoodController ctrl = loader.getController();
+                    ctrl.setupForActionSelection(this);
+                    Stage stage = new Stage();
+                    stage.setTitle("Choose what to do");
+                    stage.setScene(new Scene(root));
+                    stage.setResizable(false);
+                    stage.centerOnScreen();
+                    stage.show();
+
+                } catch (IOException e) {
+                    reportError("Errore caricando PrintListOfGood.fxml: " + e.getMessage());
+                }
+            });
+
+        }
+
+        while (bufferedIndex == null && System.currentTimeMillis() <= deadline) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return -1;
+            }
+        }
+
+        if (bufferedIndex == null) {
+            reportError("Timeout su askIndex.");
+            return -1;
+        }
+
+        int result = bufferedIndex;
+        bufferedIndex = null;
+        return result;
+    }
+
+
+    @Override
     public boolean askWithTimeout(String message) {
         long timeout = 20_000; // 20 secondi
         long deadline = System.currentTimeMillis() + timeout;
@@ -488,33 +558,6 @@ public class GUIView extends Application implements View {
 
 
 
-
-
-
-
-
-
-    @Override
-    public Integer askIndexWithTimeout() {
-        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
-        while (bufferedIndex == null) {
-            if (System.currentTimeMillis() > deadline) {
-                reportError("Timeout su askIndex.");
-                return -1;
-            }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return -1;
-            }
-        }
-
-        int result = bufferedIndex;
-        bufferedIndex = null;
-        return result;
-    }
     @Override
     public String choosePlayer() {
         if (bufferedPlayerName != null) {
@@ -554,7 +597,10 @@ public class GUIView extends Application implements View {
         return gamePhase;
     }
 
-    @Override public void printListOfGoods(List<String> goods) {}
+    @Override public void printListOfGoods(List<String> goods) {
+        triggerGoodActionPrompt();
+        this.bufferedGoods = goods;
+    }
     @Override public void printMapPosition() {}
     @Override public void printNewFase(String gamePhase) {}
     @Override public void printPileCovered() {}
@@ -882,6 +928,10 @@ public class GUIView extends Application implements View {
     }
 
 
+
+    public void triggerGoodActionPrompt() {
+        this.showGoodActionPrompt = true;
+    }
 
 
 }
