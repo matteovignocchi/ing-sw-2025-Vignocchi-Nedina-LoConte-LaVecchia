@@ -329,7 +329,7 @@ class CardEffectVisitorTest {
 
     @Test
     void visitPlauge_startsOnAll() throws BusinessLogicException {
-        visitor.visit(new PlaugeCard("Z"));
+        visitor.visit(new PlagueCard("Z"));
         verify(controller).startPlauge(p1);
         verify(controller).startPlauge(p2);
     }

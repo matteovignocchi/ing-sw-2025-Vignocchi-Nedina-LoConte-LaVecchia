@@ -56,13 +56,15 @@ public class PiratesCard implements Card, Serializable {
         this.shots_size = new ArrayList<>(shots_size);
     }
 
+    /**
+     * Accepts a CardVisitor to process this card.
+     *
+     * @param visitor the CardVisitor that will handle this card
+     * @throws BusinessLogicException if a business logic error occurs during processing
+     */
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException{
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
+        visitor.visit(this);
     }
 
     /**
@@ -94,5 +96,9 @@ public class PiratesCard implements Card, Serializable {
      */
 
     public List<Boolean> getShots_size(){return new ArrayList<>(shots_size);}
+
+    /**
+     * @return card's id
+     */
     public String getIdCard(){return idCard;}
 }

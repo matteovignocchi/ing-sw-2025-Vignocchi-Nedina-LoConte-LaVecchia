@@ -20,7 +20,7 @@ import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OpenSpaceCard.class, name = "OpenSpaceCard"),
         @JsonSubTypes.Type(value = PiratesCard.class, name = "PiratesCard"),
-        @JsonSubTypes.Type(value = PlaugeCard.class, name = "PlaugeCard"),
+        @JsonSubTypes.Type(value = PlagueCard.class, name = "PlaugeCard"),
         @JsonSubTypes.Type(value = PlanetsCard.class, name = "PlanetsCard"),
         @JsonSubTypes.Type(value = AbandonedShipCard.class, name = "AbandonedShipCard"),
         @JsonSubTypes.Type(value = FirstWarzoneCard.class, name = "FirstWarzoneCard"),

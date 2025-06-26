@@ -1,10 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard;
 
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.Model.Player;
-
 import java.io.Serializable;
-import java.util.ArrayList;
+
 
 /**
  * Class that extends FlightCardBoard, used for lvl. 2 flights

@@ -1,7 +1,5 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -72,8 +70,8 @@ public class DeckManager implements Serializable {
         return decks;
     }
 
-    //TODO: SOLO PER DEBUGGING, ELIMINARE TUTTI STI METODI UNA VOLTA FINITI
 
+    /**
     public List<Deck> CreateOpenSpaceDecks() throws CardEffectException {
         Card c1 = new OpenSpaceCard("1");
         Card c2 = new OpenSpaceCard("2");
@@ -373,5 +371,5 @@ public class DeckManager implements Serializable {
         deck1.add(c2);
         return deck1;
     }
-
+     */
 }

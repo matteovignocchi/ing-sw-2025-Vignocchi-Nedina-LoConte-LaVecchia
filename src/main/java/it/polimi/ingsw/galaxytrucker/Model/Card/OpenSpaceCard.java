@@ -15,6 +15,10 @@ public class OpenSpaceCard implements Card, Serializable {
 
     private final String idCard;
 
+    /**
+     * OpenSpaceCard constructor
+     * @param idCard card's id
+     */
     @JsonCreator
     public OpenSpaceCard(
             @JsonProperty("id_card") String idCard
@@ -24,15 +28,19 @@ public class OpenSpaceCard implements Card, Serializable {
         this.idCard = idCard;
     }
 
+    /**
+     * Accepts a CardVisitor to process this card.
+     *
+     * @param visitor the CardVisitor that will handle this card
+     * @throws BusinessLogicException if a business logic error occurs during processing
+     */
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
+        visitor.visit(this);
     }
 
-    /** Restituisce l’ID univoco di questa carta, es. "0_01" */
+    /**
+     * @return card's id
+     */
     public String getIdCard() { return idCard; }
 }

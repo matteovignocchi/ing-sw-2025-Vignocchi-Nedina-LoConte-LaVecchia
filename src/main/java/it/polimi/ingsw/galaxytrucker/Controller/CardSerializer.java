@@ -102,7 +102,7 @@ public class CardSerializer {
                 dto.type = "OPENSPACECARD";
                 dto.idCard = o.getIdCard();
             }
-            case PlaugeCard p ->{
+            case PlagueCard p ->{
                 dto.type = "PLAUGECARD";
                 dto.idCard = p.getIdCard();
             }

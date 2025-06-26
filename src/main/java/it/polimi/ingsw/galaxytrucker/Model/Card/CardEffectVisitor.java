@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.Model.Card;
 
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
-import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 
@@ -10,7 +9,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 public class CardEffectVisitor implements CardVisitor, Serializable {
     private final Controller controller;
@@ -685,7 +683,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     }
 
     /**
-     * Applies the "Plauge" card effect:
+     * Applies the "Plague" card effect:
      * For each player, a method is called that checks the amount of exposed connectors.
      *
      * @param card: card object on which the method is activated.
@@ -694,7 +692,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      */
 
     @Override
-    public void visit(PlaugeCard card) throws BusinessLogicException {
+    public void visit(PlagueCard card) throws BusinessLogicException {
         for (Player p : players) {
             controller.startPlauge(p);
         }

@@ -7,15 +7,19 @@ import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import java.io.Serializable;
 
 /**
- * This class handles the PlaugeCard, which is deserialized via Jackson.
+ * This class handles the PlagueCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
  */
-public class PlaugeCard implements Card, Serializable {
+public class PlagueCard implements Card, Serializable {
 
     private final String idCard;
 
+    /**
+     * PlagueCard's constructor
+     * @param idCard card's id
+     */
     @JsonCreator
-    public PlaugeCard(
+    public PlagueCard(
             @JsonProperty("id_card") String idCard
     ) {
         if (idCard == null || idCard.isBlank()) throw new IllegalArgumentException("id_card cannot be null or empty");
@@ -23,11 +27,19 @@ public class PlaugeCard implements Card, Serializable {
         this.idCard = idCard;
     }
 
+    /**
+     * Accepts a CardVisitor to process this card.
+     *
+     * @param visitor the CardVisitor that will handle this card
+     * @throws BusinessLogicException if a business logic error occurs during processing
+     */
     @Override
     public void accept(CardVisitor visitor) throws BusinessLogicException {
         visitor.visit(this);
     }
 
-    /** Restituisce l’ID univoco di questa carta, es. "0_02" */
+    /**
+     * @return card's id
+     */
     public String getIdCard() { return idCard; }
 }

@@ -46,13 +46,15 @@ public class AbandonedStationCard implements Card, Serializable {
         this.station_goods = new ArrayList<>(station_goods);
     }
 
+    /**
+     * Accepts a CardVisitor to process this card.
+     *
+     * @param visitor the CardVisitor that will handle this card
+     * @throws BusinessLogicException if a business logic error occurs during processing
+     */
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
+        visitor.visit(this);
     }
 
     /**
@@ -72,5 +74,9 @@ public class AbandonedStationCard implements Card, Serializable {
      */
 
     public List<Colour> getStationGoods(){ return new ArrayList<>(station_goods); }
+
+    /**
+     * @return card's id
+     */
     public String getIdCard(){ return idCard; }
 }

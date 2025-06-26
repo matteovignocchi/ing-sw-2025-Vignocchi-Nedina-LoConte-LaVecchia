@@ -163,7 +163,7 @@ public class FlightCardBoard implements Serializable {
     public void setPlayerReadyToFly(Player p, boolean isDemo) {
         if(orderedPlayersInFlight.contains(p)) throw new IllegalArgumentException("Player is already in flight");
         int size = orderedPlayersInFlight.size();
-        if(size >= 4) throw new RuntimeException("Too many players in flight");
+        if(size >= 4) throw new RuntimeException ("Too many players in flight");
 
         p.setLap(1);
         if(isDemo){
