@@ -15,10 +15,9 @@ import java.io.Serializable;
  * 0 for no joint , 1 for 1 joint , 2 for 2 joint , 3 for universal , 4 for single cannon
  * 5 for double cannon , 6 for single engine , 7 for double engine and 8 for shield
  * isShown determinate if the tile is revealed
- * @author Oleg Nedina & Matteo Vignocchi
+ * @author Oleg Nedina
+ * @author Matteo Vignocchi
  */
-
-
 public abstract class Tile implements Serializable {
     public int[] corners = new int[4];
     public int idTile;
@@ -26,6 +25,49 @@ public abstract class Tile implements Serializable {
     public String type;
 
 
+    /**
+     * Loads the image associated with a specific tile ID.
+     *
+     * Attempts to retrieve the tile image from the classpath using the given ID.
+     * If the image is not found, a default placeholder tile image is used instead.
+     *
+     * @param tileId the ID of the tile to load
+     * @return the Image corresponding to the tile
+     * @throws RuntimeException if neither the target image nor the default is found
+     */
+    public static Image loadImageById(int tileId) {
+        try {
+            String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
+            InputStream is = Tile.class.getResourceAsStream(imagePath);
+
+            if (is == null) {
+                imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web157";
+                is = Tile.class.getResourceAsStream(imagePath);
+
+                if (is == null) {
+                    throw new RuntimeException("Default tile image not found");
+                }
+            }
+
+            return new Image(is);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load tile image for ID: " + tileId, e);
+        }
+    }
+
+    /**
+     * Returns the image associated with this tile.
+     * Uses the tile's ID to retrieve the corresponding image from resources.
+     * @return the Image representing this tile
+     */
+    public Image getImage() {
+        return loadImageById(this.idTile);
+    }
+
+    /**
+     * Returns the unique identifier of this tile.
+     * @return the tile ID
+     */
     public int getIdTile() {
         return idTile;
     }
@@ -69,7 +111,15 @@ public abstract class Tile implements Serializable {
         return corners[i];
     }
 
-    @Override
+
+    /**
+     * Compares this tile to another object for equality.
+     * Two tiles are considered equal if:
+     * - They are the same instance, or
+     * - They are of the same class and have the same tile ID.
+     * @param obj the object to compare with
+     * @return true if the tiles are equal, false otherwise
+     */
     public boolean equals(Object obj) {
         if (this == obj) return true; // stesso riferimento
         if (obj == null || getClass() != obj.getClass()) return false; // null o classi diverse

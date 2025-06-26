@@ -377,9 +377,6 @@ public class TUIView implements View {
     }
 
     @Override
-    public void setInt() {}
-
-    @Override
     public void printListOfGoods(List<String> Goods) {
         inform("List of goods: ");
         for(String colour : Goods) {
@@ -498,11 +495,6 @@ public class TUIView implements View {
         System.out.println();
     }
 
-    //metodo che riceve una lista, in cui prendi
-    @Override
-    public void printNewFase(String gamePhase) {
-
-    }
 
     @Override
     public void printDeck(List<ClientCard> deck) {

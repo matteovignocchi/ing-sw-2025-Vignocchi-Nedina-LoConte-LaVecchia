@@ -10,8 +10,8 @@ import java.util.List;
  * max is the parameter for the slots
  * Human is a flag that gives the information of which token can be placed in the unit
  * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
-
 public class HousingUnit extends Tile implements Serializable {
     private List<Human> listOfToken = new ArrayList<>();
     private int max;
@@ -33,7 +33,7 @@ public class HousingUnit extends Tile implements Serializable {
         corners[3]=d;
         this.isAlien=isAlien;
         switch (isAlien){
-            case HUMAN -> typeOfConnections=Human.PRADELLA;
+            case HUMAN -> typeOfConnections=Human.HUMAN234;
             case PURPLE_ALIEN -> typeOfConnections=Human.PURPLE_ALIEN;
             case BROWN_ALIEN -> typeOfConnections=Human.BROWN_ALIEN;
         }
@@ -48,7 +48,6 @@ public class HousingUnit extends Tile implements Serializable {
      * @throws FullHousingList if the party is full
      */
     public void addHuman(Human token) throws FullHousingList, IllegalArgumentException, BusinessLogicException {
-//        if(listOfToken.size()>max) throw new BusinessLogicException("Huse is full");
         listOfToken.add(token);
     }
 
@@ -93,26 +92,41 @@ public class HousingUnit extends Tile implements Serializable {
     }
 
     /**
-     * @param connected set true if is connected to another housing unit
+     * Sets whether this housing unit is connected to another housing unit.
+     * @param connected true if the housing unit is connected, false otherwise
      */
     public void setConnected(boolean connected){
         isConnected = connected;
     }
 
     /**
-     * @return true if it is connected
+     * Returns whether this housing unit is connected to another one.
+     * @return true if connected, false otherwise
      */
     public boolean isConnected(){
         return isConnected;
     }
-
+    /**
+     * Returns the list of human tokens currently in this housing unit.
+     * @return a list of Human tokens
+     */
     public List<Human> getListOfToken(){
         return listOfToken;
     }
 
+    /**
+     * Sets the type of alien connection associated with this housing unit.
+     * This is used when the unit connects to a special alien type (e.g., BROWN_ALIEN or PURPLE_ALIEN).
+     * @param typeOfConnections the type of connection to assign
+     */
     public void setTypeOfConnections(Human typeOfConnections){
         this.typeOfConnections=typeOfConnections;
     }
+
+    /**
+     * Returns the type of alien connection associated with this housing unit.
+     * @return the type of connection (Human or Alien)
+     */
     public Human getTypeOfConnections(){
         return typeOfConnections;
     }

@@ -1,31 +1,39 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Colour;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
 import it.polimi.ingsw.galaxytrucker.DtoConvention.TileDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class responsible for converting Tile objects to their DTO representation
+ * and serializing/deserializing them as JSON.
+ * Supports both individual tiles and full dashboard matrices. Used to enable communication
+ * between model logic and client-side rendering.
+ * @author Oleg Nedina
+ */
 public class TileSerializer {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Converts a Tile object into its corresponding TileDTO.
+     * This method detects the concrete type of the tile and maps all relevant attributes
+     * (connectors, contents, rotation, etc.) into a DTO suitable for transfer or serialization.
+     * @param tile the Tile to convert
+     * @return the resulting TileDTO
+     */
     public TileDTO toDTO(Tile tile) {
         TileDTO dto = new TileDTO();
-
-        // Informazioni comuni
         dto.a = tile.controlCorners(0);
         dto.b = tile.controlCorners(1);
         dto.c = tile.controlCorners(2);
         dto.d = tile.controlCorners(3);
         dto.id = tile.getIdTile();
         dto.rotation = tile.rotation;
-
-        // Valori di default/null-safe
         dto.type = tile.getClass().getSimpleName().toUpperCase();
         dto.idDouble = false;
         dto.advance = false;
@@ -34,8 +42,6 @@ public class TileSerializer {
         dto.tokens = List.of();
         dto.goods = List.of();
         dto.protectedCorners = new ArrayList<>();
-
-        // Switch dinamico su tipo reale della tile
         switch (tile) {
             case Engine e -> {
                 dto.type = "ENGINE";
@@ -77,50 +83,29 @@ public class TileSerializer {
                 dto.capacity = ec.getCapacity();
             }
             default -> {}
-
-            // eventuali altri tipi (Connector, Cabin, ecc.) possono essere aggiunti qui
         }
-        System.out.println("[DEBUG] tile.class = " + tile.getClass().getName());
-
-        if (tile instanceof HousingUnit h) {
-            System.out.println("[DEBUG] TOKENS IN DTO: " + h.getListOfToken());
-
-            dto.tokens = h.getListOfToken().stream().map(Enum::name).toList();
-            dto.human = h.getType().name();
-            dto.max = h.returnLenght();
-        }
-
-        if (tile instanceof StorageUnit s) {
-            dto.goods = s.getListOfGoods().stream().map(Enum::name).toList();
-            dto.max = s.getMax();
-            dto.advance = s.isAdvanced();
-        }
-
-        if (tile instanceof EnergyCell ec) {
-            dto.capacity = ec.getCapacity();
-        }
-
-        if (tile instanceof Cannon c) {
-            dto.idDouble = c.isDouble();
-        }
-
-        if (tile instanceof Engine e) {
-            dto.idDouble = e.isDouble();
-        }
-
-        if (tile instanceof Shield s) {
-            for (int i = 0; i < 4; i++) dto.protectedCorners.add(s.getProtectedCorner(i));
-        }
-
-
         return dto;
     }
 
-
+    /**
+     * Converts a Tile object to a JSON string.
+     * The tile is first converted to a TileDTO, then serialized using Jackson.
+     * @param tile the tile to serialize
+     * @return the JSON string representation of the tile
+     * @throws JsonProcessingException if the serialization fails
+     */
     public String toJson(Tile tile) throws JsonProcessingException {
         return mapper.writeValueAsString(toDTO(tile));
     }
 
+
+    /**
+     * Converts a list of Tile objects into a JSON array string.
+     * Each tile is converted to a TileDTO before being serialized.
+     * @param tiles the list of tiles to serialize
+     * @return a JSON string representing the list
+     * @throws JsonProcessingException if serialization fails
+     */
     public String toJsonList(List<Tile> tiles) throws JsonProcessingException {
         List<TileDTO> dtos = new ArrayList<>();
         for (Tile tile : tiles) {
@@ -130,6 +115,13 @@ public class TileSerializer {
         return mapper.writeValueAsString(dtos);
     }
 
+    /**
+     * Converts a 2D matrix of Tile objects into a matrix of JSON strings.
+     * Useful for sending the full dashboard or ship layout to the client.
+     * @param matrix the tile matrix to serialize
+     * @return a matrix of JSON strings
+     * @throws JsonProcessingException if serialization fails
+     */
     public String[][] toJsonMatrix(Tile[][] matrix) throws JsonProcessingException {
         int rows = matrix.length;
         int cols = matrix[0].length;
@@ -140,9 +132,12 @@ public class TileSerializer {
         return jsonMatrix;
     }
 
-
     /**
-     * Deserializza JSON -> TileDTO -> Tile (model)
+     * Deserializes a JSON string into a Tile object.
+     * The method converts the JSON into a TileDTO, then reconstructs the corresponding Tile model.
+     * @param json the JSON string to parse
+     * @return the reconstructed Tile
+     * @throws JsonProcessingException if deserialization fails
      */
     public Tile fromJson(String json) throws JsonProcessingException {
         TileDTO dto = mapper.readValue(json, TileDTO.class);
@@ -150,7 +145,12 @@ public class TileSerializer {
     }
 
     /**
-     * Converte il DTO in una vera Tile del model
+     * Converts a TileDTO into the corresponding Tile model object.
+     * Instantiates the correct subclass based on the "type" field and fills in
+     * properties such as connectors, goods, tokens, and rotation.
+     * @param dto the TileDTO to convert
+     * @return the reconstructed Tile model object
+     * @throws IllegalArgumentException if the type is unknown
      */
     public Tile fromDTO(TileDTO dto) {
         Tile tile = switch (dto.type.toUpperCase()) {
@@ -190,5 +190,4 @@ public class TileSerializer {
         tile.rotation = dto.rotation;
         return tile;
     }
-
 }

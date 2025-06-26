@@ -244,18 +244,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
         controller.removeCrewmates(players.get(idx_enginepower), numCrew);
 
-        /**
-        eliminated = f.eliminatePlayers();
-        for (Player player : eliminated) controller.handleElimination(player);
-        f.orderPlayersInFlightList();
-        players = f.getOrderedPlayers();
-
-        if (players.size() == 1) {
-            String nick = controller.getNickByPlayer(players.getFirst());
-            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
-            return;
-        }
-         */
 
         int idx_firepower = 0;
         controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
@@ -278,6 +266,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < shots_directions.size(); i++) {
+            if(p.isEliminated()) continue;
             int res = p.throwDice() + p.throwDice();
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
         }
@@ -387,6 +376,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < card.getShotsDirections().size(); i++) {
+            if(p.isEliminated()) continue;
             int res = p.throwDice() + p.throwDice();
             controller.defenceFromCannon(shots_directions.get(i), shots_size.get(i), res, p);
         }
@@ -566,6 +556,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         for (int i = 0; i < card.getMeteorites_directions().size(); i++) {
             int res = p.throwDice() + p.throwDice();
+
             controller.defenceFromMeteorite(card.getMeteorites_directions().get(i), card.getMeteorites_size().get(i), res, meteoritesPlayers, i+1);
         }
 
@@ -633,12 +624,13 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             for (int i = 0; i < card.getShots_directions().size(); i++){
                 int res = first.throwDice() + first.throwDice();
+
                 for (Player p : losers){
+                    if(p.isEliminated()) continue;
                     controller.defenceFromCannon(card.getShots_directions().get(i), card.getShots_size().get(i), res, p);
                 }
             }
         }
-
     }
 
     /**

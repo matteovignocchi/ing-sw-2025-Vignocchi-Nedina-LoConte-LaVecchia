@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -297,16 +296,16 @@ class PlayerTest {
         Tile[][] custom = new Tile[5][7];
         for(int i=0;i<5;i++) for(int j=0;j<7;j++) custom[i][j] = new EmptySpace();
         HousingUnit h1 = new HousingUnit(1,1,1,1, Human.HUMAN, 7);
-        HousingUnit h2 = new HousingUnit(1,1,1,1, Human.PRADELLA, 8);
+        HousingUnit h2 = new HousingUnit(1,1,1,1, Human.HUMAN234, 8);
         custom[2][3] = h1;
         custom[2][4] = h2;
         demoPlayer.modifyDASH(custom);
 
-        assertEquals(Human.PRADELLA, h1.getTypeOfConnections());
+        assertEquals(Human.HUMAN234, h1.getTypeOfConnections());
         demoPlayer.controlOfConnection();
         assertTrue(h1.isConnected());
         assertTrue(h2.isConnected());
-        assertEquals(Human.PRADELLA, h1.getTypeOfConnections());
+        assertEquals(Human.HUMAN234, h1.getTypeOfConnections());
     }
 
     @Test
