@@ -11,7 +11,7 @@
    <children>
       <ImageView fitHeight="900.0" fitWidth="922.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-22.0" AnchorPane.topAnchor="0.0">
          <image>
-            <Image url="@../LobbyImage2.png" />
+            <Image url="@../images/LobbyImage2.png" />
          </image>
       </ImageView>
 

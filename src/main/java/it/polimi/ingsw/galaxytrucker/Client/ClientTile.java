@@ -6,8 +6,6 @@ import javafx.scene.image.Image;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class ClientTile {
@@ -64,11 +62,11 @@ public class ClientTile {
             //TODO ricordarsi che se è non devo caricare nessuna immagine
             if (tileId == 0) {
                 tileId = 157;
-                String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".png";
+                String imagePath = "/images/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".png";
                 InputStream is = ClientTile.class.getResourceAsStream(imagePath);
                 return new Image(is);
             }
-            String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
+            String imagePath = "/images/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
             InputStream is = ClientTile.class.getResourceAsStream(imagePath);
 
 
@@ -89,7 +87,7 @@ public class ClientTile {
             return loadImageById(this.id);
         } catch (RuntimeException e) {
             System.err.println("[ERROR] Tile image missing for ID: " + this.id + ", loading placeholder.");
-            InputStream is = getClass().getResourceAsStream("/placeholder.png");
+            InputStream is = getClass().getResourceAsStream("/images/placeholder.png");
             if (is == null) {
                 throw new RuntimeException("Placeholder image missing in /images/tiles/placeholder.png");
             }

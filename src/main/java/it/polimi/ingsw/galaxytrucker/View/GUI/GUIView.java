@@ -273,7 +273,6 @@ public class GUIView extends Application implements View {
     public void printDashShip(ClientTile[][] ship) {
         if (previewingEnemyDashboard) {
             previewingEnemyDashboard = false;
-
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDash.fxml"));

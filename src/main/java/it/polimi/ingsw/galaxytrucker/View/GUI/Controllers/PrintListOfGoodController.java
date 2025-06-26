@@ -70,11 +70,11 @@ public class PrintListOfGoodController extends GUIController {
 
         String color = loadedGoods.get(currentGoodIndex).toUpperCase();
         String path = switch (color) {
-            case "BLUE" -> "/BlueGood.png";
-            case "RED" -> "/RedGood.png";
-            case "GREEN" -> "/GreenGood.png";
-            case "YELLOW" -> "/YellowGood.png";
-            default -> "/placeholder.png";
+            case "BLUE" -> "/images/BlueGood.png";
+            case "RED" -> "/images/RedGood.png";
+            case "GREEN" -> "/images/GreenGood.png";
+            case "YELLOW" -> "/images/YellowGood.png";
+            default -> "/images/placeholder.png";
         };
 
         ImageView iv = new ImageView(new Image(getClass().getResource(path).toExternalForm()));

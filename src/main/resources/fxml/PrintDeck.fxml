@@ -11,7 +11,7 @@
    <children>
       <ImageView fitHeight="570.0" fitWidth="880.0">
          <image>
-            <Image url="@../Background_image_game.jpg" />
+            <Image url="@../images/Background_image_game.jpg" />
          </image>
       </ImageView>
       <Pane fx:id="leftPane" layoutX="21.0" layoutY="10.0" prefHeight="430.0" prefWidth="280.0" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="70.0">

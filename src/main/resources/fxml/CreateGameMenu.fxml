@@ -16,7 +16,7 @@
                  AnchorPane.rightAnchor="-8.0"
                  AnchorPane.topAnchor="0.0">
          <image>
-            <Image url="@../LobbyImage2.png" />
+            <Image url="@../images/LobbyImage2.png" />
          </image>
       </ImageView>
 

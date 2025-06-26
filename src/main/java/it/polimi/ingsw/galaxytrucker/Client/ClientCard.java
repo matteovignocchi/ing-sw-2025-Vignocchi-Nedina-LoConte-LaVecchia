@@ -1,5 +1,4 @@
 package it.polimi.ingsw.galaxytrucker.Client;
-import javafx.css.CssParser;
 import javafx.scene.image.Image;
 
 import java.io.InputStream;
@@ -36,8 +35,8 @@ public class ClientCard {
 
             String imagePath;
             switch (deck) {
-                case "1" -> imagePath = "/Polytechnic/cards/GT-cards_I_IT_" + id + ".jpg";
-                case "2" -> imagePath = "/Polytechnic/cards/GT-cards_II_IT_" + id + ".jpg";
+                case "1" -> imagePath = "/images/Polytechnic/cards/GT-cards_I_IT_" + id + ".jpg";
+                case "2" -> imagePath = "/images/Polytechnic/cards/GT-cards_II_IT_" + id + ".jpg";
                 default -> throw new IllegalArgumentException("Invalid deck number in cardId: " + cardId);
             }
 
@@ -55,7 +54,7 @@ public class ClientCard {
             return loadImageById(this.idCard);
         } catch (RuntimeException e) {
             System.err.println("[ERROR] Image not found for card ID: " + this.idCard + ", using placeholder.");
-            InputStream is = getClass().getResourceAsStream("/placeholder.png");
+            InputStream is = getClass().getResourceAsStream("/images/placeholder.png");
             if (is == null) {
                 throw new RuntimeException("Missing placeholder image in /placeholder.png");
             }
