@@ -305,7 +305,10 @@ public class GUIView extends Application implements View {
                     sceneRouter.getController(BUILDING_PHASE).postInitialize();
                 }
                 case WAITING_IN_LOBBY -> setSceneEnum(WAITING_QUEUE);
-                case MAIN_MENU -> setSceneEnum(MAIN_MENU);
+                case MAIN_MENU ->{
+                    setSceneEnum(MAIN_MENU);
+                    resetGUIState();
+                }
                 case TILE_MANAGEMENT -> {
                     setSceneEnum(BUILDING_PHASE);
 //                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
@@ -994,7 +997,6 @@ public class GUIView extends Application implements View {
             model.setDashboard(new ClientTile[5][7]);
             model.setCurrentTile(null);
             model.setCurrentCard(null);
-            model.setNickname(null);
             model.setFirePower(0);
             model.setEnginePower(0);
             model.setCredits(0);
