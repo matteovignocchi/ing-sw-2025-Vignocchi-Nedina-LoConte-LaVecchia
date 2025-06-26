@@ -273,7 +273,6 @@ public class GUIView extends Application implements View {
     public void printDashShip(ClientTile[][] ship) {
         if (previewingEnemyDashboard) {
             previewingEnemyDashboard = false;
-
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDash.fxml"));
@@ -384,6 +383,7 @@ public class GUIView extends Application implements View {
                 case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
+
                     controller.postInitialize();
                 }
                 case CARD_EFFECT -> {

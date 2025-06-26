@@ -17,7 +17,7 @@
                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <image>
-                <Image url="@../background_image_menu.png" />
+                <Image url="@../images/background_image_menu.png" />
             </image>
         </ImageView>
 
@@ -25,7 +25,7 @@
         <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true"
                    AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="620.0">
             <image>
-                <Image url="@../SSC_Neapel.svg.png" />
+                <Image url="@../images/SSC_Neapel.svg.png" />
             </image>
         </ImageView>
 

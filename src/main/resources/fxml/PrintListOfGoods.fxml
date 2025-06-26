@@ -10,7 +10,7 @@
    <children>
       <ImageView fitHeight="300.0" fitWidth="400.0">
          <image>
-            <Image url="@../Background_image_game.jpg" />
+            <Image url="@../images/Background_image_game.jpg" />
          </image>
       </ImageView>
       <Pane fx:id="goodPane" layoutX="71.0" layoutY="75.0" prefHeight="150.0" prefWidth="150.0" AnchorPane.bottomAnchor="75.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="75.0" />
@@ -21,7 +21,7 @@
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0">
                <image>
-                  <Image url="@../arrowButtonRotated.png" />
+                  <Image url="@../images/arrowButtonRotated.png" />
                </image>
             </ImageView>
          </graphic>
@@ -30,7 +30,7 @@
          <graphic>
             <ImageView fitHeight="20.0" fitWidth="20.0">
                <image>
-                  <Image url="@../arrowButton.png" />
+                  <Image url="@../images/arrowButton.png" />
                </image>
             </ImageView>
          </graphic>
