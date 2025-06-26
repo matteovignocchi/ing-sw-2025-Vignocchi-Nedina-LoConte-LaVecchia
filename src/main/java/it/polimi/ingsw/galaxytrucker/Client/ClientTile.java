@@ -2,14 +2,18 @@ package it.polimi.ingsw.galaxytrucker.Client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javafx.scene.image.Image;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 
+/**
+ * Client-side representation of a ship tile.
+ * Contains all the visual and descriptive information needed by the GUI,
+ * including tile type, connectors, goods, tokens, rotation, and image.
+ * Also includes methods to rotate the tile and load its graphical representation.
+ * @author Oleg Nedina
+ */
 public class ClientTile {
     public String type;
     public int a, b, c, d;
@@ -22,9 +26,13 @@ public class ClientTile {
     public List<String> goods = new ArrayList<>();
     public List<String> tokens = new ArrayList<>();
     public List<Integer> protectedCorners = new ArrayList<>();
-    @JsonProperty("rotation")
     public int rotation;
+    @JsonProperty("rotation")
 
+    /**
+     * Rotates the tile 90 degrees clockwise.
+     * Updates the connector values and the protected corners if present.
+     */
     public void rotateRight() {
         int temp = d;
         d = c;
@@ -42,6 +50,10 @@ public class ClientTile {
         }
     }
 
+    /**
+     * Rotates the tile 90 degrees counter-clockwise.
+     * Updates the connector values and the protected corners if present.
+     */
     public void rotateLeft() {
         int temp = a;
         a = b;
@@ -59,6 +71,15 @@ public class ClientTile {
         }
     }
 
+
+    /**
+     * Loads the tile image based on its ID.
+     * If the tile ID is 0, a default image is used. If the specific image is not found,
+     * a RuntimeException is thrown.
+     * @param tileId the ID of the tile
+     * @return the Image object associated with the tile
+     * @throws RuntimeException if the image is missing or cannot be loaded
+     */
     public static Image loadImageById(int tileId) {
         try {
             //TODO ricordarsi che se è non devo caricare nessuna immagine
@@ -71,8 +92,6 @@ public class ClientTile {
             String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
             InputStream is = ClientTile.class.getResourceAsStream(imagePath);
 
-
-
             if (is == null) {
                 System.err.println("[WARN] Tile image not found: " + imagePath + ", using placeholder.");
                 throw new RuntimeException("Tile image not found");
@@ -84,6 +103,12 @@ public class ClientTile {
         }
     }
 
+    /**
+     * Returns the image corresponding to this tile instance.
+     * If the image is missing, attempts to load a placeholder image.
+     * @return the tile's Image
+     * @throws RuntimeException if neither the main image nor the placeholder is available
+     */
     public Image getImage() {
         try {
             return loadImageById(this.id);
@@ -97,43 +122,27 @@ public class ClientTile {
         }
     }
 
+    /**
+     * Returns the rotation angle of the tile in degrees.
+     * @return the tile rotation in degrees (multiples of 90)
+     */
     public int getRotation() {
         return this.rotation * 90;
     }
 
-    public int getRotationIndex() {
-        return rotation;
-    }
-
-    public void setRotationIndex(int rotation) {
-        this.rotation = rotation;
-    }
-
+    /**
+     * Returns the list of goods currently present on the tile.
+     * @return a list of goods (as strings)
+     */
     public List<String> getGoods() {
         return goods;
     }
 
+    /**
+     * Returns the list of crew tokens currently present on the tile.
+     * @return a list of tokens (as strings)
+     */
     public List<String> getTokens() {
         return tokens;
     }
-
-    public int getNumHumans() {
-        // Conta i token "BASIC" (o altro filtro che usi per "umano")
-        return (int) tokens.stream().filter(t -> t.equalsIgnoreCase("BASIC")).count();
-    }
-
-    public int getNumBatteries() {
-        return (int) tokens.stream().filter(t -> t.equalsIgnoreCase("BATTERY")).count();
-    }
-
-    public boolean hasPurpleAlien() {
-        return tokens.contains("PURPLE");
-    }
-
-    public boolean hasBrownAlien() {
-        return tokens.contains("BROWN");
-    }
-
-
-
 }

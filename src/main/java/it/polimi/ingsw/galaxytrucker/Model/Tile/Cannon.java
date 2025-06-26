@@ -1,12 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
-
-
 import java.io.Serializable;
 
 /**
  * class for single cannon and double cannon
  * the flag isDouble give the information if is double or single
  * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
 public class Cannon extends Tile implements Serializable {
     private boolean isDouble;

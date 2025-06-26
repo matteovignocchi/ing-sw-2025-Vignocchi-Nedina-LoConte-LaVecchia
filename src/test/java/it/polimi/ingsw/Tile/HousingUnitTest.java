@@ -29,7 +29,7 @@ class HousingUnitTest {
     @DisplayName("Costruttore imposta a, b, c, d, tipo, id e max corretti")
     void testConstructorAndGetters() {
         assertEquals(Human.HUMAN, humanUnit.getType());
-        assertEquals(Human.PRADELLA, humanUnit.getTypeOfConnections());
+        assertEquals(Human.HUMAN234, humanUnit.getTypeOfConnections());
         assertEquals(10, humanUnit.getIdTile());
 
         assertEquals(Human.BROWN_ALIEN, brownAlienUnit.getType());
