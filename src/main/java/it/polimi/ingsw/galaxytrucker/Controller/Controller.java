@@ -66,8 +66,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            decks = deckCreator.CreateSecondLevelDeck();
-//            decks = deckCreator.CreatePlanetsDeck();
+            //decks = deckCreator.CreateSecondLevelDeck();
+            decks = deckCreator.CreateMeteoritesDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -708,7 +708,7 @@ public class Controller implements Serializable {
         }
 
         activateCard(card);
-        broadcastInform("SERVER: end of card's effect");
+        broadcastInform("\nSERVER: end of card's effect");
 
         if(deck.isEmpty()){
             broadcastInform("SERVER: All cards drawn");
@@ -2043,9 +2043,9 @@ public class Controller implements Serializable {
         }
 
         if(manageIfPlayerEliminated(p)){
-            inform("SERVER: You have lost all your humans", Nickname);
-//            updateGamePhase(Nickname , v , GamePhase.EXIT); update fatto dopo
-            return true; //TODO: da eliminare e gestire bene questo caso
+            inform("SERVER: You have lost all your humans. Your ship is destroyed", Nickname);
+            p.destroyAll();
+            return true;
         }
 
         if(!tmpBoolean){
@@ -2071,13 +2071,13 @@ public class Controller implements Serializable {
         String size = isBig ? "big" : "small";
 
         for(Player p : players){
-            if(players.getFirst().equals(p) || !p.isConnected()) continue;
+            if(players.getFirst().equals(p) || !p.isConnected() || p.isEliminated()) continue;
             String nick = getNickByPlayer(p);
             inform("\nSERVER: Waiting for your turn...", nick);
         }
 
         for (Player p : players) {
-            if(p.isConnected()){
+            if(p.isConnected() && !p.isEliminated()){
                 String nick = getNickByPlayer(p);
                 VirtualView v = getViewCheck(nick);
                 inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
@@ -2384,12 +2384,13 @@ public class Controller implements Serializable {
                 inform("SERVER: Choose your starting housing unit:", nickname);
                 xy = askPlayerCoordinates(p);
 
+                Tile tmp;
                 if(xy == null) {
-                    xy = new int[] {2,3};
-                    break;
+                    tmp = p.getTile(2,3);
+                } else {
+                    tmp = p.getTile(xy[0], xy[1]);
                 }
 
-               Tile tmp = p.getTile(xy[0], xy[1]);
                 switch (tmp) {
                     case HousingUnit h -> {
                         if(h.getType() == Human.HUMAN) flag = false;
