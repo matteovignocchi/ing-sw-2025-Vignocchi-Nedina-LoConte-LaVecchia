@@ -9,6 +9,7 @@ import java.util.Map;
  * Defines the contract between the server and the client (TUI or GUI) for all game interactions.
  * This interface is used remotely by the server to push updates or request input from the client.
  * Each implementation (e.g., TUI or GUI) should react accordingly to render views or collect input.
+ * @author Oleg Nedin && Matteo Vignocchi
  */
 public interface VirtualView extends Remote {
 
