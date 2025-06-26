@@ -505,6 +505,7 @@ public class ClientController {
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
+                                resetModel();
                             } catch (Exception e) {
                                 v.reportError(e.getMessage());
                             }
@@ -633,6 +634,7 @@ public class ClientController {
                         case "logout" -> {
                             try {
                                 virtualClient.leaveGame();
+                                resetModel();
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());
                             }
@@ -869,6 +871,18 @@ public class ClientController {
 
     public int returnIdOfTile(int a, int b) {
         return Dash_Matrix[a][b].id;
+    }
+
+
+    private void resetModel() {
+        Dash_Matrix = new ClientTile[5][7];
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                ClientTile tile = new ClientTile();
+                tile.type = "EMPTYSPACE";
+                Dash_Matrix[i][j] = tile;
+            }
+        }
     }
 
 

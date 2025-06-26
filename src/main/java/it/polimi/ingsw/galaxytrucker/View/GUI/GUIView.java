@@ -111,13 +111,6 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
-        if (message != null && message.startsWith("SERVER:")) {
-            message = message.substring("SERVER:".length()).strip();
-        }
-        if (message != null && message.startsWith("SELECT:")) {
-            message = message.substring("SELECT:".length()).strip();
-        }
-
         if (filterDisplayNotification(message, sceneEnum)) {
             synchronized (notificationQueue) {
                 notificationQueue.offer(message);
