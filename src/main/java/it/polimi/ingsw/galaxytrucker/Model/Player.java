@@ -642,8 +642,6 @@ public class Player implements Serializable {
                                 case HousingUnit e1-> {
                                    if(e1.getType() != Human.HUMAN ){
                                        e.setTypeOfConnections(e1.getType());
-                                       e1.setConnected(true);
-                                       e.setConnected(true);
                                    }else {
                                        e1.setConnected(true);
                                        e.setConnected(true);
