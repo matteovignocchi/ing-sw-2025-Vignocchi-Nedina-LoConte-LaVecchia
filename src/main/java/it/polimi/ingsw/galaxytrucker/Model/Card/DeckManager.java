@@ -188,13 +188,9 @@ public class DeckManager implements Serializable {
 
     public List<Deck> CreatePiratesDeck() throws CardEffectException {
         List<Integer> dir1 = new ArrayList<>();
-        dir1.add(0);
         dir1.add(1);
         dir1.add(2);
-        dir1.add(3);
         List<Boolean> size1 = new ArrayList<>();
-        size1.add(false);
-        size1.add(false);
         size1.add(true);
         size1.add(true);
         Card c1 = new PiratesCard("1", 2, 3, 5, dir1, size1);
