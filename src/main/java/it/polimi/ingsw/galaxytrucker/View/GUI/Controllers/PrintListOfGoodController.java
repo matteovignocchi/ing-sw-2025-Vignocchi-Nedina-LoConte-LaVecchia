@@ -21,6 +21,8 @@ public class PrintListOfGoodController extends GUIController {
     @FXML private Button addGood, rearranges, trash, leftBtn, rightBtn;
     private int currentGoodIndex = 0;
     private List<String> loadedGoods;
+    private Stage ownStage;
+
 
     public void setupForActionSelection(GUIView gui) {
         System.out.println("[LOG] setupForActionSelection() → mostra i 3 pulsanti");
@@ -121,10 +123,12 @@ public class PrintListOfGoodController extends GUIController {
     }
 
     private void closeWindow() {
-        Stage stage = (Stage) goodPane.getScene().getWindow();
-        stage.close();
+        if (ownStage != null) {
+            ownStage.close();
+        } else {
+            System.err.println("Stage non settato! Impossibile chiudere finestra.");
+        }
     }
-
     public void reset() {
         addGood.setVisible(false);
         rearranges.setVisible(false);
@@ -135,6 +139,10 @@ public class PrintListOfGoodController extends GUIController {
         for (Node node : goodPane.getChildren()) {
             node.setOnMouseClicked(null);
         }
+    }
+
+    public void setStage(Stage stage) {
+        this.ownStage = stage;
     }
 
     @Override

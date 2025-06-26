@@ -1852,7 +1852,6 @@ public class Controller implements Serializable {
             }
             while (num > 0) {
                 if(p.isConnected()){
-                    printPlayerDashboard(x, p, nick);
                     inform("SERVER: Select an housing unit", nick);
                     int[] vari = askPlayerCoordinates(p);
 
@@ -1874,7 +1873,7 @@ public class Controller implements Serializable {
                         default -> reportError("Select a valid housing unit", nick);
                     }
 
-//                    printPlayerDashboard(x, p, nick);
+                   printPlayerDashboard(x, p, nick);
                 }else{
                     Tile[][] tmpDash = p.getDashMatrix();
                     for(int i = 0 ; i<5; i++){

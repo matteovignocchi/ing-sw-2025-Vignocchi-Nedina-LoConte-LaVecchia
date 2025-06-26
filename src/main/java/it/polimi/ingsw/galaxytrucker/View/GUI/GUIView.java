@@ -497,7 +497,6 @@ public class GUIView extends Application implements View {
     }
 
     @Override
-
     public Integer askIndexWithTimeout() {
         long now = System.currentTimeMillis();
         if (now - lastAskIndexTimestamp < 300) {
@@ -522,7 +521,8 @@ public class GUIView extends Application implements View {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintListOfGoods.fxml"));
                 AnchorPane root = loader.load();
                 PrintListOfGoodController ctrl = loader.getController();
-
+                Stage stage = new Stage();
+                ctrl.setStage(stage);
                 if (showGoodActionPrompt) {
                     ctrl.loadGoods(bufferedGoods, this);
                     ctrl.setupForGoodsIndexSelection();
@@ -533,12 +533,13 @@ public class GUIView extends Application implements View {
 
                 showGoodActionPrompt = false;
 
-                Stage stage = new Stage();
+
                 stage.setTitle("Goods");
                 stage.setScene(new Scene(root));
                 stage.setResizable(false);
                 stage.centerOnScreen();
                 stage.show();
+
             } catch (IOException ex) {
                 reportError("Errore nel caricamento PrintListOfGood.fxml: " + ex.getMessage());
             }
@@ -560,10 +561,6 @@ public class GUIView extends Application implements View {
         int res = bufferedIndex;
         bufferedIndex = null;
 
-//        // Delay di conferma
-//        try {
-//            Thread.sleep(500);
-//        } catch (InterruptedException ignored) {}
 
         System.out.println("[DEBUG] Indice good confermato: " + res);
         return res;
@@ -960,13 +957,13 @@ public class GUIView extends Application implements View {
                 toast.setTranslateX(xOffset);
                 toast.setTranslateY(yOffset);
 
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(150), toast);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(100), toast);
                 fadeIn.setFromValue(0);
                 fadeIn.setToValue(1);
 
                 PauseTransition pause = new PauseTransition(Duration.seconds(3));
 
-                FadeTransition fadeOut = new FadeTransition(Duration.millis(150), toast);
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(100), toast);
                 fadeOut.setFromValue(1);
                 fadeOut.setToValue(0);
                 fadeOut.setOnFinished(e -> {
