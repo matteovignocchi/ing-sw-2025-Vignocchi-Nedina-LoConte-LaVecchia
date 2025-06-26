@@ -2010,7 +2010,7 @@ public class Controller implements Serializable {
         return false;
     }
 
-    private boolean isHitZone(int dir, int dir2) {
+    public boolean isHitZone(int dir, int dir2) {
         return switch (dir) {
             case 0, 2 -> dir2 > 3 && dir2 < 11;
             case 1, 3 -> dir2 > 4 && dir2 < 10;
@@ -2021,7 +2021,7 @@ public class Controller implements Serializable {
 
 
 
-    private boolean scriptOfDefence(String Nickname , Player p, VirtualView v, int dir2 , int dir) throws BusinessLogicException {
+    public boolean scriptOfDefence(String Nickname, Player p, VirtualView v, int dir2, int dir) throws BusinessLogicException {
         Boolean tmpBoolean = false;
         switch (dir){
             case 0 ->  tmpBoolean = p.removeFrom0(dir2);
@@ -2099,11 +2099,6 @@ public class Controller implements Serializable {
         }
     }
 
-
-
-    public void addCreditToPlayer(int credits, Player player) {
-        player.addCredits(credits);
-    }
 
     public boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);

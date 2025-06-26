@@ -24,46 +24,6 @@ public abstract class Tile implements Serializable {
     public int rotation;
     public String type;
 
-
-    /**
-     * Loads the image associated with a specific tile ID.
-     *
-     * Attempts to retrieve the tile image from the classpath using the given ID.
-     * If the image is not found, a default placeholder tile image is used instead.
-     *
-     * @param tileId the ID of the tile to load
-     * @return the Image corresponding to the tile
-     * @throws RuntimeException if neither the target image nor the default is found
-     */
-    public static Image loadImageById(int tileId) {
-        try {
-            String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
-            InputStream is = Tile.class.getResourceAsStream(imagePath);
-
-            if (is == null) {
-                imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web157";
-                is = Tile.class.getResourceAsStream(imagePath);
-
-                if (is == null) {
-                    throw new RuntimeException("Default tile image not found");
-                }
-            }
-
-            return new Image(is);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load tile image for ID: " + tileId, e);
-        }
-    }
-
-    /**
-     * Returns the image associated with this tile.
-     * Uses the tile's ID to retrieve the corresponding image from resources.
-     * @return the Image representing this tile
-     */
-    public Image getImage() {
-        return loadImageById(this.idTile);
-    }
-
     /**
      * Returns the unique identifier of this tile.
      * @return the tile ID

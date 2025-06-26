@@ -57,11 +57,7 @@ public class SlaversCard implements Card, Serializable {
      */
     @Override
     public void accept(CardVisitor visitor) throws BusinessLogicException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+        visitor.visit(this);
     }
     /**
      * @return flight days shown on the card.

@@ -45,8 +45,11 @@ class SlaversCardTest {
         card.accept(visitor);
         verify(visitor, times(1)).visit(card);
 
-        RuntimeException rex = assertThrows(RuntimeException.class, () -> card.accept(visitor));
-        assertSame(ble, rex.getCause());
+        BusinessLogicException thrown = assertThrows(
+                BusinessLogicException.class,
+                () -> card.accept(visitor)
+        );
+        assertSame(ble, thrown);
     }
 }
 

@@ -63,12 +63,8 @@ public class PiratesCard implements Card, Serializable {
      * @throws BusinessLogicException if a business logic error occurs during processing
      */
     @Override
-    public void accept(CardVisitor visitor)throws CardEffectException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor)throws BusinessLogicException {
+        visitor.visit(this);
     }
     /**
      * @return firepower shown on the card.

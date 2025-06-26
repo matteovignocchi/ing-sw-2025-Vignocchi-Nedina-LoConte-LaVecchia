@@ -40,10 +40,11 @@ class OpenSpaceCardTest {
             doThrow(ble).when(visitor).visit(card);
         } catch(BusinessLogicException ign) {}
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                card.accept(visitor)
+        BusinessLogicException thrown = assertThrows(
+                BusinessLogicException.class,
+                () -> card.accept(visitor)
         );
-        assertSame(ble, ex.getCause());
+        assertSame(ble, thrown);
     }
 }
 
