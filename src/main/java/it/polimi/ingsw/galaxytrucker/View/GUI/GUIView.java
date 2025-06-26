@@ -13,6 +13,8 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -109,27 +111,76 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
+        if (message != null && message.startsWith("SERVER:")) {
+            message = message.substring("SERVER:".length()).strip();
+        }
+        if (message != null && message.startsWith("SELECT:")) {
+            message = message.substring("SELECT:".length()).strip();
+        }
+
         if (filterDisplayNotification(message, sceneEnum)) {
             synchronized (notificationQueue) {
                 notificationQueue.offer(message);
             }
             showNextNotificationIfIdle();
-        } else {
         }
     }
-
 
     @Override
     public void reportError(String message) {
         System.err.println("[GUIView] reportError: " + message);
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText(null);
-            alert.setContentText(message != null && !message.isBlank() ? message : "Unknown error");
-            alert.showAndWait();
+            Scene scene = sceneRouter.getCurrentScene();
+            if (scene == null || scene.getRoot() == null) return;
+
+            Parent root = scene.getRoot();
+            try {
+                Pane pane = (Pane) root;
+
+                Label label = new Label(message != null && !message.isBlank() ? message : "Unknown error");
+                label.setStyle("""
+                -fx-font-family: "Impact";
+                -fx-font-size: 18px;
+                -fx-text-fill: #ffffff;
+                -fx-background-color: rgba(255, 0, 0, 0.9);
+                -fx-padding: 10px 18px;
+                -fx-background-radius: 0;
+                -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
+            """);
+                label.setWrapText(true);
+                label.setMaxWidth(300);
+
+                StackPane toast = new StackPane(label);
+                toast.setMouseTransparent(true);
+                toast.setOpacity(0);
+
+                pane.getChildren().add(toast);
+
+                double xOffset = scene.getWidth() - 300 - 10;
+                double yOffset = scene.getHeight() - 80;
+
+                toast.setTranslateX(xOffset);
+                toast.setTranslateY(yOffset);
+
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(150), toast);
+                fadeIn.setFromValue(0);
+                fadeIn.setToValue(1);
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(150), toast);
+                fadeOut.setFromValue(1);
+                fadeOut.setToValue(0);
+                fadeOut.setOnFinished(e -> pane.getChildren().remove(toast));
+
+                new SequentialTransition(fadeIn, pause, fadeOut).play();
+
+            } catch (ClassCastException e) {
+                System.err.println("[GUIView] Errore nel cast del root pane: " + e.getMessage());
+            }
         });
     }
+
     @Override
     public String askString() {
         if (bufferedPlayerName != null) {
@@ -530,13 +581,16 @@ public class GUIView extends Application implements View {
     public boolean askWithTimeout(String message) {
         long timeout = 20_000; // 20 secondi
         long deadline = System.currentTimeMillis() + timeout;
-
+        if (message != null && message.startsWith("SERVER:")) {
+            message = message.substring("SERVER:".length()).strip(); // rimuove e pulisce spazi
+        }
         bufferedBoolean = null; // reset
 
+        String finalMessage = message;
         Platform.runLater(() -> {
             GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
             if (ctrl != null) {
-                ctrl.showYesNoButtons(message); // mostra pulsanti nella GUI
+                ctrl.showYesNoButtons(finalMessage); // mostra pulsanti nella GUI
             } else {
                 reportError("Controller non disponibile per askWithTimeout.");
             }
@@ -876,7 +930,7 @@ public class GUIView extends Application implements View {
     }
 
 
-    private void showNotification(String message) {
+    public void showNotification(String message) {
         Platform.runLater(() -> {
             Scene scene = sceneRouter.getCurrentScene();
             if (scene == null || scene.getRoot() == null) {
@@ -908,18 +962,18 @@ public class GUIView extends Application implements View {
                 pane.getChildren().add(toast);
 
                 double xOffset = scene.getWidth() - 300 - 10;
-                double yOffset = scene.getHeight() - 80;
+                double yOffset = scene.getHeight() - 90;
 
                 toast.setTranslateX(xOffset);
                 toast.setTranslateY(yOffset);
 
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(300), toast);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(150), toast);
                 fadeIn.setFromValue(0);
                 fadeIn.setToValue(1);
 
                 PauseTransition pause = new PauseTransition(Duration.seconds(3));
 
-                FadeTransition fadeOut = new FadeTransition(Duration.millis(300), toast);
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(150), toast);
                 fadeOut.setFromValue(1);
                 fadeOut.setToValue(0);
                 fadeOut.setOnFinished(e -> {
@@ -940,7 +994,12 @@ public class GUIView extends Application implements View {
 
 
 
+
+
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
+        if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) {
+            return false;
+        }
         if (sceneEnum == null) {
             return message.toLowerCase().contains("login successful");
         }
@@ -951,16 +1010,13 @@ public class GUIView extends Application implements View {
             return false;
         }
         if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
-            return false;
-        }
-        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
-            System.out.println(message);
+            return message.toLowerCase().contains("hourglass");
         }
 
         return switch (sceneEnum) {
             case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
             case WAITING_QUEUE -> message.toLowerCase().contains("joined");
-            case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...");
+            case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...") || message.toLowerCase().contains("login successful");
             case NICKNAME_DIALOG -> message.contains("Login");
             case GAME_PHASE -> true;
             default -> false;
