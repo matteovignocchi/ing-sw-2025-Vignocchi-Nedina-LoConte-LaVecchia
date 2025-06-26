@@ -58,15 +58,23 @@ class AbandonedShipCardTest {
     }
 
     @Test
-    void accept_wrapsBusinessLogicExceptionInRuntime() throws Exception {
+    void accept_wrapsBusinessLogicException_Ship() throws BusinessLogicException {
         CardVisitor visitor = mock(CardVisitor.class);
         AbandonedShipCard c = new AbandonedShipCard("X", 2, 5, 1);
 
-        doThrow(new BusinessLogicException("boom")).when(visitor).visit(c);
+        BusinessLogicException ble = new BusinessLogicException("boom");
+        doThrow(ble).when(visitor).visit(c);
 
-        RuntimeException re = assertThrows(RuntimeException.class,
-                () -> c.accept(visitor), "se visit lancia BusinessLogicException, accept deve rilanciare RuntimeException");
-        assertTrue(re.getCause() instanceof BusinessLogicException, "il cause della RuntimeException dev'essere il BusinessLogicException originale");
+        BusinessLogicException thrown = assertThrows(
+                BusinessLogicException.class,
+                () -> c.accept(visitor),
+                "se visit lancia BusinessLogicException, accept deve rilanciare lo stesso BusinessLogicException"
+        );
+        assertSame(
+                ble,
+                thrown,
+                "l'eccezione rilanciata deve essere esattamente quella originale"
+        );
     }
 }
 

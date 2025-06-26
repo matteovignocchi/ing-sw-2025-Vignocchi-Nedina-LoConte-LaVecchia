@@ -68,9 +68,10 @@ class SecondWarzoneCardTest {
             doThrow(ble).when(visitor).visit(card);
         } catch (BusinessLogicException ignored) {}
 
-        RuntimeException rex = assertThrows(RuntimeException.class, () ->
-                card.accept(visitor)
+        BusinessLogicException thrown = assertThrows(
+                BusinessLogicException.class,
+                () -> card.accept(visitor)
         );
-        assertSame(ble, rex.getCause());
+        assertSame(ble, thrown);
     }
 }

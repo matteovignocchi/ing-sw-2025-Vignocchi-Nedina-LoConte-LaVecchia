@@ -71,14 +71,23 @@ class AbandonedStationCardTest {
     }
 
     @Test
-    void accept_wrapsBusinessLogicException() throws Exception {
+    void accept_wrapsBusinessLogicException_Station() throws BusinessLogicException {
         CardVisitor visitor = mock(CardVisitor.class);
         AbandonedStationCard c = new AbandonedStationCard("X2", 5, 9, List.of(Colour.GREEN));
 
-        doThrow(new BusinessLogicException("fail")).when(visitor).visit(c);
+        BusinessLogicException ble = new BusinessLogicException("fail");
+        doThrow(ble).when(visitor).visit(c);
 
-        RuntimeException re = assertThrows(RuntimeException.class, () -> c.accept(visitor), "se visit lancia BusinessLogicException, accept deve rilanciare RuntimeException");
-        assertTrue(re.getCause() instanceof BusinessLogicException, "il cause della RuntimeException dev'essere il BusinessLogicException originale");
+        BusinessLogicException thrown = assertThrows(
+                BusinessLogicException.class,
+                () -> c.accept(visitor),
+                "se visit lancia BusinessLogicException, accept deve rilanciare lo stesso BusinessLogicException"
+        );
+        assertSame(
+                ble,
+                thrown,
+                "l'eccezione rilanciata deve essere esattamente quella originale"
+        );
     }
 }
 

@@ -62,20 +62,24 @@ class FirstWarzoneCardTest {
     }
 
     @Test
-    void accept_whenVisitorThrowsBusinessLogicException_shouldWrapInRuntimeException() {
+    void accept_whenVisitorThrowsBusinessLogicException_shouldWrapInRuntimeException() throws BusinessLogicException {
         FirstWarzoneCard card = new FirstWarzoneCard("F", 1, 1, List.of(0), List.of(true));
 
         CardVisitor visitor = mock(CardVisitor.class);
         BusinessLogicException ble = new BusinessLogicException("boom");
-        try {
-            doThrow(ble).when(visitor).visit(card);
-        } catch (BusinessLogicException e) {
-        }
+        doThrow(ble).when(visitor).visit(card);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
-            card.accept(visitor);
-        });
-        assertSame(ble, ex.getCause());
+        RuntimeException rex = assertThrows(
+                RuntimeException.class,
+                () -> card.accept(visitor),
+                "se visit lancia BusinessLogicException, accept deve rilanciare RuntimeException"
+        );
+        assertSame(
+                ble,
+                rex.getCause(),
+                "il cause della RuntimeException dev'essere il BusinessLogicException originale"
+        );
     }
+
 }
 
