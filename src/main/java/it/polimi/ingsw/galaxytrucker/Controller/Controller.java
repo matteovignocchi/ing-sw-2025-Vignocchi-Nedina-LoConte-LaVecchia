@@ -1105,6 +1105,7 @@ public class Controller implements Serializable {
         }
     }
 
+
     public double getFirePower(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         double tmp = 0;
