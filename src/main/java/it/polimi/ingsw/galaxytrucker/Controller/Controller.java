@@ -67,7 +67,7 @@ public class Controller implements Serializable {
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             //decks = deckCreator.CreateSecondLevelDeck();
-            decks = deckCreator.CreateMeteoritesDeck();
+            decks = deckCreator.CreatePlagueDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -1854,9 +1854,7 @@ public class Controller implements Serializable {
         int totalCrew = getNumCrew(p);
 
         if (num >= totalCrew) {
-//            p.setEliminated();
             autoCommandForRemovePlayers(p, totalCrew);
-//            inform("SERVER: You lost all your crewmates", nick);
         } else {
             if(!p.isConnected()){
                 autoCommandForRemovePlayers(p, num);
