@@ -5,8 +5,9 @@ import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import it.polimi.ingsw.galaxytrucker.View.TUIView;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.application.Application;
-
+import java.net.UnknownHostException;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -30,9 +31,13 @@ public class ClientMain {
                         "                          |___/                                     \n"
         );
 
-        String host = "192.168.1.97";
-        int port = 30001;
+
         Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the server IP address:");
+        String host = readHost(scanner);
+
+        int rmiPort    = 1099;
+        int socketPort = 30001;
 
         int protocolChoice = readChoice(
                 scanner,
@@ -46,52 +51,32 @@ public class ClientMain {
                 Set.of("1", "2")
         );
 
-        switch (viewChoice) {
-            case 1 -> {
+        try {
+            it.polimi.ingsw.galaxytrucker.Client.VirtualView virtualClient;
+            if (protocolChoice == 1) {
+                Registry registry = LocateRegistry.getRegistry(host, rmiPort);
+                VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
+                virtualClient = new VirtualClientRmi(server);
+            } else {
+                virtualClient = new VirtualClientSocket(host, socketPort);
+            }
+
+            if (viewChoice == 1) {
                 View view = new TUIView();
-                try {
-                    VirtualView virtualClient;
-                    if (protocolChoice == 1) {
-                        Registry registry = LocateRegistry.getRegistry(host, 1099);
-                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                        virtualClient = new VirtualClientRmi(server);
-                    } else {
-                        virtualClient = new VirtualClientSocket(host, port);
-                    }
-
-                    ClientController controller = new ClientController(view, virtualClient);
-
-                    controller.start();
-                } catch (Exception e) {
-                    System.err.println("error: " + e.getMessage());
-                    e.printStackTrace();
-                } finally {
-                    scanner.close();
-                }
-            }
-            case 2 ->{
-                VirtualView virtualClient;
-                try {
-                    if (protocolChoice == 1) {
-                        Registry registry = LocateRegistry.getRegistry(host, 1099);
-                        VirtualServer server = (VirtualServer) registry.lookup("RmiServer");
-                        virtualClient = new VirtualClientRmi(server);
-                    } else {
-                        virtualClient = new VirtualClientSocket(host, port);
-                    }
-
-                    GUIStartupConfig.protocolChoice = protocolChoice;
-                    GUIStartupConfig.host = host;
-                    GUIStartupConfig.port = port;
-                    GUIStartupConfig.virtualClient = virtualClient;
-
-                    Application.launch(GUIView.class);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                new ClientController(view, virtualClient).start();
+            } else {
+                GUIStartupConfig.protocolChoice = protocolChoice;
+                GUIStartupConfig.host = host;
+                GUIStartupConfig.port = socketPort;
+                GUIStartupConfig.virtualClient = virtualClient;
+                Application.launch(GUIView.class);
             }
 
+        } catch (Exception e) {
+            System.err.println("Connection Error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            scanner.close();
         }
     }
 
@@ -108,6 +93,19 @@ public class ClientMain {
                 return Integer.parseInt(line);
             }
             System.out.println(ANSI_RED + "[ERROR] Invalid choice. Please enter " + ANSI_BOLD + "1" + ANSI_RESET + ANSI_RED + " or " + ANSI_BOLD + "2" + ANSI_RESET);
+        }
+    }
+
+    private static String readHost(Scanner scanner) {
+        while (true) {
+            System.out.print("Inserisci l'indirizzo IP del server: ");
+            String host = scanner.nextLine().trim();
+            try {
+                InetAddress.getByName(host);
+                return host;
+            } catch (UnknownHostException e) {
+                System.out.println(ANSI_RED + "[ERROR] Invalid or unreachable address, try again!\n" + ANSI_RESET);
+            }
         }
     }
 }
