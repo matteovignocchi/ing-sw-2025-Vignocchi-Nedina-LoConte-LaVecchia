@@ -1,12 +1,13 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
+import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 import java.util.Map;
 
-public class FinaleController extends GUIController {
+public class FinalSceneController extends GUIController {
 
     @FXML private Label playerNameLabel;
     @FXML private Label playerPointsLabel;
@@ -21,9 +22,12 @@ public class FinaleController extends GUIController {
     @FXML
     public void initialize() {
         logoutButton.setText("Logout");
-        logoutButton.setOnAction(e -> guiView.resolveGenericCommand("logout"));
+        logoutButton.setOnAction(e -> {
+            guiView.resetGUIState();
+            guiView.updateState(ClientGamePhase.MAIN_MENU);
+            guiView.resolveCommand("logout");
+        });
     }
-
     private void updateFinalScreen() {
         String me = model.getNickname();
         playerNameLabel.setText(me);

@@ -1,10 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
-import javafx.animation.Interpolator;
-import javafx.animation.RotateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -47,6 +48,13 @@ public class BuildingPhaseController extends GUIController {
     @FXML
     public void initialize() {
         emptySpace.id = 0;
+        getCoveredBtn.setCursor(Cursor.HAND);
+        getShownBtn.setCursor(Cursor.HAND);
+        returnTileBtn.setCursor(Cursor.HAND);
+        rotateLeftBtn.setCursor(Cursor.HAND);
+        rotateRightBtn.setCursor(Cursor.HAND);
+
+
         rotateLeftBtn.setOnAction(e -> {
             completeCommand("ROTATE_LEFT");
             rotateTile(-90);
@@ -116,6 +124,8 @@ public class BuildingPhaseController extends GUIController {
 
     @Override
     public void postInitialize() {
+        resetButtons();
+
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
                 ClientTile tile = model.getDashboard()[row][col];
@@ -128,14 +138,14 @@ public class BuildingPhaseController extends GUIController {
         clearCurrentTile(); // <-- rimuove tile trascinabile se c'era
 
         // Mostra pulsanti per BOARD_SETUP
-        returnTileBtn.setVisible(false);
-        rotateLeftBtn.setVisible(false);
-        rotateRightBtn.setVisible(false);
+//        returnTileBtn.setVisible(false);
+//        rotateLeftBtn.setVisible(false);
+//        rotateRightBtn.setVisible(false);
         getShownBtn.setVisible(true);
         getCoveredBtn.setVisible(true);
         setReadyBtn.setVisible(true);
-        rightArrowButton.setVisible(false);
-        leftArrowButton.setVisible(false);
+//        rightArrowButton.setVisible(false);
+//        leftArrowButton.setVisible(false);
 
         setNickname(model.getNickname());
         setCommandVisibility(model.isDemo());
@@ -143,31 +153,35 @@ public class BuildingPhaseController extends GUIController {
 
 
     public void postInitialize2(){
-        getCoveredBtn.setVisible(false);
-        getShownBtn.setVisible(false);
-        getCoveredBtn.setVisible(false);
+        resetButtons();
+
+//        getCoveredBtn.setVisible(false);
+//        getShownBtn.setVisible(false);
+//        getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
-        setReadyBtn.setVisible(false);
+//        setReadyBtn.setVisible(false);
         if(!model.isDemo()){
-            reserveBtn1.setVisible(false);
-            reserveBtn2.setVisible(false);
+//            reserveBtn1.setVisible(false);
+//            reserveBtn2.setVisible(false);
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         }
     }
 
     public void postInitialize3(){
-        getShownBtn.setVisible(false);
-        getCoveredBtn.setVisible(false);
-        returnTileBtn.setVisible(false);
+        resetButtons();
+
+//        getShownBtn.setVisible(false);
+//        getCoveredBtn.setVisible(false);
+//        returnTileBtn.setVisible(false);
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
-        setReadyBtn.setVisible(false);
+//        setReadyBtn.setVisible(false);
         if(!model.isDemo()){
-            reserveBtn1.setVisible(false);
-            reserveBtn2.setVisible(false);
+//            reserveBtn1.setVisible(false);
+//            reserveBtn2.setVisible(false);
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         }
@@ -260,12 +274,8 @@ public class BuildingPhaseController extends GUIController {
                 ClipboardContent content = new ClipboardContent();
                 content.putString("tile");
                 db.setContent(content);
-                db.setDragView(currentTileView.snapshot(null, null));                System.out.println("ci siamo arrivati");
-                System.out.println("ci siamo arrivati prade");
-
-
+                db.setDragView(currentTileView.snapshot(null, null));
                 event.consume();
-                System.out.println("ci siamo arrivati");
 
 
             });
@@ -384,21 +394,24 @@ public class BuildingPhaseController extends GUIController {
         }
     }
     public void postInitializeLogOut(){
-        returnTileBtn.setVisible(false);
-        rotateLeftBtn.setVisible(false);
-        rotateRightBtn.setVisible(false);
-        getShownBtn.setVisible(false);
-        getCoveredBtn.setVisible(false);
-        setReadyBtn.setVisible(false);
-        rightArrowButton.setVisible(false);
-        leftArrowButton.setVisible(false);
-        playerShip1Btn.setVisible(false);
-        playerShip2Btn.setVisible(false);
-        playerShip3Btn.setVisible(false);
+        resetButtons();
+
+//
+//        returnTileBtn.setVisible(false);
+//        rotateLeftBtn.setVisible(false);
+//        rotateRightBtn.setVisible(false);
+//        getShownBtn.setVisible(false);
+//        getCoveredBtn.setVisible(false);
+//        setReadyBtn.setVisible(false);
+//        rightArrowButton.setVisible(false);
+//        leftArrowButton.setVisible(false);
+//        playerShip1Btn.setVisible(false);
+//        playerShip2Btn.setVisible(false);
+//        playerShip3Btn.setVisible(false);
         deck1Btn.setDisable(true);
         deck2Btn.setDisable(true);
         deck3Btn.setDisable(true);
-        hourGlassBtn.setVisible(false);
+//        hourGlassBtn.setVisible(false);
     }
     private void takeReserved(int a){
 
@@ -460,12 +473,12 @@ public class BuildingPhaseController extends GUIController {
             updateTilePreviewFromList();
         });
 
-        // Click sulla tile per selezionarla
         tilePreviewPane.setOnMouseClicked(e -> {
+            guiView.showNotification("You got the tile in time!");
+
             guiView.setBufferedIndex(tileListIndex);
             isSelectingTileFromList = false;
             tileList = List.of();
-//            tilePreviewPane.getChildren().clear();
             leftArrowButton.setVisible(false);
             rightArrowButton.setVisible(false);
         });
@@ -478,9 +491,25 @@ public class BuildingPhaseController extends GUIController {
         image.setFitWidth(100);
         image.setFitHeight(100);
         image.setRotate(current.getRotation());
+        image.setCursor(Cursor.HAND); // 👈 qui
+
 
         tilePreviewPane.getChildren().setAll(image);
     }
 
+    private void resetButtons() {
+        getCoveredBtn.setVisible(false);
+        getShownBtn.setVisible(false);
+        returnTileBtn.setVisible(false);
+        rotateLeftBtn.setVisible(false);
+        rotateRightBtn.setVisible(false);
+        setReadyBtn.setVisible(false);
+        leftArrowButton.setVisible(false);
+        rightArrowButton.setVisible(false);
+        reserveBtn1.setVisible(false);
+        reserveBtn2.setVisible(false);
+        reserveBtn1.setDisable(true);
+        reserveBtn2.setDisable(true);
+    }
 
 }

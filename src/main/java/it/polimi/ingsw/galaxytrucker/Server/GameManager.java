@@ -40,6 +40,8 @@ public class GameManager {
         games.put(gameId, controller);
         controller.addPlayer(nickname, v);
         nicknameToGameId.put(nickname, gameId);
+        controller.notifyView(nickname);
+        controller.updatePositionForEveryBody();
         safeSave(gameId, controller);
         return gameId;
     }
@@ -50,6 +52,8 @@ public class GameManager {
         safeSave(gameId, controller);
         controller.addPlayer(nickname, v);
         nicknameToGameId.put(nickname, gameId);
+        controller.notifyView(nickname);
+        controller.updatePositionForEveryBody();
         if (controller.countConnectedPlayers() == controller.getMaxPlayers())
             controller.startGame();
         safeSave(gameId, controller);

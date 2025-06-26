@@ -85,5 +85,9 @@ public class SceneRouter {
         initializeAllScenes(); // già definito, ricarica tutto da zero
     }
 
+    public Scene getScene(SceneEnum sceneEnum) {
+        return scenes.get(sceneEnum);
+    }
+
 
 }

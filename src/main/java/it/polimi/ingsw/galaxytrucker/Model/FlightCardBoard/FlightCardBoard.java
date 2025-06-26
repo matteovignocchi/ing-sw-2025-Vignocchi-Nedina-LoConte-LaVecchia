@@ -31,7 +31,6 @@ public class FlightCardBoard implements Serializable {
     protected Controller controller;
 
     public FlightCardBoard(Controller controller) {
-        //si inizia a contare da 1 le posizioni
         this.spacesNumber = 18;
         this.bonusFirstPosition = 4;
         this.bonusSecondPosition = 3;
@@ -43,52 +42,91 @@ public class FlightCardBoard implements Serializable {
         this.greenGoodBonus = 2;
         this.blueGoodBonus = 1;
         this.malusBrokenTile = -1;
-        this.orderedPlayersInFlight = new ArrayList<Player>();
+        this.orderedPlayersInFlight = new ArrayList<>();
         this.controller = controller;
     }
 
+    /**
+     * @return credits for a red good
+     */
     public int getBonusRedCargo() {
         return redGoodBonus;
     }
 
+    /**
+     * @return credits for a yellow good
+     */
     public int getBonusYellowCargo() {
         return yellowGoodBonus;
     }
 
+    /**
+     * @return credits for a green good
+     */
     public int getBonusGreenCargo() {
         return greenGoodBonus;
     }
 
+    /**
+     * @return credits for a blue good
+     */
     public int getBonusBlueCargo() {
         return blueGoodBonus;
     }
 
+    /**
+     * @return malus for a broken tile
+     */
     public int getBrokenMalus(){
         return malusBrokenTile;
     }
 
+    /**
+     * @return credits for the best ship award
+     */
     public int getBonusBestShip() {
         return bonusBestShip;
     }
 
+    /**
+     * @return reward credits for the first position
+     */
     public int getBonusFirstPosition(){
         return bonusFirstPosition;
     }
 
+    /**
+     * @return reward credits for the second position
+     */
     public int getBonusSecondPosition(){
         return bonusSecondPosition;
     }
 
+    /**
+     * @return reward credits for the third position
+     */
     public int getBonusThirdPosition(){
         return bonusThirdPosition;
     }
 
+    /**
+     * @return reward credits for the fourth position
+     */
     public int getBonusFourthPosition(){
         return bonusFourthPosition;
     }
 
+    /**
+     * @return in-flight ordered players' list
+     */
     public List<Player> getOrderedPlayers(){ return new ArrayList<>(orderedPlayersInFlight); }
 
+    /**
+     * Returns the player's position in flight
+     *
+     * @param p player you want to know the position of
+     * @return player's position
+     */
     public int getPositionOfPlayer(Player p) {
         if (!orderedPlayersInFlight.contains(p)) {
             throw new IllegalArgumentException("Player not found in flight board");
@@ -96,9 +134,8 @@ public class FlightCardBoard implements Serializable {
         return p.getPos();
     }
 
-    //metodo forse utile per le riconessioni. per inserire all'inizio, si usa setPlayerReadyToFly
     /**
-     * The following method adds a player to the flight List
+     * Adds a player to the flight List
      *
      * @param p player to be added
      * @throws IllegalArgumentException if p==null or p is already in list
@@ -112,7 +149,17 @@ public class FlightCardBoard implements Serializable {
         orderedPlayersInFlight.add(p);
     }
 
-    //commentare. setta il lap e pos del player, e lo adda alla lista
+    /**
+     * Marks the given player as ready to start the flight by initializing their lap to 1, assigning their starting
+     * position based on the current flight mode (demo or normal) and the number of players already in flight, and then
+     * adds them to the flight ordered players' list
+     *
+     * @param p       the player to mark as ready and add to flight
+     * @param isDemo  {@code true} for demo games,
+     *                {@code false} for level 2 games
+     * @throws IllegalArgumentException if the player is already in flight
+     * @throws RuntimeException         if there are already 4 players in flight
+     */
     public void setPlayerReadyToFly(Player p, boolean isDemo) {
         if(orderedPlayersInFlight.contains(p)) throw new IllegalArgumentException("Player is already in flight");
         int size = orderedPlayersInFlight.size();
@@ -253,7 +300,7 @@ public class FlightCardBoard implements Serializable {
     }
 
     /**
-     * The following method eliminates the overlapped players, by checking for each of them if there's
+     * Eliminates the overlapped players, by checking for each of them if there's
      * another one with a higher number of laps and a higher position on the board
      */
 
@@ -270,6 +317,12 @@ public class FlightCardBoard implements Serializable {
         }
     }
 
+    /**
+     * Checks each non-eliminated player still in flight and eliminates
+     * any who have no humans left aboard. Eliminated players are notified of their elimination.
+     *
+     * @throws BusinessLogicException if notifying a player fails
+     */
     public void checkIfPlayerNoHumansLeft() throws BusinessLogicException {
         for(Player p : orderedPlayersInFlight) {
             if(p.isEliminated()) continue;
@@ -281,6 +334,12 @@ public class FlightCardBoard implements Serializable {
         }
     }
 
+    /**
+     * Removes all players marked as eliminated from the in‐flight ordered players' list
+     * and returns the list of those removed.
+     *
+     * @return the list of players eliminated
+     */
     public List<Player> eliminatePlayers(){
         List<Player> eliminated = new ArrayList<>();
         Iterator<Player> iterator = orderedPlayersInFlight.iterator();
