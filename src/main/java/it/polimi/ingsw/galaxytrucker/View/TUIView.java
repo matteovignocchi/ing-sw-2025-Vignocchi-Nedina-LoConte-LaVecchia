@@ -376,8 +376,6 @@ public class TUIView implements View {
         }
     }
 
-    @Override
-    public void setInt() {}
 
     @Override
     public void printListOfGoods(List<String> Goods) {
@@ -496,12 +494,6 @@ public class TUIView implements View {
         }
         printMapPosition();
         System.out.println();
-    }
-
-    //metodo che riceve una lista, in cui prendi
-    @Override
-    public void printNewFase(String gamePhase) {
-
     }
 
     @Override
