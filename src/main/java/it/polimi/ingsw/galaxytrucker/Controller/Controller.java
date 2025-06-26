@@ -42,14 +42,14 @@ public class Controller implements Serializable {
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
-    private final FlightCardBoard fBoard;
-    private Deck deck;
-    private List<Deck> decks;
+    protected final FlightCardBoard fBoard;
+    public Deck deck;
+    public List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
     private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
     private transient CardSerializer cardSerializer;
-    private transient TileSerializer tileSerializer;
+    public transient TileSerializer tileSerializer;
     private transient EnumSerializer enumSerializer;
     public transient ScheduledExecutorService pingScheduler;
 
@@ -161,13 +161,6 @@ public class Controller implements Serializable {
         } catch (Exception e) {
             markDisconnected(nickname);
             System.err.println("[ERROR] in notifyView: " + e.getMessage());
-        }
-    }
-
-    public void notifyAllViews() throws BusinessLogicException {
-        for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
-            Player p = getPlayerCheck(nickname);
-            if(p.isConnected()) notifyView(nickname);
         }
     }
 
@@ -317,10 +310,6 @@ public class Controller implements Serializable {
 
     public int countConnectedPlayers() {
         return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
-    }
-
-    public GamePhase getPrincipalGameFase() {
-        return principalGamePhase;
     }
 
     public void markDisconnected(String nickname) {
@@ -1115,6 +1104,7 @@ public class Controller implements Serializable {
             return tmp;
         }
     }
+
 
     public double getFirePower(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
@@ -2115,7 +2105,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
+    public boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
@@ -2272,7 +2262,7 @@ public class Controller implements Serializable {
         }
     }
 
-    private void checkPlayerAssembly(String nick , int x , int y) throws BusinessLogicException {
+    public void checkPlayerAssembly(String nick, int x, int y) throws BusinessLogicException {
         Player p = getPlayerCheck(nick);
         VirtualView v = getViewCheck(nick);
         p.controlAssembly(x,y);
