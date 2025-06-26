@@ -669,6 +669,8 @@ public class GUIView extends Application implements View {
             return null;
         }
     }
+
+
     @Override
     public void start() {
 
@@ -707,6 +709,7 @@ public class GUIView extends Application implements View {
 
     }
     @Override public void printMapPosition() {}
+
     @Override public void printPileCovered() {}
     @Override
     public void printPileShown(List<ClientTile> tiles) {

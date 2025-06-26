@@ -42,7 +42,7 @@ public class CardGeneration implements Serializable {
     public List<Card> loadCards(String fileName, ObjectMapper mapper) throws IOException {
         try (InputStream file = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if(file ==null) throw new IOException("File not found" + fileName);
-            return mapper.readValue(file, new TypeReference<List<Card>>() {});
+            return mapper.readValue(file, new TypeReference<>() {});
         }
     }
 

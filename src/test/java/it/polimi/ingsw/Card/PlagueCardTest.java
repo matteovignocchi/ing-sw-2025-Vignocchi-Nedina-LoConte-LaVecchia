@@ -1,29 +1,29 @@
 package it.polimi.ingsw.Card;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.Card.CardVisitor;
-import it.polimi.ingsw.galaxytrucker.Model.Card.PlaugeCard;
+import it.polimi.ingsw.galaxytrucker.Model.Card.PlagueCard;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class PlaugeCardTest {
+class PlagueCardTest {
 
     @Test
     void ctor_nullOrBlankId_throws() {
-        assertThrows(IllegalArgumentException.class, () -> new PlaugeCard(null));
-        assertThrows(IllegalArgumentException.class, () -> new PlaugeCard(" "));
+        assertThrows(IllegalArgumentException.class, () -> new PlagueCard(null));
+        assertThrows(IllegalArgumentException.class, () -> new PlagueCard(" "));
     }
 
     @Test
     void getIdCard_returnsIt() {
-        PlaugeCard card = new PlaugeCard("Z1");
+        PlagueCard card = new PlagueCard("Z1");
         assertEquals("Z1", card.getIdCard());
     }
 
     @Test
     void accept_invokesVisit_and_propagatesBLException() throws BusinessLogicException {
-        PlaugeCard card = new PlaugeCard("Z2");
+        PlagueCard card = new PlagueCard("Z2");
         CardVisitor visitor = mock(CardVisitor.class);
 
         card.accept(visitor);

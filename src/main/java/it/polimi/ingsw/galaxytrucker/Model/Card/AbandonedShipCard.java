@@ -45,13 +45,15 @@ public class AbandonedShipCard implements Card, Serializable {
         this.num_crewmates = num_crewmates;
     }
 
+    /**
+     * Accepts a CardVisitor to process this card.
+     *
+     * @param visitor the CardVisitor that will handle this card
+     * @throws BusinessLogicException if a business logic error occurs during processing
+     */
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
+        visitor.visit(this);
     }
 
     /**
@@ -72,5 +74,8 @@ public class AbandonedShipCard implements Card, Serializable {
 
     public int getNumCrewmates(){ return num_crewmates; }
 
+    /**
+     * @return card's id
+     */
     public String getIdCard(){ return idCard; }
 }

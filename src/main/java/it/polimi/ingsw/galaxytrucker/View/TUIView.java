@@ -34,7 +34,7 @@ public class TUIView implements View {
             "YELLOW", YELLOW,
             "BLUE",   BLUE
     );
-    private static final long TIME_OUT = 20000; //TODO: messo così per debug, capire quanto mettere in definitiva
+    private static final long TIME_OUT = 300000;
 
 
     //per ora lascio il server come int
@@ -495,6 +495,7 @@ public class TUIView implements View {
         printMapPosition();
         System.out.println();
     }
+
 
     @Override
     public void printDeck(List<ClientCard> deck) {
