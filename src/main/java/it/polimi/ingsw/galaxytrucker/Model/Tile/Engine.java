@@ -1,11 +1,11 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
-
 import java.io.Serializable;
 
 /**
  * class for double and single engine
  * the flag isDouble give the information if is double or single
  * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
 public class Engine extends Tile implements Serializable {
     private boolean isDouble;

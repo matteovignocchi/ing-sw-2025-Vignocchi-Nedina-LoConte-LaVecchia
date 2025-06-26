@@ -1,15 +1,30 @@
 package it.polimi.ingsw.galaxytrucker.Model;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.galaxytrucker.Model.Tile.*;
-//import it.polimi.ingsw.galaxytrucker.Server.Model.Tile.*;
-
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Utility class responsible for loading and parsing tile data from a JSON file.
+ * This parser reads the {@code tile_data.json} file from the classpath and
+ * constructs the corresponding {@link Tile} objects based on the specified type.
+ * It supports all tile subclasses defined in the model.
+ * @author Matteo Vignocchi
+ */
+
 public class TileParserLoader implements Serializable {
+
+    /**
+     * Loads the list of tiles from the JSON resource file.
+     * <p>
+     * Parses each tile definition from {@code tile_data.json} and instantiates the
+     * appropriate {@link Tile} subclass based on the "type" field.
+     * @return a list of {@link Tile} objects parsed from the JSON file
+     * @throws RuntimeException if the JSON resource is not found
+     */
 
     public List<Tile> loadTiles() {
         List<Tile> pileOfTile = new ArrayList<>();

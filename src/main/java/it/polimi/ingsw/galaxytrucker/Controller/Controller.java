@@ -66,8 +66,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            decks = deckCreator.CreateSecondLevelDeck();
-//            decks = deckCreator.CreatePlanetsDeck();
+            //decks = deckCreator.CreateSecondLevelDeck();
+            decks = deckCreator.CreateMeteoritesDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -708,7 +708,7 @@ public class Controller implements Serializable {
         }
 
         activateCard(card);
-        broadcastInform("SERVER: end of card's effect");
+        broadcastInform("\nSERVER: end of card's effect");
 
         if(deck.isEmpty()){
             broadcastInform("SERVER: All cards drawn");
@@ -1783,7 +1783,7 @@ public class Controller implements Serializable {
                             Human tmp = h.getTypeOfConnections();
                             if (h.getType() == Human.HUMAN){
                                 switch (tmp) {
-                                    case PRADELLA -> {
+                                    case HUMAN234 -> {
                                         Human tmp2 = Human.HUMAN;
                                         for (int z = 0; z < 2; z++) {
                                             System.out.println("[DEBUG] AGGIUNGO a (" + i + "," + j + ") = " + h.getListOfToken());
@@ -2043,9 +2043,9 @@ public class Controller implements Serializable {
         }
 
         if(manageIfPlayerEliminated(p)){
-            inform("SERVER: You have lost all your humans", Nickname);
-//            updateGamePhase(Nickname , v , GamePhase.EXIT); update fatto dopo
-            return true; //TODO: da eliminare e gestire bene questo caso
+            inform("SERVER: You have lost all your humans. Your ship is destroyed", Nickname);
+            p.destroyAll();
+            return true;
         }
 
         if(!tmpBoolean){
@@ -2071,13 +2071,13 @@ public class Controller implements Serializable {
         String size = isBig ? "big" : "small";
 
         for(Player p : players){
-            if(players.getFirst().equals(p) || !p.isConnected()) continue;
+            if(players.getFirst().equals(p) || !p.isConnected() || p.isEliminated()) continue;
             String nick = getNickByPlayer(p);
             inform("\nSERVER: Waiting for your turn...", nick);
         }
 
         for (Player p : players) {
-            if(p.isConnected()){
+            if(p.isConnected() && !p.isEliminated()){
                 String nick = getNickByPlayer(p);
                 VirtualView v = getViewCheck(nick);
                 inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
@@ -2237,143 +2237,6 @@ public class Controller implements Serializable {
         }
     }
 
-
-    //    public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
-//        boolean result = false;
-//        if (dir == 0) {
-//            boolean flag = true;
-//            int i = 0;
-//            while (flag && i < 5) {
-//                if (playersByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
-//                    Tile y = playersByNickname.get(player).getTile(i, dir2 - 4);
-//                    switch (y) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                return manageEnergyCell(player);
-//                            }
-//                        }
-//                        default -> {
-//                            return false;
-//                        }
-//                    }
-//                }
-//                i++;
-//
-//            }
-//            return result;
-//        } else if (dir == 1) {
-//            boolean flag = true;
-//            int i = 5;
-//            while (flag && i >= 1) {
-//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-//                    switch (y1) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y2) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y3) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    flag = false;
-//
-//                }
-//                i--;
-//            }
-//            return result;
-//        }else if (dir == 3) {
-//            boolean flag = true;
-//            int i = 1;
-//            while (flag && i<6) {
-//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-//                    switch (y1) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y2) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y3) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    flag = false;
-//
-//                }
-//                i++;
-//            }
-//            return result;
-//
-//        }
-//        return false;
-//    }
-
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -2384,12 +2247,13 @@ public class Controller implements Serializable {
                 inform("SERVER: Choose your starting housing unit:", nickname);
                 xy = askPlayerCoordinates(p);
 
+                Tile tmp;
                 if(xy == null) {
-                    xy = new int[] {2,3};
-                    break;
+                    tmp = p.getTile(2,3);
+                } else {
+                    tmp = p.getTile(xy[0], xy[1]);
                 }
 
-               Tile tmp = p.getTile(xy[0], xy[1]);
                 switch (tmp) {
                     case HousingUnit h -> {
                         if(h.getType() == Human.HUMAN) flag = false;
