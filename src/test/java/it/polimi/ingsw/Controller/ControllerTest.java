@@ -234,7 +234,7 @@ class ControllerTest {
         assertEquals(initialPile -1, controller.getPileOfTile().size());
         // shown empty
         assertTrue(controller.getShownTiles().isEmpty());
-        assertEquals("PIEDONIPRADELLA", controller.jsongetShownTiles());
+        assertEquals("CODE404", controller.jsongetShownTiles());
         // add shown
         controller.addToShownTile(t);
         List<Tile> shown = controller.getShownTiles();

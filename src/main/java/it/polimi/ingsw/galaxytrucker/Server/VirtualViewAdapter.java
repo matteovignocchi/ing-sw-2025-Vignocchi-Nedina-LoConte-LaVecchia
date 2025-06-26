@@ -31,7 +31,6 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public int[] askCoordinate() throws Exception { return null; }
 
     @Override public void updateGameState(String fase) throws Exception {}
-    @Override public void startMach() throws Exception {}
     @Override public int sendLogin(String username) throws Exception { return 0; }
     @Override public int sendGameRequest(String message , int num , Boolean isDemo) throws Exception { return 0; }
 //    @Override public String getCurrentGameState() throws Exception { return null; }

@@ -404,15 +404,15 @@ public class ClientController {
                             v.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
-                            String piedino = "PIEDONIPRADELLA";
+                            String tile = "CODE404";
                             try {
-                                piedino = virtualClient.getUncoveredTile();
+                                tile = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
                                 v.reportError(e.getMessage());
                             }
-                            if (!piedino.equals("PIEDONIPRADELLA")) {
+                            if (!tile.equals("CODE404")) {
                                 try {
-                                    tmpTile = clientTileFactory.fromJson(piedino);
+                                    tmpTile = clientTileFactory.fromJson(tile);
                                     v.printTile(tmpTile);
                                 } catch (IOException e) {
                                     v.reportError(e.getMessage());
@@ -537,15 +537,15 @@ public class ClientController {
                             g.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
-                            String piedino = "PIEDONIPRADELLA";
+                            String tile = "CODE404";
                             try {
-                                piedino = virtualClient.getUncoveredTile();
+                                tile = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());
                             }
-                            if (!piedino.equals("PIEDONIPRADELLA")) {
+                            if (!tile.equals("CODE404")) {
                                 try {
-                                    tmpTile = clientTileFactory.fromJson(piedino);
+                                    tmpTile = clientTileFactory.fromJson(tile);
                                     g.printTile(tmpTile);
                                 } catch (IOException e) {
                                     g.reportError(e.getMessage());
@@ -928,7 +928,7 @@ public class ClientController {
             }
             case "getashowntile" -> {
                 String piedino = virtualClient.getUncoveredTile();
-                if (!piedino.equals("PIEDONIPRADELLA")) {
+                if (!piedino.equals("CODE404")) {
                     tmpTile = clientTileFactory.fromJson(piedino);
                     view.printTile(tmpTile);
                 }

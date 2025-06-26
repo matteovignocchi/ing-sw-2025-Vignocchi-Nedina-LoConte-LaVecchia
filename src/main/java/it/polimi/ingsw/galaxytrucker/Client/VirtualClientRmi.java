@@ -128,10 +128,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         clientController.updateGameStateByController(phase);
     }
 
-    @Override
-    public void startMach() throws RemoteException {
 
-    }
     //TODO:sistemare, vedere se servono
 //    @Override
 //    public GamePhase getCurrentGameState() throws RemoteException {
@@ -212,7 +209,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         } catch (Exception e) {
             throw new BusinessLogicException("Failed to fetch tile list: " + e.getMessage());
         }
-        if (tmp == null || tmp.equals("PIEDONIPRADELLA")) {
+        if (tmp == null || tmp.equals("CODE404")) {
             throw new BusinessLogicException("The list of shown tiles is empty.");
         }
 
@@ -406,18 +403,6 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
     @Override
     public void setIsDemo(Boolean demo) throws RemoteException{
         clientController.setIsDemoByController(demo);
-    }
-
-    //////////////////////////////////////////////////
-    //TODO:solo una bozza, scriverlo meglio. Stesso per socket
-    public void enterGame(int gameId) throws RemoteException {
-        try{
-            server.enterGame(gameId, this , nickname);
-            setGameId(gameId);
-            //TODO: continuare come bisogna fare
-        } catch (Exception e) {
-            clientController.reportErrorByController("you miss " + e.getMessage() );
-        }
     }
 
     @Override
