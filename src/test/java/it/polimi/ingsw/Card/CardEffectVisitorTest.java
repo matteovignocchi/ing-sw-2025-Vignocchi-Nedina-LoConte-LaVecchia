@@ -155,14 +155,17 @@ class CardEffectVisitorTest {
 
         FirstWarzoneCard card = new FirstWarzoneCard("F", 1, 2, List.of(4, 2), List.of(false, true));
         visitor.visit(card);
-
         verify(board).moveRocket(-1, p2);
         verify(controller).removeCrewmates(p2, 2);
 
         when(p2.throwDice()).thenReturn(3);
+
+        Mockito.clearInvocations(controller, board);
+
         visitor.visit(card);
         verify(controller, times(2)).defenceFromCannon(anyInt(), anyBoolean(), eq(6), eq(p2));
     }
+
 
     //——— SecondWarzoneCard —————————————————————————————————————
 
@@ -188,14 +191,17 @@ class CardEffectVisitorTest {
 
         SecondWarzoneCard card = new SecondWarzoneCard("S", 2, 5, List.of(4, 2), List.of(true, false));
         visitor.visit(card);
-
         verify(board).moveRocket(-2, p1);
         verify(controller).removeGoods(p2, 5);
 
         when(p2.throwDice()).thenReturn(3);
+
+        Mockito.clearInvocations(controller, board);
+
         visitor.visit(card);
         verify(controller, times(2)).defenceFromCannon(anyInt(), anyBoolean(), eq(6), eq(p2));
     }
+
 
     //——— SmugglersCard —————————————————————————————————————
 

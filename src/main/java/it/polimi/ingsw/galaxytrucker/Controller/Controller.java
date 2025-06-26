@@ -42,14 +42,14 @@ public class Controller implements Serializable {
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
-    private final FlightCardBoard fBoard;
-    private Deck deck;
-    private List<Deck> decks;
+    protected final FlightCardBoard fBoard;
+    public Deck deck;
+    public List<Deck> decks;
     private TileParserLoader pileMaker = new TileParserLoader();
     private transient static final  ScheduledExecutorService TIMEOUT_EXECUTOR = Executors.newSingleThreadScheduledExecutor();
     private transient ScheduledFuture<?> lastPlayerTask;
     private transient CardSerializer cardSerializer;
-    private transient TileSerializer tileSerializer;
+    public transient TileSerializer tileSerializer;
     private transient EnumSerializer enumSerializer;
     public transient ScheduledExecutorService pingScheduler;
 
@@ -161,13 +161,6 @@ public class Controller implements Serializable {
         } catch (Exception e) {
             markDisconnected(nickname);
             System.err.println("[ERROR] in notifyView: " + e.getMessage());
-        }
-    }
-
-    public void notifyAllViews() throws BusinessLogicException {
-        for (String nickname : new ArrayList<>(viewsByNickname.keySet())) {
-            Player p = getPlayerCheck(nickname);
-            if(p.isConnected()) notifyView(nickname);
         }
     }
 
@@ -317,10 +310,6 @@ public class Controller implements Serializable {
 
     public int countConnectedPlayers() {
         return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
-    }
-
-    public GamePhase getPrincipalGameFase() {
-        return principalGamePhase;
     }
 
     public void markDisconnected(String nickname) {
@@ -2117,7 +2106,7 @@ public class Controller implements Serializable {
         player.addCredits(credits);
     }
 
-    private boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
+    public boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
         //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
@@ -2237,143 +2226,6 @@ public class Controller implements Serializable {
         }
     }
 
-
-    //    public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
-//        boolean result = false;
-//        if (dir == 0) {
-//            boolean flag = true;
-//            int i = 0;
-//            while (flag && i < 5) {
-//                if (playersByNickname.get(player).validityCheck(i, dir2 - 4) == Status.USED) {
-//                    Tile y = playersByNickname.get(player).getTile(i, dir2 - 4);
-//                    switch (y) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                return manageEnergyCell(player);
-//                            }
-//                        }
-//                        default -> {
-//                            return false;
-//                        }
-//                    }
-//                }
-//                i++;
-//
-//            }
-//            return result;
-//        } else if (dir == 1) {
-//            boolean flag = true;
-//            int i = 5;
-//            while (flag && i >= 1) {
-//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-//                    switch (y1) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y2) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y3) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    flag = false;
-//
-//                }
-//                i--;
-//            }
-//            return result;
-//        }else if (dir == 3) {
-//            boolean flag = true;
-//            int i = 1;
-//            while (flag && i<6) {
-//                if (playersByNickname.get(player).validityCheck(dir2 - 5, i) == Status.USED) {
-//                    Tile y1 = playersByNickname.get(player).getTile(dir2 - 5, i);
-//                    Tile y2 = playersByNickname.get(player).getTile(dir2 - 5, i + 1);
-//                    Tile y3 = playersByNickname.get(player).getTile(dir2 - 5, i - 1);
-//                    switch (y1) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y2) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    switch (y3) {
-//                        case Cannon c -> {
-//                            if (!c.isDouble()) {
-//                                return true;
-//                            } else {
-//                                if (manageEnergyCell(player)) {
-//                                    return true;
-//                                }
-//                            }
-//                        }
-//                        default -> {
-//                        }
-//                    }
-//                    flag = false;
-//
-//                }
-//                i++;
-//            }
-//            return result;
-//
-//        }
-//        return false;
-//    }
-
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -2410,7 +2262,7 @@ public class Controller implements Serializable {
         }
     }
 
-    private void checkPlayerAssembly(String nick , int x , int y) throws BusinessLogicException {
+    public void checkPlayerAssembly(String nick, int x, int y) throws BusinessLogicException {
         Player p = getPlayerCheck(nick);
         VirtualView v = getViewCheck(nick);
         p.controlAssembly(x,y);
