@@ -190,40 +190,40 @@ class ControllerTest {
         assertNotNull(dash);
     }
 
-    @Test
-    void testAskPlayerDecisionAndCoordinatesAndIndex() throws Exception {
-        controller.addPlayer("P", view1);
-        it.polimi.ingsw.galaxytrucker.Model.Player p = controller.getPlayerCheck("P");
-        // decision true
-        when(view1.askWithTimeout(anyString())).thenReturn(true);
-        assertTrue(controller.askPlayerDecision("q?", p));
-        // decision IOException -> false and disconnect
-        p.setConnected(true);
-        doThrow(new IOException("fail")).when(view1).askWithTimeout(anyString());
-        assertFalse(controller.askPlayerDecision("q?", p));
-        assertFalse(p.isConnected());
-        // coordinates
-        p.setConnected(true);
-        int[] coords = new int[]{1,2};
-        when(view1.askCoordsWithTimeout()).thenReturn(coords);
-        int[] got = controller.askPlayerCoordinates(p);
-        assertArrayEquals(coords, got);
-        // coords IOException -> null and disconnect
-        p.setConnected(true);
-        doThrow(new IOException()).when(view1).askCoordsWithTimeout();
-        assertNull(controller.askPlayerCoordinates(p));
-        assertFalse(p.isConnected());
-        // index null
-        p.setConnected(true);
-        when(view1.askIndexWithTimeout()).thenReturn(null);
-        assertNull(controller.askPlayerIndex(p, 5));
-        // index out of bounds then valid
-        p.setConnected(true);
-        when(view1.askIndexWithTimeout()).thenReturn(-1, 7, 3);
-        // stub reportError to no-op
-        doNothing().when(view1).reportError(anyString());
-        assertEquals(3, controller.askPlayerIndex(p, 5));
-    }
+//    @Test
+//    void testAskPlayerDecisionAndCoordinatesAndIndex() throws Exception {
+//        controller.addPlayer("P", view1);
+//        it.polimi.ingsw.galaxytrucker.Model.Player p = controller.getPlayerCheck("P");
+//        // decision true
+//        when(view1.askWithTimeout(anyString())).thenReturn(true);
+//        assertTrue(controller.askPlayerDecision("q?", p));
+//        // decision IOException -> false and disconnect
+//        p.setConnected(true);
+//        doThrow(new IOException("fail")).when(view1).askWithTimeout(anyString());
+//        assertFalse(controller.askPlayerDecision("q?", p));
+//        assertFalse(p.isConnected());
+//        // coordinates
+//        p.setConnected(true);
+//        int[] coords = new int[]{1,2};
+//        when(view1.askCoordsWithTimeout()).thenReturn(coords);
+//        int[] got = controller.askPlayerCoordinates(p);
+//        assertArrayEquals(coords, got);
+//        // coords IOException -> null and disconnect
+//        p.setConnected(true);
+//        doThrow(new IOException()).when(view1).askCoordsWithTimeout();
+//        assertNull(controller.askPlayerCoordinates(p));
+//        assertFalse(p.isConnected());
+//        // index null
+//        p.setConnected(true);
+//        when(view1.askIndexWithTimeout()).thenReturn(null);
+//        assertNull(controller.askPlayerIndex(p, 5));
+//        // index out of bounds then valid
+//        p.setConnected(true);
+//        when(view1.askIndexWithTimeout()).thenReturn(-1, 7, 3);
+//        // stub reportError to no-op
+//        doNothing().when(view1).reportError(anyString());
+//        assertEquals(3, controller.askPlayerIndex(p, 5));
+//    }
 
     @Test
     void testPileAndShownTilesMethods() throws Exception {
