@@ -532,7 +532,7 @@ public class Controller implements Serializable {
         getFlightCardBoard().setPlayerReadyToFly(p, isDemo);
 
         p.setGamePhase(GamePhase.WAITING_FOR_PLAYERS);
-
+        printPlayerDashboard(viewsByNickname.get(nickname),playersByNickname.get(nickname),nickname);
         playersPosition = buildPlayersPositionMap();
 
         if(playersByNickname.values().stream().filter(Player::isConnected).allMatch(e -> e.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS)) {

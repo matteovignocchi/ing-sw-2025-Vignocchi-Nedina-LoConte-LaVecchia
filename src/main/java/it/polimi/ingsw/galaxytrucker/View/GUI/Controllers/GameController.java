@@ -92,6 +92,8 @@ public class GameController extends GUIController {
     private final Map<Integer, Pane> demoMap = new HashMap<>();
     private final Map<Integer, Pane> pathMap = new HashMap<>();
     private ClientCard currentCard;
+    private final Map<String, Image> tokenImageCache = new HashMap<>();
+
 
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
@@ -235,6 +237,7 @@ public class GameController extends GUIController {
         updateDashboard(model.getDashboard());
         setCommandVisibility(model.isDemo());
     }
+
     @Override
     public void postInitialize2(){
         DrawButton.setVisible(true);
@@ -456,25 +459,23 @@ public class GameController extends GUIController {
     }
 
     private Image getTokenImage(String tokenType) {
-        String path = switch (tokenType.toLowerCase()) {
-            case "human" -> "/images/Human.png";
-            case "purple_alien" -> "/images/PurpleAlien.png";
-            case "brown_alien" -> "/images/BrownAlien.png";
-            case "red" -> "/images/RedGood.png";
-            case "yellow" -> "/images/YellowGood.png";
-            case "green" -> "/images/GreenGood.png";
-            case "blue" -> "/images/BlueGood.png";
-            case "energycell" -> "/images/EnergyCell.png";
-            default -> "/images/placeholder.png";
-        };
-
-        var stream = getClass().getResourceAsStream(path);
-        if (stream == null) {
-            return new Image("https://via.placeholder.com/16x16.png?text=?");
-        }
-
-
-        return new Image(stream);
+        return tokenImageCache.computeIfAbsent(tokenType.toLowerCase(), type -> {
+            String path = switch (type) {
+                case "human" -> "/images/Human.png";
+                case "purple_alien" -> "/images/PurpleAlien.png";
+                case "brown_alien" -> "/images/BrownAlien.png";
+                case "red" -> "/images/RedGood.png";
+                case "yellow" -> "/images/YellowGood.png";
+                case "green" -> "/images/GreenGood.png";
+                case "blue" -> "/images/BlueGood.png";
+                case "energycell" -> "/images/EnergyCell.png";
+                default -> "/images/placeholder.png";
+            };
+            var stream = getClass().getResourceAsStream(path);
+            return (stream == null)
+                    ? new Image("https://via.placeholder.com/16x16.png?text=?")
+                    : new Image(stream);
+        });
     }
 
 

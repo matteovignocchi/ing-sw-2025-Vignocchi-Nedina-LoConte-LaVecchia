@@ -376,7 +376,6 @@ public class GUIView extends Application implements View {
                 case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
-
                     controller.postInitialize();
                 }
                 case CARD_EFFECT -> {
@@ -388,8 +387,6 @@ public class GUIView extends Application implements View {
                     setSceneEnum(GAME_PHASE);
                     sceneRouter.getController(GAME_PHASE).postInitialize();
                     sceneRouter.getController(GAME_PHASE).postInitialize2();
-
-
                 }
 
                 default -> {}
@@ -690,12 +687,10 @@ public class GUIView extends Application implements View {
 
     @Override
     public void printListOfGoods(List<String> goods) {
-        System.out.println("[LOG] printListOfGoods() chiamato con: " + goods);
 
         this.bufferedGoods = goods;
         this.showGoodActionPrompt = true;
 
-        System.out.println("[LOG] showGoodActionPrompt = true");
 
     }
     @Override public void printMapPosition() {}
@@ -858,12 +853,9 @@ public class GUIView extends Application implements View {
             case "DRAW" -> "drawacard";
             default -> null;
         };
-        System.out.println("[DEBUG] Comando ricevuto: " + command + " → " + translated);
 
         if (translated != null) {
             commandQueue.offer(translated);
-            System.out.println("[DEBUG] Comando accodato");
-
         } else {
             reportError("Unrecognized command: " + command);
         }

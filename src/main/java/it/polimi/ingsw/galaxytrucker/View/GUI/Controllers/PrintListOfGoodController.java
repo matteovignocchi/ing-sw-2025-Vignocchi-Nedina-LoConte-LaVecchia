@@ -25,8 +25,6 @@ public class PrintListOfGoodController extends GUIController {
 
 
     public void setupForActionSelection(GUIView gui) {
-        System.out.println("[LOG] setupForActionSelection() → mostra i 3 pulsanti");
-
         goodPane.setVisible(false);
         addGood.setVisible(true);
         rearranges.setVisible(true);
@@ -49,8 +47,6 @@ public class PrintListOfGoodController extends GUIController {
     }
 
     public void setupForGoodsIndexSelection() {
-        System.out.println("[LOG] setupForGoodsIndexSelection() → mostra la lista di goods");
-
         goodPane.setVisible(true);
         addGood.setVisible(false);
         rearranges.setVisible(false);
