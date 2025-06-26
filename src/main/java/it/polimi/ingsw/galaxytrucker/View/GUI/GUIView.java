@@ -384,6 +384,7 @@ public class GUIView extends Application implements View {
                 case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
+
                     controller.postInitialize();
                 }
                 case CARD_EFFECT -> {
