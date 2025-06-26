@@ -12,18 +12,14 @@ public class ServerMain {
 
         GameManager gameManager = new GameManager();
         int socketPort = 30001;
-        int sockekPort2 = 30002;
         Registry registry = LocateRegistry.createRegistry(1099);
         registry.rebind("RmiServer", new ServerRmi(gameManager));
         System.out.println("Server-Rmi ready on port 1099");
 
         ServerSocketMain socketMain = new ServerSocketMain(gameManager, socketPort);
-        ServerSocketMain socketMain2 = new ServerSocketMain(gameManager, sockekPort2);
 
         Thread socketThread = new Thread(socketMain, "Socket-Listener");
         socketThread.start();
-        Thread socketThread2 = new Thread(socketMain2, "Socket-Listener");
-        socketThread2.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             socketThread.interrupt();
