@@ -12,19 +12,19 @@
     <children>
       <ImageView fitHeight="672.0" fitWidth="855.0">
          <image>
-            <Image url="@../Background_image_game.jpg" />
+            <Image url="@../images/Background_image_game.jpg" />
          </image>
       </ImageView>
 
         <Button fx:id="closeButton" layoutX="774.0" layoutY="11.0" text="X" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
       <ImageView fx:id="dashboard1" fitHeight="550.0" fitWidth="645.0" layoutX="90.0" layoutY="33.0" preserveRatio="true" AnchorPane.leftAnchor="105.0" AnchorPane.rightAnchor="105.0" AnchorPane.topAnchor="102.0">
          <image>
-            <Image url="@../Polytechnic/cardboard/cardboard-1.jpg" />
+            <Image url="@../images/Polytechnic/cardboard/cardboard-1.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="dashboard2" fitHeight="550.0" fitWidth="645.0" preserveRatio="true" AnchorPane.leftAnchor="105.0" AnchorPane.rightAnchor="105.0" AnchorPane.topAnchor="102.0">
          <image>
-            <Image url="@../Polytechnic/cardboard/cardboard-1b.jpg" />
+            <Image url="@../images/Polytechnic/cardboard/cardboard-1b.jpg" />
          </image>
       </ImageView>
       <GridPane fx:id="gridDashboard" layoutX="129.0" layoutY="121.0" prefHeight="427.0" prefWidth="596.0">

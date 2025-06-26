@@ -91,6 +91,10 @@ public class CardSerializer {
                 dto.type = "OPENSPACECARD";
                 dto.idCard = o.getIdCard();
             }
+            case PlaugeCard p ->{
+                dto.type = "PLAUGECARD";
+                dto.idCard = p.getIdCard();
+            }
             default -> dto.type = card.getClass().getSimpleName().toUpperCase();
 
         }

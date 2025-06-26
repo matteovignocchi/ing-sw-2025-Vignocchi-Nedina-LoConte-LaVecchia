@@ -98,7 +98,6 @@ public class ClientMain {
 
     private static String readHost(Scanner scanner) {
         while (true) {
-            System.out.print("Inserisci l'indirizzo IP del server: ");
             String host = scanner.nextLine().trim();
             try {
                 InetAddress.getByName(host);

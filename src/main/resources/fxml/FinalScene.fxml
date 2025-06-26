@@ -10,7 +10,7 @@
    <children>
       <ImageView fitHeight="600.0" fitWidth="450.0" layoutX="10.0" layoutY="10.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
-            <Image url="@../LobbyImage2.png" />
+            <Image url="@../images/LobbyImage2.png" />
          </image>
       </ImageView>
       <VBox layoutX="122.0" layoutY="103.0" prefHeight="262.0" prefWidth="209.0">

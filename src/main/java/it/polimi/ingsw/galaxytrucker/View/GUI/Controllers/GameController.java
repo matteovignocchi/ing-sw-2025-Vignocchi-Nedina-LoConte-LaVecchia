@@ -221,11 +221,11 @@ public class GameController extends GUIController {
     }
     private Image getShipImage(int id) {
         String path = switch (id){
-            case 33 ->  "/BlueRocket.png";
-            case 34 ->  "/GreenRocket.png";
-            case 52 ->  "/RedRocket.png";
-            case 61 ->  "/YellowRockt.png";
-            default -> "/placeholder.png";
+            case 33 ->  "/images/BlueRocket.png";
+            case 34 ->  "/images/GreenRocket.png";
+            case 52 ->  "/images/RedRocket.png";
+            case 61 ->  "/images/YellowRockt.png";
+            default -> "/images/placeholder.png";
         };
         return new Image(getClass().getResourceAsStream(path));
     }
@@ -285,7 +285,9 @@ public class GameController extends GUIController {
                 if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
                     placeTileWithTokens(tile, row, col);
                 } else {
-                    cellStackPanes[row][col].getChildren().clear();
+                    if (cellStackPanes[row][col] != null) {
+                        cellStackPanes[row][col].getChildren().clear();
+                    }
                 }
             }
         }
@@ -363,7 +365,47 @@ public class GameController extends GUIController {
     }
 
 
+    public void showYesNoButtons(String message) {
+        messageText.setText(message);
+        messageTextFlow.setVisible(true);
+        yesButton.setVisible(true);
+        noButton.setVisible(true);
+
+        yesButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(true);
+            hidePrompt();
+        });
+
+        noButton.setOnAction(e -> {
+            guiView.setBufferedBoolean(false);
+            hidePrompt();
+        });
+    }
+
+
+    private void hidePrompt() {
+        messageTextFlow.setVisible(false);
+        yesButton.setVisible(false);
+        noButton.setVisible(false);
+        messageText.setText("");
+    }
+
+    public void updateStatsLabels(String nickname, double firePower, int enginePower, int creditsVal, boolean purple, boolean brown, int humans, int energy) {
+        nicknametext.setText(nickname);
+        firepower.setText("Fire Power: " + firePower);
+        enginepower.setText("Engine Power: " + enginePower);
+        credits.setText("Credits: " + creditsVal);
+        purplealien.setText("Purple Alien: " + (purple ? "Yes" : "No"));
+        brownalien.setText("Brown Alien: " + (brown ? "Yes" : "No"));
+        numofhumans.setText("Number of Humans: " + humans);
+        energycell.setText("Number of energy Cell: " + energy);
+    }
+
     public void placeTileWithTokens(ClientTile tile, int row, int col) {
+        if (cellStackPanes[row][col] == null) {
+            return;
+        }
+
         StackPane cell = cellStackPanes[row][col];
         cell.getChildren().clear();
 
@@ -413,53 +455,17 @@ public class GameController extends GUIController {
 
     }
 
-    public void showYesNoButtons(String message) {
-        messageText.setText(message);
-        messageTextFlow.setVisible(true);
-        yesButton.setVisible(true);
-        noButton.setVisible(true);
-
-        yesButton.setOnAction(e -> {
-            guiView.setBufferedBoolean(true);
-            hidePrompt();
-        });
-
-        noButton.setOnAction(e -> {
-            guiView.setBufferedBoolean(false);
-            hidePrompt();
-        });
-    }
-
-
-    private void hidePrompt() {
-        messageTextFlow.setVisible(false);
-        yesButton.setVisible(false);
-        noButton.setVisible(false);
-        messageText.setText("");
-    }
-
-    public void updateStatsLabels(String nickname, double firePower, int enginePower, int creditsVal, boolean purple, boolean brown, int humans, int energy) {
-        nicknametext.setText(nickname);
-        firepower.setText("Fire Power: " + firePower);
-        enginepower.setText("Engine Power: " + enginePower);
-        credits.setText("Credits: " + creditsVal);
-        purplealien.setText("Purple Alien: " + (purple ? "Yes" : "No"));
-        brownalien.setText("Brown Alien: " + (brown ? "Yes" : "No"));
-        numofhumans.setText("Number of Humans: " + humans);
-        energycell.setText("Number of energy Cell: " + energy);
-    }
-
     private Image getTokenImage(String tokenType) {
         String path = switch (tokenType.toLowerCase()) {
-            case "human" -> "/Human.png";
-            case "purple_alien" -> "/PurpleAlien.png";
-            case "brown_alien" -> "/BrownAlien.png";
-            case "red" -> "/RedGood.png";
-            case "yellow" -> "/YellowGood.png";
-            case "green" -> "/GreenGood.png";
-            case "blue" -> "/BlueGood.png";
-            case "energycell" -> "/EnergyCell.png";
-            default -> "/placeholder.png";
+            case "human" -> "/images/Human.png";
+            case "purple_alien" -> "/images/PurpleAlien.png";
+            case "brown_alien" -> "/images/BrownAlien.png";
+            case "red" -> "/images/RedGood.png";
+            case "yellow" -> "/images/YellowGood.png";
+            case "green" -> "/images/GreenGood.png";
+            case "blue" -> "/images/BlueGood.png";
+            case "energycell" -> "/images/EnergyCell.png";
+            default -> "/images/placeholder.png";
         };
 
         var stream = getClass().getResourceAsStream(path);

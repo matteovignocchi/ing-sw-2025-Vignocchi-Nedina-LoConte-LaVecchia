@@ -4,7 +4,7 @@ import javafx.scene.image.Image;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * abstract class for the general structure of the tile and
  * define the common methods to move it and return some information about the tile
@@ -25,30 +25,6 @@ public abstract class Tile implements Serializable {
     public int rotation;
     public String type;
 
-
-    public static Image loadImageById(int tileId) {
-        try {
-            String imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web" + tileId + ".jpg";
-            InputStream is = Tile.class.getResourceAsStream(imagePath);
-
-            if (is == null) {
-                imagePath = "/Polytechnic/tiles/GT-new_tiles_16_for web157";
-                is = Tile.class.getResourceAsStream(imagePath);
-
-                if (is == null) {
-                    throw new RuntimeException("Default tile image not found");
-                }
-            }
-
-            return new Image(is);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load tile image for ID: " + tileId, e);
-        }
-    }
-
-    public Image getImage() {
-        return loadImageById(this.idTile);
-    }
 
     public int getIdTile() {
         return idTile;

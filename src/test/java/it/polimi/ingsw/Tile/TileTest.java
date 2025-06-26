@@ -36,17 +36,5 @@ class TileTest {
         assertNotEquals(a, new Object());
     }
 
-    @Test
-    void testLoadImageByIdThrows() {
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> Tile.loadImageById(9999));
-        assertTrue(ex.getMessage().contains("Failed to load tile image for ID: 9999"));
-    }
-
-    @Test
-    void testGetImageDelegatesToStatic() {
-        StubTile t = new StubTile(1234);
-        RuntimeException ex = assertThrows(RuntimeException.class, t::getImage);
-        assertTrue(ex.getMessage().contains("Failed to load tile image for ID: 1234"));
-    }
 }
 
