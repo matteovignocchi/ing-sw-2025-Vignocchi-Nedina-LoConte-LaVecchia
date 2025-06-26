@@ -1,17 +1,28 @@
 package it.polimi.ingsw.galaxytrucker.Controller;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.galaxytrucker.DtoConvention.CardDTO;
 import it.polimi.ingsw.galaxytrucker.Model.Card.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for converting Card objects into their corresponding DTO representations
+ * and serializing them to JSON format.
+ * Used to transfer card information between server and client in a simplified, standardized structure.
+ * @author Oleg Nedina
+ */
 public class CardSerializer {
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Converts a specific Card instance into a CardDTO.
+     * This method uses pattern matching to detect the card type and extract all relevant
+     * data needed by the client.
+     * @param card the Card object to convert
+     * @return a CardDTO containing the serialized data of the card
+     */
     public static CardDTO toDTO(Card card) {
         CardDTO dto = new CardDTO();
         switch (card) {
@@ -101,11 +112,24 @@ public class CardSerializer {
         return dto;
     }
 
+    /**
+     * Converts a Card object to its JSON string representation.
+     * This includes transforming it to a CardDTO and then serializing it with Jackson.
+     * @param card the Card to serialize
+     * @return a JSON string representing the card
+     * @throws JsonProcessingException if serialization fails
+     */
     public String toJSON(Card card) throws JsonProcessingException {
         return mapper.writeValueAsString(toDTO(card));
     }
 
-
+    /**
+     * Converts a list of Card objects into a JSON array string.
+     * Each card is first converted into a CardDTO, then the entire list is serialized.
+     * @param cards the list of Card objects to serialize
+     * @return a JSON string representing the list of cards
+     * @throws JsonProcessingException if serialization fails
+     */
     public  String toJsonList(List<Card> cards) throws JsonProcessingException {
         List<CardDTO> dtos = new ArrayList<>();
         for (Card tmp : cards) {

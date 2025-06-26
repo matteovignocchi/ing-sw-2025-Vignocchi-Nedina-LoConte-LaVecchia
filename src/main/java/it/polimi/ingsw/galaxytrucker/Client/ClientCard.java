@@ -1,10 +1,15 @@
 package it.polimi.ingsw.galaxytrucker.Client;
 import javafx.scene.image.Image;
-
 import java.io.InputStream;
 import java.util.List;
 
-
+/**
+ * Client-side representation of a game card.
+ *
+ * Holds all display-related and gameplay-relevant information needed by the view layer,
+ * including textual data and methods to load associated card images.
+ * @author Oleg Nedina
+ */
 public class ClientCard {
     public String type;
     public String idCard;
@@ -21,10 +26,24 @@ public class ClientCard {
     public List<Integer> directions;
     public List<Boolean> sizes;
 
+
+
+    /**
+     * Returns the unique identifier of the card.
+     * @return the card's ID
+     */
     public String getIdCard() {
         return idCard;
     }
 
+    /**
+     * Loads the image corresponding to a specific card ID.
+     * The card ID must follow the format "deck_cardNumber", e.g., "1_03".
+     * Loads the appropriate image from the classpath based on the deck number.
+     * @param cardId the ID of the card to load (e.g., "1_03")
+     * @return the Image associated with the card
+     * @throws RuntimeException if the ID format is invalid or the image is not found
+     */
     public static Image loadImageById(String cardId) {
         try {
             String[] parts = cardId.split("_");
@@ -49,6 +68,12 @@ public class ClientCard {
         }
     }
 
+    /**
+     * Returns the image associated with this card.
+     * If the image cannot be found, a fallback placeholder image is returned.
+     * @return the Image object for the card
+     * @throws RuntimeException if both the card image and placeholder are missing
+     */
     public Image getImage() {
         try {
             return loadImageById(this.idCard);

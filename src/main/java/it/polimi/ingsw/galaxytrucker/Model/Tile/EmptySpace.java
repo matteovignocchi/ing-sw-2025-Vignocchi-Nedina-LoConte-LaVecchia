@@ -5,6 +5,7 @@ import java.io.Serializable;
 /**
  * class for empty space, where there is not a tile
  * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
 public class EmptySpace extends Tile implements Serializable {
     public EmptySpace() {
@@ -13,6 +14,5 @@ public class EmptySpace extends Tile implements Serializable {
         corners[2]=0;
         corners[1]=0;
         idTile = 157;
-
     }
 }

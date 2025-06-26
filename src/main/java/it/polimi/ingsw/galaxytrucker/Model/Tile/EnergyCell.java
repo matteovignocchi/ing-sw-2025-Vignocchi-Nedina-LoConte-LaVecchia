@@ -7,6 +7,7 @@ import java.io.Serializable;
  * when the game initializes the tile, it will give a different capacity
  * this class store the information of how many battery the player has left
  * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
 public class EnergyCell extends Tile implements Serializable {
     private int capacity;

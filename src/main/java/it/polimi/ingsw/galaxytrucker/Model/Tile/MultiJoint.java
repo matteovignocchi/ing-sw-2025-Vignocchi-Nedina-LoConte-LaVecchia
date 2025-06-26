@@ -1,9 +1,10 @@
 package it.polimi.ingsw.galaxytrucker.Model.Tile;
-
 import java.io.Serializable;
 
 /**
- * class for the multi joint tile
+ * class for MultiJoint
+ * @author Matteo Vignocchi
+ * @author Oleg Nedina
  */
 public class MultiJoint extends Tile implements Serializable {
     /**

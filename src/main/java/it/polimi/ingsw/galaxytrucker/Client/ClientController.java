@@ -404,15 +404,15 @@ public class ClientController {
                             v.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
-                            String piedino = "PIEDONIPRADELLA";
+                            String tile = "CODE404";
                             try {
-                                piedino = virtualClient.getUncoveredTile();
+                                tile = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
                                 v.reportError(e.getMessage());
                             }
-                            if (!piedino.equals("PIEDONIPRADELLA")) {
+                            if (!tile.equals("CODE404")) {
                                 try {
-                                    tmpTile = clientTileFactory.fromJson(piedino);
+                                    tmpTile = clientTileFactory.fromJson(tile);
                                     v.printTile(tmpTile);
                                 } catch (IOException e) {
                                     v.reportError(e.getMessage());
@@ -537,15 +537,15 @@ public class ClientController {
                             g.printTile(tmpTile);
                         }
                         case "getashowntile" -> {
-                            String piedino = "PIEDONIPRADELLA";
+                            String tile = "CODE404";
                             try {
-                                piedino = virtualClient.getUncoveredTile();
+                                tile = virtualClient.getUncoveredTile();
                             } catch (Exception e) {
                                 g.reportError(e.getMessage());
                             }
-                            if (!piedino.equals("PIEDONIPRADELLA")) {
+                            if (!tile.equals("CODE404")) {
                                 try {
-                                    tmpTile = clientTileFactory.fromJson(piedino);
+                                    tmpTile = clientTileFactory.fromJson(tile);
                                     g.printTile(tmpTile);
                                 } catch (IOException e) {
                                     g.reportError(e.getMessage());
@@ -672,19 +672,7 @@ public class ClientController {
 
 
     /// /metodi che mi servono per la gui///
-
-    public static ClientController getInstance() {
-        return instance;
-    }
-
-    public VirtualView getViewInterface() {
-        return virtualClient;
-    }
-
-    public void logOutGUI() throws Exception {
-        virtualClient.logOut();
-    }
-
+    ///
     public void setCurrentTile(String jsonTile) {
         if (currentGamePhase == ClientGamePhase.TILE_MANAGEMENT) {
             try {
@@ -845,10 +833,6 @@ public class ClientController {
         return view.choosePlayer();
     }
 
-    public void printListOfCommands() {
-        view.printListOfCommand();
-    }
-
     public boolean returOKAY(int a, int b) {
         return view.returnValidity(a, b);
     }
@@ -884,67 +868,11 @@ public class ClientController {
         }
     }
 
-    public void printMapPositionByController() {
-        view.printMapPosition();
-    }
-
-    public ClientGamePhase getGamePhaseByController() {
-        return view.getGamePhase();
-    }
-
     public int returnIdOfTile(int a, int b) {
         return Dash_Matrix[a][b].id;
     }
 
 
-    private void handleGUIInteraction(GUIView guiView, ClientGamePhase lastPhase) {
-        while (true) {
-            ClientGamePhase temp = currentGamePhase;
-
-            if (temp == ClientGamePhase.CARD_EFFECT) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    view.reportError("Error in sleep");
-                }
-                continue;
-            }
-
-            try {
-                // Aspetta asincronamente il comando dalla GUI
-//                String key = guiView.sendAvailableChoices2().get();
-                processCommand(""); // Estrai questa logica in un metodo separato
-            } catch (Exception e) {
-                view.reportError(e.getMessage());
-            }
-        }
-    }
-
-    private void processCommand(String key) throws Exception {
-        switch (key) {
-            case "getacoveredtile" -> {
-                tmpTile = clientTileFactory.fromJson(virtualClient.getTileServer());
-                view.printTile(tmpTile);
-            }
-            case "getashowntile" -> {
-                String piedino = virtualClient.getUncoveredTile();
-                if (!piedino.equals("PIEDONIPRADELLA")) {
-                    tmpTile = clientTileFactory.fromJson(piedino);
-                    view.printTile(tmpTile);
-                }
-            }
-            // ... altri casi come nello switch originale
-        }
-    }
-
-    public void setTileFromGui(ClientTile tile) {
-        tmpTile = tile;
-        try {
-            virtualClient.positionTile(clientTileFactory.toJson(tmpTile));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
 
 
