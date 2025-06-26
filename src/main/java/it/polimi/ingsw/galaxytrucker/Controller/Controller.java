@@ -51,7 +51,7 @@ public class Controller implements Serializable {
     private transient CardSerializer cardSerializer;
     private transient TileSerializer tileSerializer;
     private transient EnumSerializer enumSerializer;
-    private transient ScheduledExecutorService pingScheduler;
+    public transient ScheduledExecutorService pingScheduler;
 
 
 
