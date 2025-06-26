@@ -48,7 +48,7 @@ public class MeteoritesRainCard implements Card, Serializable {
      * @throws BusinessLogicException if a business logic error occurs during processing
      */
     @Override
-    public void accept(CardVisitor visitor) throws BusinessLogicException {
+    public void accept(CardVisitor visitor)  throws BusinessLogicException{
         visitor.visit(this);
     }
 

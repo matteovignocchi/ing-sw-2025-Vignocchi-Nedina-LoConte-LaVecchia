@@ -31,7 +31,7 @@ public class StardustCard implements Card, Serializable {
      * Accepts a CardVisitor to process this card.
      *
      * @param visitor the CardVisitor that will handle this card
-     * @throws BusinessLogicException if a business logic error occurs during processing
+     * @throws CardEffectException if a business logic error occurs during processing
      */
     @Override
     public void accept(CardVisitor visitor) throws BusinessLogicException {

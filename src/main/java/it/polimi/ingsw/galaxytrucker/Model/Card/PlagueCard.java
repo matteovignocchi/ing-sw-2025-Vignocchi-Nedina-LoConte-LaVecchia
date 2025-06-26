@@ -37,7 +37,6 @@ public class PlagueCard implements Card, Serializable {
     public void accept(CardVisitor visitor) throws BusinessLogicException {
         visitor.visit(this);
     }
-
     /**
      * @return card's id
      */

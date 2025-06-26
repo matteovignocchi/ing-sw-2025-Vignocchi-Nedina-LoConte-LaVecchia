@@ -21,7 +21,7 @@ public interface CardVisitor {
      * @param card: card.
      * @throws CardEffectException: custom exception that is thrown in case of problems activating the card.
      */
-    void visit(StardustCard card) throws BusinessLogicException;
+    void visit(StardustCard card) throws CardEffectException, BusinessLogicException;
     /**
      * Apply SmugglersCard effect
      * @param card: card.
