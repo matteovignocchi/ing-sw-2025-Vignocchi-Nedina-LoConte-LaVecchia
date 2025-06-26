@@ -52,7 +52,6 @@ public abstract class VirtualViewAdapter implements VirtualView {
     @Override public void setStart() throws Exception {}
     @Override public String askInformationAboutStart() throws Exception { return null; }
     @Override public void setIsDemo(Boolean demo) throws Exception {};
-    @Override public void enterGame(int gameId) throws Exception {};
     @Override public void updateDashMatrix(String[][] dashMatrix) throws Exception {}
     @Override public String takeReservedTile() throws Exception { return null; }
     @Override public void setClientController(ClientController clientController) throws Exception{}
