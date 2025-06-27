@@ -111,6 +111,9 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
+        if (message != null && message.startsWith("SERVER:")) {
+            message.substring(7).trim();
+        }
         if (filterDisplayNotification(message, sceneEnum)) {
             synchronized (notificationQueue) {
                 notificationQueue.offer(message);
@@ -935,7 +938,7 @@ public class GUIView extends Application implements View {
                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
             """);
                 label.setWrapText(true);
-                label.setMaxWidth(300);
+                label.setMaxWidth(400);
 
                 StackPane toast = new StackPane(label);
                 toast.setMouseTransparent(true);
@@ -943,8 +946,8 @@ public class GUIView extends Application implements View {
 
                 pane.getChildren().add(toast);
 
-                double xOffset = scene.getWidth() - 300 - 10;
-                double yOffset = scene.getHeight() - 90;
+                double xOffset = scene.getWidth() - 300;
+                double yOffset = scene.getHeight() - 100;
 
                 toast.setTranslateX(xOffset);
                 toast.setTranslateY(yOffset);
