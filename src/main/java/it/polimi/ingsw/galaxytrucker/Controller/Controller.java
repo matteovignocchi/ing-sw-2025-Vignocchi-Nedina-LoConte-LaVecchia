@@ -1772,8 +1772,8 @@ public class Controller implements Serializable {
                 while(finish > 0){
                     if(p.isConnected()){
                         inform("SERVER: Select an energy cell to remove a battery from", nick);
-                        printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
+                        printPlayerDashboard(x, p, nick);
 
                         if(vari==null){
                             autoCommandForBattery(p, 1);
@@ -2400,6 +2400,7 @@ public class Controller implements Serializable {
         if(manageIfPlayerEliminated(p)){
             inform("SERVER: You have lost all your humans. Your ship is destroyed", Nickname);
             p.destroyAll();
+            printPlayerDashboard(v, p, Nickname);
             return true;
         }
 
@@ -2408,6 +2409,7 @@ public class Controller implements Serializable {
         }else{
             inform("SERVER: You've been hit", Nickname);
             askStartHousingForControl(Nickname);
+
         }
 
         return false;

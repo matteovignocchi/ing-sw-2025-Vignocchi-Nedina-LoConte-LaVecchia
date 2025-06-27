@@ -31,7 +31,7 @@ public class FinalSceneController extends GUIController {
     private void updateFinalScreen() {
         String me = model.getNickname();
         playerNameLabel.setText(me);
-        playerPointsLabel.setText("Crediti: " + model.credits);
+        playerPointsLabel.setText("Credits: " + model.credits);
         playerCargoLabel.setText("Position: " + model.getMyPosition(me));
 
         // Avversari
