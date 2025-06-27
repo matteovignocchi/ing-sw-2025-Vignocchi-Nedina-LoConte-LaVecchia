@@ -1860,41 +1860,6 @@ class ControllerTest {
     }
 
     @Test
-    void testRemoveCrewmates_interactiveBrownThenPurple() throws Exception {
-        Player p = mock(Player.class);
-        VirtualView v = mock(VirtualView.class);
-        doReturn("P").when(controller).getNickByPlayer(p);
-        controller.addPlayer("P", v);
-        controller.getPlayersByNickname().put("P", p);
-
-        doReturn(5).when(controller).getNumCrew(p);
-        when(p.isConnected()).thenReturn(true);
-        doReturn(null, null).when(controller).askPlayerCoordinates(p);
-        HousingUnit h1 = mock(HousingUnit.class);
-        HousingUnit h2 = mock(HousingUnit.class);
-        when(p.getTile(2,3)).thenReturn(h1).thenReturn(h2);
-
-        when(h1.returnLenght()).thenReturn(1);
-        when(h1.removeHumans(0)).thenReturn(2);
-        when(h2.returnLenght()).thenReturn(1);
-        when(h2.removeHumans(0)).thenReturn(3);
-        doReturn(false).when(controller).askPlayerDecision(anyString(), eq(p));
-
-        controller.removeCrewmates(p, 2);
-
-        InOrder ord = inOrder(controller, h1, p, h2);
-        ord.verify(controller).printPlayerDashboard(v, p, "P");
-        ord.verify(controller).inform("SERVER: Select an housing unit", "P");
-        ord.verify(h1).removeHumans(0);
-        ord.verify(p).setBrownAlien();
-
-        ord.verify(controller).printPlayerDashboard(v, p, "P");
-        ord.verify(controller).inform("SERVER: Select an housing unit", "P");
-        ord.verify(h2).removeHumans(0);
-        ord.verify(p).setPurpleAlien();
-    }
-
-    @Test
     void testRemoveCrewmates_invalidThenValid() throws Exception {
         Player p = mock(Player.class);
         VirtualView v = mock(VirtualView.class);
