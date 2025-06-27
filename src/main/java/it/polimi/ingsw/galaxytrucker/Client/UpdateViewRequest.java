@@ -6,26 +6,22 @@ public class UpdateViewRequest implements Serializable {
     private final double firePower;
     private final int powerEngine;
     private final int credits;
-    //private final int position;
     private final boolean purpleAlien;
     private final boolean brownAlien;
     private final int numberOfHuman;
     private final int numberOfEnergy;
 
-    public UpdateViewRequest(String nickname, double firePower, int powerEngine, int credits, /*int position,*/
-                             boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
+    public UpdateViewRequest(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         this.nickname = nickname;
         this.firePower = firePower;
         this.powerEngine = powerEngine;
         this.credits = credits;
-        /*this.position = position;*/
         this.purpleAlien = purpleAlien;
         this.brownAlien = brownAlien;
         this.numberOfHuman = numberOfHuman;
         this.numberOfEnergy = numberOfEnergy;
     }
 
-    // Getters
     public String getNickname() {
         return nickname;
     }
@@ -41,12 +37,6 @@ public class UpdateViewRequest implements Serializable {
     public int getCredits() {
         return credits;
     }
-
-    /*
-    public int getPosition() {
-        return position;
-    }
-     */
 
     public boolean hasPurpleAlien() {
         return purpleAlien;
