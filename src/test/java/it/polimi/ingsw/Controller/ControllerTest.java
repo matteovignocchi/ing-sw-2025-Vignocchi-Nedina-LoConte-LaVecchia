@@ -1,12 +1,10 @@
 package it.polimi.ingsw.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sun.javafx.css.parser.Token;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Model.*;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Card;
-import it.polimi.ingsw.galaxytrucker.Model.Card.CardEffectVisitor;
 import it.polimi.ingsw.galaxytrucker.Model.Card.Deck;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard2;

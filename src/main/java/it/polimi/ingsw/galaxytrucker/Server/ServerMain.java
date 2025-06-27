@@ -1,31 +1,53 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 
-import java.rmi.RemoteException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.registry.*;
 
 public class ServerMain {
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws Exception {
+        String host = (args.length > 0 && !args[0].isBlank())
+                ? args[0]
+                : getLocalHostAddress();
 
-        //INDIRIZZO IP CORRENTE. A SECONDA LA RETE, OVVIAMENTE CAMBIA. BUONO FARE COSI PER DEBUG E PROVA INIZIALE
-        //TODO: PER PRESENTAZIONE, SOLUZIONE PIU ROBUSTA (PASSARE TRAMINE ARGS O LEGGERE FILE DI CONFIGURAZIONE)
-        System.setProperty("java.rmi.server.hostname", "192.168.1.55");
+        int rmiPort = (args.length > 1)
+                ? Integer.parseInt(args[1])
+                : 1099;
 
+        int socketPort = (args.length > 2)
+                ? Integer.parseInt(args[2])
+                : 30001;
+
+        System.setProperty("java.rmi.server.hostname", host);
         GameManager gameManager = new GameManager();
-        int socketPort = 30001;
-        Registry registry = LocateRegistry.createRegistry(1099);
+
+        Registry registry = LocateRegistry.createRegistry(rmiPort);
         registry.rebind("RmiServer", new ServerRmi(gameManager));
-        System.out.println("Server-Rmi ready on port 1099");
-
+        System.out.printf("Server RMI ready on port %d%n", rmiPort);
         ServerSocketMain socketMain = new ServerSocketMain(gameManager, socketPort);
-
         Thread socketThread = new Thread(socketMain, "Socket-Listener");
         socketThread.start();
-
+        System.out.printf("Server SOCKET ready on port %d%n", socketPort);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown in progress…");
             socketThread.interrupt();
-            try { socketThread.join();
+            try {
+                socketThread.join();
             } catch (InterruptedException ignored) {}
+            System.out.println("Server terminated.");
         }));
+    }
+
+    /**
+     * Restituisce l’indirizzo IPv4 locale non-loopback,
+     * o localhost se fallisce.
+     */
+    private static String getLocalHostAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            return "127.0.0.1";
+        }
     }
 }
 

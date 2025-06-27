@@ -26,8 +26,7 @@ public class ServerSocketMain implements Runnable {
     public void run() {
         try {
             serverSocket = new ServerSocket(port);
-            serverSocket.setSoTimeout(1_000); // 1 secondo
-            System.out.println("Server-Socket ready on port " + port);
+            serverSocket.setSoTimeout(1_000);
 
             while (!Thread.currentThread().isInterrupted()) {
                 try {
