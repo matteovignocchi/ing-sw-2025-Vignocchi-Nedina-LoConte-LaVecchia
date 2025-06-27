@@ -38,10 +38,10 @@ import java.util.function.Consumer;
  * - `fBoard`: the active flight board instance
  * Designed to operate concurrently and safely via thread-safe collections (e.g., ConcurrentHashMap),
  * and uses scheduled tasks for timeout and ping monitoring.
+ * @author Gabriele La Vecchia
  * @author Matteo Vignocchi
  * @author Oleg Nedina
  * @author Francesco Lo Conte
- * @author Gabriele La Vecchia
  */
 public class Controller implements Serializable {
     private final int gameId;
