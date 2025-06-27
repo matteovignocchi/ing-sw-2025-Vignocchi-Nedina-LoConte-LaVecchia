@@ -599,7 +599,7 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         payload.add(gameId);
         payload.add(nickname);
         payload.add(clientController.returnIdOfTile(index[0], index[1]));
-        clientController.setTileInMatrix("PIEDINIPRADELLA", index[0], index[1]);
+        clientController.setTileInMatrix("COD1234", index[0], index[1]);
         clientController.resetValidityByController(index[0], index[1]);
         clientController.printMyDashBoardByController();
         Message request = Message.request(Message.OP_GET_RESERVED_TILE, payload);
