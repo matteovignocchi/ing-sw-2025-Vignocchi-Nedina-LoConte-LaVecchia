@@ -625,30 +625,41 @@ public class Player implements Serializable {
      * If a housing unit is adjacent to an alien cabin (non-HUMAN), it also inherits
      * the alien type for connection purposes.
      */
-    public void controlOfConnection(){
-        int [] dx = {-1, 0, 1, 0};
-        int [] dy = {0, 1, 0, -1};
+    public void controlOfConnection() {
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
+        int[] opposite = {2, 3, 0, 1};
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 7; y++) {
                 Tile housing = Dash_Matrix[x][y];
-                switch (housing){
-                    case HousingUnit e->{
+                switch (housing) {
+                    case HousingUnit e -> {
+                        boolean connectedToHuman = false;
                         for (int i = 0; i < 4; i++) {
                             int nx = x + dx[i];
                             int ny = y + dy[i];
-                            if(isOutOfBounds(nx,ny)) continue;
-                            Tile nearTmp = Dash_Matrix[nx][ny];
-                            switch (nearTmp){
-                                case HousingUnit e1-> {
-                                   if(e1.getType() != Human.HUMAN ){
-                                       e.setTypeOfConnections(e1.getType());
-                                   }else {
-                                       e1.setConnected(true);
-                                       e.setConnected(true);
-                                   }
+                            if (isOutOfBounds(nx, ny)) continue;
+                            Tile neighbor = Dash_Matrix[nx][ny];
+                            switch (neighbor) {
+                                case HousingUnit e1 -> {
+                                    int a = e.controlCorners(i);
+                                    int b = e1.controlCorners(opposite[i]);
+
+                                    if (connected(a, b)) {
+                                        if (e1.getType() == Human.HUMAN) {
+                                            e.setConnected(true);
+                                            e1.setConnected(true);
+                                            connectedToHuman = true;
+                                        } else {
+                                            e.setTypeOfConnections(e1.getType());
+                                        }
+                                    }
                                 }
                                 default -> {}
                             }
+                        }
+                        if (!connectedToHuman) {
+                            e.setConnected(false);
                         }
                     }
                     default -> {}
@@ -656,7 +667,6 @@ public class Player implements Serializable {
             }
         }
     }
-
     /**
      * Checks whether two sides of adjacent tiles are connected.
      * Two sides are considered connected if:
