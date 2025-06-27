@@ -26,10 +26,7 @@ public class Controller implements Serializable {
     public transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
     private Map<String , int[] > playersPosition = new ConcurrentHashMap<>();
-
-    //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
-
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
@@ -37,7 +34,6 @@ public class Controller implements Serializable {
     private GamePhase principalGamePhase;
     private int numberOfEnter =0;
     private final int TIME_OUT = 30;
-
 
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
@@ -66,8 +62,8 @@ public class Controller implements Serializable {
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
-            decks = deckCreator.CreateSecondLevelDeck();
-//            decks = deckCreator.CreatePlagueDeck();
+//            decks = deckCreator.CreateSecondLevelDeck();
+            decks = deckCreator.CreatePlagueDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -400,6 +396,12 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Initializes the game by setting all players to BOARD_SETUP phase,
+     * updating their views with initial positions, tiles, and dashboards,
+     * then notifies each view that the game is starting.
+     * If not in demo mode, also starts the hourglass timer.
+     */
     public void startGame() {
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.BOARD_SETUP));
         Map<String,int[]> fullMap = buildPlayersPositionMap();
@@ -434,6 +436,15 @@ public class Controller implements Serializable {
         if (!isDemo) startHourglass();
     }
 
+    /**
+     * Draws a covered tile from the pile for the specified player,
+     * sets the player’s phase to TILE_MANAGEMENT, updates the view,
+     * and returns the tile as JSON.
+     *
+     * @param nickname the nickname of the player drawing the tile
+     * @return a JSON string representing the drawn tile
+     * @throws BusinessLogicException if the pile is empty or there is a problem with the serialization
+     */
     public String getCoveredTile(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -444,20 +455,26 @@ public class Controller implements Serializable {
         p.setLastTile(t);
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
-        try {
-            viewsByNickname.get(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.TILE_MANAGEMENT));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        updateGamePhase(nickname, viewsByNickname.get(nickname), GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
 
         try {
             return tileSerializer.toJson(t);
         } catch (JsonProcessingException e) {
-            throw new BusinessLogicException(e.getMessage());
+            throw new BusinessLogicException("Error serializing tile to JSON", e);
         }
     }
 
+    /**
+     * Allows a player to choose one of the currently uncovered tiles by its ID,
+     * sets their phase to TILE_MANAGEMENT, notifies their view,
+     * and returns the chosen tile as JSON.
+     *
+     * @param nickname the nickname of the player choosing the tile
+     * @param idTile   the unique ID of the tile to choose
+     * @return a JSON string representing the chosen tile
+     * @throws BusinessLogicException if no tiles are available or the tile ID is invalid
+     */
     public String chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
@@ -470,41 +487,67 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
         notifyView(nickname);
+
         try {
             return tileSerializer.toJson(t);
         } catch (JsonProcessingException e) {
-            throw new BusinessLogicException(e.getMessage());
+            throw new BusinessLogicException("Error serializing tile to JSON", e);
         }
     }
 
+    /**
+     * Drops the given tile back onto the uncovered pile for the player,
+     * resets their phase to BOARD_SETUP, updates their view,
+     * and notifies the view of the change.
+     *
+     * @param nickname the nickname of the player dropping the tile
+     * @param tile     a JSON string representing the tile to drop
+     * @throws BusinessLogicException if the tile JSON is invalid
+     */
     public void dropTile (String nickname, String tile) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
         try {
             addToShownTile(tileSerializer.fromJson(tile));
         } catch (JsonProcessingException e) {
-            throw new BusinessLogicException(e.getMessage());
+            throw new BusinessLogicException("Error serializing tile to JSON", e);
         }
+
         p.setGamePhase(GamePhase.BOARD_SETUP);
-        try {
-            viewsByNickname.get(nickname).updateGameState(enumSerializer.serializeGamePhase(GamePhase.BOARD_SETUP));
-        } catch (Exception e) {
-            System.err.println("dropTile: " + e.getMessage());
-        }
+        updateGamePhase(nickname, viewsByNickname.get(nickname), GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
 
+    /**
+     * Places the specified tile on the player's dashboard at the given coordinates,
+     * resets the player’s phase to BOARD_SETUP, and notifies their view.
+     *
+     * @param nickname the nickname of the player placing the tile
+     * @param tile     a JSON string representing the tile to place
+     * @param cord     an array [x, y] indicating where to place the tile
+     * @throws BusinessLogicException if the tile JSON is invalid or placement fails
+     */
     public void placeTile(String nickname, String tile, int[] cord) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
         try {
             p.addTile(cord[0], cord[1], tileSerializer.fromJson(tile));
         } catch (JsonProcessingException e) {
-            throw new BusinessLogicException(e.getMessage());
+            throw new BusinessLogicException("Error serializing tile to JSON", e);
         }
         p.setGamePhase(GamePhase.BOARD_SETUP);
         notifyView(nickname);
     }
 
+    /**
+     * Retrieves a tile from the player's reserved discard pile by its ID,
+     * resets its validity, sets the player phase to TILE_MANAGEMENT_AFTER_RESERVED,
+     * notifies their view, and returns the tile as JSON.
+     *
+     * @param nickname the nickname of the player retrieving the reserved tile
+     * @param id       the unique ID of the reserved tile
+     * @return a JSON string representing the reserved tile
+     * @throws BusinessLogicException if the tile is not found in the discard pile
+     */
     public String getReservedTile(String nickname , int id) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -519,13 +562,22 @@ public class Controller implements Serializable {
                 try {
                     return tileSerializer.toJson(t);
                 } catch (JsonProcessingException e) {
-                    throw new BusinessLogicException(e.getMessage());
+                    throw new BusinessLogicException("Error serializing tile to JSON", e);
                 }
             }
         }
         throw new BusinessLogicException("Tile not found");
     }
 
+    /**
+     * Marks the player as ready to fly; updates their phase to WAITING_FOR_PLAYERS,
+     * refreshes their dashboard, rebuilds player positions, and if all players are ready,
+     * starts the flight phase.
+     *
+     * @param nickname the nickname of the player setting ready
+     * @throws BusinessLogicException if the player state is invalid
+     * @throws RemoteException        if notifying the view fails
+     */
     public void setReady(String nickname) throws BusinessLogicException, RemoteException {
         Player p = getPlayerCheck(nickname);
 
@@ -550,28 +602,13 @@ public class Controller implements Serializable {
             mergeDecks();
         }
 
-        //metto in lista gli eventuali players disconnesi che non hanno chiamato il metodo setReady
         List<Player> playersInFlight = fBoard.getOrderedPlayers();
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
-        //aggiorno la mappa di oleg
-        for(Map.Entry<String, Player> entry : playersByNickname.entrySet()) {
-            Player p = entry.getValue();
-            String nickname = entry.getKey();
-            playersPosition = buildPlayersPositionMap();
-        }
-
+        playersPosition = buildPlayersPositionMap();
         broadcastInform("SERVER: " + "Flight started!");
 
-        //TODO: queste stampe da eliminare per debug
-        /**/for(Player p: playersByNickname.values()) System.out.println("1 VOLTA: Player "+getNickByPlayer(p)+" num di discard tiles: "+
-                p.checkDiscardPile());
-
         for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
-
-        /**/for(Player p: playersByNickname.values()) System.out.println("2 VOLTA: Player "+getNickByPlayer(p)+" num di discard tiles: "+
-                p.checkDiscardPile());
-
         addHuman();
 
         playersByNickname.forEach( (s, p) -> p.setGamePhase(GamePhase.WAITING_FOR_TURN));
@@ -579,6 +616,12 @@ public class Controller implements Serializable {
         activateDrawPhase();
     }
 
+    /**
+     * Selects the next leader among connected players to draw a card,
+     * notifies that player to draw, and sets all others to WAITING_FOR_TURN.
+     *
+     * @throws BusinessLogicException if no players are currently connected
+     */
     public void activateDrawPhase() throws BusinessLogicException {
         List<Player> candidates = fBoard.getOrderedPlayers().stream()
                 .filter(Player::isConnected)
@@ -614,12 +657,23 @@ public class Controller implements Serializable {
         }
     }
 
+
+    /**
+     * Starts the hourglass timer and broadcasts a start message to all players.
+     */
     public void startHourglass(){
         hourglass.flip();
         broadcastInform("SERVER: " + "Hourglass started!");
     }
 
-    public void flipHourglass (String nickname) throws RemoteException, BusinessLogicException {
+    /**
+     * Attempts to flip the hourglass for the given player, enforcing flip limits
+     * and game-phase requirements, and broadcasts appropriate messages or errors.
+     *
+     * @param nickname the nickname of the player requesting the flip
+     * @throws BusinessLogicException if the flip is not allowed by game rules
+     */
+    public void flipHourglass (String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
         int flips = hourglass.getFlips();
         HourglassState state = hourglass.getState();
@@ -651,6 +705,13 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Called when the hourglass state expires. Broadcasts messages
+     * based on the number of flips and starts the flight phase on the third expiration.
+     *
+     * @param h the Hourglass instance whose state changed
+     * @throws BusinessLogicException if an error occurs while starting the flight
+     */
     public void onHourglassStateChange(Hourglass h) throws BusinessLogicException {
         int flips = h.getFlips();
 
@@ -1763,6 +1824,8 @@ public class Controller implements Serializable {
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
+            p.setGamePhase(GamePhase.CARD_EFFECT);
+            updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
@@ -1894,12 +1957,11 @@ public class Controller implements Serializable {
         }
     }
 
-    public void startPlauge(Player p) throws BusinessLogicException {
+    public void startPlague(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
 
         inform("SERVER: Starting plague", nick);
-        int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);

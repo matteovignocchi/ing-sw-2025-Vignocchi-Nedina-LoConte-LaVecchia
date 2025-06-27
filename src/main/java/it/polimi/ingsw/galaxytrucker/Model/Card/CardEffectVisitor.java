@@ -4,12 +4,23 @@ import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.FlightCardBoard.FlightCardBoard;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Implements the CardVisitor interface to apply the effects of adventure cards
+ * during the flight phase of the game.
+ * This visitor uses the game Controller and FlightCardBoard to execute
+ * card-specific logic—such as drawing rewards, applying penalties,
+ * updating player state, and advancing game phases.
+ * It also holds a reference to the list of players involved in the current flight.
+ *
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @see CardVisitor
+ */
 public class CardEffectVisitor implements CardVisitor, Serializable {
     private final Controller controller;
     private final FlightCardBoard f;
@@ -38,12 +49,12 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     }
 
     /**
-     * Applies the “Open Space” card effect: for each player in turn order,
-     * moves their rocket forward by an amount equal to their engine power.
+     * Applies the “Open Space” card effect: for each player in turn order, moves their rocket forward by an amount
+     * equal to their engine power. If a player has an engine power equals to 0, he is eliminated.
      *
      * @param card the OpenSpaceCard to apply
      * @throws InvalidCardException if card is null
-     * @throws CardEffectException  in case of any error during effect execution
+     * @throws BusinessLogicException  in case of any error during effect execution
      */
 
     @Override
@@ -79,7 +90,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card the StardustCard to apply
      * @throws InvalidCardException if card is null
-     * @throws CardEffectException  in case of any error during effect execution
+     * @throws BusinessLogicException in case of any error during effect execution
      */
 
     @Override
@@ -112,7 +123,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card the SlaversCard to apply
      * @throws InvalidCardException if card is null
-     * @throws CardEffectException  in case of any error during effect execution
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -176,6 +187,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card card
      * @throws CardEffectException if card is null
+     * @throws BusinessLogicException in case of any logic error during effect execution
      */
 
     @Override
@@ -208,19 +220,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 "He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_crew));
 
-        /**
-        f.setOverlappedPlayersEliminated();
-        List<Player> eliminated = f.eliminatePlayers();
-        for (Player player : eliminated) controller.handleElimination(player);
-        f.orderPlayersInFlightList();
-        players = f.getOrderedPlayers();
-
-        if (players.size() == 1) {
-            String nick = controller.getNickByPlayer(players.getFirst());
-            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
-            return;
-        }
-         */
 
         int idx_enginepower = 0;
         int numCrew = card.getNumCrewmates();
@@ -281,7 +280,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      * chosen.
      *
      * @param card card
-     * @throws CardEffectException if card is null
+     * @throws InvalidCardException if card is null
+     * @throws BusinessLogicException in case of any logic error during effect execution
      */
 
     @Override
@@ -315,20 +315,6 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power!" +
                 " He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_firepower));
-
-        /**
-        f.setOverlappedPlayersEliminated();
-        List<Player> eliminated = f.eliminatePlayers();
-        for (Player player : eliminated) controller.handleElimination(player);
-        f.orderPlayersInFlightList();
-        players = f.getOrderedPlayers();
-
-        if (players.size() == 1) {
-            String nick = controller.getNickByPlayer(players.getFirst());
-            controller.inform("SERVER: You are flying alone. Ignored continuation of Warzone card effect", nick);
-            return;
-        }
-         */
 
 
         int idx_engine = 0;
@@ -384,14 +370,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      * Applies the “Smugglers” card effect:
      * In order from the leader, for each player:
      * - If a player has less firepower than the Smuggler's value, he loses the specified number of goods
-     * - If a player has the sam firepower as Smuggler's value, nothing happens
+     * - If a player has the same firepower as Smuggler's value, nothing happens
      * - If a player has higher firepower than the Smuggler's value, he can decide whether to get the specified goods as
      * reward and lose the specified flight days or not.
      * In any case, Smugglers are defeated and don't attack any other player
      *
      * @param card the SmugglersCard to apply
      * @throws InvalidCardException if card is null
-     * @throws CardEffectException  in case of any error during effect execution
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -446,7 +432,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -490,7 +476,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -536,7 +522,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -572,7 +558,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -642,7 +628,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
@@ -684,17 +670,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
     /**
      * Applies the "Plague" card effect:
-     * For each player, a method is called that checks the amount of exposed connectors.
+     * For each player, for each couple of housing units directly connected, a crewmate is removed from both of them
      *
      * @param card: card object on which the method is activated.
      * @throws InvalidCardException if card is null.
-     * @throws CardEffectException  in case of any error during effect execution.
+     * @throws BusinessLogicException  in case of any logic error during effect execution
      */
 
     @Override
     public void visit(PlagueCard card) throws BusinessLogicException {
         for (Player p : players) {
-            controller.startPlauge(p);
+            controller.startPlague(p);
         }
     }
 

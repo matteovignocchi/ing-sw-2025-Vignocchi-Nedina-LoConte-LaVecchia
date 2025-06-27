@@ -2,7 +2,9 @@ package it.polimi.ingsw.galaxytrucker.Exception;
 
 import java.io.Serializable;
 
-//TODO: mettere tale classe in un jar condiviso, in modo che anche il client la può chiamare
+/**
+ * Checked Exception thrown for logic game exceptions
+ */
 public class BusinessLogicException extends Exception implements Serializable {
     public BusinessLogicException(String message) {
         super(message);

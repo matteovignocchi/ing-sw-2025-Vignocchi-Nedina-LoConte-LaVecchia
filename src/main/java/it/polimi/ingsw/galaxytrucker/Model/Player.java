@@ -629,11 +629,14 @@ public class Player implements Serializable {
         int[] dx = {-1, 0, 1, 0};
         int[] dy = {0, 1, 0, -1};
         int[] opposite = {2, 3, 0, 1};
+
         for (int x = 0; x < 5; x++) {
             for (int y = 0; y < 7; y++) {
                 Tile housing = Dash_Matrix[x][y];
+
                 switch (housing) {
                     case HousingUnit e -> {
+                        if(e.getType() != Human.HUMAN) continue;
                         boolean connectedToHuman = false;
                         for (int i = 0; i < 4; i++) {
                             int nx = x + dx[i];

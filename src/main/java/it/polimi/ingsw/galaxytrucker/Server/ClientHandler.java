@@ -201,8 +201,8 @@ public class ClientHandler extends VirtualViewAdapter implements Runnable {
     private Object handleGetUncoveredList(Object p) throws BusinessLogicException {
         List<Object> payload = (List<Object>) p;
         int gameId = (Integer) payload.get(0);
-        String nickname = (String) payload.get(1);
-        return gameManager.getUncoveredTilesList(gameId, nickname);
+        String nickname = (String) payload.get(1); //con il fatto che ho rimosso il nick dal metodo del gamemanager perchè non usato, qui mi da senza uso. si dovrebbe poter levare
+        return gameManager.getUncoveredTilesList(gameId);
 
     }
 

@@ -58,12 +58,8 @@ public class FirstWarzoneCard implements Card, Serializable {
      */
 
     @Override
-    public void accept(CardVisitor visitor) throws CardEffectException {
-        try {
-            visitor.visit(this);
-        } catch (BusinessLogicException e) {
-            throw new RuntimeException(e);
-        }
+    public void accept(CardVisitor visitor) throws BusinessLogicException {
+        visitor.visit(this);
     }
 
     /**

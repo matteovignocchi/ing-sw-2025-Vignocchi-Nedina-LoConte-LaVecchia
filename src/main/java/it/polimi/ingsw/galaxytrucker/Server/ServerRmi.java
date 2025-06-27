@@ -1,30 +1,43 @@
 package it.polimi.ingsw.galaxytrucker.Server;
 import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
 import it.polimi.ingsw.galaxytrucker.Client.VirtualView;
-
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Map;
 
+/**
+ * RMI server implementation of the VirtualServer interface.
+ * Delegates game operations to a GameManager instance and exposes them over RMI,
+ * centralizing exception handling and input validation.
+ *
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ */
 public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     private final GameManager gameManager;
 
+    /**
+     * Constructs a ServerRmi with the given GameManager.
+     *
+     * @param gameManager the GameManager to which calls will be forwarded
+     * @throws RemoteException if stub export fails
+     */
     public ServerRmi(GameManager gameManager) throws RemoteException {
         super();
         this.gameManager = gameManager;
     }
 
     /**
-     * Metodo helper per centralizzare la gestione delle chiamate al GameManager e delle eccezioni.
+     * Helper that invokes a GameManager method and translates exceptions
+     * into RemoteException or BusinessLogicException with contextual messages.
      *
-     * @param methodName Il nome del metodo del GameManager che viene chiamato. Usato per creare
-     * messaggi di errore più informativi.
-     * @param call Un'interfaccia funzionale (GameManagerCall) che incapsula la chiamata al metodo del GameManager.
-     * @param <T> Il tipo di ritorno del metodo del GameManager.
-     * @return Il risultato della chiamata al metodo del GameManager.
-     * @throws RemoteException Se si verifica un errore di comunicazione RMI (es. problemi di rete).
-     * @throws BusinessLogicException Se il GameManager lancia un'eccezione a causa di un errore nella logica di gioco.
+     * @param methodName the name of the GameManager method being called
+     * @param call       the functional interface encapsulating the GameManager call
+     * @param <T>        the return type of the GameManager method
+     * @return the result of the GameManager call
+     * @throws RemoteException         if a network or I/O error occurs
+     * @throws BusinessLogicException  if the GameManager signals a game logic error
      */
     private <T> T handleGameManagerCall(String methodName, GameManagerCall<T> call) throws RemoteException, BusinessLogicException {
         try {
@@ -39,15 +52,32 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
     }
 
     /**
-     * Interfaccia funzionale per rappresentare una chiamata a un metodo del GameManager.  Permette
-     * di passare il codice da eseguire al metodo handleGameManagerCall.
+     * Functional interface for wrapping a call to a GameManager method.
      *
-     * @param <T> Il tipo di ritorno del metodo del GameManager.
+     * @param <T> the return type of the wrapped call
      */
     private interface GameManagerCall<T> {
+        /**
+         * Executes the encapsulated GameManager call.
+         *
+         * @return the result of the call
+         * @throws Exception if any error occurs during execution
+         */
         T execute() throws Exception;
     }
 
+    /**
+     * Creates a new game session and returns its ID.
+     * Validates inputs before delegating to GameManager.createGame.
+     *
+     * @param isDemo     true to run in demo mode, false otherwise
+     * @param v          the VirtualView for the creating player
+     * @param nickname   the nickname of the creating player
+     * @param maxPlayers the maximum number of players (2–4)
+     * @return the newly created game ID
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if a game logic error occurs during creation
+     */
     @Override
     public int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException {
         if (v == null) { throw new RemoteException("VirtualView cannot be null"); }
@@ -57,6 +87,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         return handleGameManagerCall("createNewGame", () -> gameManager.createGame(isDemo, v, nickname, maxPlayers));
     }
 
+    /**
+     * Adds a player to an existing game.
+     *
+     * @param gameId   the ID of the game to join
+     * @param v        the VirtualView for the joining player
+     * @param nickname the nickname of the joining player
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if a game logic error prevents joining
+     */
     @Override
     public void enterGame(int gameId, VirtualView v, String nickname) throws RemoteException, BusinessLogicException {
         if (v == null) { throw new RemoteException("VirtualView cannot be null"); }
@@ -68,6 +107,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+
+    /**
+     * Removes a player from a game and ends the session.
+     *
+     * @param gameId   the ID of the game to leave
+     * @param nickname the nickname of the leaving player
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if a game logic error occurs during quit
+     */
     @Override
     public void LeaveGame(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
@@ -78,6 +126,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    /**
+     * Retrieves the covered tile for the specified player.
+     *
+     * @param gameId   the ID of the game
+     * @param nickname the nickname of the player
+     * @return a JSON string representing the covered tile
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if a game logic error occurs
+     */
     @Override
     public String getCoveredTile(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty");}
@@ -85,13 +142,33 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         return handleGameManagerCall("getCoveredTile", () -> gameManager.getCoveredTile(gameId, nickname));
     }
 
+    /**
+     * Retrieves the list of uncovered tiles available for the player to choose from.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @return a JSON string containing the list of uncovered tiles
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the uncovered tiles list is empty or game state is invalid
+     */
     @Override
     public String getUncoveredTilesList(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
 
-        return handleGameManagerCall("getUncoveredTilesList", () -> gameManager.getUncoveredTilesList(gameId, nickname));
+        return handleGameManagerCall("getUncoveredTilesList", () -> gameManager.getUncoveredTilesList(gameId));
     }
 
+
+    /**
+     * Allows a player to choose one of the uncovered tiles by its ID.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @param idTile   the index of the uncovered tile to choose
+     * @return a JSON string representing the chosen tile
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the tile ID is invalid or game state is invalid
+     */
     @Override
     public String chooseUncoveredTile(int gameId, String nickname, int idTile) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
@@ -100,6 +177,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         return handleGameManagerCall("chooseUncoveredTile", () -> gameManager.chooseUncoveredTile(gameId, nickname, idTile));
     }
 
+    /**
+     * Drops a specified tile from the player's ship.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @param tile     the JSON string representing the tile to drop
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the tile cannot be dropped due to game rules
+     */
     @Override
     public void dropTile(int gameId, String nickname, String tile) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
@@ -111,6 +197,16 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    /**
+     * Places a specified tile on the player's ship at given coordinates.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @param tile     the JSON string representing the tile to place
+     * @param cord     the [x, y] coordinates on the ship grid where the tile should be placed
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the tile cannot be placed due to game rules or invalid coordinates
+     */
     @Override
     public void placeTile(int gameId, String nickname, String tile, int[] cord) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
@@ -123,6 +219,14 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    /**
+     * Marks a player as ready to proceed to the flight phase.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the player cannot be marked ready due to game state
+     */
     @Override
     public void setReady(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) { throw new RemoteException("Nickname cannot be null or empty"); }
@@ -133,6 +237,14 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    /**
+     * Flips the hourglass timer for a player.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the timer cannot be flipped due to game state
+     */
     @Override
     public void rotateGlass(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
@@ -143,17 +255,43 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
-    //valori possibili per showDeck: 0,1,2,
+
+    /**
+     * Returns the JSON representation of a specific card deck.
+     *
+     * @param gameId   the identifier of the game
+     * @param idxDeck  the index of the deck to show (e.g., 0, 1, 2)
+     * @return a JSON string representing the cards in the requested deck
+     * @throws RemoteException        if an RMI error occurs
+     * @throws BusinessLogicException if the deck index is invalid
+     */
     @Override
     public String showDeck(int gameId, int idxDeck) throws RemoteException, BusinessLogicException {
         return handleGameManagerCall("showDeck", () -> gameManager.showDeck(gameId, idxDeck));
     }
 
+    /**
+     * Retrieves a map of games currently waiting for more players.
+     *
+     * @return a map from game ID to a three-element array:
+     *         [connected players, max players, demo flag (1 for demo, 0 otherwise)]
+     * @throws RemoteException        if an RMI error occurs
+     * @throws BusinessLogicException never thrown in this implementation
+     */
     @Override
     public Map<Integer,int[]> requestGamesList() throws RemoteException, BusinessLogicException {
         return handleGameManagerCall("requestGamesList", gameManager::listActiveGames);
     }
 
+    /**
+     * Returns the dashboard matrix for a given player.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @return a 2D array representing the player's dashboard
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the game or player is invalid
+     */
     @Override
     public String[][] lookAtDashBoard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
@@ -161,6 +299,14 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         return handleGameManagerCall("lookDashBoard", () -> gameManager.lookAtDashBoard(nickname, gameId));
     }
 
+    /**
+     * Draws a card for the specified player.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the player cannot draw a card due to game state
+     */
     @Override
     public void drawCard(int gameId, String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
@@ -168,6 +314,13 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         handleGameManagerCall("drawCard", () -> { gameManager.drawCard(gameId, nickname); return null; });
     }
 
+    /**
+     * Logs out a player from the server.
+     *
+     * @param nickname the nickname of the player to log out
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException never thrown in this implementation
+     */
     @Override
     public void logOut(String nickname) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
@@ -178,6 +331,15 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         });
     }
 
+    /**
+     * Attempts to log in a player and returns their game ID if reconnecting.
+     *
+     * @param nickname the nickname of the player logging in
+     * @param v        the VirtualView associated with the player
+     * @return the existing game ID if reconnecting, or 0 for a new session
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the nickname is already in use
+     */
     @Override
     public int logIn(String nickname, VirtualView v) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");
@@ -185,6 +347,17 @@ public class ServerRmi extends UnicastRemoteObject implements VirtualServer {
         return handleGameManagerCall("login", () -> gameManager.login(nickname, v));
     }
 
+
+    /**
+     * Retrieves a reserved tile for a player by its index.
+     *
+     * @param gameId   the identifier of the game
+     * @param nickname the nickname of the player
+     * @param id       the index of the reserved tile to retrieve
+     * @return a JSON string representing the reserved tile
+     * @throws RemoteException        if validation fails or an RMI error occurs
+     * @throws BusinessLogicException if the reserved tile index is invalid
+     */
     @Override
     public String getReservedTile(int gameId, String nickname , int id) throws RemoteException, BusinessLogicException {
         if (nickname == null || nickname.trim().isEmpty()) throw new RemoteException("Nickname cannot be null or empty");

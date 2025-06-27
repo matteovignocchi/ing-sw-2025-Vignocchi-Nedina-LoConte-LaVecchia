@@ -1,5 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.Model.Card;
 
+import it.polimi.ingsw.galaxytrucker.Model.Colour;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -71,7 +73,6 @@ public class DeckManager implements Serializable {
     }
 
 
-    /**
     public List<Deck> CreateOpenSpaceDecks() throws CardEffectException {
         Card c1 = new OpenSpaceCard("1");
         Card c2 = new OpenSpaceCard("2");
@@ -168,9 +169,9 @@ public class DeckManager implements Serializable {
     }
 
     public List<Deck> CreatePlagueDeck() throws CardEffectException {
-        Card c1 = new PlaugeCard("1");
-        Card c2 = new PlaugeCard("2");
-        Card c3 = new PlaugeCard("3");
+        Card c1 = new PlagueCard("1");
+        Card c2 = new PlagueCard("2");
+        Card c3 = new PlagueCard("3");
         Deck deck1 = new Deck();
         Deck deck2 = new Deck();
         Deck deck3 = new Deck();
@@ -371,5 +372,4 @@ public class DeckManager implements Serializable {
         deck1.add(c2);
         return deck1;
     }
-     */
 }

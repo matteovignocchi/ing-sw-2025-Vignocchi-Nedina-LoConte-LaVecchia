@@ -8,6 +8,13 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Map;
 
+
+/**
+ * Remote interface defining all accessible game operations.
+ * Allows clients to create, join, leave games and perform in-game actions.
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ */
 public interface VirtualServer extends Remote {
 
     int createNewGame(boolean isDemo, VirtualView v, String nickname, int maxPlayers) throws RemoteException, BusinessLogicException;
