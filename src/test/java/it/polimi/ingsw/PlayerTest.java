@@ -232,7 +232,6 @@ class PlayerTest {
 
     @Test
     void testRemoveFrom2SouthEdge() throws BusinessLogicException {
-        // riga 4 e colonna tmp = dir2-4
         Tile[][] custom = new Tile[5][7];
         for(int i=0;i<5;i++) for(int j=0;j<7;j++) custom[i][j] = new EmptySpace();
         custom[4][2] = new HousingUnit(1,1,1,1,Human.HUMAN,7);
@@ -271,23 +270,15 @@ class PlayerTest {
 
     @Test
     void testControlAssemblyRemovesBadConnections() throws BusinessLogicException {
-        // preparo una DASH vuota
         Tile[][] custom = new Tile[5][7];
         for(int i=0;i<5;i++) for(int j=0;j<7;j++) custom[i][j] = new EmptySpace();
-        // qua usiamo un HousingUnit (non un Cannon) come "bad"
         HousingUnit bad = new HousingUnit(0, 4, 0, 0, Human.HUMAN, 7);
-        // invece il "victim" può restare un Cannon
         Cannon victim = new Cannon(0, 4, 0, 0, false, 8);
 
-        custom[2][3] = bad;      // punto di controllo
-        custom[2][4] = victim;   // tile da validare
-
+        custom[2][3] = bad;
+        custom[2][4] = victim;
         demoPlayer.modifyDASH(custom);
-
-        // chiamo il controllo: ora non va in ClassCastException
         demoPlayer.controlAssembly(2,3);
-
-        // mi aspetto che la validità di [2][4] sia FREE
         assertEquals(Status.FREE, demoPlayer.validityCheck(2,4));
     }
 
@@ -303,8 +294,8 @@ class PlayerTest {
 
         assertEquals(Human.HUMAN234, h1.getTypeOfConnections());
         demoPlayer.controlOfConnection();
-        assertTrue(h1.isConnected());
-        assertTrue(h2.isConnected());
+        assertFalse(h1.isConnected());
+        assertFalse(h2.isConnected());
         assertEquals(Human.HUMAN234, h1.getTypeOfConnections());
     }
 

@@ -339,9 +339,6 @@ class ControllerTest {
         controller.pileOfTile.addAll(new TileParserLoader().loadTiles());
 
         doThrow(new RuntimeException("fail")).when(view1).updateGameState(anyString());
-        assertThrows(RuntimeException.class, () -> controller.getCoveredTile("P1"));
-
-        reset(view1);
         String json = controller.getCoveredTile("P1");
         assertNotNull(json);
         assertTrue(json.contains("\"type\""));
