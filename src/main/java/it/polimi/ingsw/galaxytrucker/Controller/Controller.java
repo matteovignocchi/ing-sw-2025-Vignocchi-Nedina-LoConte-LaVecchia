@@ -1763,8 +1763,6 @@ public class Controller implements Serializable {
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
-            p.setGamePhase(GamePhase.CARD_EFFECT);
-            updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);

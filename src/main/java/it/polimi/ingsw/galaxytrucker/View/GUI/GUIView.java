@@ -498,7 +498,7 @@ public class GUIView extends Application implements View {
         long now = System.currentTimeMillis();
         if (now - lastAskIndexTimestamp < 300) {
             System.out.println("[DEBUG] askIndexWithTimeout ignorato (chiamata duplicata)");
-            return -1;
+            return null;
         }
 
         lastAskIndexTimestamp = now;
@@ -552,7 +552,7 @@ public class GUIView extends Application implements View {
 
         if (bufferedIndex == null) {
             reportError("Timeout su askIndex.");
-            return 0;
+            return null;
         }
 
         int res = bufferedIndex;
@@ -620,13 +620,13 @@ public class GUIView extends Application implements View {
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
                 reportError("Timeout su askCoordinate.");
-                return new int[]{-1, -1};
+                return null;
             }
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return new int[]{-1, -1};
+                return null;
             }
         }
 
