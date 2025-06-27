@@ -303,9 +303,6 @@ public class BuildingPhaseController extends GUIController {
             tileImage.setRotate(tile.getRotation());
             graphicGridPane.add(tileImage, col, row);
         });
-        System.out.printf("Tile at [%d,%d] → id=%d, rawRotation=%d, effectiveDegrees=%d%n",
-                row, col, tile.id, tile.rotation, tile.getRotation());
-
     }
 
     public void clearCurrentTile() {

@@ -1763,6 +1763,9 @@ public class Controller implements Serializable {
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
+            p.setGamePhase(GamePhase.CARD_EFFECT);
+            updateGamePhase(tmpNick, x, GamePhase.CARD_EFFECT);
+            printPlayerDashboard(x,p ,tmpNick);
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 7; j++) {
                     Tile t = p.getTile(i, j);
@@ -1774,7 +1777,6 @@ public class Controller implements Serializable {
                                     case HUMAN234 -> {
                                         Human tmp2 = Human.HUMAN;
                                         for (int z = 0; z < 2; z++) {
-                                            System.out.println("[DEBUG] AGGIUNGO a (" + i + "," + j + ") = " + h.getListOfToken());
                                             h.addHuman(tmp2);}
                                     }
                                     case PURPLE_ALIEN -> {
