@@ -5,9 +5,7 @@ import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.SequentialTransition;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -49,7 +47,6 @@ public class GUIView extends Application implements View {
     private GUIModel model;
     private final BlockingQueue<String> menuChoiceQueue = new LinkedBlockingQueue<>();
     private final BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
-    private final Queue<String> notificationQueue = new LinkedList<>();
     private boolean isShowingNotification = false;
     private int[] bufferedCoordinate = null;
     private Integer bufferedIndex = null;
@@ -57,6 +54,12 @@ public class GUIView extends Application implements View {
     private String bufferedPlayerName = null;
     private volatile Boolean bufferedBoolean;
     private boolean showGoodActionPrompt = false;
+    private final Queue<String> notificationQueue = new LinkedList<>();
+    private final List<StackPane> activeNotifications = new ArrayList<>();
+    private boolean isNotificationPlaying = false;
+    private static final int MAX_VISIBLE = 5;
+    private StackPane currentToast = null;
+    private StackPane previousToast = null;
     private List<String> bufferedGoods = List.of();
     private volatile long lastAskCoordinateTimestamp = 0;
     private volatile long lastAskIndexTimestamp = 0;
@@ -111,14 +114,22 @@ public class GUIView extends Application implements View {
 
     @Override
     public void inform(String message) {
-        if (message != null && message.startsWith("SERVER:")) {
-            message.substring(7).trim();
+        String subString = "";
+        if (message != null && message.trim().startsWith("SERVER:")) {
+            subString = message.trim().substring(7).trim();
         }
-        if (filterDisplayNotification(message, sceneEnum)) {
-            synchronized (notificationQueue) {
-                notificationQueue.offer(message);
-            }
-            showNextNotificationIfIdle();
+        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select")) {
+            Platform.runLater(() -> {
+                GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
+                if (ctrl != null) {
+                    ctrl.messageSet(message);
+                } else {
+                    reportError("GameController not initialized");
+                }
+            });
+        }
+        if (filterDisplayNotification(subString, sceneEnum)) {
+            showNotification(message);
         }
     }
 
@@ -203,26 +214,21 @@ public class GUIView extends Application implements View {
                 reportError("GameController non disponibile.");
             }
         });
-        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
-        while (bufferedCoordinate == null) {
-            if (System.currentTimeMillis() > deadline) {
-                reportError("Timeout su askCoordinate.");
-                return new int[]{-1, -1};
-            }
 
+        while (bufferedCoordinate == null) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return new int[]{-1, -1};
+                return new int[]{2,3};
             }
         }
 
         int[] result = bufferedCoordinate;
         bufferedCoordinate = null;
-        System.out.println("[DEBUG] Coordinate lette: " + Arrays.toString(result));
         return result;
     }
+
 
 
     public void setBufferedCoordinate(int[] coordinate) {
@@ -506,7 +512,7 @@ public class GUIView extends Application implements View {
         }
 
         lastAskIndexTimestamp = now;
-        long deadline = now + 20_000;
+        long deadline = now + 200_000;
 
         long waitStart = System.currentTimeMillis();
         while (!showGoodActionPrompt && System.currentTimeMillis() - waitStart < 300) {
@@ -570,7 +576,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public boolean askWithTimeout(String message) {
-        long timeout = 20_000; // 20 secondi
+        long timeout = 200_000; // 20 secondi
         long deadline = System.currentTimeMillis() + timeout;
         if (message != null && message.startsWith("SERVER:")) {
             message = message.substring("SERVER:".length()).strip(); // rimuove e pulisce spazi
@@ -620,7 +626,7 @@ public class GUIView extends Application implements View {
             }
         });
 
-        long deadline = System.currentTimeMillis() + 20_000; // 20 secondi
+        long deadline = System.currentTimeMillis() + 200_000; // 20 secondi
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
                 reportError("Timeout su askCoordinate.");
@@ -637,13 +643,6 @@ public class GUIView extends Application implements View {
         int[] result = bufferedCoordinate;
         bufferedCoordinate = null;
 
-        // Se entro 500ms askCoordinate non è richiamato di nuovo, consideriamo confermato
-//        try {
-//            Thread.sleep(500);
-//        } catch (InterruptedException ignored) {}
-//        if (System.currentTimeMillis() - lastAskCoordinateTimestamp > 400) {
-//            System.out.println("[DEBUG] Coordinate confermate: " + Arrays.toString(result));
-//        }
 
         return result;
     }
@@ -901,80 +900,131 @@ public class GUIView extends Application implements View {
         }
     }
 
-    private void showNextNotificationIfIdle() {
-        if (isShowingNotification) return;
 
-        String nextMessage;
+
+
+
+
+    /**
+     * Aggiunge una notifica alla coda da visualizzare a schermo con animazione.
+     * @param message il testo da mostrare
+     */
+    public void showNotification(String message) {
         synchronized (notificationQueue) {
-            nextMessage = notificationQueue.poll();
+            notificationQueue.offer(message);
         }
-
-        if (nextMessage != null) {
-            isShowingNotification = true;
-            showNotification(nextMessage);
-        }
+        playNextNotification();
     }
 
 
-    public void showNotification(String message) {
+    /**
+     * Mostra la prossima notifica dalla coda, se non è in corso un’animazione.
+     */
+    private void playNextNotification() {
+        if (isNotificationPlaying) return;
+
+        String message;
+        synchronized (notificationQueue) {
+            message = notificationQueue.poll();
+        }
+
+        if (message == null) return;
+
+        isNotificationPlaying = true;
+
         Platform.runLater(() -> {
             Scene scene = sceneRouter.getCurrentScene();
             if (scene == null || scene.getRoot() == null) {
+                isNotificationPlaying = false;
                 return;
             }
 
-            Parent root = scene.getRoot();
-
+            Pane pane;
             try {
-                Pane pane = (Pane) root;
-
-                Label label = new Label(message);
-                label.setStyle("""
-                -fx-font-family: "Impact";
-                -fx-font-size: 19px;
-                -fx-text-fill: #000000;
-                -fx-background-color: rgba(255, 223, 0, 0.85); 
-                -fx-padding: 10px 18px;
-                -fx-background-radius: 0; 
-                -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
-            """);
-                label.setWrapText(true);
-                label.setMaxWidth(400);
-
-                StackPane toast = new StackPane(label);
-                toast.setMouseTransparent(true);
-                toast.setOpacity(0);
-
-                pane.getChildren().add(toast);
-
-                double xOffset = scene.getWidth() - 300;
-                double yOffset = scene.getHeight() - 100;
-
-                toast.setTranslateX(xOffset);
-                toast.setTranslateY(yOffset);
-
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(100), toast);
-                fadeIn.setFromValue(0);
-                fadeIn.setToValue(1);
-
-                PauseTransition pause = new PauseTransition(Duration.seconds(3));
-
-                FadeTransition fadeOut = new FadeTransition(Duration.millis(100), toast);
-                fadeOut.setFromValue(1);
-                fadeOut.setToValue(0);
-                fadeOut.setOnFinished(e -> {
-                    pane.getChildren().remove(toast);
-                    isShowingNotification = false;
-                    showNextNotificationIfIdle();
-                });
-
-
-                new SequentialTransition(fadeIn, pause, fadeOut).play();
-
+                pane = (Pane) scene.getRoot();
             } catch (ClassCastException e) {
                 reportError("ClassCastException: " + e.getMessage());
+                isNotificationPlaying = false;
+                return;
             }
+
+            // Fai salire quella precedente e sparire
+            if (currentToast != null) {
+                previousToast = currentToast;
+
+                TranslateTransition moveUp = new TranslateTransition(Duration.millis(400), previousToast);
+                moveUp.setByY(-70);
+
+                FadeTransition fadeOutOld = new FadeTransition(Duration.millis(400), previousToast);
+                fadeOutOld.setFromValue(1);
+                fadeOutOld.setToValue(0);
+                fadeOutOld.setOnFinished(e -> {
+                    pane.getChildren().remove(previousToast);
+                    previousToast = null;
+                });
+
+                new ParallelTransition(moveUp, fadeOutOld).play();
+            }
+
+            // Crea nuova notifica
+            Label label = new Label(message);
+            label.setStyle("""
+            -fx-font-family: "Impact";
+            -fx-font-size: 19px;
+            -fx-text-fill: #000000;
+            -fx-background-color: rgba(255, 223, 0, 0.85);
+            -fx-padding: 10px 18px;
+            -fx-background-radius: 0;
+            -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
+        """);
+            label.setWrapText(true);
+            label.setMaxWidth(400);
+
+            StackPane toast = new StackPane(label);
+            toast.setMouseTransparent(true);
+            toast.setOpacity(0);
+            pane.getChildren().add(toast);
+
+            toast.setTranslateX(scene.getWidth() - 450);
+            toast.setTranslateY(scene.getHeight() - 100);
+
+            currentToast = toast;
+
+            // Animazione entrata
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(400), toast);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+
+            // Pausa visiva
+            PauseTransition pause = new PauseTransition(Duration.seconds(2));
+
+            // Uscita
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(400), toast);
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(e -> {
+                pane.getChildren().remove(toast);
+                if (currentToast == toast) currentToast = null;
+                isNotificationPlaying = false;
+                playNextNotification(); // Mostra la prossima in coda
+            });
+
+            new SequentialTransition(fadeIn, pause, fadeOut).play();
         });
+    }
+
+
+    private void updateNotificationPositions() {
+        double baseY = sceneRouter.getCurrentScene().getHeight() - 100;
+        double toastHeight = 60;
+
+        for (int i = 0; i < activeNotifications.size(); i++) {
+            StackPane toast = activeNotifications.get(i);
+            double newY = baseY - i * (toastHeight + 10);
+            TranslateTransition move = new TranslateTransition(Duration.millis(200), toast);
+            move.setToY(newY);
+            move.play();
+        }
     }
 
 
@@ -983,31 +1033,38 @@ public class GUIView extends Application implements View {
 
 
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
-        if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) {
-            return false;
-        }
+        String lowerMsg = message.strip().toLowerCase();
+
+        // Messaggi da filtrare sempre
+        if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) return false;
+        if (lowerMsg.contains("waiting for other players...")) return false;
+        if (lowerMsg.contains("choose deck")) return false;
+        if (lowerMsg.contains("card") || lowerMsg.contains("ship")) return false;
+        if (lowerMsg.contains("ship before the attack")) return false;
+        if (lowerMsg.contains("select")) return false;
+        if (lowerMsg.contains("flight started")) return false;
+        if (lowerMsg.contains("checking")) return false;
         if (sceneEnum == null) {
-            return message.toLowerCase().contains("login successful");
+            return lowerMsg.contains("login successful");
         }
-        if(message.toLowerCase().contains("waiting for other players...")) {
-            return false;
-        }
-        if(message.toLowerCase().contains("choose deck")) {
-            return false;
-        }
-        if(gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED){
-            return message.toLowerCase().contains("hourglass");
+
+        if (gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED) {
+            return lowerMsg.contains("hourglass");
         }
 
         return switch (sceneEnum) {
-            case BUILDING_PHASE -> !message.toLowerCase().contains("rotate");
-            case WAITING_QUEUE -> message.toLowerCase().contains("joined");
-            case MAIN_MENU -> !message.contains("Connected") || !message.contains("Insert") || !message.contains("Creating New Game...") || message.toLowerCase().contains("login successful");
-            case NICKNAME_DIALOG -> message.contains("Login");
+            case BUILDING_PHASE -> !lowerMsg.contains("rotate");
+            case WAITING_QUEUE -> lowerMsg.contains("joined");
+            case MAIN_MENU -> lowerMsg.contains("login successful") &&
+                    !lowerMsg.contains("connected") &&
+                    !lowerMsg.contains("insert") &&
+                    !lowerMsg.contains("creating new game...");
+            case NICKNAME_DIALOG -> lowerMsg.contains("login");
             case GAME_PHASE -> true;
             default -> false;
         };
     }
+
     public void prepareToViewEnemyDashboard(String enemyName) {
         this.previewingEnemyDashboard = true;
         this.bufferedPlayerName = enemyName;

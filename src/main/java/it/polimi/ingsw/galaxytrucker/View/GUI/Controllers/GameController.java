@@ -367,6 +367,10 @@ public class GameController extends GUIController {
         cardPane.getChildren().clear();
     }
 
+    public void messageSet(String message) {
+        messageText.setText(message);
+        messageTextFlow.setVisible(true);
+    }
 
     public void showYesNoButtons(String message) {
         messageText.setText(message);
