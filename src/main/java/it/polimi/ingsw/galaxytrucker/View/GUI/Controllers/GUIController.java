@@ -2,14 +2,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import it.polimi.ingsw.galaxytrucker.View.GUI.*;
-import javafx.fxml.FXML;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import javafx.scene.control.Button;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class GUIController {
     protected GUIModel model;
@@ -32,9 +25,8 @@ public abstract class GUIController {
     public void setGuiView(GUIView guiView) {
         this.guiView = guiView;
     }
-    public abstract void postInitialize();
-    public void postInitializeLogOut(){}
 
+    public abstract void postInitialize();
 
     public void updateDashboard(ClientTile[][] ship) {
     }

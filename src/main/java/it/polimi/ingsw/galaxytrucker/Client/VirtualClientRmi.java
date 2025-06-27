@@ -646,7 +646,7 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
         }
             try {
                 int tmp = clientController.returnIdOfTile(index[0], index[1]);
-                clientController.setTileInMatrix("PIEDINIPRADELLA", index[0], index[1]);
+                clientController.setTileInMatrix("COD1234", index[0], index[1]);
                 clientController.resetValidityByController(index[0], index[1]);
                 clientController.printMyDashBoardByController();
                 tmpTile = server.getReservedTile(gameId,nickname,tmp);
