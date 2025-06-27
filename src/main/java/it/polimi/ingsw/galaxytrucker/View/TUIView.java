@@ -10,6 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Text-based User Interface (TUI) implementation of the View interface for Galaxy Trucker.
+ * Handles all user interactions through the console, displaying game information,
+ * prompting for input, and rendering the ship dashboard and other game elements
+ * using ANSI colors and formatted text.
+ * Supports a demo mode and maintains player state such as nickname and game phase.
+ * @author Matteo Vignocchi
+ * @author Oleg Nedina
+ */
 public class TUIView implements View {
     private ClientGamePhase game;
     private boolean isDemo;
@@ -33,6 +42,11 @@ public class TUIView implements View {
     );
     private static final long TIME_OUT = 300000;
 
+    /**
+     * Initializes the TUI and prints the welcome banner and initial instructions.
+     * Explains the tile representation, including the meaning of connector numbers
+     * and tile type acronyms, using colored text to enhance readability.
+     */
     @Override
     public void start() {
         System.out.println(
@@ -68,6 +82,15 @@ public class TUIView implements View {
         inform("SU stands for storage unit, when is white is the standard unit, when it is"+RED+" red"+RESET+" it is advanced, after that there is the max capacity of the unit. In each corner, there is a counter showing how many goods of that color are present.");
     }
 
+    /**
+     * Reads a line of input from the console, waiting up to the specified timeout.
+     * Checks if input is ready every 20 milliseconds until the timeout expires.
+     * Returns null if no input is received within the timeout.
+     * @param timeoutMs the maximum time to wait in milliseconds
+     * @return the input line as a String, or null if timed out
+     * @throws InterruptedException if the thread is interrupted while waiting
+     * @throws IOException if an input error occurs
+     */
     private String readLine(long timeoutMs) throws InterruptedException, IOException {
         long end = System.currentTimeMillis() + timeoutMs;
         while (System.currentTimeMillis() < end) {
@@ -79,22 +102,46 @@ public class TUIView implements View {
         return null;
     }
 
+    /**
+     * Displays a generic informational message to the console.
+     * @param message the message to display
+     */
     @Override
     public void inform(String message) {System.out.println(message);}
 
+    /**
+     * Displays an error message to the console in red color.
+     * @param message the error message to display
+     */
     @Override
     public void reportError(String message) {System.out.println(RED+ "[ERROR] " + message + RESET);}
 
+    /**
+     * Updates the internal game phase state of the TUI.
+     * @param gamePhase the current game phase
+     */
     @Override
     public void updateState(ClientGamePhase gamePhase) {
         game = gamePhase;
     }
 
+    /**
+     * Updates the internal map of player positions.
+     * @param map a mapping from player nicknames to their position and status arrays
+     */
     @Override
     public void updateMap(Map<String, int[]> map) {
         mapPosition = map;
     }
 
+    /**
+     * Prompts the user to choose a player from the list of current players.
+     * Displays players sorted by their lap and position, with eliminated players marked.
+     * Reads the user's input with a timeout and validates it against the player list.
+     * @return the chosen player's nickname, or null if the game phase changes during input
+     * @throws IOException if an input error occurs
+     * @throws InterruptedException if the input wait is interrupted
+     */
     @Override
     public String choosePlayer() throws IOException, InterruptedException {
         ClientGamePhase originalPhase = getGamePhase();
@@ -142,6 +189,13 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Prompts the user with a yes/no question until a valid response is received.
+     * Accepts "yes" or "no" (case insensitive). Returns Boolean.TRUE or Boolean.FALSE.
+     * If the game phase changes during input, returns null.
+     * @param message the question to ask the user
+     * @return Boolean.TRUE for "yes", Boolean.FALSE for "no", or null if phase changes
+     */
     @Override
     public Boolean ask(String message) {
         ClientGamePhase originalPhase = getGamePhase();
@@ -168,6 +222,14 @@ public class TUIView implements View {
         return Boolean.FALSE;
     }
 
+    /**
+     * Prompts the user with a yes/no question, waiting for a limited time.
+     * Accepts "yes" or "no" (case insensitive). Returns true or false accordingly.
+     * If timeout expires, returns false automatically.
+     * Invalid inputs prompt an error message and re-ask within the timeout.
+     * @param message the question to ask the user
+     * @return true for "yes", false for "no" or timeout
+     */
     @Override
     public boolean askWithTimeout(String message) {
         long end = System.currentTimeMillis() + TIME_OUT;
@@ -190,6 +252,13 @@ public class TUIView implements View {
         return false;
     }
 
+    /**
+     * Prompts the user to enter row and column coordinates with a timeout.
+     * Coordinates must be within valid ranges: row [5-9], column [4-10].
+     * Returns the coordinates adjusted to zero-based indexing or null if timeout occurs.
+     * Errors during input prompt an error message and re-ask within the timeout.
+     * @return an int array [row, column], or null if timeout happens
+     */
     @Override
     public int[] askCoordinatesWithTimeout(){
         long end = System.currentTimeMillis() + TIME_OUT;
@@ -252,6 +321,12 @@ public class TUIView implements View {
         return null;
     }
 
+    /**
+     * Prompts the user to enter an index with a timeout.
+     * Accepts only valid integers; invalid inputs prompt errors and retries.
+     * Returns the zero-based index or null if timeout expires.
+     * @return the zero-based index selected, or null on timeout
+     */
     @Override
     public Integer askIndexWithTimeout() {
         long end = System.currentTimeMillis() + TIME_OUT;
@@ -276,6 +351,15 @@ public class TUIView implements View {
         return null;
     }
 
+    /**
+     * Prompts the user to enter row and column coordinates without timeout.
+     * Validates input and enforces coordinate ranges (row: 5-9, column: 4-10).
+     * Returns coordinates adjusted to zero-based indexing or null if game phase changes.
+     * Errors during input prompt an error message and re-ask.
+     * @return an int array [row, column], or null if game phase changes during input
+     * @throws IOException if an I/O error occurs
+     * @throws InterruptedException if input thread is interrupted
+     */
     @Override
     public int[] askCoordinate() throws IOException, InterruptedException{
         int[] coordinate = new int[2];
@@ -325,6 +409,12 @@ public class TUIView implements View {
         return coordinate;
     }
 
+    /**
+     * Prompts the user to enter an index without timeout.
+     * Validates input, accepts only integers, and returns zero-based index.
+     * Returns null if game phase changes during input.
+     * @return the zero-based index entered, or null if game phase changes
+     */
     @Override
     public Integer askIndex() {
         ClientGamePhase originalPhase = getGamePhase();
@@ -351,6 +441,11 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Prompts the user to enter a string without timeout.
+     * Returns the trimmed string or null if game phase changes during input.
+     * @return the input string, or null if game phase changes
+     */
     @Override
     public String askString() {
         ClientGamePhase originalPhase = getGamePhase();
@@ -371,6 +466,10 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Displays a list of goods with their associated ANSI colors.
+     * @param Goods list of goods represented as strings (e.g., "RED", "BLUE")
+     */
     @Override
     public void printListOfGoods(List<String> Goods) {
         inform("List of goods: ");
@@ -384,6 +483,12 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Renders the player's ship dashboard as a colored ASCII grid in the console.
+     * Each tile is drawn with its connectors and acronyms, using color codes to distinguish types.
+     * Special blocks and masked tiles are displayed with block characters.
+     * @param dashboard a 2D array of ClientTile representing the ship layout
+     */
     @Override
     public void printDashShip(ClientTile[][] dashboard) {
         System.out.print("    ");
@@ -451,6 +556,11 @@ public class TUIView implements View {
         System.out.println();
     }
 
+    /**
+     * Displays the current positions and status of all players in the game.
+     * Players are sorted by elimination status, lap number, and position.
+     * Eliminated players are marked accordingly.
+     */
     @Override
     public void printMapPosition() {
         System.out.println("\nPlayers in game:");
@@ -473,6 +583,19 @@ public class TUIView implements View {
                 });
     }
 
+    /**
+     * Updates the player's status information display based on the current game phase.
+     * Different levels of detail are shown depending on the phase, including credits, power,
+     * aliens present, crew numbers, and energy batteries.
+     * @param nickname player's nickname
+     * @param firePower current firepower
+     * @param powerEngine current engine power
+     * @param credits current credits
+     * @param purpleAlien presence of purple alien
+     * @param brownAlien presence of brown alien
+     * @param numberOfHuman number of humans on the ship
+     * @param numberOfEnergy total energy available
+     */
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
@@ -489,6 +612,10 @@ public class TUIView implements View {
         System.out.println();
     }
 
+    /**
+     * Displays all cards in the given deck with their detailed information.
+     * @param deck the list of ClientCard to display
+     */
     @Override
     public void printDeck(List<ClientCard> deck) {
         inform("Deck: ");
@@ -498,6 +625,12 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Displays detailed information about a single card based on its type.
+     * Shows fields like flight days, crew mates, credits, firepower, and rewards
+     * with clear formatting and section headers.
+     * @param card the ClientCard to display
+     */
     @Override
     public void printCard(ClientCard card) {
         switch (card.type.toUpperCase()) {
@@ -570,6 +703,11 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Converts a list of goods (by name) into a comma-separated string with ANSI color codes.
+     * @param goods the list of goods as color strings (e.g., "RED", "BLUE")
+     * @return a colored string representing the goods
+     */
     private String joinGoods(List<String> goods) {
         return goods.stream()
                 .map(c -> ANSI_COLOR.getOrDefault(c, "")
@@ -578,12 +716,28 @@ public class TUIView implements View {
                 .collect(Collectors.joining(", "));
     }
 
+    /**
+     * Displays the summary and details of a war zone card.
+     * Prints two summary lines followed by a formatted table of shots with directions and sizes.
+     * @param dirs list of shot directions encoded as integers
+     * @param sizes list of shot sizes (true for big, false for small)
+     * @param summary1 first summary line describing penalties or effects
+     * @param summary2 second summary line describing penalties or effects
+     */
     private void printWarzoneTable(List<Integer> dirs, List<Boolean> sizes, String summary1, String summary2) {
         inform(summary1);
         inform(summary2);
         printAttackTable(dirs, sizes);
     }
 
+    /**
+     * Creates a centered string combining a key and value padded to a specified width.
+     * Used for aligning key-value pairs in the console output.
+     * @param key the label string
+     * @param val the value string
+     * @param width the total width of the resulting string
+     * @return the centered key-value string
+     */
     private String centerKV(String key, String val, int width) {
         String line = key + ": " + val;
         int pad = width - line.length();
@@ -591,6 +745,12 @@ public class TUIView implements View {
         return " ".repeat(Math.max(0,padL)) + line + " ".repeat(Math.max(0,padR));
     }
 
+    /**
+     * Displays a formatted table of attack shots with their directions and sizes.
+     * Uses arrow symbols for directions and textual labels for size.
+     * @param dirs list of shot directions encoded as integers
+     * @param sizes list of shot sizes (true for big, false for small)
+     */
     private void printAttackTable(List<Integer> dirs, List<Boolean> sizes) {
         Map<Integer,String> arrow = Map.of(0,"↓",1,"←",2,"↑",3,"→");
         Function<Boolean,String> sizeLabel = b->b?"Big":"Small";
@@ -606,12 +766,24 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Centers a string within a field of specified width by padding with spaces.
+     * @param s the string to center
+     * @param width the total field width
+     * @return the centered string padded with spaces
+     */
     private String center(String s, int width) {
         int pad = width - s.length();
         int padL = pad>0?pad/2:0, padR = pad>0?pad-padL:0;
         return " ".repeat(padL) + s + " ".repeat(padR);
     }
 
+    /**
+     * Prints a single tile in an ASCII-art styled box.
+     * The tile is rendered as three lines with connectors and label,
+     * surrounded by a border.
+     * @param tile the ClientTile to print
+     */
     @Override
     public void printTile(ClientTile tile) {
         StringBuilder top = new StringBuilder();
@@ -630,6 +802,10 @@ public class TUIView implements View {
         System.out.println(border);
     }
 
+    /**
+     * Prints a grid representation of covered tiles (face-down) with their indices.
+     * Useful for displaying the pile of covered tiles to the user.
+     */
     @Override
     public void printPileCovered() {
         StringBuilder topBorder = new StringBuilder();
@@ -672,6 +848,11 @@ public class TUIView implements View {
 
     }
 
+    /**
+     * Prints a list of uncovered (shown) tiles in rows of 7,
+     * each tile rendered in ASCII art style.
+     * @param tiles the list of ClientTiles to print
+     */
     @Override
     public void printPileShown(List<ClientTile> tiles) {
         StringBuilder top = new StringBuilder();
@@ -708,7 +889,12 @@ public class TUIView implements View {
         }
     }
 
-
+    /**
+     * Returns a short label string representing the tile type and properties.
+     * Includes color codes for special tile types (e.g., aliens, advanced storage).
+     * @param tile the ClientTile to describe
+     * @return the label string for the tile
+     */
     private String getTileContent (ClientTile tile){
         switch(tile.type.trim().toUpperCase()){
             case "EMPTYSPACE"  ->{ return "   ";}
@@ -737,6 +923,14 @@ public class TUIView implements View {
         return null;
     }
 
+    /**
+     * Returns an array of three strings representing the three lines
+     * of the ASCII-art tile rendering.
+     * The rendering includes connector counts and the tile label,
+     * with color highlighting for shields and goods.
+     * @param tile the ClientTile to render
+     * @return a String array of length 3, each entry representing a line of the tile
+     */
     private String[] renderTile(ClientTile tile) {
         String[] out = new String[3];
         int a = tile.a;
@@ -818,6 +1012,11 @@ public class TUIView implements View {
 
     }
 
+    /**
+     * Constructs the list of available command strings based on the current game phase and demo mode.
+     * Used to present the user with valid choices in the TUI.
+     * @return a list of command strings
+     */
     private List<String> commandConstructor(){
         List<String> listOfOptions = new ArrayList<>();
         switch (game) {
@@ -875,6 +1074,14 @@ public class TUIView implements View {
         return listOfOptions;
     }
 
+    /**
+     * Reads user input and returns the chosen command from the list of available commands.
+     * Validates that the input corresponds to a valid index, and normalizes
+     * the command string by removing special characters.
+     * @return the normalized command string chosen by the user, or null if invalid input or timeout
+     * @throws IOException if input reading fails
+     * @throws InterruptedException if the input thread is interrupted
+     */
     @Override
     public String sendAvailableChoices() throws IOException, InterruptedException {
         List<String> options = commandConstructor();
@@ -910,6 +1117,10 @@ public class TUIView implements View {
          */
     }
 
+    /**
+     * Prints the list of available commands to the user based on the current game phase.
+     * The commands are numbered and displayed as a menu prompt.
+     */
     @Override
     public void printListOfCommand(){
         List<String> listOfOptions = commandConstructor();
@@ -921,6 +1132,12 @@ public class TUIView implements View {
         inform("Insert index: ");
     }
 
+    /**
+     * Sets whether the interface is in demo mode and initializes the mask of valid tile positions accordingly.
+     * The mask is a 5x7 Boolean matrix where `true` means a position is valid for tile placement,
+     * `false` or `null` means invalid or blocked, depending on the mode.
+     * @param demo true to enable demo mode, false otherwise
+     */
     @Override
     public void setIsDemo(Boolean demo) {
         Boolean[][] validStatus = new Boolean[5][7];
@@ -1012,6 +1229,11 @@ public class TUIView implements View {
 
     }
 
+    /**
+     * Displays a list of available games with their player counts and mode.
+     * @param availableGames map where keys are game IDs and values are arrays containing:
+     *                       [current number of players, maximum players, demo mode flag (1 for demo)]
+     */
     @Override
     public void displayAvailableGames (Map<Integer, int[]> availableGames) {
         for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
@@ -1023,39 +1245,81 @@ public class TUIView implements View {
         }
     }
 
+    /**
+     * Returns whether the position (a, b) on the ship dashboard is currently valid for tile placement.
+     * @param a the row index
+     * @param b the column index
+     * @return true if the position is valid, false otherwise
+     */
     @Override
     public boolean returnValidity(int a , int b){
         return mask[a][b];
     }
 
+    /**
+     * Marks the position (a, b) on the dashboard as invalid for tile placement.
+     * @param a the row index
+     * @param b the column index
+     */
     @Override
     public void setValidity(int a , int b){
         mask[a][b] = false;
     }
 
+    /**
+     * Marks the position (a, b) on the dashboard as valid for tile placement.
+     * @param a the row index
+     * @param b the column index
+     */
     @Override
     public void resetValidity(int a , int b){
         mask[a][b] = true;
     }
-    
+
+    /**
+     * Sets the specified tile at the given position on the dashboard.
+     * Implementation not required in this snippet.
+     * @param tile the ClientTile to set
+     * @param row the row index
+     * @param col the column index
+     */
     @Override
     public void setTile(ClientTile tile,  int row, int col){
         
     }
 
-   @Override
+    /**
+     * Sets the current active tile (e.g., the tile being manipulated by the player).
+     * Implementation not required in this snippet.
+     * @param tile the ClientTile to set as current
+     */
+    @Override
    public void setCurrentTile(ClientTile tile){}
 
-   @Override
+    /**
+     * Sets the nickname of the current player.
+     * @param nickname the player's nickname
+     */
+    @Override
    public void setNickName(String nickname){
         this.nickname = nickname;
    }
 
+    /**
+     * Returns the current game phase known by the view.
+     * @return the current ClientGamePhase
+     */
     @Override
     public ClientGamePhase getGamePhase() {return game;}
 
+    /**
+     * Displays the list of available games to join and prompts the user to select one.
+     * Returns 0 if the user wants to return to the main menu.
+     * @param availableGames a map from game IDs to arrays containing game info (e.g., player counts)
+     * @return the selected game ID or 0 for main menu
+     */
     @Override
-    public int askGameToJoin(Map<Integer, int[]> availableGames) throws IOException, InterruptedException {
+    public int askGameToJoin(Map<Integer, int[]> availableGames) {
         inform("**Available Games:**");
         inform("0. Return to main menu");
         displayAvailableGames(availableGames);
