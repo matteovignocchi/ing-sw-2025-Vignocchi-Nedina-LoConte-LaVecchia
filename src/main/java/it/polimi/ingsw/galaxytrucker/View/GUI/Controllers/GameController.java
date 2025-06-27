@@ -93,7 +93,7 @@ public class GameController extends GUIController {
     private final Map<Integer, Pane> pathMap = new HashMap<>();
     private ClientCard currentCard;
     private final Map<String, Image> tokenImageCache = new HashMap<>();
-
+    private final StackPane[][] cellStackPanes = new StackPane[5][7]; // 5 righe, 7 colonne
 
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
@@ -284,22 +284,45 @@ public class GameController extends GUIController {
     public void updateDashboard(ClientTile[][] dashboard) {
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
+                StackPane cell = cellStackPanes[row][col];
+                if (cell == null) continue;
+
+                cell.getChildren().clear(); // sempre pulisce
+
                 ClientTile tile = dashboard[row][col];
                 if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
-                    placeTileWithTokens(tile, row, col);
-                } else {
-                    if (cellStackPanes[row][col] != null) {
-                        cellStackPanes[row][col].getChildren().clear();
+                    placeTile(tile, row, col); // nuovo metodo: sempre disegna immagine
+                    if (!tile.tokens.isEmpty() || tile.capacity > 0 || (tile.goods != null && !tile.goods.isEmpty())) {
+                        placeTokens(tile, row, col); // solo se ci sono token
                     }
                 }
             }
         }
     }
 
+    public void clearDashboard() {
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 7; col++) {
+                if (cellStackPanes[row][col] != null) {
+                    cellStackPanes[row][col].getChildren().clear();
+                }
+            }
+        }
+    }
+
+    private void placeTile(ClientTile tile, int row, int col) {
+        StackPane cell = cellStackPanes[row][col];
+        if (cell == null) return;
+
+        ImageView tileImage = new ImageView(tile.getImage());
+        tileImage.setFitWidth(70);
+        tileImage.setFitHeight(70);
+        tileImage.setRotate(tile.getRotation());
+        cell.getChildren().add(tileImage);
+    }
 
 
 
-    private final StackPane[][] cellStackPanes = new StackPane[5][7]; // 5 righe, 7 colonne
 
     public void initializeGrid() {
         for (int row = 0; row < 5; row++) {
@@ -408,33 +431,23 @@ public class GameController extends GUIController {
         energycell.setText("Number of energy Cell: " + energy);
     }
 
-    public void placeTileWithTokens(ClientTile tile, int row, int col) {
-        if (cellStackPanes[row][col] == null) {
-            return;
-        }
-
+    private void placeTokens(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
-        cell.getChildren().clear();
+        if (cell == null) return;
 
-        // Immagine base della tile
-        ImageView tileImage = new ImageView(tile.getImage());
-        tileImage.setFitWidth(70);
-        tileImage.setFitHeight(70);
-        tileImage.setRotate(tile.getRotation());
-        cell.getChildren().add(tileImage);
-        // Umani
+        // Umani / alieni
         for (int i = 0; i < tile.tokens.size(); i++) {
-
             String tokenType = tile.tokens.get(i);
             ImageView token = new ImageView(getTokenImage(tokenType));
             token.setFitWidth(26);
             token.setFitHeight(32);
             StackPane.setAlignment(token, Pos.CENTER);
-            token.setTranslateX(i * 17); // offset orizzontale
+            token.setTranslateX(i * 17);
             token.setTranslateY(2);
             cell.getChildren().add(token);
         }
 
+        // Batterie
         for (int i = 0; i < tile.capacity; i++) {
             ImageView token = new ImageView(getTokenImage("EnergyCell"));
             token.setFitWidth(22);
@@ -459,8 +472,8 @@ public class GameController extends GUIController {
                 cell.getChildren().add(token);
             }
         }
-
     }
+
 
     private Image getTokenImage(String tokenType) {
         return tokenImageCache.computeIfAbsent(tokenType.toLowerCase(), type -> {

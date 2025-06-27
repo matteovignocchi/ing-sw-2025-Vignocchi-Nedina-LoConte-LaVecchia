@@ -118,7 +118,7 @@ public class GUIView extends Application implements View {
         if (message != null && message.trim().startsWith("SERVER:")) {
             subString = message.trim().substring(7).trim();
         }
-        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select")) {
+        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.equals("SERVER: Select an housing unit")) {
             Platform.runLater(() -> {
                 GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
                 if (ctrl != null) {
@@ -307,16 +307,8 @@ public class GUIView extends Application implements View {
         } else {
             model.setDashboard(ship);
             Platform.runLater(() -> {
-                BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(SceneEnum.BUILDING_PHASE);
-                GameController ctrl2 = (GameController) sceneRouter.getController(GAME_PHASE);
-                Scene currentScene = sceneRouter.getCurrentScene();
-                Scene gameScene = sceneRouter.getScene(GAME_PHASE);
-                //TODO CAPIRE SE SERVE
-                if (ctrl2 != null && currentScene == gameScene) {
-                    ctrl2.updateDashboard(ship);
-                } else {
-                    System.out.println("[DEBUG] GameController non inizializzato o scena non attiva. Salto updateDashboard.");
-                }
+                GUIController controller = sceneRouter.getController(SceneEnum.GAME_PHASE);
+                controller.updateDashboard(ship);
             });
         }
     }
@@ -636,7 +628,7 @@ public class GUIView extends Application implements View {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return null;
+                return new int[]{2,3};
             }
         }
 
@@ -1044,9 +1036,11 @@ public class GUIView extends Application implements View {
         if (lowerMsg.contains("select")) return false;
         if (lowerMsg.contains("flight started")) return false;
         if (lowerMsg.contains("checking")) return false;
+        if (lowerMsg.contains("waiting for turn")) return false;
         if (sceneEnum == null) {
             return lowerMsg.contains("login successful");
         }
+        if(gamePhase == ClientGamePhase.EXIT) return false;
 
         if (gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED) {
             return lowerMsg.contains("hourglass");
