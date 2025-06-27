@@ -438,17 +438,24 @@ public class Controller implements Serializable {
         cancelLastPlayerTimeout();
         if (countConnectedPlayers() == 1) {
             lastPlayerTask = TIMEOUT_EXECUTOR.schedule(() -> {
-                String winner = playersByNickname.entrySet().stream()
-                        .filter(e -> e.getValue().isConnected())
-                        .map(Map.Entry::getKey)
-                        .findFirst().orElse(null);
+                try {
+                    String winner = playersByNickname.entrySet().stream()
+                            .filter(e -> e.getValue().isConnected())
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .orElse(null);
 
-                if (winner != null) {
-                    String msg = "SERVER: " + "You win by timeout!";
-                    inform(msg, winner);
-                }
-                if (onGameEnd != null) {
-                    onGameEnd.accept(gameId);
+                    if (winner != null) {
+                        inform("\nSERVER: You win by timeout!", winner);
+                        Player p = getPlayerCheck(winner);
+                        p.setGamePhase(GamePhase.EXIT);
+                        updateGamePhase(winner, getViewCheck(winner), GamePhase.EXIT);
+                    }
+                    if(onGameEnd != null){
+                        onGameEnd.accept(gameId);
+                    }
+                } catch (BusinessLogicException e) {
+                    e.printStackTrace();
                 }
             }, 1, TimeUnit.MINUTES);
         }
