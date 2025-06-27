@@ -21,24 +21,39 @@ import java.util.function.Consumer;
 //TODO: controllare le eccezioni e capire le eccezione nei metodi che usano i parser!! Gestite male, soprattutto per il discorso markdisconnected
 //TODO: pulire il codice (sostituire ove possibile v.inform con chiamate a inform metodo controller, e metodi simili)
 
+/**
+ * Server-side game controller in the MVC architecture.
+ * Manages the entire game logic, player state, tile deck, card effects, and phase transitions.
+ * Responsibilities:
+ * - Initializing the game board, decks, and players
+ * - Managing turn-based interactions and enforcing rules
+ * - Handling card effects during the flight phase
+ * - Serializing and broadcasting game state updates to clients via VirtualView
+ * - Orchestrating game flow based on the current GamePhase
+ * - Handling disconnections, timeouts, and demo mode behaviors
+ * It holds core game structures such as:
+ * - `pileOfTile`, `deck`, `shownTile`: game resources
+ * - `playersByNickname`: player data and dashboards
+ * - `viewsByNickname`: client connection views
+ * - `fBoard`: the active flight board instance
+ * Designed to operate concurrently and safely via thread-safe collections (e.g., ConcurrentHashMap),
+ * and uses scheduled tasks for timeout and ping monitoring.
+ * @author Matteo Vignocchi
+ * @author Oleg Nedina
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
+ */
 public class Controller implements Serializable {
     private final int gameId;
     public transient Map<String, VirtualView> viewsByNickname = new ConcurrentHashMap<>();
     private final Map<String, Player> playersByNickname = new ConcurrentHashMap<>();
     private Map<String , int[] > playersPosition = new ConcurrentHashMap<>();
-
-    //Capire se tenere e come gestire
     private final Set<String> loggedInUsers;
-
     private final AtomicInteger playerIdCounter;
     private final int MaxPlayers;
     private final boolean isDemo;
     private transient Consumer<Integer> onGameEnd;
-    private GamePhase principalGamePhase;
     private int numberOfEnter =0;
-    private final int TIME_OUT = 30;
-
-
     private transient Hourglass hourglass;
     public List<Tile> pileOfTile;
     public List<Tile> shownTile = new ArrayList<>();
@@ -53,21 +68,30 @@ public class Controller implements Serializable {
     private transient EnumSerializer enumSerializer;
     public transient ScheduledExecutorService pingScheduler;
 
-
-
+    /**
+     * Initializes the game controller with all core components.
+     * This constructor sets up the game board, tile and card decks, serializers,
+     * player data structures, and timing mechanisms. It differentiates setup logic
+     * based on whether the game is running in demo mode or standard mode.
+     * @param isDemo true if the game is in demo mode (simplified deck and board)
+     * @param gameId the unique ID of the game instance
+     * @param MaxPlayers the maximum number of players allowed
+     * @param onGameEnd callback function to execute when the game ends
+     * @param loggedInUsers the set of users currently logged into the system
+     * @throws CardEffectException if there is an error initializing a card effect
+     * @throws IOException if loading tiles or decks fails
+     */
     public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
         if(isDemo) {
             fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             deck = deckCreator.CreateDemoDeck();
-//            deck = deckCreator.CreateMixedDemoDeck();
         }else{
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
             //TODO: commentato per debugging. ripristinare una volta finito
             decks = deckCreator.CreateSecondLevelDeck();
-//            decks = deckCreator.CreatePlagueDeck();
             deck = new Deck();
         }
         this.cardSerializer = new CardSerializer();
@@ -85,10 +109,9 @@ public class Controller implements Serializable {
         });
         this.isDemo = isDemo;
         this.MaxPlayers = MaxPlayers;
-        this.playerIdCounter = new AtomicInteger(1); //verificare che matcha con la logica
+        this.playerIdCounter = new AtomicInteger(1);
         pileOfTile = pileMaker.loadTiles();
         Collections.shuffle(pileOfTile);
-
         this.loggedInUsers = loggedInUsers;
     }
 
@@ -134,6 +157,16 @@ public class Controller implements Serializable {
         return playersByNickname.values().iterator().next().getGamePhase();
     }
 
+    /**
+     * Sends a full game state update to the specified player's view.
+     * This includes:
+     * - The current game phase
+     * - The full map of all player positions
+     * - The player's status (firepower, engine power, credits, alien presence, crew, energy)
+     * - The last drawn tile, if in TILE_MANAGEMENT phase
+     * If any error occurs during communication, the player is marked as disconnected.
+     * @param nickname the nickname of the player to update
+     */
     public void notifyView(String nickname) {
         VirtualView v = viewsByNickname.get(nickname);
         Player p      = playersByNickname.get(nickname);
@@ -164,6 +197,21 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Adds a new player to the game and initializes their state.
+     * Performs the following actions:
+     * - Validates that the nickname is unique and the game is not full
+     * - Assigns a ship image ID based on join order
+     * - Creates a new Player object with default settings and dashboard
+     * - Sets the initial game phase to WAITING_IN_LOBBY
+     * - Sends initial tile and phase to the player's VirtualView
+     * - Updates player and view registries
+     * - Broadcasts the join event to all players
+     * @param nickname the nickname of the joining player
+     * @param view the VirtualView associated with the player
+     * @throws BusinessLogicException if the nickname is already used or the game is full
+     * @throws Exception if an error occurs during serialization or communication
+     */
     public void addPlayer(String nickname, VirtualView view) throws BusinessLogicException, Exception {
         numberOfEnter ++;
         if (playersByNickname.containsKey(nickname)) throw new BusinessLogicException("Nickname already used");
@@ -191,12 +239,10 @@ public class Controller implements Serializable {
         broadcastInform( nickname + "  joined");
     }
 
-    //Per testing
     public Map<String, Player> getPlayersByNickname(){
         return playersByNickname;
     }
 
-    //Se tutto va, eliminabile
     public Player getPlayerByNickname(String nickname) {
         return playersByNickname.get(nickname);
     }
@@ -312,6 +358,16 @@ public class Controller implements Serializable {
         return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
     }
 
+    /**
+     * Marks the specified player as disconnected and informs the other players.
+     * If the player is currently connected, this method:
+     * - Sets their status to disconnected
+     * - Broadcasts a message to all players
+     * - Triggers a timeout check for game continuation
+     * - Removes the player from the logged-in user list
+     * @param nickname the nickname of the player to mark as disconnected
+     */
+
     public void markDisconnected(String nickname) {
         Player p = playersByNickname.get(nickname);
         if (p != null && p.isConnected()) {
@@ -400,6 +456,17 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 1
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Starts the game by transitioning all players to the BOARD_SETUP phase.
+     * For each player:
+     * - Updates their game phase to BOARD_SETUP
+     * - Sends the full map with all player positions
+     * - Sends the initial tile (central housing unit) and full dashboard matrix
+     * - Notifies the player to initialize their view and enables input
+     * If the game is not in demo mode, it also starts the hourglass timer
+     * for turn management or player inactivity.
+     * Any communication failure with a player marks them as disconnected.
+     */
     public void startGame() {
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.BOARD_SETUP));
         Map<String,int[]> fullMap = buildPlayersPositionMap();
@@ -434,6 +501,14 @@ public class Controller implements Serializable {
         if (!isDemo) startHourglass();
     }
 
+    /**
+     * Draws a covered tile from the pile and assigns it to the specified player.
+     * The drawn tile is stored as the player's last tile and their game phase is
+     * updated to TILE_MANAGEMENT. The view is also updated accordingly.
+     * @param nickname the nickname of the player requesting a tile
+     * @return the serialized JSON representation of the drawn tile
+     * @throws BusinessLogicException if the pile is empty or serialization fails
+     */
     public String getCoveredTile(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -458,6 +533,15 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Allows a player to select a tile from the list of uncovered (shown) tiles.
+     * If the tile is available, it is removed from the shown list and set as the player's
+     * last selected tile. The player's phase is set to TILE_MANAGEMENT and the view is updated.
+     * @param nickname the player making the selection
+     * @param idTile the ID of the tile to select
+     * @return the selected tile serialized as JSON
+     * @throws BusinessLogicException if the tile is not found or has already been taken
+     */
     public String chooseUncoveredTile(String nickname, int idTile) throws BusinessLogicException {
         List<Tile> uncoveredTiles = getShownTiles();
         Optional<Tile> opt = uncoveredTiles.stream().filter(t -> t.getIdTile() == idTile).findFirst();
@@ -477,6 +561,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Allows a player to drop (return) a tile, making it available again to others.
+     * The dropped tile is deserialized and added back to the shown tile list.
+     * The player's phase is reverted to BOARD_SETUP and the view is updated.
+     * @param nickname the player dropping the tile
+     * @param tile the tile to drop, serialized as JSON
+     * @throws BusinessLogicException if deserialization fails
+     */
     public void dropTile (String nickname, String tile) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -494,6 +586,15 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
+    /**
+     * Places a tile on the player's dashboard at the specified coordinates.
+     * The tile is deserialized and placed at the given (row, column) if valid.
+     * The player's phase is set back to BOARD_SETUP and the view is updated.
+     * @param nickname the player placing the tile
+     * @param tile the tile to place, serialized as JSON
+     * @param cord an array containing [row, column] coordinates
+     * @throws BusinessLogicException if placement is invalid or deserialization fails
+     */
     public void placeTile(String nickname, String tile, int[] cord) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
         try {
@@ -505,6 +606,15 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
+    /**
+     * Retrieves a reserved tile from the player's discard pile by ID.
+     * If found, the tile is removed from the discard pile and set as the
+     * player's last tile. The game phase is set to TILE_MANAGEMENT_AFTER_RESERVED.
+     * @param nickname the player retrieving the tile
+     * @param id the ID of the reserved tile
+     * @return the tile serialized as JSON
+     * @throws BusinessLogicException if the tile is not found or serialization fails
+     */
     public String getReservedTile(String nickname , int id) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -526,6 +636,14 @@ public class Controller implements Serializable {
         throw new BusinessLogicException("Tile not found");
     }
 
+    /**
+     * Marks the player as ready to start the flight phase.
+     * Updates the player's phase to WAITING_FOR_PLAYERS and prints their dashboard.
+     * If all connected players are ready, starts the flight phase automatically.
+     * @param nickname the player declaring readiness
+     * @throws BusinessLogicException if the player is invalid or flight prep fails
+     * @throws RemoteException if communication with the client fails
+     */
     public void setReady(String nickname) throws BusinessLogicException, RemoteException {
         Player p = getPlayerCheck(nickname);
 
@@ -776,7 +894,6 @@ public class Controller implements Serializable {
         }
     }
 
-
     public void startAwardsPhase() throws BusinessLogicException {
 
         broadcastInform("\nSERVER: Flight ended! Time to collect rewards!");
@@ -865,6 +982,12 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Serializes and returns the full list of cards in the specified deck.
+     * This is typically used for debug or spectator features to inspect deck contents.
+     * @param idxDeck the index of the deck to inspect
+     * @return a JSON array string representing the list of cards, or null if serialization fails
+     */
     public String showDeck (int idxDeck){
         try {
             return cardSerializer.toJsonList(new ArrayList<>(decks.get(idxDeck).getCards()));
@@ -874,6 +997,13 @@ public class Controller implements Serializable {
         return null;
     }
 
+    /**
+     * Returns the player's ship dashboard as a serialized 2D matrix of tiles.
+     * Used to allow one player to inspect another player's ship state.
+     * @param nickname the name of the player whose dashboard is requested
+     * @return a 2D array of JSON strings representing the tiles
+     * @throws BusinessLogicException if the player is invalid or serialization fails
+     */
     public String[][] lookAtDashBoard(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
         try {
@@ -951,23 +1081,49 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Adds a tile to the list of currently visible (uncovered) tiles.
+     * This list is used during the tile selection phase when players choose
+     * tiles from the shared revealed pool.
+     * @param tile the tile to add to the shownTile list
+     */
     public void addToShownTile(Tile tile) {
         shownTile.add(tile);
     }
 
+    /**
+     * Retrieves and removes the tile at the specified index from the shown tile list.
+     * @param index the index of the tile to retrieve
+     * @return the selected tile
+     * @throws IndexOutOfBoundsException if the index is invalid
+     */
     public Tile getShownTile(int index) {
         Tile tmp = shownTile.get(index);
         shownTile.remove(index);
         return tmp;
     }
+
+    /**
+     * Returns the list of covered tiles remaining in the main tile pile.
+     * @return the list of covered tiles
+     */
     public List<Tile> getPileOfTile() {
         return pileOfTile;
     }
 
+    /**
+     * Returns the current list of uncovered (visible) tiles available for selection.
+     * @return the list of shown tiles
+     */
     public List<Tile> getShownTiles(){
         return shownTile;
     }
+
+    /**
+     * Returns the list of shown tiles serialized as a JSON array string.
+     * If the list is empty, returns the string "CODE404".
+     * @return a JSON string of shown tiles, or "CODE404" if the list is empty
+     */
     public String jsongetShownTiles(){
         try {
             if(shownTile.isEmpty()) return "CODE404";
@@ -978,12 +1134,25 @@ public class Controller implements Serializable {
         return null;
     }
 
+    /**
+     * Retrieves and removes a tile from the main tile pile at the given index.
+     * Used when a player draws a covered tile.
+     * @param index the index of the tile to retrieve
+     * @return the selected tile
+     * @throws IndexOutOfBoundsException if the index is invalid
+     */
     public Tile getTile(int index) {
         Tile tmp = pileOfTile.get(index);
         pileOfTile.remove(index);
         return tmp;
     }
-    // metodo che restituisce il numero di crewMate nella nave
+
+    /**
+     * Counts the total number of crew slots (including aliens) on the player's ship.
+     * Iterates through all housing units on the ship and sums their capacity.
+     * @param p the player whose crew count is requested
+     * @return the total number of crew slots
+     */
     public int getNumCrew(Player p) {
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
@@ -998,6 +1167,10 @@ public class Controller implements Serializable {
         return tmp;
     }
 
+    /**
+     * Returns whether the current game is in demo mode.
+     * @return true if demo mode is active, false otherwise
+     */
     public boolean getIsDemo(){
         return isDemo;
     }
@@ -1007,14 +1180,15 @@ public class Controller implements Serializable {
      * this method checks even if there is a double engine and ask the player if they want to activate it
      * the method calls selectedEnergyCell, and when they return true, it activates it
      * also it checks if there is the brown alien, with the flag on the player and adds the bonus
-     *
+     * @param p the player whose engine power is being calculated
      * @return the total amount of engine power
+     * @throws BusinessLogicException if the player reference is invalid
      */
     public int getPowerEngineForCard(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
                 Boolean var = false;
                 switch (y) {
@@ -1041,11 +1215,21 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Calculates the total engine power of a player's ship.
+     * The method sums:
+     * - +1 for each single engine
+     * - +2 for each double engine
+     * - +2 bonus if the player has a brown alien and at least one engine
+     * @param p the player whose engine power is being calculated
+     * @return the total engine power
+     * @throws BusinessLogicException if the player reference is invalid
+     */
     public int getPowerEngine(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
                 Boolean var = false;
                 switch (y) {
@@ -1069,7 +1253,18 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Calculates the total firepower of a player's ship during card resolution.
+     * Firepower is computed as follows:
+     * - +1 or +2 for each activated double cannon (requires energy)
+     * - +0.5 or +1 for each single cannon depending on its orientation
+     * - +2 bonus if the player has a purple alien and at least one cannon
+     * The method prompts the player to choose whether to activate double cannons,
+     * and takes orientation into account for both single and double cannons.
+     * @param p the player whose firepower is being calculated
+     * @return the total firepower (may be fractional)
+     * @throws BusinessLogicException if player lookup or energy management fails
+     */
     public double getFirePowerForCard(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
 
@@ -1105,7 +1300,17 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Calculates the passive total firepower of a player's ship.
+     * Firepower is computed based on cannon tiles:
+     * - +2 for a double cannon facing outward (type 5), otherwise +1
+     * - +1 for a single cannon facing outward (type 4), otherwise +0.5
+     * This version does not prompt for energy activation (unlike getFirePowerForCard).
+     * A +2 bonus is added if the player has a purple alien and at least one cannon.
+     * @param p the player whose firepower is being calculated
+     * @return the total firepower (may be fractional)
+     * @throws BusinessLogicException if player lookup fails
+     */
     public double getFirePower(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         double tmp = 0;
@@ -1136,16 +1341,32 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Returns the total amount of stored energy on the player's ship.
+     * Delegates to the player's own method for computing the sum of all energy cell capacities.
+     * @param p the player whose energy count is requested
+     * @return the total number of energy units available
+     */
     public int getTotalEnergy(Player p) {
         return p.getTotalEnergy();
     }
 
+    /**
+     * Returns the total amount of stored goods on the player's ship.
+     * Delegates to the player's own method for computing the sum of all goods.
+     * @param p the player whose goods count is requested
+     * @return the total number of goods units present
+     */
     public int getTotalGood(Player p) {
         return p.getTotalGood();
     }
 
-
+    /**
+     * Checks whether the player has any remaining crew members and eliminates them if not.
+     * If the player's total number of human tokens is zero, they are marked as eliminated.
+     * @param p the player to check
+     * @return true if the player was eliminated, false otherwise
+     */
     public boolean manageIfPlayerEliminated(Player p) {
         int tmp= p.getTotalHuman();
         if(tmp == 0){
@@ -1156,7 +1377,14 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Automatically removes a specified number of goods from the player's storage units.
+     * The method scans the dashboard from top-left to bottom-right and removes goods
+     * in order of appearance until the requested number is removed or none remain.
+     * @param p the player from whom to remove goods
+     * @param numOfGoods the total number of goods to remove
+     * @throws BusinessLogicException if removal from a storage unit fails
+     */
     public void autoCommandForRemoveGoods(Player p, int numOfGoods) throws BusinessLogicException {
         int flag = numOfGoods;
         if (flag<= 0) return;
@@ -1180,6 +1408,13 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Automatically removes the first instance of a good of the specified colour from the player's storage units.
+     * The method searches all storage units in row-major order and removes the first match.
+     * @param p the player from whom to remove the good
+     * @param col the colour of the good to remove
+     * @throws BusinessLogicException if removal from a storage unit fails
+     */
     public void autoCommandForRemoveSingleGood(Player p, Colour col) throws BusinessLogicException {
         for(int i=0; i<5; i++){
             for(int j=0; j<7; j++){
@@ -1203,6 +1438,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Automatically removes a specified number of crew tokens from the player's housing units.
+     * The method scans the dashboard from top-left to bottom-right and removes crew tokens
+     * in order of appearance until the requested number is removed or none remain.
+     * @param p the player from whom to remove crew tokens
+     * @param num the total number of crew to remove
+     * @throws BusinessLogicException if removal from a housing unit fails
+     */
     public void autoCommandForRemovePlayers(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
@@ -1227,6 +1470,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Automatically removes the specified number of batteries from the player's energy cells.
+     * Batteries are removed in row-major order until the required amount is deducted
+     * or no capacity remains.
+     * @param p the player from whom to remove batteries
+     * @param num the number of batteries to remove
+     * @throws BusinessLogicException if removal fails due to invalid state
+     */
     public void autoCommandForBattery(Player p, int num) throws BusinessLogicException {
         int flag = num;
         if (flag<= 0) return;
@@ -1254,7 +1505,17 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Removes a specified number of goods (and possibly batteries) from the player's ship.
+     * The method handles three scenarios:
+     * 1. All goods are lost — removes everything automatically.
+     * 2. Fewer goods lost — prompts the player (if connected) to choose which goods to discard.
+     * 3. More goods lost than owned — removes all goods and deducts remaining loss from energy.
+     * If the player is disconnected, removal is fully automatic.
+     * @param p the player whose goods are being removed
+     * @param num the total number of goods (or equivalent value) to remove
+     * @throws BusinessLogicException if a game rule is violated
+     */
     public void removeGoods(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1542,6 +1803,17 @@ public class Controller implements Serializable {
         printPlayerDashboard(x, p, nick);
     }
 
+    /**
+     * Provides an interactive loop for the player to manage their collected goods.
+     * The player can:
+     * - Add goods to storage units
+     * - Rearrange goods across units
+     * - Trash unwanted goods
+     * Prompts continue until the player chooses to exit.
+     * @param p the player managing goods
+     * @param list the list of goods currently available to place
+     * @throws BusinessLogicException if a rule is violated during interaction
+     */
     public void manageGoods(Player p, List<Colour> list) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1567,7 +1839,17 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Allows the player to add goods from the provided list to available storage units.
+     * If a storage unit is full, the player is prompted to remove a stored good.
+     * Dangerous (red) goods can only be placed in advanced storage units.
+     * The loop continues until the player chooses to stop or the list is empty.
+     * @param p the player placing the goods
+     * @param x the VirtualView associated with the player
+     * @param list the list of goods to place
+     * @param nick the nickname of the player (for messaging)
+     * @throws BusinessLogicException if adding/removing goods fails
+     */
     public void addGoods(Player p, VirtualView x, List<Colour> list, String nick) throws BusinessLogicException {
         boolean flag = true;
         Colour tempGood = null;
@@ -1641,7 +1923,19 @@ public class Controller implements Serializable {
         if(flag) reportError("Empty list of goods", nick);
     }
 
-
+    /**
+     * Allows the player to rearrange goods between different storage units.
+     * The player selects a source storage unit, chooses a good to remove,
+     * and then selects a destination unit to place it in. This process
+     * can be repeated until the player decides to stop.
+     * Validity checks are performed to ensure the selected cell is a storage unit
+     * and not empty. Red goods can only be placed in advanced units.
+     * @param p the player performing the rearrangement
+     * @param v the VirtualView used to display the dashboard
+     * @param list unused (reserved for future logic or shared reference)
+     * @param nick the player's nickname for messaging
+     * @throws BusinessLogicException if a game rule is violated during the operation
+     */
     public void caseRedistribution(Player p , VirtualView v , List<Colour> list , String nick) throws BusinessLogicException {
         printPlayerDashboard(v, p, nick);
 
@@ -1683,7 +1977,19 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Prompts the player to select a valid storage unit to place a given good.
+     * The method loops until the player selects a valid storage unit:
+     * - If the unit is full, an error is shown and the prompt repeats
+     * - If the good is red, it can only be added to an advanced unit
+     * - For all other goods, placement is allowed if space is available
+     * The operation ends once the good is successfully placed.
+     * @param v the VirtualView used to display the updated dashboard
+     * @param p the player placing the good
+     * @param color the colour of the good to be placed
+     * @param nick the player's nickname for communication
+     * @throws BusinessLogicException if the placement fails due to game rules
+     */
     public void selectStorageUnitForAdd(VirtualView v, Player p , Colour color , String nick) throws BusinessLogicException {
         int[] coordinates;
         boolean exit = false;
@@ -1721,6 +2027,16 @@ public class Controller implements Serializable {
     }
 
 
+    /**
+     * Allows the player to remove (trash) goods from their storage units.
+     * The player is prompted to select a storage unit and choose a good to remove.
+     * If no coordinates are selected, a good is removed automatically.
+     * The process can be repeated until the player chooses to stop.
+     * @param p the player removing the goods
+     * @param v the VirtualView used to display the dashboard
+     * @param nick the player's nickname for messages and prompts
+     * @throws BusinessLogicException if a removal fails or a rule is violated
+     */
     public void caseRemove(Player p , VirtualView v , String nick) throws BusinessLogicException {
         int[] coordinates;
         boolean exit = true;
@@ -1758,6 +2074,16 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Automatically assigns crew members or aliens to housing units for all players.
+     * For each player's dashboard:
+     * - If the housing unit supports HUMANS, adds two humans by default
+     * - If the housing unit is connected to a special module (purple or brown alien):
+     * - Asks the player whether to place the corresponding alien
+     * - If confirmed, places the alien and updates the player state
+     * Also updates the player dashboard view after assignment.
+     * @throws BusinessLogicException if an error occurs during crew placement
+     */
     public void addHuman() throws BusinessLogicException {
         broadcastInform("SERVER: Checking all players' ships");
         for (Player p : playersByNickname.values()) {
@@ -1830,13 +2156,22 @@ public class Controller implements Serializable {
                 }
             }
             printPlayerDashboard(x,p ,tmpNick);
-            //in tutte le abitazioni normali metto 2 human
-            //in tutte le altre chiedo se vuole un alieno -> aggiorno flag quindi smette
-            //se è connessa -> mettere umani
         }
     }
 
-
+    /**
+     * Removes a specified number of crewmates from the player's ship.
+     * If the player is connected:
+     * - Prompts them to select housing units manually
+     * If disconnected:
+     * - Automatically removes crewmates from available housing units
+     * If the number to remove is greater than or equal to total crew,
+     * all crewmates are removed.
+     * Also updates the player state if an alien is removed.
+     * @param p the player losing crew
+     * @param num the number of crewmates to remove
+     * @throws BusinessLogicException if the operation fails
+     */
     public void removeCrewmates(Player p, int num) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView x = viewsByNickname.get(nick);
@@ -1896,6 +2231,13 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Simulates a plague event affecting all connected housing units on the player's ship.
+     * Each connected housing unit with at least one crew member loses one crewmate.
+     * If the removed crewmate is an alien, the corresponding alien flag on the player is cleared.
+     * @param p the player affected by the plague
+     * @throws BusinessLogicException if crew removal fails
+     */
     public void startPlauge(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
@@ -1932,7 +2274,6 @@ public class Controller implements Serializable {
      * @param d the direction of a small meteorite of cannon_fire
      * @return if the ship is safe
      */
-
     public boolean isProtected(String nick, int d) throws BusinessLogicException {
         boolean flag = false;
         VirtualView x = viewsByNickname.get(nick);
@@ -1979,12 +2320,19 @@ public class Controller implements Serializable {
     }
 
     /**
-     * this method evaluates the protection of the ship making use of the other methods
-     *
-     * @param dir  cardinal direction of the attack
-     * @param type dimension of the attack, true if it is big
+     * Evaluates whether a player's ship can defend against an incoming attack.
+     * The method performs the following steps:
+     * - Prints an attack warning to the player
+     * - Checks if the attack is within the hit zone
+     * - If the attack is a big one or the ship is unprotected, applies damage via scriptOfDefence
+     * - Otherwise, informs the player that they are protected
+     * @param dir the cardinal direction of the attack (0 = North, 1 = East, 2 = South, 3 = West)
+     * @param type true if the attack is big, false if small
+     * @param dir2 the position index of the attack along the edge
+     * @param p the player being attacked
+     * @return true if the ship is destroyed, false otherwise
+     * @throws BusinessLogicException if tile removal or crew checks fail
      */
-
     public boolean defenceFromCannon(int dir, boolean type, int dir2, Player p) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
@@ -2009,6 +2357,12 @@ public class Controller implements Serializable {
         return false;
     }
 
+    /**
+     * Determines whether the given attack is within the valid hit zone.
+     * @param dir the cardinal direction of the attack
+     * @param dir2 the index of the impact along the ship's border
+     * @return true if the attack lands in a vulnerable zone, false otherwise
+     */
     public boolean isHitZone(int dir, int dir2) {
         return switch (dir) {
             case 0, 2 -> dir2 > 3 && dir2 < 11;
@@ -2017,9 +2371,20 @@ public class Controller implements Serializable {
         };
     }
 
-
-
-
+    /**
+     * Executes the ship’s defence logic after an attack lands.
+     * The method:
+     * - Attempts to remove the first tile hit in the attack direction
+     * - Checks if the player has lost all crew (in which case the ship is destroyed)
+     * - Notifies the player whether the attack was blocked, missed, or successful
+     * @param Nickname the nickname of the player
+     * @param p the player object
+     * @param v the associated virtual view
+     * @param dir2 the position index of the impact
+     * @param dir the cardinal direction of the attack
+     * @return true if the ship was destroyed, false otherwise
+     * @throws BusinessLogicException if tile removal or alien status updates fail
+     */
     public boolean scriptOfDefence(String Nickname, Player p, VirtualView v, int dir2, int dir) throws BusinessLogicException {
         Boolean tmpBoolean = false;
         switch (dir){
@@ -2046,12 +2411,23 @@ public class Controller implements Serializable {
     }
 
     /**
-     * this method evaluates the protection of the ship making use of the other methods
-     *
-     * @param dir  cardinal direction of the attack
-     * @param isBig dimension of the attack, true if it is big
+     * Handles the resolution of a meteorite attack on all connected, non-eliminated players.
+     * For each player:
+     * - Prints a warning and the ship's current dashboard
+     * - Checks whether the meteorite is in a valid hit zone
+     * - If the meteorite is big:
+     * - It hits unless the tile is protected by a shield
+     * - If the meteorite is small:
+     * - It hits unless the tile has no exposed connector or is shielded
+     * - If a hit occurs, the standard defence script is executed
+     * Players who are first in the list, eliminated, or disconnected are skipped.
+     * @param dir the direction the meteorite comes from (0 = North, 1 = East, etc.)
+     * @param isBig true if the meteorite is big, false if small
+     * @param dir2 the index on the border where the meteorite hits
+     * @param players the list of players involved in the game
+     * @param numMeteorite the meteorite's sequence number (used for logging)
+     * @throws BusinessLogicException if ship modification or player status update fails
      */
-
     public void defenceFromMeteorite(int dir, boolean isBig, int dir2, List<Player> players, int numMeteorite) throws BusinessLogicException {
         String[] directions = {"Nord", "East", "South", "West"};
         String direction = directions[dir];
@@ -2098,10 +2474,21 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Handles user interaction to determine whether to use a battery from an energy cell.
+     * The method:
+     * - Asks the player if they want to use a battery (with a custom message)
+     * - If confirmed, prompts the player to select an energy cell
+     * - If the selected cell has available batteries, one is consumed
+     * - If not, the player can choose to retry or abort
+     * If the player is disconnected, the action is skipped automatically.
+     * @param nick the nickname of the player
+     * @param mex a custom message displayed to the player (contextual hint)
+     * @return true if a battery was successfully used, false otherwise
+     * @throws BusinessLogicException if tile access or battery use fails
+     */
     public boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
         VirtualView x = getViewCheck(nick);
-        //Caso disconnesso WorstCase scenario: non attivo i doppi motori
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
         int[] coordinates;
@@ -2140,7 +2527,17 @@ public class Controller implements Serializable {
         }
     }
 
-
+    /**
+     * Checks whether the player's ship is protected from a big meteorite impact
+     * based on the shield configuration and the meteorite direction.
+     * The method evaluates if a shield tile protects the specified incoming direction
+     * and section of the ship.
+     * @param dir the cardinal direction of the meteorite (0 = North, 1 = East, 2 = South, 3 = West)
+     * @param dir2 the section index where the meteorite is expected to hit
+     * @param player the nickname of the player being evaluated
+     * @return true if the ship is protected, false otherwise
+     * @throws BusinessLogicException if the player or their tiles cannot be retrieved
+     */
     public boolean checkProtection(int dir, int dir2, String player) throws BusinessLogicException {
         return switch (dir) {
             case 0 -> checkColumnProtection(player, dir2 - 4);
@@ -2151,6 +2548,16 @@ public class Controller implements Serializable {
         };
     }
 
+    /**
+     * Checks if any tile in the specified column of the player's ship provides protection
+     * from a North-directed big meteorite via a cannon.
+     * Iterates through each row in the column, and for each tile that is actively used (`Status.USED`),
+     * checks whether it offers cannon protection in direction 0 (North).
+     * @param player the nickname of the player
+     * @param col the column index to check (0–6)
+     * @return true if at least one tile provides protection in that column, false otherwise
+     * @throws BusinessLogicException if tile access fails
+     */
     private boolean checkColumnProtection(String player, int col) throws BusinessLogicException {
         for (int row = 0; row < 5; row++) {
             if (playersByNickname.get(player).validityCheck(row, col) == Status.USED) {
@@ -2161,6 +2568,16 @@ public class Controller implements Serializable {
         return false;
     }
 
+    /**
+     * Checks whether the specified row or its adjacent rows provide protection
+     * from a meteorite coming from the East or West side.
+     * Evaluates the current row, the row above, and the row below.
+     * @param player the nickname of the player
+     * @param row the central row to check (0–4)
+     * @param direction the attack direction (1 = East, 3 = West)
+     * @return true if any tile in the checked rows offers cannon protection in the given direction
+     * @throws BusinessLogicException if player data is unavailable
+     */
     private boolean checkRowProtectionFromSide(String player, int row, int direction) throws BusinessLogicException {
         for (int r = row - 1; r <= row + 1; r++) {
             if (r < 0 || r >= 5) continue;
@@ -2169,7 +2586,17 @@ public class Controller implements Serializable {
         return false;
     }
 
-
+    /**
+     * Checks whether any tile in the specified row offers cannon protection
+     * in the given direction.
+     * Iterates from right to left if direction is East (1),
+     * or left to right if direction is West (3).
+     * @param player the nickname of the player
+     * @param row the row to check
+     * @param direction the side to evaluate (1 = East, 3 = West)
+     * @return true if a cannon protects the ship in that direction from that row
+     * @throws BusinessLogicException if access to the player's tile fails
+     */
     private boolean checkTileInRow(String player, int row, int direction) throws BusinessLogicException {
         if (direction == 1) {
             for (int col = 6; col >= 0; col--) {
@@ -2189,6 +2616,16 @@ public class Controller implements Serializable {
         return false;
     }
 
+    /**
+     * Checks whether the given column or its adjacent columns contain any tile
+     * that provides protection from a meteorite coming from the South.
+     * Evaluates the column and its immediate neighbors (left and right).
+     * @param player the nickname of the player
+     * @param column the central column to check (0–6)
+     * @param direction the attack direction (expected 2 = South)
+     * @return true if protection is found in any of the columns
+     * @throws BusinessLogicException if the player's ship state is inaccessible
+     */
     private boolean checkColumnProtectionFromSouth(String player, int column, int direction) throws BusinessLogicException {
         for (int c = column - 1; c <= column + 1; c++) {
             if(c < 0 || c>= 7) continue;
@@ -2197,6 +2634,16 @@ public class Controller implements Serializable {
         return false;
     }
 
+    /**
+     * Checks whether any tile in the specified column offers cannon protection
+     * in the given direction.
+     * Iterates from bottom to top.
+     * @param player the nickname of the player
+     * @param column the column to check
+     * @param direction the direction to check protection from (typically South)
+     * @return true if a tile offers protection, false otherwise
+     * @throws BusinessLogicException if the player's data cannot be accessed
+     */
     private boolean checkTileInColumn(String player, int column, int direction) throws BusinessLogicException {
         for(int row = 4; row >= 0; row--){
             if (playersByNickname.get(player).validityCheck(row, column) == Status.USED){
@@ -2207,6 +2654,18 @@ public class Controller implements Serializable {
         return false;
     }
 
+    /**
+     * Determines whether the given tile is a cannon that provides protection
+     * in the specified orientation.
+     * Handles single and double cannons:
+     * - For double cannons, energy is required to activate
+     * - For single cannons, protection is granted if the connector is facing outward
+     * @param tile the tile to evaluate
+     * @param player the nickname of the player (used to interactively request energy use)
+     * @param orientation the direction to evaluate (0–3, depending on attack origin)
+     * @return true if the cannon provides protection, false otherwise
+     * @throws BusinessLogicException if battery activation fails
+     */
     private boolean isCannonProtected(Tile tile, String player , int orientation) throws BusinessLogicException {
         switch (tile){
             case Cannon c -> {
@@ -2219,6 +2678,15 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Asks the player to select a starting housing unit to revalidate the ship structure after damage.
+     * If the player is connected, prompts them to select a tile until a valid housing unit is chosen.
+     * If the player is not connected, the central tile (2,3) is used by default.
+     * Once a valid housing unit is selected, the method triggers a ship structure check
+     * using the `controlAssembly` method on the player's dashboard.
+     * @param nickname the player's nickname
+     * @throws BusinessLogicException if tile access or structural validation fails
+     */
     public void askStartHousingForControl(String nickname) throws BusinessLogicException {
         Player p = getPlayerCheck(nickname);
 
@@ -2256,6 +2724,15 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Triggers a structure validation of the player's ship starting from the specified tile.
+     * This method calls `controlAssembly` on the player's dashboard to verify tile connectivity.
+     * It also updates the dashboard view to reflect any changes caused by the validation process.
+     * @param nick the nickname of the player
+     * @param x the row index of the starting tile
+     * @param y the column index of the starting tile
+     * @throws BusinessLogicException if structural checks fail or player/view access fails
+     */
     public void checkPlayerAssembly(String nick, int x, int y) throws BusinessLogicException {
         Player p = getPlayerCheck(nick);
         VirtualView v = getViewCheck(nick);
@@ -2263,10 +2740,39 @@ public class Controller implements Serializable {
         printPlayerDashboard(v, p, nick);
     }
 
+    /**
+     * Returns the current game phase of the specified player as a string.
+     * If serialization fails, returns "EXIT" as fallback.
+     * @param nick the player's nickname
+     * @return the current game phase as a string, or "EXIT" on error
+     */
+    public String getGamePhase(String nick){
+        try {
+            return enumSerializer.serializeGamePhase(playersByNickname.get(nick).getGamePhase());
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in serializeGamePhase: " + e.getMessage());
+        }
+        return "EXIT";
+    }
+
+    /**
+     * Returns the player's dashboard matrix serialized as a 2D JSON array of tiles.
+     * If serialization fails, returns null.
+     * @param nick the player's nickname
+     * @return a 2D JSON representation of the player's dashboard, or null on error
+     */
+    public String[][] getDashJson(String nick){
+        try {
+            return tileSerializer.toJsonMatrix( playersByNickname.get(nick).getDashMatrix());
+        } catch (JsonProcessingException e) {
+            System.err.println("[ERROR] in serializeDashMatrix: " + e.getMessage());
+        }
+        return null;
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     public FlightCardBoard getFlightCardBoard() {
         return fBoard;
@@ -2279,7 +2785,6 @@ public class Controller implements Serializable {
      *
      * @param card card
      */
-
     public void activateCard(Card card) throws BusinessLogicException {
         CardEffectVisitor visitor = new CardEffectVisitor(this);
         card.accept(visitor);
@@ -2300,25 +2805,6 @@ public class Controller implements Serializable {
         }
         deck.shuffle();
     }
-
-
-    //metodi da inserire nel card visitor per gestione tui
-
-    /**
-    public void changePhaseFromCard(String nick, Player p, GamePhase tmp){
-        if(p.isConnected()){
-            try {
-                viewsByNickname.get(nick).updateGameState(enumSerializer.serializeGamePhase(tmp));
-                //notifyView(nick);
-            } catch (IOException e) {
-                markDisconnected(nick);
-            } catch (Exception e){
-                markDisconnected(nick);
-                System.err.println("[ERROR] in changePhaseFromCard: " + e.getMessage());
-            }
-        }
-    }
-     */
 
     public void changeMapPosition(String nick, Player p) throws BusinessLogicException {
         playersPosition = buildPlayersPositionMap();
@@ -2358,24 +2844,6 @@ public class Controller implements Serializable {
 
     public Map<String,int[] > getPlayersPosition(){
         return new HashMap<>(playersPosition);
-    }
-
-    public String getGamePhase(String nick){
-        try {
-            return enumSerializer.serializeGamePhase(playersByNickname.get(nick).getGamePhase());
-        } catch (JsonProcessingException e) {
-            System.err.println("[ERROR] in serializeGamePhase: " + e.getMessage());
-        }
-        return "EXIT";
-    }
-
-    public String[][] getDashJson(String nick){
-        try {
-            return tileSerializer.toJsonMatrix( playersByNickname.get(nick).getDashMatrix());
-        } catch (JsonProcessingException e) {
-            System.err.println("[ERROR] in serializeDashMatrix: " + e.getMessage());
-        }
-        return null;
     }
 
     private Map<String,int[]> buildPlayersPositionMap() {

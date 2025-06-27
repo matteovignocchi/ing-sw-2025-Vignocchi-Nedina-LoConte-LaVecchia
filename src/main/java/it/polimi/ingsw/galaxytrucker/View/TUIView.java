@@ -1,9 +1,7 @@
 package it.polimi.ingsw.galaxytrucker.View;
-
 import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +15,6 @@ public class TUIView implements View {
     private boolean isDemo;
     private Boolean[][] mask;
     private final BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-    private Scanner scanner = new Scanner(System.in);
     private static final String RESET = "\u001B[0m";
     private static final String YELLOW = "\u001B[33m";
     private static final String RED = "\u001B[31m";
@@ -36,9 +33,6 @@ public class TUIView implements View {
     );
     private static final long TIME_OUT = 300000;
 
-
-    //per ora lascio il server come int
-    //alla fine di ogni comando scritto dagli altri una show update
     @Override
     public void start() {
         System.out.println(
@@ -87,12 +81,15 @@ public class TUIView implements View {
 
     @Override
     public void inform(String message) {System.out.println(message);}
+
     @Override
     public void reportError(String message) {System.out.println(RED+ "[ERROR] " + message + RESET);}
+
     @Override
     public void updateState(ClientGamePhase gamePhase) {
         game = gamePhase;
     }
+
     @Override
     public void updateMap(Map<String, int[]> map) {
         mapPosition = map;
@@ -144,8 +141,6 @@ public class TUIView implements View {
             reportError("Please enter a valid nickname from the list");
         }
     }
-
-
 
     @Override
     public Boolean ask(String message) {
@@ -376,7 +371,6 @@ public class TUIView implements View {
         }
     }
 
-
     @Override
     public void printListOfGoods(List<String> Goods) {
         inform("List of goods: ");
@@ -479,7 +473,6 @@ public class TUIView implements View {
                 });
     }
 
-    /// position diventa una mappa stringa intero
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         switch(game){
@@ -495,7 +488,6 @@ public class TUIView implements View {
         printMapPosition();
         System.out.println();
     }
-
 
     @Override
     public void printDeck(List<ClientCard> deck) {
@@ -578,7 +570,6 @@ public class TUIView implements View {
         }
     }
 
-    /** Converte [RED, BLUE] in "RED, BLUE" */
     private String joinGoods(List<String> goods) {
         return goods.stream()
                 .map(c -> ANSI_COLOR.getOrDefault(c, "")
@@ -587,10 +578,7 @@ public class TUIView implements View {
                 .collect(Collectors.joining(", "));
     }
 
-    private void printWarzoneTable(List<Integer> dirs,
-                                   List<Boolean> sizes,
-                                   String summary1,
-                                   String summary2) {
+    private void printWarzoneTable(List<Integer> dirs, List<Boolean> sizes, String summary1, String summary2) {
         inform(summary1);
         inform(summary2);
         printAttackTable(dirs, sizes);
@@ -749,9 +737,6 @@ public class TUIView implements View {
         return null;
     }
 
-
-
-
     private String[] renderTile(ClientTile tile) {
         String[] out = new String[3];
         int a = tile.a;
@@ -832,8 +817,6 @@ public class TUIView implements View {
         return out;
 
     }
-
-    /// ///// DA QUI IN BASSO LAVORO IO ///////
 
     private List<String> commandConstructor(){
         List<String> listOfOptions = new ArrayList<>();
@@ -1028,6 +1011,7 @@ public class TUIView implements View {
         this.mask = validStatus;
 
     }
+
     @Override
     public void displayAvailableGames (Map<Integer, int[]> availableGames) {
         for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
@@ -1038,14 +1022,17 @@ public class TUIView implements View {
             this.inform(id + ". Players in game : " + info[0] + "/" + info[1] + suffix);
         }
     }
+
     @Override
     public boolean returnValidity(int a , int b){
         return mask[a][b];
     }
+
     @Override
     public void setValidity(int a , int b){
         mask[a][b] = false;
     }
+
     @Override
     public void resetValidity(int a , int b){
         mask[a][b] = true;
@@ -1055,16 +1042,15 @@ public class TUIView implements View {
     public void setTile(ClientTile tile,  int row, int col){
         
     }
+
    @Override
-   public void setCurrentTile(ClientTile tile){
-        
-   }
+   public void setCurrentTile(ClientTile tile){}
+
    @Override
    public void setNickName(String nickname){
         this.nickname = nickname;
    }
-    
-    
+
     @Override
     public ClientGamePhase getGamePhase() {return game;}
 
@@ -1082,10 +1068,6 @@ public class TUIView implements View {
             reportError("Invalid choice, try again.");
         }
     }
-
-
-
-
 }
 
 

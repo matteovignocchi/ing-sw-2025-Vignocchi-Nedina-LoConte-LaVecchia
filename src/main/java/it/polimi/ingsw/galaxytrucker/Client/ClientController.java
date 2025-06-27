@@ -16,9 +16,6 @@ import java.util.Map;
 import static java.lang.String.valueOf;
 
 
-//trasporto il client da un'altra parte per una questione di scalabilità e correttezza :
-//non dovendo lavorare con static diventa più testabile e se plice
-
 public class ClientController {
     private final View view;
     private final VirtualView virtualClient;
@@ -28,18 +25,10 @@ public class ClientController {
     private ClientTile[][] Dash_Matrix;
     private ClientGamePhase currentGamePhase;
     private String nickname;
-
-
-    //Cose per il refactor dei json
     private final ClientTileFactory clientTileFactory;
     private final ClientCardFactory clientCardFactory;
     private final ClientEnumFactory clientEnumFactory;
-
     public String json = "boh";
-
-
-    private static ClientController instance;
-
 
     public ClientController(View view, VirtualView virtualClient) {
         this.view = view;
@@ -161,7 +150,6 @@ public class ClientController {
         }
     }
 
-
     private void mainMenuLoop() throws Exception {
         while (isConnected) {
             printMainMenu();
@@ -198,7 +186,6 @@ public class ClientController {
         }
     }
 
-
     private void printMainMenu() {
         view.inform("-----MENU-----");
         view.inform("1. Create new game");
@@ -206,7 +193,6 @@ public class ClientController {
         view.inform("3. Logout");
         view.inform("Insert index:");
     }
-
 
     public void createNewGame() throws Exception {
         switch (view) {
@@ -269,7 +255,6 @@ public class ClientController {
         return 0;
     }
 
-
     public void joinExistingGame() throws Exception {
         switch (view){
             case GUIView g -> {
@@ -300,62 +285,6 @@ public class ClientController {
 
     public int sendGameRequestFromController(String msg, int numberOfPlayer, boolean isDemo) throws Exception {
         return virtualClient.sendGameRequest(msg, numberOfPlayer, isDemo);
-    }
-
-
-    /**
-     * private boolean waitForFlightStart() throws Exception {
-     * <p>
-     * if (currentGamePhase == ClientGamePhase.WAITING_FOR_PLAYERS) {
-     * return true;
-     * }
-     * <p>
-     * view.inform("Waiting for other players to finish their ship…\n");
-     * view.inform("Possible actions while waiting for flight:");
-     * view.inform(" 1: Watch a player's ship");
-     * view.inform(" 2: Logout");
-     * view.inform("Insert index:");
-     * <p>
-     * BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-     * while (currentGamePhase == ClientGamePhase.WAITING_FOR_PLAYERS) {
-     * if (console.ready()) {
-     * String line = console.readLine().trim();
-     * switch (line) {
-     * case "1" -> virtualClient.lookDashBoard();
-     * case "2" -> {
-     * virtualClient.leaveGame();
-     * view.inform("Returned to main menu");
-     * return false;
-     * }
-     * default -> view.reportError("Invalid choice. Please enter 1 or 2.");
-     * }
-     * } else {
-     * Thread.sleep(200);
-     * }
-     * }
-     * System.out.println("");
-     * view.inform("Flight is starting! Good luck!\n");
-     * return true;
-     * }
-     */
-
-
-    private boolean handleWaitForGameStart() throws Exception {
-        view.inform("Waiting for other players…");
-        view.inform("Type 'exit' to abandon the lobby and return to main menu.");
-
-        while (true) {
-            if (currentGamePhase != ClientGamePhase.WAITING_FOR_PLAYERS) {
-                return true;
-            }
-
-            String line = view.askString().trim();
-            if ("exit".equalsIgnoreCase(line)) {
-                virtualClient.leaveGame();
-                view.inform("Returned to main menu");
-                return false;
-            }
-        }
     }
 
     private void startGame() {
@@ -672,9 +601,6 @@ public class ClientController {
         }
     }
 
-
-    /// /metodi che mi servono per la gui///
-    ///
     public void setCurrentTile(String jsonTile) {
         if (currentGamePhase == ClientGamePhase.TILE_MANAGEMENT) {
             try {
@@ -709,7 +635,6 @@ public class ClientController {
             view.setValidity(a, b);
         }
     }
-
 
     public void showUpdateByController(String nickname, double firePower, int powerEngine, int credits, boolean purpleAline, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         view.updateView(nickname, firePower, powerEngine, credits, purpleAline, brownAlien, numberOfHuman, numberOfEnergy);
@@ -838,15 +763,6 @@ public class ClientController {
         return view.returnValidity(a, b);
     }
 
-    public String getSomeTile(int a, int b) {
-        try {
-            return clientTileFactory.toJson(Dash_Matrix[a][b]);
-        } catch (JsonProcessingException e) {
-            view.reportError(e.getMessage());
-        }
-        return null;
-    }
-
     public void updateMapPositionByController(Map<String, int[]> Position) {
         view.updateMap(Position);
     }
@@ -873,7 +789,6 @@ public class ClientController {
         return Dash_Matrix[a][b].id;
     }
 
-
     private void resetModel() {
         Dash_Matrix = new ClientTile[5][7];
         for (int i = 0; i < 5; i++) {
@@ -884,7 +799,6 @@ public class ClientController {
             }
         }
     }
-
 
 }
 
