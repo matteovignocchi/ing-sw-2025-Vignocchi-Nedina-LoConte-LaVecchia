@@ -26,7 +26,7 @@ public class ServerSocketMain implements Runnable {
      * Constructs the socket server with the specified GameManager and port.
      *
      * @param gameManager the GameManager instance to handle game logic for clients
-     * @param port        the TCP port on which the server will listen
+     * @param port the TCP port on which the server will listen
      */
     public ServerSocketMain(GameManager gameManager, int port) {
         this.gameManager = gameManager;

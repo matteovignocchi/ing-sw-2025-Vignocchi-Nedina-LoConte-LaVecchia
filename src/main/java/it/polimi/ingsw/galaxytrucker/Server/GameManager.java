@@ -368,6 +368,10 @@ public class GameManager {
         }
     }
 
+    /**
+     * Absolute path to save games.
+     */
+    private static final File SAVES_DIR = new File(System.getProperty("user.home"), ".galaxytrucker" + File.separator + "saves");
 
     /**
      * Schedules periodic saving of all active games every minute.
@@ -396,7 +400,7 @@ public class GameManager {
      * @throws IOException if an I/O error occurs during saving
      */
     private void saveGameState(int gameId, Controller controller) throws IOException {
-        File dir = savesDir;
+        File dir = SAVES_DIR;
         if (!dir.exists()) dir.mkdirs();
 
         File tmp = new File(dir, "game_" + gameId + ".sav.tmp");
@@ -419,8 +423,8 @@ public class GameManager {
      * @param gameId the identifier of the game whose save file should be removed
      */
     private void deleteSavedGame(int gameId) {
-        File f = new File(savesDir, "game_" + gameId + ".sav");
-        System.out.println("⏏ Deleting save in: " + f.getAbsolutePath());
+        File f = new File(SAVES_DIR, "game_" + gameId + ".sav");
+        System.out.println("Deleting save in: " + f.getAbsolutePath());
         if (f.exists() && !f.delete()) {
             System.err.println("I cannot delete the game " + gameId);
         }
@@ -431,12 +435,13 @@ public class GameManager {
      * and repopulates the internal game maps.
      */
     private void loadSavedGames() {
-        File dir = savesDir;
+        File dir = SAVES_DIR;
         if (!dir.exists()) return;
         int maxId = 0;
 
         File[] files = dir.listFiles((d,n) -> n.matches("game_\\d+\\.sav"));
-        if (files != null) for (File f : files) {
+        if (files != null)
+            for (File f : files) {
             try (var in = new ObjectInputStream(new FileInputStream(f))) {
                 Controller controller = (Controller) in.readObject();
                 int gameId = Integer.parseInt(f.getName().replaceAll("\\D+", ""));
@@ -531,14 +536,4 @@ public class GameManager {
                         }
                 ));
     }
-
-//    public void handleDisconnectRmi(int gameId, String nickname) {
-//        try {
-//            Controller ctrl = getControllerCheck(gameId);
-//            ctrl.markDisconnected(nickname);
-//            System.out.println("Marked "+nickname+" as DISCONNECTED in game "+gameId);
-//        } catch (BusinessLogicException e) {
-//        }
-//    }
-
 }

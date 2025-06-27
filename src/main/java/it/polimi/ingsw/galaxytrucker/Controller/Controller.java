@@ -983,8 +983,8 @@ public class Controller implements Serializable {
             p.setGamePhase(GamePhase.EXIT);
 
             if(p.isConnected()){
-                if(totalCredits>0) inform("SERVER: " + "Your total credits are: " + totalCredits + " You won!", nick);
-                else inform("SERVER: " + "Your total credits are: " + totalCredits + " You lost!", nick);
+                if(totalCredits>0) inform("\nSERVER: " + "Your total credits are: " + totalCredits + "\nYOU WON!", nick);
+                else inform("SERVER: " + "Your total credits are: " + totalCredits + "\nYOU LOST!", nick);
 
                 informAndNotify("SERVER: " + "Game over. Thank you for playing!", nick);
             }
