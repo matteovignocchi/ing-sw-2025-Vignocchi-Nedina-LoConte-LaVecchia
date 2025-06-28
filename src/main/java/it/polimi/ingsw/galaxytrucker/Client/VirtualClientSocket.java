@@ -20,7 +20,8 @@ import java.util.concurrent.CountDownLatch;
  * from the server and dispatches them based on their type (REQUEST, RESPONSE, UPDATE, etc.).
  * This class acts as a passive intermediary, delegating game logic and state rendering to
  * the {@link ClientController}, and remaining agnostic of the actual view implementation.
- * @author Matteo Vignocchi && Francesco Lo Conte
+ * @author Matteo Vignocchi
+ * @author Francesco Lo Conte
  */
 public class VirtualClientSocket implements Runnable, VirtualView {
 
