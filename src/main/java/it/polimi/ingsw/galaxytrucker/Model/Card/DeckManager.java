@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * The DeckManager class is responsible for creating playable decks of adventure cards using cards loaded
  * via the CardGeneration class. This class can be used by the game controller to generate shuffled decks.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class DeckManager implements Serializable {

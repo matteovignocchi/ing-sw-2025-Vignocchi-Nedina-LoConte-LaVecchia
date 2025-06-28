@@ -9,7 +9,8 @@ import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
  * It also supports polymorphic deserialization from JSON using Jackson.
  * The "JsonTypeInfo" and "JsonSubTypes" annotations enable the ObjectMapper
  * to correctly instantiate the specific card subclass based on the "type" property in the JSON file.
- * @author Gabriele La vecchia && Francesco Lo Conte
+ * @author Gabriele La vecchia
+ * @auth Francesco Lo Conte
  */
 
 @JsonTypeInfo(

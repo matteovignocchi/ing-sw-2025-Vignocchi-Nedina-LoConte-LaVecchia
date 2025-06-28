@@ -7,7 +7,8 @@ import it.polimi.ingsw.galaxytrucker.Exception.BusinessLogicException;
  * Card objects without changing their classes. Each concrete card type implements the "accept" method,
  * which invokes the appropriate "visit" method defined here. Implementations of this interface define
  * the behavior that should occur when a specific card is activated during gameplay.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 public interface CardVisitor {
     /**

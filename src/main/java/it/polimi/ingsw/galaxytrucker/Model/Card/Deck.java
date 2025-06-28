@@ -7,7 +7,8 @@ import java.util.*;
  * Represents a deck of Card objects.
  * The deck follows a FIFO (First-In-First-Out) logic using a LinkedList internally.
  * This class is used to organize and manage the adventure cards drawn during the game.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class Deck  implements Serializable {

@@ -10,7 +10,8 @@ import java.util.List;
 /**
  * This class handles the SecondWarzoneCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class SecondWarzoneCard implements Card, Serializable {

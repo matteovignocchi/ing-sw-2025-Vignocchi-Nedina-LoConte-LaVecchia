@@ -10,7 +10,8 @@ import java.io.Serializable;
 /**
  * This class handles the AbandonedShipCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class AbandonedShipCard implements Card, Serializable {
