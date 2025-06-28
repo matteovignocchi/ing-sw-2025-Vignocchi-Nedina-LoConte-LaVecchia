@@ -12,7 +12,8 @@ import java.util.List;
 
 /**
  * Class that describes the FlightCardBoard (for demo flight) and its methods
- * @author Gabriele La Vecchia && Francesco Lo Conte
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
  */
 
 public class FlightCardBoard implements Serializable {

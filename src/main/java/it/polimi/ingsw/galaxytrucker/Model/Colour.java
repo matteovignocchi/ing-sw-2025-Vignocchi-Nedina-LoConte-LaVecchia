@@ -3,7 +3,8 @@ package it.polimi.ingsw.galaxytrucker.Model;
 /**
  * Enumeration to distinguish the main colours
  * that identify rockets, players, cargo
- * @author Gabriele La Vecchia & Francesco Lo Conte
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
  */
 
 public enum Colour {
