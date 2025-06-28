@@ -242,6 +242,8 @@ public class GUIView extends Application implements View {
                         numberOfHuman,
                         numberOfEnergy);}
         });
+        FinalSceneController ctrl2 = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
+        ctrl2.updateFinalScreen();
     }
 
     @Override

@@ -23,9 +23,6 @@ public class FinalSceneController extends GUIController {
 
     @FXML private Label playerNameLabel;
     @FXML private Label playerPointsLabel;
-    @FXML private Label opponent1Label;
-    @FXML private Label opponent2Label;
-    @FXML private Label opponent3Label;
     @FXML private Button logoutButton;
     @FXML private Label titleLabel;
 
@@ -48,52 +45,23 @@ public class FinalSceneController extends GUIController {
      * Displays the current player's nickname, credits, and position.
      * Lists the positions of up to three opponents, skipping the current player.
      */
-    private void updateFinalScreen() {
+    public void updateFinalScreen() {
         String me = model.getNickname();
         int[] myData = model.getPlayerPositions().get(me);
         int myCredits = (myData != null && myData.length > 1) ? myData[1] : 0;
-        boolean iAmEliminated = (myData != null && myData.length > 2 && myData[2] == 1);
 
         playerNameLabel.setText(me);
         playerPointsLabel.setText("Credits: " + myCredits);
 
-        List<Map.Entry<String, int[]>> sortedPlayers = model.getPlayerPositions().entrySet().stream()
-                .sorted((e1, e2) -> Integer.compare(
-                        e2.getValue().length > 1 ? e2.getValue()[1] : 0,
-                        e1.getValue().length > 1 ? e1.getValue()[1] : 0))
-                .toList();
 
-        boolean iAmFirst = !sortedPlayers.isEmpty() && sortedPlayers.get(0).getKey().equals(me);
-
-        if (iAmFirst && !iAmEliminated) {
+        if (myCredits > 0) {
             titleLabel.setText("You won!");
             titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 28px;");
         } else {
-            titleLabel.setText("Final Results");
-            titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 24px;");
-        }
-
-        int index = 0;
-        int labelIndex = 0;
-
-        for (Map.Entry<String, int[]> entry : sortedPlayers) {
-            String name = entry.getKey();
-            if (name.equals(me)) continue;
-
-            String line = (index + 1) + "° - " + name;
-
-            switch (labelIndex++) {
-                case 0 -> opponent1Label.setText(line);
-                case 1 -> opponent2Label.setText(line);
-                case 2 -> opponent3Label.setText(line);
-            }
-
-            index++;
-
-            if (labelIndex >= 3) break;
+            titleLabel.setText("You lost!");
+            titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 28px;");
         }
     }
-
 
 
 

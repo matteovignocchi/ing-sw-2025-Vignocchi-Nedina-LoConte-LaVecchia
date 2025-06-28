@@ -992,6 +992,11 @@ public class Controller implements Serializable {
         if (onGameEnd != null) {
             onGameEnd.accept(gameId);
         }
+        for (Player p : playersByNickname.values()) {
+            String nick = getNickByPlayer(p);
+            notifyView(nick);
+        }
+
     }
 
     /**
