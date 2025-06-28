@@ -230,7 +230,7 @@ public class GameController extends GUIController {
     @Override
     public void postInitialize() {
         initializeGrid();
-        updateDashboard(model.getDashboard());
+        updateDashboard();
         setCommandVisibility(model.isDemo());
     }
 
