@@ -1,8 +1,6 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI;
 
 import it.polimi.ingsw.galaxytrucker.Client.*;
-import it.polimi.ingsw.galaxytrucker.Model.GamePhase;
-import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.*;
 import it.polimi.ingsw.galaxytrucker.View.View;
 import javafx.animation.*;
@@ -11,29 +9,21 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
-
 import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.*;
 
 public class GUIView extends Application implements View {
@@ -63,7 +53,6 @@ public class GUIView extends Application implements View {
     private List<String> bufferedGoods = List.of();
     private volatile long lastAskCoordinateTimestamp = 0;
     private volatile long lastAskIndexTimestamp = 0;
-
 
 
 
@@ -102,10 +91,6 @@ public class GUIView extends Application implements View {
     public void setSceneEnum(SceneEnum sceneEnum) {
         this.sceneEnum = sceneEnum;
         sceneRouter.setScene(sceneEnum);
-    }
-
-    public void resolveNickname(String nickname) {
-        inputManager.nicknameFuture.complete(nickname);
     }
 
     public void resolveMenuChoice(String choice) {
@@ -229,11 +214,10 @@ public class GUIView extends Application implements View {
         return result;
     }
 
-
-
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
     }
+
     public void setBufferedBoolean(Boolean value) {this.bufferedBoolean = value;}
 
     @Override
@@ -260,16 +244,6 @@ public class GUIView extends Application implements View {
                         numberOfEnergy);}
         });
     }
-
-    public String askMenuChoice() {
-        try {
-            return inputManager.menuChoiceFuture.get();
-        } catch (Exception e) {
-            reportError("Failed to get menu choice: " + e.getMessage());
-            return "";
-        }
-    }
-
 
     @Override
     public void printDashShip(ClientTile[][] ship) {
@@ -313,9 +287,6 @@ public class GUIView extends Application implements View {
         }
     }
 
-
-
-
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
         model.setPlayerPositions(playerMaps);
@@ -328,13 +299,8 @@ public class GUIView extends Application implements View {
         });
     }
 
-    public Map<String, int[]> getPlayerPositions() {
-       return model.getPlayerPositions();
-    }
-
     public void updateState(ClientGamePhase newPhase) {
 
-        //TODO CAPIRE SE SERVE
         System.out.println("[DEBUG] updateState ricevuto: " + newPhase);
         if (newPhase == this.gamePhase) {
             System.out.println("[DEBUG] Fase invariata, non aggiorno: " + newPhase);
@@ -355,7 +321,7 @@ public class GUIView extends Application implements View {
                 }
                 case TILE_MANAGEMENT -> {
                     setSceneEnum(BUILDING_PHASE);
-//                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
+                    sceneRouter.getController(BUILDING_PHASE).postInitialize();
                     sceneRouter.getController(SceneEnum.BUILDING_PHASE).postInitialize2();
                 }
                 case TILE_MANAGEMENT_AFTER_RESERVED->{
@@ -396,8 +362,6 @@ public class GUIView extends Application implements View {
         });
     }
 
-
-
     @Override
     public void printTile(ClientTile tile) {
         Platform.runLater(() -> {
@@ -416,12 +380,8 @@ public class GUIView extends Application implements View {
         });
     }
 
-
-
     @Override
-    public void printListOfCommand() {
-
-    }
+    public void printListOfCommand() {}
 
     @Override public Boolean ask(String message) { return false; }
 
@@ -439,10 +399,9 @@ public class GUIView extends Application implements View {
             }
 
             ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU); // ✅ Solo ora cambiamo scena
+            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
         });
     }
-
 
     @Override
     public void setTile(ClientTile tile, int row, int col) {
@@ -462,7 +421,6 @@ public class GUIView extends Application implements View {
         });
     }
 
-
     @Override
     public void setCurrentTile(ClientTile tile) {
         Platform.runLater(() -> {
@@ -471,14 +429,13 @@ public class GUIView extends Application implements View {
         });
     }
 
-
     @Override
-    public void setNickName(String cognomePradella) {
+    public void setNickName(String cognomePradella) {}
 
-    }
     public void setBufferedIndex(Integer index) {
         this.bufferedIndex = index;
     }
+
     @Override
     public Integer askIndex() {
         while (bufferedIndex == null) {
@@ -565,21 +522,20 @@ public class GUIView extends Application implements View {
         return res;
     }
 
-
     @Override
     public boolean askWithTimeout(String message) {
-        long timeout = 200_000; // 20 secondi
+        long timeout = 200_000;
         long deadline = System.currentTimeMillis() + timeout;
         if (message != null && message.startsWith("SERVER:")) {
-            message = message.substring("SERVER:".length()).strip(); // rimuove e pulisce spazi
+            message = message.substring("SERVER:".length()).strip();
         }
-        bufferedBoolean = null; // reset
+        bufferedBoolean = null;
 
         String finalMessage = message;
         Platform.runLater(() -> {
             GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
             if (ctrl != null) {
-                ctrl.showYesNoButtons(finalMessage); // mostra pulsanti nella GUI
+                ctrl.showYesNoButtons(finalMessage);
             } else {
                 reportError("Controller non disponibile per askWithTimeout.");
             }
@@ -604,7 +560,6 @@ public class GUIView extends Application implements View {
         return result;
     }
 
-
     @Override
     public int[] askCoordinatesWithTimeout() {
         lastAskCoordinateTimestamp = System.currentTimeMillis();
@@ -618,7 +573,7 @@ public class GUIView extends Application implements View {
             }
         });
 
-        long deadline = System.currentTimeMillis() + 200_000; // 20 secondi
+        long deadline = System.currentTimeMillis() + 200_000;
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
                 reportError("Timeout su askCoordinate.");
@@ -639,8 +594,6 @@ public class GUIView extends Application implements View {
         return result;
     }
 
-
-
     @Override
     public String choosePlayer() {
         if (bufferedPlayerName != null) {
@@ -652,11 +605,8 @@ public class GUIView extends Application implements View {
         }
     }
 
-
     @Override
-    public void start() {
-
-    }
+    public void start() {}
 
     @Override public void setIsDemo(Boolean demo) { model.setDemo(demo); }
 
@@ -688,9 +638,13 @@ public class GUIView extends Application implements View {
 
 
     }
-    @Override public void printMapPosition() {}
 
-    @Override public void printPileCovered() {}
+    @Override
+    public void printMapPosition() {}
+
+    @Override
+    public void printPileCovered() {}
+
     @Override
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
@@ -700,6 +654,7 @@ public class GUIView extends Application implements View {
             ctrl.displayTileSelection(tiles);
         });
     }
+
     @Override
     public void printCard(ClientCard card) {
         Platform.runLater(() -> {
@@ -718,7 +673,6 @@ public class GUIView extends Application implements View {
         });
     }
 
-
     @Override
     public void printDeck(List<ClientCard> deck) {
         Platform.runLater(() -> {
@@ -726,7 +680,6 @@ public class GUIView extends Application implements View {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PrintDeck.fxml"));
                 AnchorPane root = loader.load();
 
-                // Ottieni i tre pannelli (meglio usare fx:id se possibile)
                 Pane leftPane = (Pane) root.getChildren().get(1);
                 Pane centerPane = (Pane) root.getChildren().get(2);
                 Pane rightPane = (Pane) root.getChildren().get(3);
@@ -740,20 +693,11 @@ public class GUIView extends Application implements View {
                     panes.get(i).getChildren().add(imageView);
                 }
 
-                // Crea una nuova finestra
                 Stage popupStage = new Stage();
                 popupStage.setTitle("Deck");
-
-                // Imposta la scena
                 Scene popupScene = new Scene(root);
                 popupStage.setScene(popupScene);
-
-                // Centra la finestra sullo schermo
                 popupStage.centerOnScreen();
-
-                // (Opzionale) Imposta come modale rispetto alla finestra principale
-                // popupStage.initModality(Modality.WINDOW_MODAL);
-                // popupStage.initOwner(mainStage);
                 Button done = (Button) root.lookup("#done");
                 if (done != null) {
                     done.setOnAction(e -> popupStage.close());
@@ -770,24 +714,11 @@ public class GUIView extends Application implements View {
         });
     }
 
-
-
-
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
         inputManager.resetAll();
     }
 
-    public void askCoordinateAsync(Consumer<int[]> callback) {
-        inputManager.coordinateFuture = new CompletableFuture<>();
-        inputManager.coordinateFuture.thenAccept(callback);
-    }
-    public void prepareCoordinateInput() {
-        Platform.runLater(() -> {
-            BuildingPhaseController ctrl = (BuildingPhaseController) sceneRouter.getController(BUILDING_PHASE);
-           // ctrl.enableGridSelection(); // questo metodo lo definisci tu se vuoi, ad esempio per abilitare highlight, ecc.
-        });
-    }
     @Override
     public String sendAvailableChoices() {
         try {
@@ -803,23 +734,12 @@ public class GUIView extends Application implements View {
         commandQueue.offer(command);
     }
 
-
-
     public boolean hasResolvedMenuChoice() {
         return !menuChoiceQueue.isEmpty();
     }
 
     public String consumeMenuChoice() {
         return menuChoiceQueue.poll();
-    }
-
-    public void prepareIndexInput(Runnable enableUI) {
-        inputManager.indexFuture = new CompletableFuture<>();
-        Platform.runLater(enableUI);
-    }
-    public void askIndexAsync(Consumer<Integer> callback) {
-        inputManager.indexFuture = new CompletableFuture<>();
-        inputManager.indexFuture.thenAccept(callback);
     }
 
     public List<Object> askCreateGameData() {
@@ -856,13 +776,6 @@ public class GUIView extends Application implements View {
         }
     }
 
-
-    public void resolveIndex(int index) {
-        if (!inputManager.indexFuture.isDone()) {
-            inputManager.indexFuture.complete(index);
-        }
-    }
-
     @Override
     public int askGameToJoin(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameStrings = FXCollections.observableArrayList();
@@ -892,11 +805,6 @@ public class GUIView extends Application implements View {
         }
     }
 
-
-
-
-
-
     /**
      * Aggiunge una notifica alla coda da visualizzare a schermo con animazione.
      * @param message il testo da mostrare
@@ -907,7 +815,6 @@ public class GUIView extends Application implements View {
         }
         playNextNotification();
     }
-
 
     /**
      * Mostra la prossima notifica dalla coda, se non è in corso un’animazione.
@@ -1005,29 +912,8 @@ public class GUIView extends Application implements View {
         });
     }
 
-
-    private void updateNotificationPositions() {
-        double baseY = sceneRouter.getCurrentScene().getHeight() - 100;
-        double toastHeight = 60;
-
-        for (int i = 0; i < activeNotifications.size(); i++) {
-            StackPane toast = activeNotifications.get(i);
-            double newY = baseY - i * (toastHeight + 10);
-            TranslateTransition move = new TranslateTransition(Duration.millis(200), toast);
-            move.setToY(newY);
-            move.play();
-        }
-    }
-
-
-
-
-
-
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
         String lowerMsg = message.strip().toLowerCase();
-
-        // Messaggi da filtrare sempre
         if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) return false;
         if (lowerMsg.contains("waiting for other players...")) return false;
         if (lowerMsg.contains("choose deck")) return false;
@@ -1063,26 +949,6 @@ public class GUIView extends Application implements View {
         this.previewingEnemyDashboard = true;
         this.bufferedPlayerName = enemyName;
         System.out.println(""+ enemyName);
-    }
-    public void preparePlayerCoordinateInput() {
-        Platform.runLater(() -> {
-            GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
-            ctrl.enableDashboardCoordinateSelection(coords -> {
-                setBufferedCoordinate(coords);
-                resolveGenericCommand("COORD_SELECTED");
-            });
-        });
-    }
-
-    public void ErPuzzo(){
-    }
-
-
-
-
-
-    public void triggerGoodActionPrompt() {
-        this.showGoodActionPrompt = true;
     }
 
     private void clearModelAndBuffers() {

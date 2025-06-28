@@ -1,10 +1,8 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
-import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,12 +11,17 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
-import javafx.util.Duration;
-import it.polimi.ingsw.galaxytrucker.View.GUI.*;
-
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
+/**
+ * Controller for the building phase GUI scene in Galaxy Trucker.
+ * Manages user interactions such as rotating tiles, selecting covered or shown tiles,
+ * returning tiles, declaring readiness, and viewing other players' ships.
+ * Connects UI components (buttons, grid panes, image views) with the underlying game logic
+ * through commands sent to the GUI view.
+ * @author Matteo Vignocchi
+ * @author Oleg Nedina
+ */
 public class BuildingPhaseController extends GUIController {
 
     @FXML private Button rotateLeftBtn, rotateRightBtn, getCoveredBtn, getShownBtn, returnTileBtn, setReadyBtn;
@@ -32,10 +35,8 @@ public class BuildingPhaseController extends GUIController {
     @FXML private VBox tilePreviewPane;
     @FXML private Button leftArrowButton, rightArrowButton, reserveBtn1, reserveBtn2;
 
-
     private List<ClientTile> tileList = new ArrayList<>();
     private int tileListIndex = 0;
-
     private ClientTile currentTile;
     private ImageView currentTileView;
     private int currentRotation = 0;
@@ -43,8 +44,21 @@ public class BuildingPhaseController extends GUIController {
     private ClientTile emptySpace = new ClientTile();
     private boolean isSelectingTileFromList = false;
 
-
-
+    /**
+     * Initializes the building phase scene.
+     * Sets up initial states and cursor styles for buttons.
+     * Attaches event handlers to buttons to handle user actions such as:
+     * - Rotating the current tile left or right
+     * - Selecting covered or shown tiles
+     * - Returning a tile to the pile
+     * - Declaring the player ready
+     * - Spinning the hourglass
+     * - Logging out
+     * - Viewing other players' dashboards
+     * - Taking reserved tiles
+     * - Choosing a deck
+     * Also sets up click handlers for the coordinate grid used for tile placement.
+     */
     @FXML
     public void initialize() {
         emptySpace.id = 0;
@@ -122,6 +136,12 @@ public class BuildingPhaseController extends GUIController {
         setupCoordinateGridClickHandler();
     }
 
+    /**
+     * Performs post-initialization setup for the building phase scene.
+     * Resets button states, places all non-empty tiles from the model's dashboard into the GUI grid,
+     * clears the currently selected tile, sets visibility of main action buttons,
+     * updates the nickname display, and configures command visibility based on demo mode.
+     */
     @Override
     public void postInitialize() {
         resetButtons();
@@ -135,61 +155,57 @@ public class BuildingPhaseController extends GUIController {
             }
         }
 
-        clearCurrentTile(); // <-- rimuove tile trascinabile se c'era
+        clearCurrentTile();
 
-        // Mostra pulsanti per BOARD_SETUP
-//        returnTileBtn.setVisible(false);
-//        rotateLeftBtn.setVisible(false);
-//        rotateRightBtn.setVisible(false);
         getShownBtn.setVisible(true);
         getCoveredBtn.setVisible(true);
         setReadyBtn.setVisible(true);
-//        rightArrowButton.setVisible(false);
-//        leftArrowButton.setVisible(false);
-
         setNickname(model.getNickname());
         setCommandVisibility(model.isDemo());
     }
 
-
+    /**
+     * Alternative post-initialization for the building phase scene with
+     * different button visibility configuration.
+     * Resets buttons, shows tile rotation and return buttons,
+     * disables reserved tile buttons if not in demo mode.
+     */
     public void postInitialize2(){
         resetButtons();
-
-//        getCoveredBtn.setVisible(false);
-//        getShownBtn.setVisible(false);
-//        getCoveredBtn.setVisible(false);
         returnTileBtn.setVisible(true);
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
-//        setReadyBtn.setVisible(false);
         if(!model.isDemo()){
-//            reserveBtn1.setVisible(false);
-//            reserveBtn2.setVisible(false);
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         }
     }
 
+    /**
+     * Another variation of post-initialization for the building phase scene.
+     * Similar to `postInitialize2()` but excludes the return tile button visibility setup.
+     * Resets buttons, shows rotation buttons,
+     * disables reserved tile buttons if not in demo mode.
+     */
     public void postInitialize3(){
         resetButtons();
-
-//        getShownBtn.setVisible(false);
-//        getCoveredBtn.setVisible(false);
-//        returnTileBtn.setVisible(false);
         rotateLeftBtn.setVisible(true);
         rotateRightBtn.setVisible(true);
-//        setReadyBtn.setVisible(false);
         if(!model.isDemo()){
-//            reserveBtn1.setVisible(false);
-//            reserveBtn2.setVisible(false);
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         }
 
     }
 
-
-
+    /**
+     * Initializes the coordinate grid with transparent buttons that handle drag-and-drop for tile placement.
+     * Each button corresponds to a tile position and:
+     * - Highlights on drag over if the dragged item is a tile.
+     * - Validates the drop position against the model's mask.
+     * - On valid drop, buffers the coordinate and signals the controller to place the tile.
+     * - Updates reserved tile buttons visibility if not in demo mode.
+     */
     private void setupCoordinateGridClickHandler() {
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
@@ -209,7 +225,6 @@ public class BuildingPhaseController extends GUIController {
                 });
 
                 tileButton.setOnDragExited(e -> tileButton.setStyle("-fx-background-color: transparent;"));
-
                 tileButton.setOnDragDropped(event -> {
                     Dragboard db = event.getDragboard();
                     if (db.hasString() && db.getString().equals("tile")) {
@@ -221,10 +236,7 @@ public class BuildingPhaseController extends GUIController {
                             event.setDropCompleted(false);
                             return;
                         }
-
-                        // Salva coordinate per quando askCoordinate sarà chiamato
                         guiView.setBufferedCoordinate(new int[]{r, c});
-
                         guiView.resolveGenericCommand("PLACE_TILE");
                         if(!model.isDemo()){
                             reserveBtn1.setVisible(true);
@@ -232,12 +244,6 @@ public class BuildingPhaseController extends GUIController {
                             reserveBtn1.setDisable(false);
                             reserveBtn2.setDisable(false);
                         }
-
-
-                        // Pulisce preview e resetta
-//                        tilePreviewPane.getChildren().clear();
-//                        currentTileView = null;
-
                         event.setDropCompleted(true);
                     } else {
                         event.setDropCompleted(false);
@@ -250,12 +256,24 @@ public class BuildingPhaseController extends GUIController {
         }
     }
 
+    /**
+     * Completes the rotation future with the current rotation modulo 360 degrees
+     * if it has not been completed yet.
+     * Used to signal the rotation angle to the input manager asynchronously.
+     * @param angle the rotation angle (not directly used in this method)
+     */
     private void rotateTile(int angle) {
         if (!inputManager.rotationFuture.isDone()) {
             inputManager.rotationFuture.complete(currentRotation % 360);
         }
     }
 
+    /**
+     * Displays the given tile in the tile preview pane with its current rotation.
+     * Sets up drag detection on the tile image to enable drag-and-drop placement.
+     * Does nothing if a tile selection from a list is currently active.
+     * @param tile the ClientTile to display
+     */
     public void showCurrentTile(ClientTile tile) {
         if (isSelectingTileFromList) return;
 
@@ -284,11 +302,22 @@ public class BuildingPhaseController extends GUIController {
         });
     }
 
+    /**
+     * Sends a command string to the GUI view to be resolved by the controller logic.
+     * @param command the command to complete and send
+     */
     private void completeCommand(String command) {
         guiView.resolveGenericCommand(command);
     }
 
-
+    /**
+     * Places the given tile image at the specified position in the graphical grid.
+     * Runs on the JavaFX Application Thread and replaces any existing tile node at that position.
+     * The tile image is resized and rotated to reflect its current state.
+     * @param tile the ClientTile to display
+     * @param row the row index in the grid
+     * @param col the column index in the grid
+     */
     public void placeTileAt(ClientTile tile, int row, int col) {
         Platform.runLater(() -> {
             graphicGridPane.getChildren().removeIf(node -> {
@@ -305,6 +334,10 @@ public class BuildingPhaseController extends GUIController {
         });
     }
 
+    /**
+     * Clears the tile preview pane and resets the currently selected tile to null.
+     * Runs on the JavaFX Application Thread.
+     */
     public void clearCurrentTile() {
         Platform.runLater(() -> {
             tilePreviewPane.getChildren().clear();
@@ -312,10 +345,22 @@ public class BuildingPhaseController extends GUIController {
         });
     }
 
+    /**
+     * Updates the nickname label in the GUI with the provided nickname.
+     * Runs on the JavaFX Application Thread.
+     * @param nickname the player nickname to display
+     */
     public void setNickname(String nickname) {
         Platform.runLater(() -> nicknameLabel.setText(nickname));
     }
 
+    /**
+     * Adjusts the visibility and enabled status of GUI components based on demo mode.
+     * Hides or shows ship dashboard, decks, hourglass, cards, and player buttons
+     * according to whether the GUI is running in demo mode.
+     * Also calls `setPlayersButton()` to update player buttons visibility.
+     * @param demo true if running in demo mode, false otherwise
+     */
     private void setCommandVisibility(Boolean demo) {
         playerShip1Btn.setVisible(false);
         playerShip2Btn.setVisible(false);
@@ -352,6 +397,11 @@ public class BuildingPhaseController extends GUIController {
         setPlayersButton();
     }
 
+    /**
+     * Updates visibility, labels, and user data of player ship buttons
+     * based on the number of other players in the game.
+     * Shows up to three buttons, one per other player, with appropriate nicknames.
+     */
     private void setPlayersButton() {
         Map<String, int[]> mapPosition = model.getPlayerPositions();
         List<String> others = mapPosition.keySet().stream()
@@ -390,26 +440,13 @@ public class BuildingPhaseController extends GUIController {
             }
         }
     }
-    public void postInitializeLogOut(){
-        resetButtons();
 
-//
-//        returnTileBtn.setVisible(false);
-//        rotateLeftBtn.setVisible(false);
-//        rotateRightBtn.setVisible(false);
-//        getShownBtn.setVisible(false);
-//        getCoveredBtn.setVisible(false);
-//        setReadyBtn.setVisible(false);
-//        rightArrowButton.setVisible(false);
-//        leftArrowButton.setVisible(false);
-//        playerShip1Btn.setVisible(false);
-//        playerShip2Btn.setVisible(false);
-//        playerShip3Btn.setVisible(false);
-        deck1Btn.setDisable(true);
-        deck2Btn.setDisable(true);
-        deck3Btn.setDisable(true);
-//        hourGlassBtn.setVisible(false);
-    }
+    /**
+     * Handles the action of taking a reserved tile based on the button index (1 or 2).
+     * If the reserved tile position is valid, it sets the buffered coordinate,
+     * sends the RESERVE_TILE command, and places an empty space in the GUI grid.
+     * @param a the reserved tile slot index (1 or 2)
+     */
     private void takeReserved(int a){
 
         switch(a){
@@ -431,11 +468,21 @@ public class BuildingPhaseController extends GUIController {
         }
     }
 
+    /**
+     * Sets the buffered index for the chosen deck and sends the DECK command to the controller.
+     * @param index the index of the deck selected by the player
+     */
     private void chooseDeck(int index){
         guiView.setBufferedIndex(index);
         completeCommand("DECK");
     }
 
+    /**
+     * Displays a selection of tiles for the player to choose from.
+     * Hides other buttons, shows navigation arrows to cycle through the tile list,
+     * and sets up event handlers for selection and navigation.
+     * @param tiles the list of tiles available for selection
+     */
     public void displayTileSelection(List<ClientTile> tiles) {
         if (tiles == null || tiles.isEmpty()) {
             guiView.reportError("No tiles to display.");
@@ -446,7 +493,6 @@ public class BuildingPhaseController extends GUIController {
         tileList = tiles;
         tileListIndex = 0;
 
-        // Nasconde pulsanti inutili
         getCoveredBtn.setVisible(false);
         getShownBtn.setVisible(false);
         setReadyBtn.setVisible(false);
@@ -454,7 +500,6 @@ public class BuildingPhaseController extends GUIController {
         rotateLeftBtn.setVisible(false);
         rotateRightBtn.setVisible(false);
 
-        // Mostra le frecce
         leftArrowButton.setVisible(true);
         rightArrowButton.setVisible(true);
 
@@ -480,6 +525,11 @@ public class BuildingPhaseController extends GUIController {
             rightArrowButton.setVisible(false);
         });
     }
+
+    /**
+     * Updates the tile preview pane to show the currently selected tile from the tile list.
+     * Sets image size, rotation, and cursor style.
+     */
     private void updateTilePreviewFromList() {
         if (tileList == null || tileList.isEmpty()) return;
 
@@ -488,12 +538,16 @@ public class BuildingPhaseController extends GUIController {
         image.setFitWidth(100);
         image.setFitHeight(100);
         image.setRotate(current.getRotation());
-        image.setCursor(Cursor.HAND); // 👈 qui
+        image.setCursor(Cursor.HAND);
 
 
         tilePreviewPane.getChildren().setAll(image);
     }
 
+    /**
+     * Resets visibility and disables all interactive buttons in the building phase UI.
+     * Prepares the UI for a fresh state or transition.
+     */
     private void resetButtons() {
         getCoveredBtn.setVisible(false);
         getShownBtn.setVisible(false);

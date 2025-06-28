@@ -1,6 +1,5 @@
 
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
-
 import it.polimi.ingsw.galaxytrucker.View.GUI.GUIView;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
@@ -12,9 +11,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.util.List;
 
+/**
+ * Controller for the GUI scene that manages the player's interaction with goods.
+ * Provides UI to select actions on goods (add, rearrange, trash), navigate among goods,
+ * display the current good visually, and close the window after selection.
+ * @author Matteo Vignocchi
+ * @author Oleg Nedina
+ */
 public class PrintListOfGoodController extends GUIController {
 
     @FXML private Pane goodPane;
@@ -23,7 +28,12 @@ public class PrintListOfGoodController extends GUIController {
     private List<String> loadedGoods;
     private Stage ownStage;
 
-
+    /**
+     * Prepares the UI for selecting an action on goods.
+     * Shows action buttons (Add, Rearranges, Trash) and hides navigation buttons.
+     * Sets event handlers to set the buffered index in the GUI view and close the window on selection.
+     * @param gui the GUIView instance for buffering the user choice
+     */
     public void setupForActionSelection(GUIView gui) {
         goodPane.setVisible(false);
         addGood.setVisible(true);
@@ -46,6 +56,11 @@ public class PrintListOfGoodController extends GUIController {
         });
     }
 
+    /**
+     * Prepares the UI for selecting a specific good from the list.
+     * Shows the good display pane and navigation buttons,
+     * hides action selection buttons.
+     */
     public void setupForGoodsIndexSelection() {
         goodPane.setVisible(true);
         addGood.setVisible(false);
@@ -55,12 +70,24 @@ public class PrintListOfGoodController extends GUIController {
         rightBtn.setVisible(true);
     }
 
+    /**
+     * Loads the list of goods to display and initializes the selection index.
+     * Displays the first good visually.
+     * @param goods list of goods as color strings
+     * @param guiView the GUIView instance to interact with
+     */
     public void loadGoods(List<String> goods, GUIView guiView) {
         this.loadedGoods = goods;
         this.currentGoodIndex = 0;
         showGood(guiView);
     }
 
+    /**
+     * Displays the currently selected good with its image in the pane.
+     * Sets up the image view with proper styling and mouse click animation
+     * that notifies the GUI view of the selection and closes the window.
+     * @param gui the GUIView instance to notify upon selection
+     */
     public void showGood(GUIView gui) {
         goodPane.getChildren().clear();
 
@@ -103,6 +130,11 @@ public class PrintListOfGoodController extends GUIController {
         goodPane.getChildren().add(iv);
     }
 
+    /**
+     * Configures the left and right navigation buttons to cycle through the goods list.
+     * Updates the displayed good accordingly and notifies the GUI view on selection.
+     * @param gui the GUIView instance to notify upon selection
+     */
     public void configureNavigation(GUIView gui) {
         leftBtn.setVisible(true);
         rightBtn.setVisible(true);
@@ -118,6 +150,10 @@ public class PrintListOfGoodController extends GUIController {
         });
     }
 
+    /**
+     * Closes the current window if the stage is set.
+     * Logs an error if the stage is not set.
+     */
     private void closeWindow() {
         if (ownStage != null) {
             ownStage.close();
@@ -125,22 +161,18 @@ public class PrintListOfGoodController extends GUIController {
             System.err.println("Stage non settato! Impossibile chiudere finestra.");
         }
     }
-    public void reset() {
-        addGood.setVisible(false);
-        rearranges.setVisible(false);
-        trash.setVisible(false);
-        leftBtn.setVisible(false);
-        rightBtn.setVisible(false);
 
-        for (Node node : goodPane.getChildren()) {
-            node.setOnMouseClicked(null);
-        }
-    }
-
+    /**
+     * Sets the JavaFX Stage that owns this controller's window.
+     * @param stage the Stage instance
+     */
     public void setStage(Stage stage) {
         this.ownStage = stage;
     }
 
+    /**
+     * Empty override of postInitialize; no additional setup required after scene load.
+     */
     @Override
     public void postInitialize() {}
 }
