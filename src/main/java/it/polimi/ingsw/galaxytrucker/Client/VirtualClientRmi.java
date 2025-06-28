@@ -453,21 +453,20 @@ public class VirtualClientRmi extends UnicastRemoteObject implements VirtualView
      */
     @Override
     public String getUncoveredTile() throws BusinessLogicException, IOException, InterruptedException {
-        String tmp;
-        try {
-            tmp = server.getUncoveredTilesList(gameId, nickname);
-        } catch (Exception e) {
-            throw new BusinessLogicException("Failed to fetch tile list: " + e.getMessage());
-        }
-        if (tmp == null || tmp.equals("CODE404")) {
-            throw new BusinessLogicException("The list of shown tiles is empty.");
-        }
-
-        int size =  clientController.printListOfTileShownByController(tmp);
-        clientController.informByController("Select a tile");
         while (true) {
+            String tmp;
+            try {
+                tmp = server.getUncoveredTilesList(gameId, nickname);
+            } catch (Exception e) {
+                throw new BusinessLogicException("Failed to fetch tile list: " + e.getMessage());
+            }
+            if (tmp == null || tmp.equals("CODE404")) {
+                throw new BusinessLogicException("The list of shown tiles is empty.");
+            }
+            clientController.informByController("Select a tile");
+            int size =  clientController.printListOfTileShownByController(tmp);
+            if(size == 0) throw new BusinessLogicException("The list of shown tiles is empty.");
             Integer indexObj = askIndex();
-            if(indexObj == null) { return null; }
             int index = indexObj;
             if (index >= 0 && index < size) {
                 try {

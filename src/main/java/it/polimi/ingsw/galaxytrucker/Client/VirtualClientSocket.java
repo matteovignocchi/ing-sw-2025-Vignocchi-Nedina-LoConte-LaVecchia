@@ -1008,16 +1008,13 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         if (tmp == null || tmp.equals("CODE404")) {
             throw new BusinessLogicException("The list of shown tiles is empty.");
         }
-
-        int size = clientController.printListOfTileShownByController(tmp);
-        clientController.informByController("Select a tile");
-
         while (true) {
+            int size = clientController.printListOfTileShownByController(tmp);
+            clientController.informByController("Select a tile");
             Integer indexObj = askIndex();
             if (indexObj == null) {
                 return null;
             }
-
             int index = indexObj;
             if (index >= 0 && index < size) {
                 List<Object> tileRequestPayload = new ArrayList<>();
@@ -1032,7 +1029,10 @@ public class VirtualClientSocket implements Runnable, VirtualView {
                 try {
                     switch (tilePayload) {
                         case String tile -> {
-                            if (tile.equals("CODE404")) {
+                            if (tile.contains("Tile already taken")) {
+                                clientController.reportErrorByController("You missed: " + tile + ". Select a new index.");
+                                continue;
+                            } else if (tile.contains("CODE404")) {
                                 clientController.reportErrorByController("You missed: " + tile + ". Select a new index.");
                                 continue;
                             }
