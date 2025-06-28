@@ -39,7 +39,7 @@ public class Deck  implements Serializable {
      * Ignores null cards inside the collection.
      *
      * @param cards: a Collection of Card objects to add.
-     * @throws IllegalArgumentException: if the collection itself is null.
+     * @throws IllegalArgumentException if the collection itself is null.
      */
 
     public void addAll(Collection<Card> cards) {
@@ -65,7 +65,7 @@ public class Deck  implements Serializable {
      * Draws the card at the front of the deck and removes it.
      *
      * @return the next Card in the deck.
-     * @throws InvalidSizeException: if the deck is empty.
+     * @throws InvalidSizeException if the deck is empty.
      */
 
     public Card draw() throws CardEffectException{
