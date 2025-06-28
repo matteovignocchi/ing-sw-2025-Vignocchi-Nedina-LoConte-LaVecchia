@@ -2275,6 +2275,7 @@ public class Controller implements Serializable {
                 }
             }
         }
+        printPlayerDashboard(viewsByNickname.get(nick), p, nick);
     }
 
     /**
