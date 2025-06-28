@@ -16,11 +16,8 @@
       </ImageView>
       <VBox layoutX="268.0" layoutY="243.0" prefHeight="419.0" prefWidth="366.0" styleClass="final">
          <children>
-            <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="52.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
-            <Label fx:id="playerPointsLabel" prefHeight="45.0" prefWidth="368.0" styleClass="final" textAlignment="CENTER" />
-            <Label fx:id="opponent1Label" prefHeight="52.0" prefWidth="371.0" styleClass="final" />
-            <Label fx:id="opponent2Label" prefHeight="46.0" prefWidth="368.0" styleClass="final" />
-            <Label fx:id="opponent3Label" prefHeight="54.0" prefWidth="376.0" styleClass="final" />
+            <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="70.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
+            <Label fx:id="playerPointsLabel" prefHeight="66.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
          </children></VBox>
       <Button fx:id="logoutButton" layoutX="402.0" layoutY="683.0" mnemonicParsing="false" text="Logout" />
       <Label fx:id="titleLabel" layoutX="248.0" layoutY="182.0" prefHeight="61.0" prefWidth="404.0" styleClass="subtitle-label" />
