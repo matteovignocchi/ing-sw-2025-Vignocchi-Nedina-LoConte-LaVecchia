@@ -69,16 +69,12 @@ class FirstWarzoneCardTest {
         BusinessLogicException ble = new BusinessLogicException("boom");
         doThrow(ble).when(visitor).visit(card);
 
-        RuntimeException rex = assertThrows(
-                RuntimeException.class,
+        BusinessLogicException ex = assertThrows(
+                BusinessLogicException.class,
                 () -> card.accept(visitor),
-                "se visit lancia BusinessLogicException, accept deve rilanciare RuntimeException"
+                "accettando un BusinessLogicException, accept dovrebbe propagare la stessa eccezione"
         );
-        assertSame(
-                ble,
-                rex.getCause(),
-                "il cause della RuntimeException dev'essere il BusinessLogicException originale"
-        );
+        assertSame(ble, ex);
     }
 
 }

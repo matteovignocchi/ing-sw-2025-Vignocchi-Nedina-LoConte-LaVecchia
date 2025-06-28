@@ -1,13 +1,18 @@
 package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
 
 import it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.text.Text;
-
-import java.io.IOException;
 import java.util.List;
+
+/**
+ * Controller for the "Create Game" menu GUI scene.
+ * Manages UI components and user interactions to select game mode (demo or normal)
+ * and the number of players (2 to 4).
+ * Passes selected configuration data to the GUI view and transitions to the waiting queue scene.
+ * @author Matteo Vignocchi
+ */
 
 public class CreateGameMenuController extends GUIController {
 
@@ -23,13 +28,23 @@ public class CreateGameMenuController extends GUIController {
 
     private boolean isDemo = false;
 
+
+    /**
+     * Initializes the controller by setting up the initial UI state.
+     * Shows demo selection buttons and hides player count options.
+     */
     @FXML
     public void initialize() {
         setupInitialState();
     }
 
+    /**
+     * Configures the initial visibility and event handlers for demo and exit buttons.
+     * Hides player count buttons and back button.
+     * Sets up actions for demo selection, normal level 2 selection, back navigation, and exit.
+     */
     private void setupInitialState() {
-        // Show demo selection, hide player selection
+
         demoQuestionText.setVisible(true);
         level2Button.setVisible(true);
         demoButton.setVisible(true);
@@ -58,8 +73,13 @@ public class CreateGameMenuController extends GUIController {
         });
     }
 
+    /**
+     * Updates the UI to show player count selection buttons and back button.
+     * Hides demo selection and exit buttons.
+     * Sets up actions for selecting 2, 3, or 4 players.
+     */
     private void showPlayerSelection() {
-        // Hide demo selection, show player selection
+
         demoQuestionText.setVisible(false);
         level2Button.setVisible(false);
         demoButton.setVisible(false);
@@ -76,17 +96,23 @@ public class CreateGameMenuController extends GUIController {
         fourPlayerButton.setOnAction(e -> confirmGameData(4));
     }
 
+    /**
+     * Sends the selected game configuration (demo flag and player count) to the GUI view.
+     * Changes the scene to the waiting queue and resets the menu UI to initial state.
+     * @param playerCount the number of players selected
+     */
     private void confirmGameData(int playerCount) {
         List<Object> data = List.of(isDemo, playerCount);
-        guiView.resolveDataGame(data);  // completa la future che aspetta il ClientController
+        guiView.resolveDataGame(data);
         guiView.setSceneEnum(SceneEnum.WAITING_QUEUE);
-        setupInitialState();// o qualunque scena venga dopo
+        setupInitialState();
     }
 
+    /**
+     * Empty override of postInitialize, no additional setup required after scene load.
+     */
     @Override
     public void postInitialize() {
-        // se serve setup dopo il caricamento completo
     }
-
 
 }

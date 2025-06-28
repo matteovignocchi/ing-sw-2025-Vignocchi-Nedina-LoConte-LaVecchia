@@ -14,7 +14,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,21 +78,18 @@ public class GameController extends GUIController {
     @FXML private Label brownalien;
     @FXML private Label numofhumans;
     @FXML private Label energycell;
-
-
-
     @FXML private TextFlow messageTextFlow;
     @FXML private Text messageText;
     @FXML private Button yesButton;
     @FXML private Button noButton;
-
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
     @FXML private Button logout , DrawButton;
+
     private final Map<Integer, Pane> demoMap = new HashMap<>();
     private final Map<Integer, Pane> pathMap = new HashMap<>();
     private ClientCard currentCard;
     private final Map<String, Image> tokenImageCache = new HashMap<>();
-
+    private final StackPane[][] cellStackPanes = new StackPane[5][7];
 
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
@@ -197,19 +193,17 @@ public class GameController extends GUIController {
         }
     }
 
-
     public void updateMapPosition(Map<String, int[]> playerMaps, boolean isDemo) {
         Map<Integer, Pane> paneMap = isDemo ? demoMap : pathMap;
 
-        // Pulisci tutto
         paneMap.values().forEach(p -> p.getChildren().clear());
 
         for (Map.Entry<String, int[]> entry : playerMaps.entrySet()) {
             int[] pos = entry.getValue();
             if (pos == null || pos.length < 2) continue;
 
-            int position = pos[0]; // es. da 1 a 24
-            int shipId = pos[3];   // id della nave associata
+            int position = pos[0];
+            int shipId = pos[3];
 
             Pane cell = paneMap.get(position);
             if (cell == null) continue;
@@ -221,6 +215,7 @@ public class GameController extends GUIController {
             cell.getChildren().add(ship);
         }
     }
+
     private Image getShipImage(int id) {
         String path = switch (id){
             case 33 ->  "/images/BlueRocket.png";
@@ -231,10 +226,11 @@ public class GameController extends GUIController {
         };
         return new Image(getClass().getResourceAsStream(path));
     }
+
     @Override
     public void postInitialize() {
-        initializeGrid(); // inizializza le celle della dashboard
-        updateDashboard(model.getDashboard());
+        initializeGrid();
+        updateDashboard();
         setCommandVisibility(model.isDemo());
     }
 
@@ -243,6 +239,7 @@ public class GameController extends GUIController {
         DrawButton.setVisible(true);
         DrawButton.setDisable(false);
     }
+
     public void postInitialize3(){
         playerShip1Btn.setVisible(false);
         playerShip2Btn.setVisible(false);
@@ -250,11 +247,7 @@ public class GameController extends GUIController {
         DrawButton.setVisible(false);
     }
 
-
     private void setCommandVisibility(boolean demo) {
-        // Mostra/nasconde sfondi o bottoni demo in base al flag
-        // esempio: demo1.setVisible(demo);
-        // oppure disabilita click, bottoni, ecc.
         playerShip1Btn.setVisible(false);
         playerShip2Btn.setVisible(false);
         playerShip3Btn.setVisible(false);
@@ -281,16 +274,29 @@ public class GameController extends GUIController {
     }
 
 
-    public void updateDashboard(ClientTile[][] dashboard) {
+    public void updateDashboard() {
+        if (imageShip.getChildren().isEmpty()) {
+            initializeGrid();
+        }
+
+        ClientTile[][] dashboard = model.getDashboard();
+
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
+                StackPane cell = cellStackPanes[row][col];
+                if (cell == null) continue;
+
+                cell.getChildren().clear();
+
                 ClientTile tile = dashboard[row][col];
-                if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
-                    placeTileWithTokens(tile, row, col);
-                } else {
-                    if (cellStackPanes[row][col] != null) {
-                        cellStackPanes[row][col].getChildren().clear();
-                    }
+                if (tile == null || "EMPTYSPACE".equals(tile.type)) {
+                    continue;
+                }
+
+                placeTile(tile, row, col);
+
+                if (!tile.tokens.isEmpty() || tile.capacity > 0 || (tile.goods != null && !tile.goods.isEmpty())) {
+                    placeTokens(tile, row, col);
                 }
             }
         }
@@ -298,18 +304,34 @@ public class GameController extends GUIController {
 
 
 
+    public void clearDashboard() {
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 7; col++) {
+                if (cellStackPanes[row][col] != null) {
+                    cellStackPanes[row][col].getChildren().clear();
+                }
+            }
+        }
+    }
 
-    private final StackPane[][] cellStackPanes = new StackPane[5][7]; // 5 righe, 7 colonne
+    private void placeTile(ClientTile tile, int row, int col) {
+        StackPane cell = cellStackPanes[row][col];
+        if (cell == null) return;
+
+        ImageView tileImage = new ImageView(tile.getImage());
+        tileImage.setFitWidth(70);
+        tileImage.setFitHeight(70);
+        tileImage.setRotate(tile.getRotation());
+        cell.getChildren().add(tileImage);
+    }
 
     public void initializeGrid() {
+        imageShip.getChildren().clear();
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
                 StackPane cell = new StackPane();
                 cell.setPrefSize(70, 70);
-
-                // Opzionale: stile base
                 cell.setStyle("-fx-background-color: transparent;");
-
                 imageShip.add(cell, col, row);
                 cellStackPanes[row][col] = cell;
             }
@@ -408,29 +430,17 @@ public class GameController extends GUIController {
         energycell.setText("Number of energy Cell: " + energy);
     }
 
-    public void placeTileWithTokens(ClientTile tile, int row, int col) {
-        if (cellStackPanes[row][col] == null) {
-            return;
-        }
-
+    private void placeTokens(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
-        cell.getChildren().clear();
+        if (cell == null) return;
 
-        // Immagine base della tile
-        ImageView tileImage = new ImageView(tile.getImage());
-        tileImage.setFitWidth(70);
-        tileImage.setFitHeight(70);
-        tileImage.setRotate(tile.getRotation());
-        cell.getChildren().add(tileImage);
-        // Umani
         for (int i = 0; i < tile.tokens.size(); i++) {
-
             String tokenType = tile.tokens.get(i);
             ImageView token = new ImageView(getTokenImage(tokenType));
             token.setFitWidth(26);
             token.setFitHeight(32);
             StackPane.setAlignment(token, Pos.CENTER);
-            token.setTranslateX(i * 17); // offset orizzontale
+            token.setTranslateX(i * 17);
             token.setTranslateY(2);
             cell.getChildren().add(token);
         }
@@ -445,7 +455,6 @@ public class GameController extends GUIController {
             cell.getChildren().add(token);
         }
 
-        // Merci
         List<String> goods = tile.goods;
         if (goods != null) {
             for (int i = 0; i < goods.size(); i++) {
@@ -459,8 +468,8 @@ public class GameController extends GUIController {
                 cell.getChildren().add(token);
             }
         }
-
     }
+
 
     private Image getTokenImage(String tokenType) {
         return tokenImageCache.computeIfAbsent(tokenType.toLowerCase(), type -> {

@@ -10,7 +10,8 @@ import java.io.Serializable;
 /**
  * This class handles the SlaversCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class SlaversCard implements Card, Serializable {
@@ -26,6 +27,7 @@ public class SlaversCard implements Card, Serializable {
      * @param credits: credits earned by the player who defeats the slavers and accepts the reward.
      * @param num_crewmates: crewmates lost by the player who defeats the slavers and accepts the reward.
      * @param fire_power: firepower needed to beat the slavers card.
+     * @throws IllegalArgumentException if {@code idCard} is null or blank, or if {@code days}, {@code credits}, {@code num_crewmates}, or {@code fire_power} are not positive.
      */
 
     @JsonCreator

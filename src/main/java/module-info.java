@@ -1,5 +1,4 @@
 module it.polimi.ingsw.galaxytrucker {
-    requires javafx.controls;
     requires javafx.fxml;
     requires org.controlsfx.controls;
     requires kotlin.stdlib;
@@ -13,8 +12,6 @@ module it.polimi.ingsw.galaxytrucker {
     requires java.desktop;
     requires java.logging;
     requires java.compiler;
-
-    exports it.polimi.ingsw.galaxytrucker;
     exports it.polimi.ingsw.galaxytrucker.Controller;
     exports it.polimi.ingsw.galaxytrucker.View;
     exports it.polimi.ingsw.galaxytrucker.Server;
@@ -23,7 +20,6 @@ module it.polimi.ingsw.galaxytrucker {
     exports it.polimi.ingsw.galaxytrucker.View.GUI;
 
     opens it.polimi.ingsw.galaxytrucker.Server to java.rmi;
-    opens it.polimi.ingsw.galaxytrucker to javafx.fxml;
     opens it.polimi.ingsw.galaxytrucker.Model.Card to com.fasterxml.jackson.databind;
     exports it.polimi.ingsw.galaxytrucker.Client;
     opens it.polimi.ingsw.galaxytrucker.Client to java.rmi;

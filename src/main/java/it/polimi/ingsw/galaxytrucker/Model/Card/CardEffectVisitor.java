@@ -30,8 +30,8 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
      * CardEffectVisitor constructs that apply adventure card effects using the specified Controller.
      * This constructor retrieves the current FlightCardBoard and the list of players in flight order from the controller.
      *
-     * @param controller: the controller through which the visitor interacts with the game state;
-     * @throws NullPointerException: if the controller, flight board, player list, or an individual player is null.
+     * @param controller the controller through which the visitor interacts with the game state;
+     * @throws NullPointerException if the controller, flight board, player list, or an individual player is null.
      */
 
     public CardEffectVisitor(Controller controller) {

@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
 <?import javafx.scene.image.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="450.0" stylesheets="@css/Button.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.FinalSceneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.FinalSceneController">
    <children>
-      <ImageView fitHeight="600.0" fitWidth="450.0" layoutX="10.0" layoutY="10.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="900.0" fitWidth="900.0" layoutX="10.0" layoutY="10.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@../images/LobbyImage2.png" />
          </image>
       </ImageView>
-      <VBox layoutX="122.0" layoutY="103.0" prefHeight="262.0" prefWidth="209.0">
+      <VBox layoutX="268.0" layoutY="243.0" prefHeight="419.0" prefWidth="366.0" styleClass="final">
          <children>
-            <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="45.0" prefWidth="219.0" textAlignment="CENTER" />
-            <Label fx:id="playerPointsLabel" prefHeight="45.0" prefWidth="219.0" textAlignment="CENTER" />
-            <Label fx:id="playerCargoLabel" prefHeight="45.0" prefWidth="219.0" textAlignment="CENTER" />
-            <Label prefHeight="45.0" prefWidth="219.0" textAlignment="CENTER" />
-            <Label prefHeight="0.0" prefWidth="211.0" textAlignment="CENTER" />
-            <Label prefHeight="45.0" prefWidth="219.0" textAlignment="CENTER" />
-            <Label fx:id="opponent1Label" prefHeight="22.0" prefWidth="207.0" />
-            <Label fx:id="opponent2Label" prefHeight="22.0" prefWidth="217.0" />
-            <Label fx:id="opponent3Label" prefHeight="22.0" prefWidth="216.0" />
+            <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="52.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
+            <Label fx:id="playerPointsLabel" prefHeight="45.0" prefWidth="368.0" styleClass="final" textAlignment="CENTER" />
+            <Label fx:id="opponent1Label" prefHeight="52.0" prefWidth="371.0" styleClass="final" />
+            <Label fx:id="opponent2Label" prefHeight="46.0" prefWidth="368.0" styleClass="final" />
+            <Label fx:id="opponent3Label" prefHeight="54.0" prefWidth="376.0" styleClass="final" />
          </children></VBox>
-      <Button fx:id="logoutButton" layoutX="179.0" layoutY="399.0" mnemonicParsing="false" text="Logout" />
+      <Button fx:id="logoutButton" layoutX="402.0" layoutY="683.0" mnemonicParsing="false" text="Logout" />
+      <Label fx:id="titleLabel" layoutX="248.0" layoutY="182.0" prefHeight="61.0" prefWidth="404.0" styleClass="subtitle-label" />
    </children>
+   <stylesheets>
+      <URL value="@css/Button.css" />
+      <URL value="@css/GameButton.css" />
+      <URL value="@css/TitleStyle.css" />
+   </stylesheets>
 </AnchorPane>

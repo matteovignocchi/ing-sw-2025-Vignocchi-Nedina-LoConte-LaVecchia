@@ -66,6 +66,11 @@
     -fx-font-size: 22px;
     -fx-text-fill: #ffffff;
 }
+.final {
+    -fx-font-family: "Impact";
+    -fx-font-size: 22px;
+    -fx-text-fill: #444444;
+}
 
 .nickname {
     -fx-font-family: "Impact";

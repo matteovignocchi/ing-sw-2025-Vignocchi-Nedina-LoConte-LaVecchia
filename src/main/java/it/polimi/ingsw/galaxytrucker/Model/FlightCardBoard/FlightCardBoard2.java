@@ -6,7 +6,8 @@ import java.io.Serializable;
 
 /**
  * Class that extends FlightCardBoard, used for lvl. 2 flights
- * @author Gabriele La Vecchia && Francesco Lo Conte
+ * @author Gabriele La Vecchia
+ * @author Francesco Lo Conte
  */
 public class FlightCardBoard2 extends FlightCardBoard implements Serializable {
 

@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * This class handles the AbandonedStationCard, which is deserialized via Jackson.
  * It is parsed through a visitor pattern.
- * @author Francesco Lo Conte && Gabriele La Vecchia
+ * @author Francesco Lo Conte
+ * @author Gabriele La Vecchia
  */
 
 public class AbandonedStationCard implements Card, Serializable {
@@ -26,7 +27,6 @@ public class AbandonedStationCard implements Card, Serializable {
      * @param days: flight days that the player who accepts loses.
      * @param station_goods: List of goods, the reward for those who accept.
      */
-
     @JsonCreator
     public AbandonedStationCard(
             @JsonProperty("id_card") String idCard,
@@ -56,22 +56,20 @@ public class AbandonedStationCard implements Card, Serializable {
     public void accept(CardVisitor visitor) throws BusinessLogicException{
         visitor.visit(this);
     }
+
     /**
      * @return flight days shown on the card.
      */
-
     public int getDays(){ return days; }
 
     /**
      * @return number of crewmates shown on the card.
      */
-
     public int getNumCrewmates(){ return num_crewmates; }
 
     /**
      * @return list of goods shown on the card.
      */
-
     public List<Colour> getStationGoods(){ return new ArrayList<>(station_goods); }
 
     /**

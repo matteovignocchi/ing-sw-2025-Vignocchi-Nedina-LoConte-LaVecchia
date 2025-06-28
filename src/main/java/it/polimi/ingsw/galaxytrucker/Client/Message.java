@@ -12,6 +12,7 @@ import java.util.UUID;
  * Server responses (containing payloads or errors)
  * Server-initiated updates (e.g., game state changes)
  * Notifications (like disconnection warnings)
+ * @author Matteo Vignocchi
  */
 public class Message implements Serializable {
 
