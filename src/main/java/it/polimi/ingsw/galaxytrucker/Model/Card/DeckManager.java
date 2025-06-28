@@ -20,7 +20,7 @@ public class DeckManager implements Serializable {
 
     /**
      * Constructs a new DeckManager by initializing a CardGeneration instance to load cards from JSON resources.
-     * @throws IOException: if loading card data files fails.
+     * @throws IOException if loading card data files fails.
      */
 
     public DeckManager() throws IOException {
