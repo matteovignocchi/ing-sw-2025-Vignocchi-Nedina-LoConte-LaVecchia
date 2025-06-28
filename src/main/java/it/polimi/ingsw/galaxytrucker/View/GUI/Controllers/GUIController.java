@@ -57,7 +57,7 @@ public abstract class GUIController {
     /**
      * Optional method for updating the ship dashboard in the GUI.
      * Subclasses may override this to update their dashboard UI components.
-     * @param ship the 2D array of ClientTiles representing the player's ship
+     * @return  ship the 2D array of ClientTiles representing the player's ship
      */
     public ClientTile[][] getDashboard(){ return model.getDashboard(); }
 

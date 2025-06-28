@@ -23,8 +23,8 @@ public class AbandonedShipCard implements Card, Serializable {
 
     /**
      * AbandonedShipCard constructor with specific values.
-     * @param days: flight days that the player who accepts loses.
-     * @param credits: credits earned by the player who accepts.
+     * @param days flight days that the player who accepts loses.
+     * @param credits credits earned by the player who accepts.
      * @param num_crewmates  number of crewmates lost by the player who accepts the card. Must be positive.
      * @throws IllegalArgumentException if {@code idCard} is null or blank, or if {@code days}, {@code credits}, or {@code num_crewmates} are not positive.
      */
@@ -61,19 +61,16 @@ public class AbandonedShipCard implements Card, Serializable {
     /**
      * @return flight days shown on the card.
      */
-
     public int getDays(){ return days; }
 
     /**
      * @return credits shown on the card.
      */
-
     public int getCredits(){ return credits; }
 
     /**
      * @return number of crewmates shown on the card.
      */
-
     public int getNumCrewmates(){ return num_crewmates; }
 
     /**
