@@ -1,13 +1,12 @@
 .title-label {
     -fx-font-family: "Impact";
     -fx-font-size: 60px;
-    -fx-text-fill: #ffee04; /* Giallo brillante */
+    -fx-text-fill: #ffee04;
     -fx-background-color: transparent;
     -fx-padding: 16px 32px;
     -fx-alignment: center;
     -fx-text-alignment: center;
 
-    /* Simula bordo scuro attorno alle lettere */
     -fx-effect: dropshadow(gaussian, #b8860b, 2, 0.8, 0, 0);
 }
 .title-text {
@@ -16,4 +15,13 @@
     -fx-fill: #ffee04;
     -fx-stroke: #b8860b;
     -fx-stroke-width: 1.2px;
+}
+.subtitle-label {
+    -fx-font-family: "Impact";
+    -fx-font-size: 36px;
+    -fx-text-fill: #444444;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-padding: 8px 16px;
+    -fx-background-color: transparent;
 }

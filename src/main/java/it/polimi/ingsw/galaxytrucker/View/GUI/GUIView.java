@@ -45,7 +45,6 @@ public class GUIView extends Application implements View {
     private volatile Boolean bufferedBoolean;
     private boolean showGoodActionPrompt = false;
     private final Queue<String> notificationQueue = new LinkedList<>();
-    private final List<StackPane> activeNotifications = new ArrayList<>();
     private boolean isNotificationPlaying = false;
     private static final int MAX_VISIBLE = 5;
     private StackPane currentToast = null;
@@ -103,7 +102,7 @@ public class GUIView extends Application implements View {
         if (message != null && message.trim().startsWith("SERVER:")) {
             subString = message.trim().substring(7).trim();
         }
-        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.equals("SERVER: Select an housing unit")) {
+        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.equals("SERVER: Select an housing unit") || message.equals("SERVER: Select an energy cell to remove a battery from")) {
             Platform.runLater(() -> {
                 GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
                 if (ctrl != null) {
@@ -335,7 +334,6 @@ public class GUIView extends Application implements View {
                     GUIController controller = sceneRouter.getController(EXIT_PHASE);
                     if (controller != null) {
                         controller.postInitialize();
-
                     } else {
                         reportError("Controller EXIT_PHASE non disponibile.");
                     }
@@ -466,7 +464,7 @@ public class GUIView extends Application implements View {
         }
 
         lastAskIndexTimestamp = now;
-        long deadline = now + 200_000;
+        long deadline = now + 300_000;
 
         long waitStart = System.currentTimeMillis();
         while (!showGoodActionPrompt && System.currentTimeMillis() - waitStart < 300) {
@@ -527,7 +525,7 @@ public class GUIView extends Application implements View {
 
     @Override
     public boolean askWithTimeout(String message) {
-        long timeout = 200_000;
+        long timeout = 300_000;
         long deadline = System.currentTimeMillis() + timeout;
         if (message != null && message.startsWith("SERVER:")) {
             message = message.substring("SERVER:".length()).strip();
@@ -575,7 +573,7 @@ public class GUIView extends Application implements View {
             }
         });
 
-        long deadline = System.currentTimeMillis() + 200_000;
+        long deadline = System.currentTimeMillis() + 300_000;
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
                 reportError("Timeout su askCoordinate.");
@@ -916,6 +914,10 @@ public class GUIView extends Application implements View {
 
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
         String lowerMsg = message.strip().toLowerCase();
+        if (gamePhase == ClientGamePhase.EXIT) {
+            resetQueue();
+            return false;
+        }
         if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) return false;
         if (lowerMsg.contains("waiting for other players...")) return false;
         if (lowerMsg.contains("choose deck")) return false;
@@ -941,7 +943,6 @@ public class GUIView extends Application implements View {
                     !lowerMsg.contains("creating new game...");
             case NICKNAME_DIALOG -> lowerMsg.contains("login");
             case GAME_PHASE -> true;
-            case EXIT_PHASE -> false;
             default -> false;
         };
     }
@@ -989,6 +990,10 @@ public class GUIView extends Application implements View {
         gamePhase = null;
         sceneEnum = null;
         System.out.println("[DEBUG] GUIView state resettato completamente.");
+    }
+
+    private void resetQueue(){
+        notificationQueue.clear();
     }
 
 

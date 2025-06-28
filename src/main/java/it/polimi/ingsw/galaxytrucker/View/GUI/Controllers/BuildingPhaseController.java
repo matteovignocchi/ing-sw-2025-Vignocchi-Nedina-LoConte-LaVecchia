@@ -199,7 +199,9 @@ public class BuildingPhaseController extends GUIController {
 
     public void postInitialize4(){
         resetButtons();
-        hourGlassBtn.setVisible(true);
+        if(!model.isDemo()){
+            hourGlassBtn.setVisible(true);
+        }
         logOutBtn.setVisible(true);
         setPlayersButton();
     }

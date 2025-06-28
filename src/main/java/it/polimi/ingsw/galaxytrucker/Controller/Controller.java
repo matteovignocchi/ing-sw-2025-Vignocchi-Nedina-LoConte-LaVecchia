@@ -1480,6 +1480,7 @@ public class Controller implements Serializable {
                 if(flag<=0) return;
             }
         }
+        printPlayerDashboard(getViewCheck(getNickByPlayer(p)),p,getNickByPlayer(p));
     }
 
     /**
@@ -2307,26 +2308,6 @@ public class Controller implements Serializable {
             String mex = "To activate a shield";
             return manageEnergyCell(nick, mex);
         }
-//            while (!flag) {
-//                boolean ans = askPlayerDecision("SERVER: Do you want to use a shield?", p);
-//
-//                if (ans) {
-//                    int[] coordinate = askPlayerCoordinates(playersByNickname.get(nick));
-//
-//
-//                    Tile y = playersByNickname.get(nick).getTile(coordinate[0], coordinate[1]);
-//                    switch (y) {
-//                        case Shield shield -> {
-//                            if (!(shield.getProtectedCorner(d) == 8))
-//                                inform("SERVER: Select another shield", nick);
-//                            else
-//                                return manageEnergyCell(nick);
-//                        }
-//                        default -> inform("SERVER: Select a valid shield", nick);
-//                    }
-//                } else flag = true;
-//            }
-//        }
         return false;
     }
 
@@ -2837,7 +2818,6 @@ public class Controller implements Serializable {
                 }
             }
         }
-        //notifyAllViews();
     }
 
     public void setExit() throws BusinessLogicException {
@@ -2866,9 +2846,9 @@ public class Controller implements Serializable {
             Player p    = e.getValue();
 
             m.put(nick, new int[]{
-                    p.getPos(),                 // posizione
-                    p.getLap(),                 // lap
-                    p.isEliminated() ? 1 : 0  ,  // 1=eliminato, 0=ingame
+                    p.getPos(),
+                    p.getLap(),
+                    p.isEliminated() ? 1 : 0  ,
                     p.getIdPhoto()
 
             });

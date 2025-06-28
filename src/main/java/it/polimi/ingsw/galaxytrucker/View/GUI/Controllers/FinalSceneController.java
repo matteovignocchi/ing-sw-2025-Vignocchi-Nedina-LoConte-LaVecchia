@@ -4,7 +4,10 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TitledPane;
+import javafx.scene.layout.Pane;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -20,11 +23,11 @@ public class FinalSceneController extends GUIController {
 
     @FXML private Label playerNameLabel;
     @FXML private Label playerPointsLabel;
-    @FXML private Label playerCargoLabel;
     @FXML private Label opponent1Label;
     @FXML private Label opponent2Label;
     @FXML private Label opponent3Label;
     @FXML private Button logoutButton;
+    @FXML private Label titleLabel;
 
     /**
      * Initializes the final scene, setting up the logout button text and action handler.
@@ -47,24 +50,53 @@ public class FinalSceneController extends GUIController {
      */
     private void updateFinalScreen() {
         String me = model.getNickname();
+        int[] myData = model.getPlayerPositions().get(me);
+        int myCredits = (myData != null && myData.length > 1) ? myData[1] : 0;
+        boolean iAmEliminated = (myData != null && myData.length > 2 && myData[2] == 1);
+
         playerNameLabel.setText(me);
-        playerPointsLabel.setText("Credits: " + model.credits);
-        playerCargoLabel.setText("Position: " + model.getMyPosition(me));
+        playerPointsLabel.setText("Credits: " + myCredits);
+
+        List<Map.Entry<String, int[]>> sortedPlayers = model.getPlayerPositions().entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(
+                        e2.getValue().length > 1 ? e2.getValue()[1] : 0,
+                        e1.getValue().length > 1 ? e1.getValue()[1] : 0))
+                .toList();
+
+        boolean iAmFirst = !sortedPlayers.isEmpty() && sortedPlayers.get(0).getKey().equals(me);
+
+        if (iAmFirst && !iAmEliminated) {
+            titleLabel.setText("You won!");
+            titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 28px;");
+        } else {
+            titleLabel.setText("Final Results");
+            titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 24px;");
+        }
 
         int index = 0;
-        for (Map.Entry<String, int[]> entry : model.getPlayerPositions().entrySet()) {
+        int labelIndex = 0;
+
+        for (Map.Entry<String, int[]> entry : sortedPlayers) {
             String name = entry.getKey();
             if (name.equals(me)) continue;
 
-            int[] pos = entry.getValue();
-            String line = name + " → Position: " + pos[0];
-            switch (index++) {
+            String line = (index + 1) + "° - " + name;
+
+            switch (labelIndex++) {
                 case 0 -> opponent1Label.setText(line);
                 case 1 -> opponent2Label.setText(line);
                 case 2 -> opponent3Label.setText(line);
             }
+
+            index++;
+
+            if (labelIndex >= 3) break;
         }
     }
+
+
+
+
 
     /**
      * Called after the scene is fully loaded to populate the final screen data.
