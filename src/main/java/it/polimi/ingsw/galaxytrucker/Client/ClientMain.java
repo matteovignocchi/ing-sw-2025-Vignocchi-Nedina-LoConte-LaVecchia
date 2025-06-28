@@ -55,7 +55,7 @@ public class ClientMain {
                         "                          |___/                                     \n"
         );
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the server IP address:");
+        System.out.print("Enter the server IP address: ");
         String host = readHost(scanner);
         int rmiPort    = 1099;
         int socketPort = 30001;
