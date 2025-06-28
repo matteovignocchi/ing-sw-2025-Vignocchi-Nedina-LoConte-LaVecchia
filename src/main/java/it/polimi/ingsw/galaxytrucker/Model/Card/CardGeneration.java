@@ -17,7 +17,7 @@ public class CardGeneration implements Serializable {
      * The cards are divided into three categories: Level 1 cards, Level 2 cards, and Demo cards.
      * Each category is populated by parsing the corresponding JSON file using Jackson.
      *
-     * @throws IOException: if one of the specified card files cannot be found or read correctly.
+     * @throws IOException if one of the specified card files cannot be found or read correctly.
      */
 
     public CardGeneration() throws IOException {
@@ -33,10 +33,10 @@ public class CardGeneration implements Serializable {
      * The method reads the JSON as a resource from the classpath and deserializes it into a list of card instances.
      * The structure of the JSON must match the types registered in the Card interface using Jackson annotations.
      *
-     * @param fileName: the name of the JSON file (relative to the classpath).
-     * @param mapper: the Jackson Object Mapper used for deserialization.
-     * @return: a list of cards read from the file.
-     * @throws IOException: if the file is not found or if deserialization fails.
+     * @param fileName the name of the JSON file (relative to the classpath).
+     * @param mapper the Jackson Object Mapper used for deserialization.
+     * @return a list of cards read from the file.
+     * @throws IOException if the file is not found or if deserialization fails.
      */
 
     public List<Card> loadCards(String fileName, ObjectMapper mapper) throws IOException {
