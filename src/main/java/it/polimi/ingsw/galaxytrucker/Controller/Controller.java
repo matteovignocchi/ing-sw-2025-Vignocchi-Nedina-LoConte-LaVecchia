@@ -17,9 +17,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-//TODO: corner-case: crash in startGame
-//TODO: controllare le eccezioni e capire le eccezione nei metodi che usano i parser!! Gestite male, soprattutto per il discorso markdisconnected
-//TODO: pulire il codice (sostituire ove possibile v.inform con chiamate a inform metodo controller, e metodi simili)
 
 /**
  * Server-side game controller in the MVC architecture.
@@ -87,12 +84,10 @@ public class Controller implements Serializable {
         if(isDemo) {
             fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
-            //TODO: commentato per debugging. ripristinare una volta finito
             deck = deckCreator.CreateDemoDeck();
         }else{
             fBoard = new FlightCardBoard2(this);
             DeckManager deckCreator = new DeckManager();
-            //TODO: commentato per debugging. ripristinare una volta finito
             decks = deckCreator.CreateSecondLevelDeck();
             deck = new Deck();
         }
