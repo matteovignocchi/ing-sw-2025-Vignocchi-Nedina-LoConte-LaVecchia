@@ -59,7 +59,9 @@ public abstract class GUIController {
      * Subclasses may override this to update their dashboard UI components.
      * @param ship the 2D array of ClientTiles representing the player's ship
      */
-    public void updateDashboard(ClientTile[][] ship) {
+    public ClientTile[][] getDashboard(){ return model.getDashboard(); }
+
+    public void updateDashboard() {
     }
 
     /**

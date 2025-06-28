@@ -282,7 +282,7 @@ public class GUIView extends Application implements View {
             model.setDashboard(ship);
             Platform.runLater(() -> {
                 GUIController controller = sceneRouter.getController(SceneEnum.GAME_PHASE);
-                controller.updateDashboard(ship);
+                controller.updateDashboard();
             });
         }
     }
@@ -510,7 +510,6 @@ public class GUIView extends Application implements View {
         }
 
         if (bufferedIndex == null) {
-            reportError("Timeout su askIndex.");
             return null;
         }
 
@@ -518,7 +517,6 @@ public class GUIView extends Application implements View {
         bufferedIndex = null;
 
 
-        System.out.println("[DEBUG] Indice good confermato: " + res);
         return res;
     }
 
@@ -537,7 +535,7 @@ public class GUIView extends Application implements View {
             if (ctrl != null) {
                 ctrl.showYesNoButtons(finalMessage);
             } else {
-                reportError("Controller non disponibile per askWithTimeout.");
+                reportError("Controller not.");
             }
         });
 
@@ -551,7 +549,6 @@ public class GUIView extends Application implements View {
         }
 
         if (bufferedBoolean == null) {
-            reportError("Timeout su askWithTimeout.");
             return false;
         }
 
@@ -926,8 +923,6 @@ public class GUIView extends Application implements View {
         if (sceneEnum == null) {
             return lowerMsg.contains("login successful");
         }
-        if(gamePhase == ClientGamePhase.EXIT) return false;
-
         if (gamePhase == ClientGamePhase.TILE_MANAGEMENT || gamePhase == ClientGamePhase.TILE_MANAGEMENT_AFTER_RESERVED) {
             return lowerMsg.contains("hourglass");
         }
@@ -941,6 +936,7 @@ public class GUIView extends Application implements View {
                     !lowerMsg.contains("creating new game...");
             case NICKNAME_DIALOG -> lowerMsg.contains("login");
             case GAME_PHASE -> true;
+            case EXIT_PHASE -> false;
             default -> false;
         };
     }

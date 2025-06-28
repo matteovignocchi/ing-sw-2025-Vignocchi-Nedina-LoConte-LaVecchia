@@ -273,24 +273,37 @@ public class GameController extends GUIController {
         setPlayersButton();
     }
 
-    public void updateDashboard(ClientTile[][] dashboard) {
+
+    public void updateDashboard() {
+        ClientTile[][] dashboard = model.getDashboard();
+
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 7; col++) {
                 StackPane cell = cellStackPanes[row][col];
                 if (cell == null) continue;
 
+                // Pulisce SEMPRE la cella visivamente
                 cell.getChildren().clear();
 
                 ClientTile tile = dashboard[row][col];
-                if (tile != null && !"EMPTYSPACE".equals(tile.type)) {
-                    placeTile(tile, row, col);
-                    if (!tile.tokens.isEmpty() || tile.capacity > 0 || (tile.goods != null && !tile.goods.isEmpty())) {
-                        placeTokens(tile, row, col);
-                    }
+
+                if (tile == null || "EMPTYSPACE".equals(tile.type)) {
+                    // Tile vuota: non disegnare nulla (lascia la cella vuota)
+                    continue;
+                }
+
+                // Tile valida: disegna immagine
+                placeTile(tile, row, col);
+
+                if (!tile.tokens.isEmpty() || tile.capacity > 0 || (tile.goods != null && !tile.goods.isEmpty())) {
+                    placeTokens(tile, row, col);
                 }
             }
         }
     }
+
+
+
 
     public void clearDashboard() {
         for (int row = 0; row < 5; row++) {
