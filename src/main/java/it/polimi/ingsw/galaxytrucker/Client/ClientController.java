@@ -576,6 +576,7 @@ public class ClientController {
                                     g.reportError(e.getMessage());
                                 }
                             }
+                            g.showNotification("You got the tile in time!");
                         }
                         case "returnthetile" -> {
                             try {

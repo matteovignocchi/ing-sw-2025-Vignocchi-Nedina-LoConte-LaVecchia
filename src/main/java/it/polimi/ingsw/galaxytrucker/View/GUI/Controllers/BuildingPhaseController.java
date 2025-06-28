@@ -195,7 +195,13 @@ public class BuildingPhaseController extends GUIController {
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         }
+    }
 
+    public void postInitialize4(){
+        resetButtons();
+        hourGlassBtn.setVisible(true);
+        logOutBtn.setVisible(true);
+        setPlayersButton();
     }
 
     /**
@@ -516,8 +522,6 @@ public class BuildingPhaseController extends GUIController {
         });
 
         tilePreviewPane.setOnMouseClicked(e -> {
-            guiView.showNotification("You got the tile in time!");
-
             guiView.setBufferedIndex(tileListIndex);
             isSelectingTileFromList = false;
             tileList = List.of();

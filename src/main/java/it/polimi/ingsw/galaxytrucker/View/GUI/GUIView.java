@@ -340,7 +340,12 @@ public class GUIView extends Application implements View {
                         reportError("Controller EXIT_PHASE non disponibile.");
                     }
                 }
-                case WAITING_FOR_TURN  , WAITING_FOR_PLAYERS->{
+                case WAITING_FOR_PLAYERS -> {
+                    setSceneEnum(BUILDING_PHASE);
+                    GUIController controller = sceneRouter.getController(BUILDING_PHASE);
+                    controller.postInitialize4();
+                }
+                case WAITING_FOR_TURN ->{
                     setSceneEnum(GAME_PHASE);
                     GUIController controller = sceneRouter.getController(GAME_PHASE);
                     controller.postInitialize();

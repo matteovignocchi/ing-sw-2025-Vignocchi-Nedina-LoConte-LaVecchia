@@ -77,5 +77,12 @@ public abstract class GUIController {
      */
     public void postInitialize3() {
     }
+
+    /**
+     * Optional lifecycle hooks for additional post-initialization steps.
+     * Subclasses may override these methods as needed.
+     */
+    public void postInitialize4() {
+    }
 }
 
