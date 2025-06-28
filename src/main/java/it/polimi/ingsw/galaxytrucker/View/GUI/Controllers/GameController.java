@@ -245,6 +245,7 @@ public class GameController extends GUIController {
         playerShip2Btn.setVisible(false);
         playerShip3Btn.setVisible(false);
         DrawButton.setVisible(false);
+        logout.setVisible(false);
     }
 
     private void setCommandVisibility(boolean demo) {

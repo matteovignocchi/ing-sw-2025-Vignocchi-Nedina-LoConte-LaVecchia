@@ -103,6 +103,9 @@ public class BuildingPhaseController extends GUIController {
             reserveBtn2.setVisible(true);
             reserveBtn1.setDisable(false);
             reserveBtn2.setDisable(false);
+            deck1Btn.setDisable(true);
+            deck2Btn.setDisable(true);
+            deck3Btn.setDisable(true);
         });
         setReadyBtn.setOnAction(e -> {
             completeCommand("READY");
