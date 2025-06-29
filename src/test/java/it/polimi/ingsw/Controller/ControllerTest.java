@@ -655,7 +655,7 @@ class ControllerTest {
     @Test
     void testChangeMapPositionAndUpdatePositionForEverybody() throws Exception {
         controller.addPlayer("U", view1);
-        controller.changeMapPosition("U", controller.getPlayerCheck("U"));
+        controller.changeMapPosition();
         controller.getPlayerCheck("U").setConnected(true);
         reset(view1);
         controller.updatePositionForEveryBody();
@@ -740,7 +740,7 @@ class ControllerTest {
     @Test
     void testUpdatePositionForEveryBody_NormalAndIOException() throws Exception {
         controller.addPlayer("P", view1);
-        controller.changeMapPosition("P", controller.getPlayerCheck("P"));
+        controller.changeMapPosition();
         controller.getPlayerByNickname("P").setConnected(true);
         reset(view1);
         controller.updatePositionForEveryBody();

@@ -65,7 +65,7 @@ class CardEffectVisitorTest {
         assertTrue(p1.isEliminated());
         verify(controller).inform("SERVER: Your engine power is 0", "A");
         verify(board).moveRocket(3, p2);
-        verify(controller, times(2)).changeMapPosition(any(), any());
+        verify(controller, times(2)).changeMapPosition();
         verify(controller, times(2)).updatePositionForEveryBody();
     }
 

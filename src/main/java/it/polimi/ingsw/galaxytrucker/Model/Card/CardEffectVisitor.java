@@ -79,7 +79,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 f.moveRocket(x, p);
             }
 
-            controller.changeMapPosition(nick, p);
+            controller.changeMapPosition();
             controller.updatePositionForEveryBody();
         }
     }
@@ -107,7 +107,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             controller.inform(msg, nick);
             f.moveRocket(-x, p);
 
-            controller.changeMapPosition(nick, p);
+            controller.changeMapPosition();
             controller.updatePositionForEveryBody();
         }
     }
@@ -151,7 +151,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     p.addCredits(credits);
                 }
 
-                controller.changeMapPosition(nick, p);
+                controller.changeMapPosition();
                 controller.updatePositionForEveryBody();
                 controller.broadcastInform("SERVER: Slavers defeated by " + nick + "!");
                 exit = true;
@@ -402,7 +402,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 if (controller.askPlayerDecision(string, p)) {
                     f.moveRocket(-days, p);
                     controller.manageGoods(p, card.getRewardGoods());
-                    controller.changeMapPosition(nick, p);
+                    controller.changeMapPosition();
                     controller.updatePositionForEveryBody();
                 }
 
@@ -456,7 +456,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 p.addCredits(credits);
                 controller.removeCrewmates(p, num_crewmates);
 
-                controller.changeMapPosition(nick, p);
+                controller.changeMapPosition();
                 controller.updatePositionForEveryBody();
                 exit = true;
             } else {
@@ -499,7 +499,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                     controller.manageGoods(p, card.getStationGoods());
 
-                    controller.changeMapPosition(nick, p);
+                    controller.changeMapPosition();
                     controller.updatePositionForEveryBody();
                     exit = true;
                 } else {
@@ -583,7 +583,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 if (controller.askPlayerDecision(string, p)) {
                     f.moveRocket(-days, p);
                     p.addCredits(credits);
-                    controller.changeMapPosition(nick, p);
+                    controller.changeMapPosition();
                     controller.updatePositionForEveryBody();
                 }
 
@@ -662,7 +662,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 Player p = landedPlayers.get(i);
                 String nick = controller.getNickByPlayer(p);
                 f.moveRocket(-days, p);
-                controller.changeMapPosition(nick, p);
+                controller.changeMapPosition();
             }
             controller.updatePositionForEveryBody();
         }

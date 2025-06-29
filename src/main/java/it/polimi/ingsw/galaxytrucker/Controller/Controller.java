@@ -1185,10 +1185,6 @@ public class Controller implements Serializable {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //GESTIONE MODEL 2
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Prompts a connected player with a yes/no question and waits for their response.
      * If the player is disconnected or an error occurs (including timeout), returns false.
@@ -1388,7 +1384,7 @@ public class Controller implements Serializable {
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
-                Boolean var = false;
+                boolean var;
                 switch (y) {
                     case Engine c -> {
                         var = c.isDouble();
@@ -1402,7 +1398,7 @@ public class Controller implements Serializable {
                             tmp = tmp + 1;
                         }
                     }
-                    default -> tmp = tmp;
+                    default -> {}
                 }
             }
         }
@@ -1424,12 +1420,11 @@ public class Controller implements Serializable {
      * @throws BusinessLogicException if the player reference is invalid
      */
     public int getPowerEngine(Player p) throws BusinessLogicException {
-        String nick = getNickByPlayer(p);
         int tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
-                Boolean var = false;
+                boolean var;
                 switch (y) {
                     case Engine c -> {
                         var = c.isDouble();
@@ -1440,7 +1435,7 @@ public class Controller implements Serializable {
                             tmp = tmp + 1;
                         }
                     }
-                    default -> tmp = tmp;
+                    default -> {}
                 }
             }
         }
@@ -1460,7 +1455,7 @@ public class Controller implements Serializable {
      * The method prompts the player to choose whether to activate double cannons,
      * and takes orientation into account for both single and double cannons.
      * @param p the player whose firepower is being calculated
-     * @return the total firepower (may be fractional)
+     * @return the total firepower (maybe fractional)
      * @throws BusinessLogicException if player lookup or energy management fails
      */
     public double getFirePowerForCard(Player p) throws BusinessLogicException {
@@ -1486,7 +1481,7 @@ public class Controller implements Serializable {
                             else tmp = tmp + 1;
                         }
                     }
-                    default -> tmp = tmp;
+                    default -> {}
                 }
 
             }
@@ -1506,11 +1501,10 @@ public class Controller implements Serializable {
      * This version does not prompt for energy activation (unlike getFirePowerForCard).
      * A +2 bonus is added if the player has a purple alien and at least one cannon.
      * @param p the player whose firepower is being calculated
-     * @return the total firepower (may be fractional)
+     * @return the total firepower (maybe fractional)
      * @throws BusinessLogicException if player lookup fails
      */
     public double getFirePower(Player p) throws BusinessLogicException {
-        String nick = getNickByPlayer(p);
         double tmp = 0;
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
@@ -1527,7 +1521,7 @@ public class Controller implements Serializable {
                             else tmp = tmp + 1;
                         }
                     }
-                    default -> tmp = tmp;
+                    default -> {}
                 }
 
             }
@@ -1581,9 +1575,8 @@ public class Controller implements Serializable {
      * in order of appearance until the requested number is removed or none remain.
      * @param p the player from whom to remove goods
      * @param numOfGoods the total number of goods to remove
-     * @throws BusinessLogicException if removal from a storage unit fails
      */
-    public void autoCommandForRemoveGoods(Player p, int numOfGoods) throws BusinessLogicException {
+    public void autoCommandForRemoveGoods(Player p, int numOfGoods) {
         int flag = numOfGoods;
         if (flag<= 0) return;
         for (int i = 0; i < 5; i++) {
@@ -1611,16 +1604,15 @@ public class Controller implements Serializable {
      * The method searches all storage units in row-major order and removes the first match.
      * @param p the player from whom to remove the good
      * @param col the colour of the good to remove
-     * @throws BusinessLogicException if removal from a storage unit fails
      */
-    public void autoCommandForRemoveSingleGood(Player p, Colour col) throws BusinessLogicException {
+    public void autoCommandForRemoveSingleGood(Player p, Colour col) {
         for(int i=0; i<5; i++){
             for(int j=0; j<7; j++){
                 Tile tmp = p.getTile(i, j);
                 switch (tmp){
                     case StorageUnit c -> {
                         List<Colour> list = c.getListOfGoods();
-                        if(list.isEmpty()) continue;
+                        if(list.isEmpty()) {}
                         else {
                             for(int z=0; z<list.size(); z++){
                                 if(list.get(z).equals(col)){
@@ -1736,13 +1728,11 @@ public class Controller implements Serializable {
             }
         }
 
-        //1° caso
         if(num == totalGood){
             autoCommandForRemoveGoods(p, totalGood);
             if(!p.isConnected()) return;
             inform("SERVER: You have lost all your goods", nick);
 
-        //2° caso
         } else if(num < totalGood){
             if(!p.isConnected()) {
                 autoCommandForRemoveGoods(p, num);
@@ -1949,7 +1939,7 @@ public class Controller implements Serializable {
                     }
                 }
             }
-        }else { //3° caso: if(num > totalGood)
+        }else { 
             autoCommandForRemoveGoods(p, totalGood);
             int finish = num-totalGood;
 
@@ -2219,7 +2209,6 @@ public class Controller implements Serializable {
                 }
                 default -> {
                     reportError("Not valid cell", nick);
-                    //if(!askPlayerDecision("SERVER: " + "Do you want to select another Storage Unit? , if not you will loose the goods", p)) exit = true;
                 }
             }
         }
@@ -2438,7 +2427,6 @@ public class Controller implements Serializable {
      */
     public void startPlague(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
-        VirtualView v = viewsByNickname.get(nick);
 
         inform("SERVER: Starting plague", nick);
         for (int i = 0; i < 5; i++) {
@@ -2473,8 +2461,6 @@ public class Controller implements Serializable {
      * @return if the ship is safe
      */
     public boolean isProtected(String nick, int d) throws BusinessLogicException {
-        boolean flag = false;
-        VirtualView x = viewsByNickname.get(nick);
         Player p = getPlayerByNickname(nick);
         boolean directionProtected = false;
         for (int i = 0; i < 5; i++) {
@@ -2668,7 +2654,6 @@ public class Controller implements Serializable {
      * @throws BusinessLogicException if tile access or battery use fails
      */
     public boolean manageEnergyCell(String nick, String mex) throws BusinessLogicException {
-        VirtualView x = getViewCheck(nick);
         Player player = getPlayerCheck(nick);
         if(!player.isConnected()) return false;
         int[] coordinates;
@@ -2893,14 +2878,10 @@ public class Controller implements Serializable {
                 }
             } while(flag);
 
-            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
-            checkPlayerAssembly(nickname,  xy[0], xy[1]);
-            /**/System.out.println("DOPO DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
+            checkPlayerAssembly(nickname, xy != null ? xy[0] : 2, xy != null ? xy[1] : 3);
 
         }else{
-            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
             checkPlayerAssembly(nickname,  2,3);
-            /**/System.out.println("PRIMA DI CHECKPLAYER ASSEMBLY: Player "+getNickByPlayer(p)+" num di discard tiles: "+ p.checkDiscardPile());
         }
     }
 
@@ -2950,10 +2931,10 @@ public class Controller implements Serializable {
         return null;
     }
 
-
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * Returns the flightCardBoard associated to the game
+     * @return flightCardBoard of the game
+     */
     public FlightCardBoard getFlightCardBoard() {
         return fBoard;
     }
@@ -2986,10 +2967,25 @@ public class Controller implements Serializable {
         deck.shuffle();
     }
 
-    public void changeMapPosition(String nick, Player p) throws BusinessLogicException {
+    /**
+     * Refreshes the internal playersPosition map by rebuilding it from
+     * the current state of all Player objects.
+     */
+    public void changeMapPosition() {
         playersPosition = buildPlayersPositionMap();
     }
 
+    /**
+     * Sends the latest playersPosition map to every connected client view.
+     * <p>
+     * Iterates over all nicknames in playersPosition and invokes
+     * {@code updateMapPosition(playersPosition)} on each registered
+     * {@link VirtualView} if the corresponding player is connected.
+     * Any I/O or runtime failure will mark that player as disconnected.
+     * </p>
+     *
+     * @throws BusinessLogicException if a nickname in playersPosition does not correspond to a known Player
+     */
     public void updatePositionForEveryBody() throws BusinessLogicException {
         for(String nick : playersPosition.keySet()){
             Player p = getPlayerCheck(nick);
@@ -3006,7 +3002,16 @@ public class Controller implements Serializable {
         }
     }
 
-    public void setExit() throws BusinessLogicException {
+    /**
+     * Transitions all players into the EXIT phase, notifies their views of
+     * the EXIT state, and invokes the game-end callback if present.
+     * <p>
+     * Sets each Player’s phase to {@link GamePhase#EXIT}, calls
+     * {@code updateGameState(EXIT)} on every VirtualView, and finally
+     * fires {@code onGameEnd.accept(gameId)}.
+     * </p>
+     */
+    public void setExit()  {
         playersByNickname.values().forEach(p -> p.setGamePhase(GamePhase.EXIT));
 
         viewsByNickname.forEach((nick, view) -> {
@@ -3021,10 +3026,31 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Returns a copy of the current playersPosition map, mapping each
+     * player nickname to their position data array.
+     *
+     * @return a new {@code Map<String,int[]>} where each value is
+     *         {@code [pos, lap, eliminatedFlag, idPhoto]}
+     */
     public Map<String,int[] > getPlayersPosition(){
         return new HashMap<>(playersPosition);
     }
 
+    /**
+     * Builds a fresh map of player positions from the internal Player state.
+     * <p>
+     * For each entry in playersByNickname, extracts:
+     * <ul>
+     *   <li>current track position ({@code p.getPos()})</li>
+     *   <li>current lap ({@code p.getLap()})</li>
+     *   <li>elimination flag (1 if eliminated, 0 otherwise)</li>
+     *   <li>photo ID ({@code p.getIdPhoto()})</li>
+     * </ul>
+     * </p>
+     *
+     * @return a new {@code Map<String,int[]>} reflecting each player’s state
+     */
     private Map<String,int[]> buildPlayersPositionMap() {
         Map<String,int[]> m = new HashMap<>();
         for (Map.Entry<String, Player> e : playersByNickname.entrySet()) {
@@ -3042,6 +3068,10 @@ public class Controller implements Serializable {
         return m;
     }
 
+    /**
+     * Shuts down the hourglass timer if it exists, preventing any further
+     * scheduled flips or expiration callbacks.
+     */
     public void shutdownHourglass() {
         if (hourglass != null) {
             hourglass.shutdown();
