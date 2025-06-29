@@ -679,7 +679,6 @@ public class GUIView extends Application implements View {
 
     /**
      * Asks the user a yes/no question with a timeout of 5 minutes.
-     * Displays the message (stripped of "SERVER:" prefix) with Yes/No buttons.
      * Waits for user input or returns false if timeout or interruption occurs.
      * @param message the question to ask the user
      * @return true if user selects Yes, false otherwise or on timeout
@@ -688,16 +687,13 @@ public class GUIView extends Application implements View {
     public boolean askWithTimeout(String message) {
         long timeout = 300_000;
         long deadline = System.currentTimeMillis() + timeout;
-        if (message != null && message.startsWith("SERVER:")) {
-            message = message.substring("SERVER:".length()).strip();
-        }
+
         bufferedBoolean = null;
 
-        String finalMessage = message;
         Platform.runLater(() -> {
             GameController ctrl = (GameController) sceneRouter.getController(GAME_PHASE);
             if (ctrl != null) {
-                ctrl.showYesNoButtons(finalMessage);
+                ctrl.showYesNoButtons(message);
             } else {
                 reportError("Controller not intialized yet.");
             }
