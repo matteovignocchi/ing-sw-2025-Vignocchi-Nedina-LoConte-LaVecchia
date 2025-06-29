@@ -752,6 +752,7 @@ public class Player implements Serializable {
             boolean tmpBo = controlAssembly2(x,y);
             if(tmpBo) flag = true;
         }
+        boolean tmpBo = controlAssembly2(x,y);
         controlOfConnection();
         semaphore = false;
         removeTile(x, y);
@@ -773,56 +774,80 @@ public class Player implements Serializable {
         boolean[][] visited = new boolean[5][7];
         boolean[][] wrongConnection = new boolean[5][7];
         Queue<int[]> queue = new LinkedList<>();
-        int [] dx = {-1, 0, 1, 0};
-        int [] dy = {0, 1, 0, -1};
-        int [] opp = {2,3,0,1};
-        queue.add(new int[] {xx, yy});
+        int[] dx = {-1, 0, 1, 0};
+        int[] dy = {0, 1, 0, -1};
+        int[] opp = {2, 3, 0, 1};
+
+        queue.add(new int[]{xx, yy});
         visited[xx][yy] = true;
+
         while (!queue.isEmpty()) {
             int[] curr = queue.poll();
             int x = curr[0];
             int y = curr[1];
 
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
-                if(isOutOfBounds(nx, ny) || visited[nx][ny]) continue;
-                if(validStatus[nx][ny] != Status.USED) continue;
-                if (wrongConnection[x][y] || wrongConnection[nx][ny]) continue;
+                if (isOutOfBounds(nx, ny)) continue;
+                if (validStatus[nx][ny] != Status.USED) continue;
+                if (visited[nx][ny]) continue;
+
                 int currentSide = Dash_Matrix[x][y].controlCorners(i);
                 int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
-                if ((currentSide > 0 && nearSide == 0) || (currentSide == 0 && nearSide > 0)) {
-                    wrongConnection[nx][ny] = true;
-                    continue;
-                }
+
                 if (connected(currentSide, nearSide)) {
-                    queue.add(new int[] {nx, ny});
+                    queue.add(new int[]{nx, ny});
                     visited[nx][ny] = true;
-                } else {
-                    wrongConnection[nx][ny] = true;
                 }
             }
-
         }
-        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 7; j++) {
-                if(!visited[i][j] || wrongConnection[i][j]) {
-                    if(!(validStatus[i][j] == Status.FREE)){
+
+        for (int x = 0; x < 5; x++) {
+            for (int y = 0; y < 7; y++) {
+                if (!visited[x][y] || validStatus[x][y] != Status.USED) continue;
+
+                for (int i = 0; i < 4; i++) {
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+
+                    int currentSide = Dash_Matrix[x][y].controlCorners(i);
+
+                    if (currentSide == 0) continue;
+
+                    if (isOutOfBounds(nx, ny) || validStatus[nx][ny] != Status.USED) {
+                        continue;
+                    }
+                    int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
+
+                    if (nearSide == 0 || !connected(currentSide, nearSide)) {
+                        wrongConnection[x][y] = true;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                if (!visited[i][j] || wrongConnection[i][j]) {
+                    if (validStatus[i][j] != Status.FREE) {
                         count++;
                     }
-                    this.removeTile(i, j);
+                    removeTile(i, j);
                 }
             }
         }
-        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 7; j++) {
-                if(isIsolated(i,j) && validStatus[i][j] == Status.USED){
-                    this.removeTile(i,j);
-                    count ++;
+
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 7; j++) {
+                if (validStatus[i][j] == Status.USED && isIsolated(i, j)) {
+                    removeTile(i, j);
+                    count++;
                 }
             }
         }
+
         return count != 0;
     }
 
