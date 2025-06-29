@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.IOException;
@@ -123,7 +124,6 @@ public class GUIView extends Application implements View {
      */
     @Override
     public void inform(String message) {
-        String subString = "";
         if(message.toLowerCase().contains("eliminated")) model.setEliminated();
         if( message.contains("Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.contains("Select an housing unit") || message.contains("Select an energy cell to remove a battery from")) {
             Platform.runLater(() -> {
@@ -175,9 +175,8 @@ public class GUIView extends Application implements View {
                 }
             });
         }
-
-        if (filterDisplayNotification(subString, sceneEnum)) {
-            showNotification(message);
+        if(filterDisplayNotification(message)){
+            appendToChat(message);
         }
     }
 
@@ -1176,24 +1175,20 @@ public class GUIView extends Application implements View {
      * Determines if a message should trigger a notification display based on its content and current scene.
      * Filters out messages related to specific game phases or repetitive messages to avoid notification spam.
      * @param message the message to evaluate
-     * @param sceneEnum the current scene enum
      * @return true if the message should be displayed as a notification, false otherwise
      */
-    private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
+    private boolean filterDisplayNotification(String message) {
         String lowerMsg = message.strip().toLowerCase();
         if (gamePhase == ClientGamePhase.EXIT) {
             resetQueue();
             return false;
         }
         if (message.strip().startsWith("SELECT:\n 1. Add good\n 2. Rearranges the goods\n 3. Trash some goods")) return false;
-        if (lowerMsg.contains("waiting for other players...")) return false;
-        if (lowerMsg.contains("choose deck")) return false;
-        if (lowerMsg.contains("card") || lowerMsg.contains("ship")) return false;
+        if (lowerMsg.contains("choose deck") || lowerMsg.contains("choose coordinates")) return false;
         if (lowerMsg.contains("ship before the attack")) return false;
         if (lowerMsg.contains("select")) return false;
         if (lowerMsg.contains("flight started")) return false;
         if (lowerMsg.contains("checking")) return false;
-        if (lowerMsg.contains("waiting for turn")) return false;
         if (sceneEnum == null) {
             return lowerMsg.contains("login successful");
         }
@@ -1209,8 +1204,7 @@ public class GUIView extends Application implements View {
                     !lowerMsg.contains("insert") &&
                     !lowerMsg.contains("creating new game...");
             case NICKNAME_DIALOG -> lowerMsg.contains("login");
-            case GAME_PHASE -> true;
-            default -> false;
+            default -> true;
         };
     }
 
@@ -1275,5 +1269,33 @@ public class GUIView extends Application implements View {
     private void resetQueue(){
         notificationQueue = new LinkedList<>();
     }
+
+    public void appendToChat(String message) {
+        ChatController ctrl = (ChatController) sceneRouter.getController(CHAT);
+        if (ctrl != null) {
+            Platform.runLater(() -> ctrl.addMessage(message));
+        } else {
+            System.err.println("Not initialized");
+        }
+    }
+
+    public void showChatScene() {
+        Platform.runLater(() -> {
+            Scene chatScene = sceneRouter.getScene(SceneEnum.CHAT);
+            if (chatScene != null) {
+                Stage chatStage = new Stage();
+                chatStage.setTitle("Chat");
+                chatStage.setScene(chatScene);
+                chatStage.initOwner(mainStage);
+                chatStage.setResizable(false);
+                chatStage.initModality(Modality.NONE);
+                chatStage.show();
+            } else {
+                System.err.println("Chat scene not found.");
+            }
+        });
+    }
+
+
 
 }

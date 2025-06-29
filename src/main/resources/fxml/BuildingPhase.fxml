@@ -178,6 +178,7 @@
         </GridPane>
       <Button fx:id="reserveBtn1" mnemonicParsing="false" prefHeight="80.0" prefWidth="80.0" styleClass="transparent-button" AnchorPane.leftAnchor="742.0" AnchorPane.topAnchor="340.0" />
       <Button fx:id="reserveBtn2" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" prefHeight="80.0" prefWidth="80.0" styleClass="transparent-button" AnchorPane.leftAnchor="825.0" AnchorPane.topAnchor="340.0" />
+      <Button fx:id="chatBtn" layoutX="286.0" layoutY="676.0" mnemonicParsing="false" stylesheets="@css/Button.css" text="Chat" AnchorPane.bottomAnchor="15.0" />
     </children>
 
     <stylesheets>

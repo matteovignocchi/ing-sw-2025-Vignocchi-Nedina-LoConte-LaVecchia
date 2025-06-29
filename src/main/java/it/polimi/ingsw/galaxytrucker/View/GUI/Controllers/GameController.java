@@ -90,7 +90,7 @@ public class GameController extends GUIController {
     @FXML private Button yesButton;
     @FXML private Button noButton;
     @FXML private Button playerShip1Btn, playerShip2Btn, playerShip3Btn;
-    @FXML private Button logout , DrawButton;
+    @FXML private Button logout , DrawButton, chatBtn;
 
     private final Map<Integer, Pane> demoMap = new HashMap<>();
     private final Map<Integer, Pane> pathMap = new HashMap<>();
@@ -103,6 +103,7 @@ public class GameController extends GUIController {
      * and populates internal maps for demo and normal mode.
      */
     public void initialize() {
+
         playerShip1Btn.setOnAction(e -> {
             guiView.prepareToViewEnemyDashboard((String) playerShip1Btn.getUserData());
             completeCommand("LOOK_PLAYER1");
@@ -117,7 +118,7 @@ public class GameController extends GUIController {
         });
         logout.setOnAction(e -> completeCommand("LOGOUT"));
         DrawButton.setOnAction(e -> completeCommand("DRAW"));
-
+        chatBtn.setOnAction(e -> openChat());
         demoMap.put(1, demo1);
         demoMap.put(2, demo2);
         demoMap.put(3, demo3);
@@ -214,6 +215,13 @@ public class GameController extends GUIController {
     }
 
     /**
+     * Opens the chat scene by delegating to GUIView.
+     */
+    private void openChat() {
+        guiView.showChatScene();
+    }
+
+    /**
      * Updates the graphical positions of players' ships on the map,
      * choosing demo or normal display based on the isDemo flag.
      * @param playerMaps map containing players' positions
@@ -303,7 +311,7 @@ public class GameController extends GUIController {
         playerShip3Btn.setVisible(false);
         yesButton.setVisible(false);
         noButton.setVisible(false);
-
+        logout.setVisible(true);
 
         DrawButton.setVisible(false);
         DrawButton.setDisable(true);
