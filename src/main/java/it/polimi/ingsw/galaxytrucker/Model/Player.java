@@ -787,18 +787,23 @@ public class Player implements Serializable {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
-                if(isOutOfBounds(nx,ny) || visited[nx][ny]) continue;
-                if(validStatus[nx][ny] == Status.FREE) continue;
+                if(isOutOfBounds(nx, ny) || visited[nx][ny]) continue;
+                if(validStatus[nx][ny] != Status.USED) continue;
+                if (wrongConnection[x][y] || wrongConnection[nx][ny]) continue;
                 int currentSide = Dash_Matrix[x][y].controlCorners(i);
                 int nearSide = Dash_Matrix[nx][ny].controlCorners(opp[i]);
-                if (currentSide == 0 || nearSide == 0) continue;
-                if(connected(currentSide,nearSide)){
-                    queue.add(new int[] {nx,ny});
+                if ((currentSide > 0 && nearSide == 0) || (currentSide == 0 && nearSide > 0)) {
+                    wrongConnection[nx][ny] = true;
+                    continue;
+                }
+                if (connected(currentSide, nearSide)) {
+                    queue.add(new int[] {nx, ny});
                     visited[nx][ny] = true;
-                }else{
+                } else {
                     wrongConnection[nx][ny] = true;
                 }
             }
+
         }
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 7; j++) {
