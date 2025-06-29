@@ -75,7 +75,7 @@ public class GameListMenuController extends GUIController {
         }
 
         try {
-            int gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim()) - 1;
+            int gameId = Integer.parseInt(selectedItem.split("\\.")[0].trim())+1;
 
             if (!inputManager.indexFuture.isDone()) {
                 inputManager.indexFuture.complete(gameId);

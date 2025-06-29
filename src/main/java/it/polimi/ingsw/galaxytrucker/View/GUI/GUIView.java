@@ -491,20 +491,6 @@ public class GUIView extends Application implements View {
      */
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
-        System.out.println("GUI - Loading game list into ListView...");
-
-        Platform.runLater(() -> {
-            GameListMenuController ctrl = (GameListMenuController) sceneRouter.getController(SceneEnum.JOIN_GAME_MENU);
-            ObservableList<String> games = FXCollections.observableArrayList();
-            for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
-                int gameId = entry.getKey();
-                int[] data = entry.getValue();
-                games.add((gameId) + ". Players: " + data[0] + ", Demo: " + (data[1] == 1 ? "Yes" : "No"));
-            }
-
-            ctrl.displayGames(games);
-            setSceneEnum(SceneEnum.JOIN_GAME_MENU);
-        });
     }
 
     /**
@@ -1025,7 +1011,7 @@ public class GUIView extends Application implements View {
             int[] info = entry.getValue();
             boolean isDemo = info[2] == 1;
             String suffix = isDemo ? " DEMO" : "";
-            String desc = (id + 1) + ". Players in game: " + info[0] + "/" + info[1] + suffix;
+            String desc = (id) + ". Players in game: " + info[0] + "/" + info[1] + suffix;
             gameStrings.add(desc);
         }
 
@@ -1038,7 +1024,7 @@ public class GUIView extends Application implements View {
         });
 
         try {
-            Integer result = inputManager.indexFuture.get();
+            Integer result = inputManager.indexFuture.get()-1;
             return result != null && result == -1 ? 0 : result;
         } catch (Exception e) {
             reportError("Failed to get index: " + e.getMessage());
