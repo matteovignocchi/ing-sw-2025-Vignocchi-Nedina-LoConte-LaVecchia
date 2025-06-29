@@ -13,6 +13,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
  * - WAITING_QUEUE: waiting room scene
  * - NICKNAME_DIALOG: dialog for entering player nickname
  * - EXIT_PHASE: final scene after game ends
+ * - CHAT: it displays the chat with all the information during the game
  * Each scene holds the relative path to its FXML file.
  * @author Matteo Vignocchi
  */

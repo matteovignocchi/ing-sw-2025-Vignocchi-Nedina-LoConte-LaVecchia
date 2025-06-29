@@ -284,11 +284,11 @@ public class GUIModel {
         this.playerPositions.clear();
     }
 
+    /**
+     * Set if the player is eliminated
+     */
     public void setEliminated(){
         isEliminated = true;
     }
 
-    public boolean isEliminated(){
-        return isEliminated;
-    }
 }

@@ -118,8 +118,8 @@ public class GUIView extends Application implements View {
 
     /**
      * Displays an informational message to the user.
-     * Filters and processes specific server messages to update the game controller.
-     * Shows a notification popup for messages passing the filter.
+     * Filters and processes specific server messages to update the game controller or the final scene controller.
+     * Shows a notification in chat for messages passing the filter.
      * @param message the message to display
      */
     @Override
@@ -244,7 +244,7 @@ public class GUIView extends Application implements View {
     /**
      * Requests a string input from the user.
      * If a buffered player name is set, returns it immediately.
-     * Otherwise waits asynchronously for the nickname input future to complete.
+     * Otherwise, waits asynchronously for the nickname input future to complete.
      * @return the input string from the user or buffered name
      */
     @Override
@@ -842,14 +842,12 @@ public class GUIView extends Application implements View {
 
     /**
      * Stub method for printing player map positions.
-     * Currently does nothing in GUI implementation.
      */
     @Override
     public void printMapPosition() {}
 
     /**
      * Stub method for printing the covered pile of tiles.
-     * Currently does nothing in GUI implementation.
      */
     @Override
     public void printPileCovered() {}
@@ -1279,6 +1277,11 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Show the chat scene in a new window.
+     * The scene is loaded from the {@code SceneRouter} and displayed in a new stage.
+     * If the scene is not found, an error is printed to standard error.
+     */
     public void showChatScene() {
         Platform.runLater(() -> {
             Scene chatScene = sceneRouter.getScene(SceneEnum.CHAT);

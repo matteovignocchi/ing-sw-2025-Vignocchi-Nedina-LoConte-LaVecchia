@@ -4,7 +4,7 @@ package it.polimi.ingsw.galaxytrucker.View.GUI.Controllers;
  * Controller for the waiting queue GUI scene.
  * Manages the user interface displayed while players wait for the game to start.
  * Handles updating player lists, showing status, and transitioning to the next scene.
- *@author Oleg Nedina
+ *@author Matteo Vignocchi
  */
 public  class WaitingQueueController extends GUIController{
 

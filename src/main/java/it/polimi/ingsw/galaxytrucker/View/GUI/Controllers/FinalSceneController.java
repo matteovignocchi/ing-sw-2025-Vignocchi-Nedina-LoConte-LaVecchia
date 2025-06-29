@@ -26,6 +26,7 @@ public class FinalSceneController extends GUIController {
     @FXML private Label bestShipMessage;
     @FXML private Label arrivedMessage;
     private int myCredits;
+
     /**
      * Initializes the final scene, setting up the logout button text and action handler.
      * The logout button resets the GUI and signals the controller to process logout.
@@ -79,23 +80,47 @@ public class FinalSceneController extends GUIController {
 
     }
 
+    /**
+     * Set the message displaying in which position they arrived.
+     *
+     * @param message the message to display
+     */
     public void setArrivedMessage(String message) {
         arrivedMessage.setText(message);
     }
 
+    /**
+     * Set the message for the best ship award.
+     *
+     * @param message the message to display
+     */
     public void bestShipMessage(String message) {
         bestShipMessage.setText(message);
     }
 
+    /**
+     * Set the message related to goods selling.
+     *
+     * @param message the message to display
+     */
     public void goodsMessage(String message) {
         sellingGood.setText(message);
     }
 
+    /**
+     * Set the message showing the credits lost.
+     *
+     * @param message the message to display
+     */
     public void creditsLostMessage(String message) {
         discardPile.setText(message);
     }
 
-
+    /**
+     * Set the number of credits owned by the player.
+     *
+     * @param credits the amount of credits
+     */
     public void setCredits(int credits) {
         myCredits = credits;
     }
