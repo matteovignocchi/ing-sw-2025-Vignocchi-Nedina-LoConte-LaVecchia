@@ -17,8 +17,8 @@
       <VBox layoutX="268.0" layoutY="243.0" prefHeight="419.0" prefWidth="366.0" styleClass="final">
          <children>
             <Label fx:id="playerNameLabel" alignment="CENTER" prefHeight="70.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
-            <Label fx:id="arrivedMessage" alignment="CENTER" prefHeight="70.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
             <Label fx:id="playerPointsLabel" prefHeight="66.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
+            <Label fx:id="arrivedMessage" alignment="CENTER" prefHeight="70.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
             <Label fx:id="sellingGood" prefHeight="66.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
             <Label fx:id="discardPile" prefHeight="66.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
             <Label fx:id="bestShipMessage" prefHeight="66.0" prefWidth="366.0" styleClass="final" textAlignment="CENTER" />
