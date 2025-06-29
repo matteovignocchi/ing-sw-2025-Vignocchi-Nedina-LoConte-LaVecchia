@@ -4,6 +4,8 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 /**
  * Controller for the final scene GUI displayed at the end of the game.
@@ -19,7 +21,11 @@ public class FinalSceneController extends GUIController {
     @FXML private Label playerPointsLabel;
     @FXML private Button logoutButton;
     @FXML private Label titleLabel;
-
+    @FXML private Label sellingGood;
+    @FXML private Label discardPile;
+    @FXML private Label bestShipMessage;
+    @FXML private Label arrivedMessage;
+    private int myCredits;
     /**
      * Initializes the final scene, setting up the logout button text and action handler.
      * The logout button resets the GUI and signals the controller to process logout.
@@ -32,6 +38,16 @@ public class FinalSceneController extends GUIController {
             guiView.updateState(ClientGamePhase.MAIN_MENU);
             guiView.resolveCommand("logout");
         });
+        bestShipMessage.setWrapText(true);
+        sellingGood.setWrapText(true);
+        discardPile.setWrapText(true);
+        bestShipMessage.setMaxWidth(366);
+        sellingGood.setMaxWidth(366);
+        discardPile.setMaxWidth(366);
+        VBox.setVgrow(bestShipMessage, Priority.ALWAYS);
+        VBox.setVgrow(sellingGood, Priority.ALWAYS);
+        VBox.setVgrow(discardPile, Priority.ALWAYS);
+
     }
 
     /**
@@ -41,9 +57,6 @@ public class FinalSceneController extends GUIController {
      */
     public void updateFinalScreen() {
         String me = model.getNickname();
-        int[] myData = model.getPlayerPositions().get(me);
-        int myCredits = (myData != null && myData.length > 1) ? myData[1] : 0;
-
         playerNameLabel.setText(me);
         playerPointsLabel.setText("Credits: " + myCredits);
 
@@ -64,6 +77,27 @@ public class FinalSceneController extends GUIController {
     public void postInitialize() {
         updateFinalScreen();
 
+    }
+
+    public void setArrivedMessage(String message) {
+        arrivedMessage.setText(message);
+    }
+
+    public void bestShipMessage(String message) {
+        bestShipMessage.setText(message);
+    }
+
+    public void goodsMessage(String message) {
+        sellingGood.setText(message);
+    }
+
+    public void creditsLostMessage(String message) {
+        discardPile.setText(message);
+    }
+
+
+    public void setCredits(int credits) {
+        myCredits = credits;
     }
 }
 

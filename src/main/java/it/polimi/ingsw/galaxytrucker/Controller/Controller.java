@@ -1108,10 +1108,12 @@ public class Controller implements Serializable {
 
         for (int i = 0; i < orderedPlayers.size(); i++) {
             orderedPlayers.get(i).addCredits(arrivalBonus[i]);
+            inform("SERVER: You received "+ arrivalBonus[i]+ "because you arrived "+ i+1, getNickByPlayer(orderedPlayers.get(i)));
         }
 
         for (Player p : bestShipPlayers) {
             p.addCredits(bonusBestShip);
+            inform("SERVER: You have received the Best Ship Built bonus plus 14 credits", getNickByPlayer(p));
         }
 
         for (Player p : playersByNickname.values()) {
@@ -1127,7 +1129,6 @@ public class Controller implements Serializable {
                     case BLUE   -> totalDouble += blueGoodBonus   * factor;
                 }
             }
-
             p.addCredits((int) Math.ceil(totalDouble));
 
             int numBrokenTiles = p.checkDiscardPile();
@@ -1136,7 +1137,10 @@ public class Controller implements Serializable {
 
             String nick = getNickByPlayer(p);
             int totalCredits = p.getCredits();
+            notifyView(getNickByPlayer(p));
             p.setGamePhase(GamePhase.EXIT);
+            inform("SERVER: You earned "+totalDouble+" credits from selling goods", getNickByPlayer(p));
+            inform("SERVER: you lost "+ numBrokenTiles * malusBrokenTile + " credits from all the tile you lost", getNickByPlayer(p));
 
             if(p.isConnected()){
                 if(totalCredits>0) inform("\nSERVER: " + "Your total credits are: " + totalCredits + "\nYOU WON!", nick);

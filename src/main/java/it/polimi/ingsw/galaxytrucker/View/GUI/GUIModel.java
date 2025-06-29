@@ -28,6 +28,7 @@ public class GUIModel {
     private int numberOfEnergy;
     private boolean purpleAlien;
     private boolean brownAlien;
+    private boolean isEliminated = false;
 
     /**
      * Returns the current dashboard tile matrix.
@@ -265,15 +266,6 @@ public class GUIModel {
     }
 
     /**
-     * Gets the position index of a given player.
-     * @param playerName the nickname of the player
-     * @return the position index
-     */
-    public int getMyPosition(String playerName){
-        return playerPositions.get(playerName)[0];
-    }
-
-    /**
      * Resets all fields of the model to their initial state.
      */
     public void reset() {
@@ -292,4 +284,11 @@ public class GUIModel {
         this.playerPositions.clear();
     }
 
+    public void setEliminated(){
+        isEliminated = true;
+    }
+
+    public boolean isEliminated(){
+        return isEliminated;
+    }
 }
