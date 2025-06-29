@@ -1108,12 +1108,13 @@ public class Controller implements Serializable {
 
         for (int i = 0; i < orderedPlayers.size(); i++) {
             orderedPlayers.get(i).addCredits(arrivalBonus[i]);
-            inform("You received "+ arrivalBonus[i]+ "because you arrived "+ i+1, getNickByPlayer(orderedPlayers.get(i)));
+            int j = i+1;
+            inform("You received "+ arrivalBonus[i]+ " because you arrived "+ j, getNickByPlayer(orderedPlayers.get(i)));
         }
 
         for (Player p : bestShipPlayers) {
             p.addCredits(bonusBestShip);
-            inform("You have received the Best Ship Built bonus plus 14 credits", getNickByPlayer(p));
+            inform("You have received "+bonusBestShip+" credits because of the Best Ship", getNickByPlayer(p));
         }
 
         for (Player p : playersByNickname.values()) {
@@ -1139,9 +1140,8 @@ public class Controller implements Serializable {
             int totalCredits = p.getCredits();
             notifyView(getNickByPlayer(p));
             p.setGamePhase(GamePhase.EXIT);
-            inform("You earned "+totalDouble+" credits from selling goods", getNickByPlayer(p));
-            inform("You lost "+ numBrokenTiles * malusBrokenTile + " credits from all the tile you lost", getNickByPlayer(p));
-
+            inform("You received "+totalDouble+" credits from selling goods", getNickByPlayer(p));
+            inform("You lost "+ numBrokenTiles * malusBrokenTile + " credits because of your broken tiles", getNickByPlayer(p));
             if(p.isConnected()){
                 if(totalCredits>0) inform("\nYour total credits are: " + totalCredits + "\nYOU WON!", nick);
                 else inform("Your total credits are: " + totalCredits + "\nYOU LOST!", nick);
