@@ -48,7 +48,7 @@ public class StorageUnit extends Tile implements Serializable {
      */
     public void addGood(Colour good) throws FullGoodsList, TooDangerous {
         if (listOfGoods.size() == max) {
-            throw new FullGoodsList("Storage is full, choose another one"); //ricordati di aggiungere gestione eccezione chiamata remove
+            throw new FullGoodsList("Storage is full, choose another one");
         } else if ( good == Colour.RED && !advanced) {
             throw new TooDangerous("Too Dangerous! Do not even try!\nYou risk blowing up the ship");
         }

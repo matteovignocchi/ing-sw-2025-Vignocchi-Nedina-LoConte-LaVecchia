@@ -1058,10 +1058,5 @@ public class VirtualClientSocket implements Runnable, VirtualView {
         startLatch.countDown();
     }
 
-
-
-
-
-
 }
 

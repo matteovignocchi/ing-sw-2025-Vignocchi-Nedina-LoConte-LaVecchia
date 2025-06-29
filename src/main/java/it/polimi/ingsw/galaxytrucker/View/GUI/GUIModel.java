@@ -2,7 +2,6 @@ package it.polimi.ingsw.galaxytrucker.View.GUI;
 import it.polimi.ingsw.galaxytrucker.Client.ClientCard;
 import it.polimi.ingsw.galaxytrucker.Client.ClientTile;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

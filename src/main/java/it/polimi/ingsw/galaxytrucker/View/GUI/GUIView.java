@@ -26,6 +26,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import static it.polimi.ingsw.galaxytrucker.View.GUI.SceneEnum.*;
 
+/**
+ * JavaFX-based graphical user interface implementation of the View interface.
+ * Manages scenes, user inputs, and interactions for the Galaxy Trucker client.
+ * Coordinates with the ClientController and GUIModel, handles asynchronous input,
+ * and controls scene transitions using SceneRouter.
+ * @author Matteo VIgnochhi
+ * @author Oleg Nedina
+ */
 public class GUIView extends Application implements View {
 
     private static ClientController clientController;
@@ -53,8 +61,12 @@ public class GUIView extends Application implements View {
     private volatile long lastAskCoordinateTimestamp = 0;
     private volatile long lastAskIndexTimestamp = 0;
 
-
-
+    /**
+     * Entry point for the JavaFX application.
+     * Initializes the primary stage, model, input manager, and scene router.
+     * Starts the ClientController in a background thread.
+     * @param primaryStage the main stage of the JavaFX application
+     */
     @Override
     public void start(Stage primaryStage) {
         mainStage = primaryStage;
@@ -87,15 +99,29 @@ public class GUIView extends Application implements View {
         }).start();
     }
 
+    /**
+     * Changes the current displayed scene to the specified scene enum.
+     * @param sceneEnum the target scene to display
+     */
     public void setSceneEnum(SceneEnum sceneEnum) {
         this.sceneEnum = sceneEnum;
         sceneRouter.setScene(sceneEnum);
     }
 
+    /**
+     * Adds a menu choice string to the internal queue to be processed asynchronously.
+     * @param choice the menu option chosen by the user
+     */
     public void resolveMenuChoice(String choice) {
         menuChoiceQueue.add(choice);
     }
 
+    /**
+     * Displays an informational message to the user.
+     * Filters and processes specific server messages to update the game controller.
+     * Shows a notification popup for messages passing the filter.
+     * @param message the message to display
+     */
     @Override
     public void inform(String message) {
         String subString = "";
@@ -117,6 +143,12 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Displays an error message in the GUI as a temporary toast notification.
+     * The toast fades in, stays visible for a short duration, then fades out and removes itself.
+     * If the scene or root pane is unavailable, the error is logged to the console.
+     * @param message the error message to display
+     */
     @Override
     public void reportError(String message) {
         System.err.println("[GUIView] reportError: " + message);
@@ -172,6 +204,12 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Requests a string input from the user.
+     * If a buffered player name is set, returns it immediately.
+     * Otherwise waits asynchronously for the nickname input future to complete.
+     * @return the input string from the user or buffered name
+     */
     @Override
     public String askString() {
         if (bufferedPlayerName != null) {
@@ -188,6 +226,13 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Requests tile coordinates input from the user.
+     * Enables coordinate selection in the game controller asynchronously.
+     * Waits for buffered coordinates to be set via user interaction.
+     * Returns a default coordinate if interrupted.
+     * @return the selected tile coordinates as an int array [row, column]
+     */
     @Override
     public int[] askCoordinate() {
         Platform.runLater(() -> {
@@ -213,12 +258,33 @@ public class GUIView extends Application implements View {
         return result;
     }
 
+    /**
+     * Buffers the coordinate input for later retrieval.
+     * @param coordinate the selected coordinates as [row, column]
+     */
     public void setBufferedCoordinate(int[] coordinate) {
         this.bufferedCoordinate = coordinate;
     }
 
+    /**
+     * Buffers a Boolean value for later retrieval.
+     * @param value the Boolean value to buffer
+     */
     public void setBufferedBoolean(Boolean value) {this.bufferedBoolean = value;}
 
+    /**
+     * Updates the GUI model and relevant controllers with the latest player statistics.
+     * Updates fields like nickname, firepower, engine power, credits, alien presence,
+     * number of humans and energy, and refreshes the game and final screens accordingly.
+     * @param nickname the player's nickname
+     * @param firePower total firepower
+     * @param powerEngine total engine power
+     * @param credits player's credits
+     * @param purpleAlien whether purple alien is present
+     * @param brownAlien whether brown alien is present
+     * @param numberOfHuman number of human crew members
+     * @param numberOfEnergy number of energy units
+     */
     @Override
     public void updateView(String nickname, double firePower, int powerEngine, int credits, boolean purpleAlien, boolean brownAlien, int numberOfHuman, int numberOfEnergy) {
         Platform.runLater(() -> {
@@ -246,6 +312,12 @@ public class GUIView extends Application implements View {
         ctrl2.updateFinalScreen();
     }
 
+    /**
+     * Displays the dashboard of a ship in the GUI.
+     * If previewing an enemy dashboard, opens a popup window with that ship's tiles.
+     * Otherwise, updates the player's own dashboard on the main scene.
+     * @param ship 2D array of ClientTile representing the ship layout
+     */
     @Override
     public void printDashShip(ClientTile[][] ship) {
         if (previewingEnemyDashboard) {
@@ -288,6 +360,10 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Updates the internal model with player positions and informs the game controller to update the map UI.
+     * @param playerMaps map of player nicknames to position arrays
+     */
     @Override
     public void updateMap(Map<String, int[]> playerMaps) {
         model.setPlayerPositions(playerMaps);
@@ -300,11 +376,14 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Changes the current game phase and updates the GUI scene accordingly.
+     * Calls appropriate post-initialization hooks on the corresponding controllers.
+     * @param newPhase the new game phase to set
+     */
     public void updateState(ClientGamePhase newPhase) {
 
-        System.out.println("[DEBUG] updateState ricevuto: " + newPhase);
         if (newPhase == this.gamePhase) {
-            System.out.println("[DEBUG] Fase invariata, non aggiorno: " + newPhase);
             return;
         }
         this.gamePhase = newPhase;
@@ -367,6 +446,11 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Displays the specified tile in the building phase UI.
+     * If tile is null, clears the current tile preview.
+     * @param tile the tile to display
+     */
     @Override
     public void printTile(ClientTile tile) {
         Platform.runLater(() -> {
@@ -385,11 +469,26 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Empty override of printListOfCommand.
+     * No commands are printed in this GUI implementation for now.
+     */
     @Override
     public void printListOfCommand() {}
 
+    /**
+     * Stub method for asking a boolean question; always returns false.
+     * @param message the message or question to display
+     * @return false (stub implementation)
+     */
     @Override public Boolean ask(String message) { return false; }
 
+    /**
+     * Displays the list of available games in the Join Game menu.
+     * Converts the game data into a list of formatted strings, updates
+     * the game list UI component asynchronously, and switches to the Join Game scene.
+     * @param availableGames map of game IDs to their player count and demo status
+     */
     @Override
     public void displayAvailableGames(Map<Integer, int[]> availableGames) {
         System.out.println("GUI - Loading game list into ListView...");
@@ -408,6 +507,13 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Updates the model dashboard at the specified position with the given tile.
+     * If the current scene is the building phase, also updates the GUI grid visually.
+     * @param tile the tile to set
+     * @param row the row index
+     * @param col the column index
+     */
     @Override
     public void setTile(ClientTile tile, int row, int col) {
         model.getDashboard()[row][col] = tile;
@@ -426,6 +532,10 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Displays the current tile preview in the building phase controller.
+     * @param tile the ClientTile to display
+     */
     @Override
     public void setCurrentTile(ClientTile tile) {
         Platform.runLater(() -> {
@@ -434,18 +544,31 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Empty override for setting nickname; no action performed.
+     * @param name the nickname string (unused)
+     */
     @Override
-    public void setNickName(String cognomePradella) {}
+    public void setNickName(String name) {}
 
+    /**
+     * Buffers the selected index for asynchronous retrieval.
+     * @param index the index to buffer
+     */
     public void setBufferedIndex(Integer index) {
         this.bufferedIndex = index;
     }
 
+    /**
+     * Waits for a buffered index to be set and returns it.
+     * Returns -1 if interrupted.
+     * @return the buffered index or -1 if interrupted
+     */
     @Override
     public Integer askIndex() {
         while (bufferedIndex == null) {
             try {
-                Thread.sleep(100); // attende polling leggero
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return -1;
@@ -457,11 +580,17 @@ public class GUIView extends Application implements View {
         return result;
     }
 
+    /**
+     * Requests an index from the user with a timeout of 5 minutes.
+     * If called too frequently (within 300ms), returns null immediately.
+     * Displays a goods selection popup if applicable, otherwise an action selection.
+     * Waits for user input or until timeout expires.
+     * @return the selected index, or null if timed out or no selection made
+     */
     @Override
     public Integer askIndexWithTimeout() {
         long now = System.currentTimeMillis();
         if (now - lastAskIndexTimestamp < 300) {
-            System.out.println("[DEBUG] askIndexWithTimeout ignorato (chiamata duplicata)");
             return null;
         }
 
@@ -525,6 +654,13 @@ public class GUIView extends Application implements View {
         return res;
     }
 
+    /**
+     * Asks the user a yes/no question with a timeout of 5 minutes.
+     * Displays the message (stripped of "SERVER:" prefix) with Yes/No buttons.
+     * Waits for user input or returns false if timeout or interruption occurs.
+     * @param message the question to ask the user
+     * @return true if user selects Yes, false otherwise or on timeout
+     */
     @Override
     public boolean askWithTimeout(String message) {
         long timeout = 300_000;
@@ -562,6 +698,12 @@ public class GUIView extends Application implements View {
         return result;
     }
 
+    /**
+     * Requests coordinates input from the user with a timeout of 5 minutes.
+     * Enables coordinate selection in the GUI and waits for input.
+     * Returns default coordinates or null if timeout or interruption occurs.
+     * @return selected coordinates as [row, col], or null on timeout
+     */
     @Override
     public int[] askCoordinatesWithTimeout() {
         lastAskCoordinateTimestamp = System.currentTimeMillis();
@@ -596,6 +738,11 @@ public class GUIView extends Application implements View {
         return result;
     }
 
+    /**
+     * Returns the currently buffered player name if set.
+     * Reports an error and returns null if no player name is buffered.
+     * @return the selected player name or null if none selected
+     */
     @Override
     public String choosePlayer() {
         if (bufferedPlayerName != null) {
@@ -607,46 +754,89 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Stub implementation of start; no action performed.
+     */
     @Override
     public void start() {}
 
-    @Override public void setIsDemo(Boolean demo) { model.setDemo(demo); }
+    /**
+     * Sets the demo mode flag in the model.
+     * @param demo true to enable demo mode, false otherwise
+     */
+    @Override
+    public void setIsDemo(Boolean demo) { model.setDemo(demo); }
 
+    /**
+     * Checks if the specified coordinate is currently valid for tile placement.
+     * @param a row index
+     * @param b column index
+     * @return true if the position is valid, false otherwise
+     */
     @Override
     public boolean returnValidity(int a, int b) {
         return model.returnValidity(a,b);
     }
 
+    /**
+     * Marks the specified coordinate as invalid for tile placement.
+     * @param a row index
+     * @param b column index
+     */
     @Override
     public void setValidity(int a, int b) {
         model.setValidity(a, b);
     }
 
+    /**
+     * Resets the validity of the specified coordinate to valid for tile placement.
+     * @param a row index
+     * @param b column index
+     */
     @Override
     public void resetValidity(int a, int b) {
         model.resetValidity(a,b);
     }
 
+    /**
+     * Returns the current game phase.
+     * @return the current ClientGamePhase
+     */
     @Override
     public ClientGamePhase getGamePhase() {
         return gamePhase;
     }
 
+    /**
+     * Buffers the list of goods to be displayed and sets a flag to prompt the user
+     * for an action related to goods.
+     * @param goods list of goods represented as strings (color names)
+     */
     @Override
     public void printListOfGoods(List<String> goods) {
-
         this.bufferedGoods = goods;
         this.showGoodActionPrompt = true;
-
-
     }
 
+    /**
+     * Stub method for printing player map positions.
+     * Currently does nothing in GUI implementation.
+     */
     @Override
     public void printMapPosition() {}
 
+    /**
+     * Stub method for printing the covered pile of tiles.
+     * Currently does nothing in GUI implementation.
+     */
     @Override
     public void printPileCovered() {}
 
+    /**
+     * Displays the list of shown tiles in the building phase UI.
+     * Resets any current tile selection before displaying.
+     * @param tiles list of ClientTile objects to display
+     */
     @Override
     public void printPileShown(List<ClientTile> tiles) {
         Platform.runLater(() -> {
@@ -657,6 +847,11 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Displays the specified card in the game phase UI.
+     * Clears the card display if the card is null.
+     * @param card the ClientCard to display
+     */
     @Override
     public void printCard(ClientCard card) {
         Platform.runLater(() -> {
@@ -675,6 +870,12 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Displays a deck of cards in a popup window.
+     * Shows up to three cards side-by-side, with a close button.
+     * Handles loading the FXML layout and populating card images.
+     * @param deck list of ClientCard objects representing the deck
+     */
     @Override
     public void printDeck(List<ClientCard> deck) {
         Platform.runLater(() -> {
@@ -716,11 +917,20 @@ public class GUIView extends Application implements View {
         });
     }
 
+    /**
+     * Completes the future related to game creation data input.
+     * Resets all buffered inputs afterward.
+     * @param data list of game configuration data to resolve
+     */
     public void resolveDataGame(List<Object> data) {
         inputManager.createGameDataFuture.complete(data);
         inputManager.resetAll();
     }
 
+    /**
+     * Retrieves the next user command from the command queue, blocking until available.
+     * @return the next command string input by the user, or null if interrupted
+     */
     @Override
     public String sendAvailableChoices() {
         try {
@@ -732,27 +942,49 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Adds a generic command string to the command queue for processing.
+     * @param command the command to resolve
+     */
     public void resolveCommand(String command) {
         commandQueue.offer(command);
     }
 
+    /**
+     * Checks if there is at least one menu choice available in the queue.
+     * @return true if there is a pending menu choice, false otherwise
+     */
     public boolean hasResolvedMenuChoice() {
         return !menuChoiceQueue.isEmpty();
     }
 
+    /**
+     * Retrieves and removes the next menu choice from the queue.
+     * @return the next menu choice string, or null if none is available
+     */
     public String consumeMenuChoice() {
         return menuChoiceQueue.poll();
     }
 
+    /**
+     * Retrieves the game creation data input by the user.
+     * Blocks until the input future completes or returns a default if failed.
+     * @return a list containing the game creation parameters
+     */
     public List<Object> askCreateGameData() {
         try {
             return inputManager.createGameDataFuture.get();
         } catch (Exception e) {
             reportError("Failed to get create game data: " + e.getMessage());
-            return List.of(false, 0); // fallback
+            return List.of(false, 0);
         }
     }
 
+    /**
+     * Translates a generic command string to a known internal command and queues it.
+     * If the command is unrecognized, reports an error.
+     * @param command the user input command string
+     */
     public void resolveGenericCommand(String command) {
         String translated = switch (command.toUpperCase()) {
             case "GET_COVERED" -> "getacoveredtile";
@@ -778,6 +1010,13 @@ public class GUIView extends Application implements View {
         }
     }
 
+    /**
+     * Displays the list of available games and prompts the user to select one to join.
+     * Converts the game map to a list of descriptive strings, updates the GUI,
+     * then waits for the user selection asynchronously.
+     * @param availableGames map of game IDs to player counts and demo status
+     * @return the chosen game index or 0 if canceled or on error
+     */
     @Override
     public int askGameToJoin(Map<Integer, int[]> availableGames) {
         ObservableList<String> gameStrings = FXCollections.observableArrayList();
@@ -808,8 +1047,8 @@ public class GUIView extends Application implements View {
     }
 
     /**
-     * Aggiunge una notifica alla coda da visualizzare a schermo con animazione.
-     * @param message il testo da mostrare
+     * Adds a notification message to the display queue and initiates showing it with animation.
+     * @param message the notification text to display
      */
     public void showNotification(String message) {
         synchronized (notificationQueue) {
@@ -819,7 +1058,9 @@ public class GUIView extends Application implements View {
     }
 
     /**
-     * Mostra la prossima notifica dalla coda, se non è in corso un’animazione.
+     * Shows the next notification message from the queue if no notification is currently displayed.
+     * Animates the current toast message fading out and moving up,
+     * then displays the next message with a fade-in, pause, and fade-out sequence.
      */
     private void playNextNotification() {
         if (isNotificationPlaying) return;
@@ -849,7 +1090,6 @@ public class GUIView extends Application implements View {
                 return;
             }
 
-            // Fai salire quella precedente e sparire
             if (currentToast != null) {
                 previousToast = currentToast;
 
@@ -867,7 +1107,6 @@ public class GUIView extends Application implements View {
                 new ParallelTransition(moveUp, fadeOutOld).play();
             }
 
-            // Crea nuova notifica
             Label label = new Label(message);
             label.setStyle("""
             -fx-font-family: "Impact";
@@ -891,15 +1130,12 @@ public class GUIView extends Application implements View {
 
             currentToast = toast;
 
-            // Animazione entrata
             FadeTransition fadeIn = new FadeTransition(Duration.millis(400), toast);
             fadeIn.setFromValue(0);
             fadeIn.setToValue(1);
 
-            // Pausa visiva
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
 
-            // Uscita
             FadeTransition fadeOut = new FadeTransition(Duration.millis(400), toast);
             fadeOut.setFromValue(1);
             fadeOut.setToValue(0);
@@ -907,13 +1143,19 @@ public class GUIView extends Application implements View {
                 pane.getChildren().remove(toast);
                 if (currentToast == toast) currentToast = null;
                 isNotificationPlaying = false;
-                playNextNotification(); // Mostra la prossima in coda
+                playNextNotification();
             });
-
             new SequentialTransition(fadeIn, pause, fadeOut).play();
         });
     }
 
+    /**
+     * Determines if a message should trigger a notification display based on its content and current scene.
+     * Filters out messages related to specific game phases or repetitive messages to avoid notification spam.
+     * @param message the message to evaluate
+     * @param sceneEnum the current scene enum
+     * @return true if the message should be displayed as a notification, false otherwise
+     */
     private boolean filterDisplayNotification(String message, SceneEnum sceneEnum) {
         String lowerMsg = message.strip().toLowerCase();
         if (gamePhase == ClientGamePhase.EXIT) {
@@ -949,12 +1191,20 @@ public class GUIView extends Application implements View {
         };
     }
 
+    /**
+     * Prepares the GUI to display an opponent's dashboard by setting flags and buffering the opponent's name.
+     * @param enemyName the name of the opponent whose dashboard will be viewed
+     */
     public void prepareToViewEnemyDashboard(String enemyName) {
         this.previewingEnemyDashboard = true;
         this.bufferedPlayerName = enemyName;
         System.out.println(""+ enemyName);
     }
 
+    /**
+     * Resets the GUI model and clears all buffered inputs and flags to initial state.
+     * Clears dashboard, tiles, stats, player positions, demo flag, and input buffers.
+     */
     private void clearModelAndBuffers() {
         if (model != null) {
             model.setDashboard(new ClientTile[5][7]);
@@ -982,6 +1232,10 @@ public class GUIView extends Application implements View {
         inputManager.resetAll();
     }
 
+    /**
+     * Resets the entire GUI state including the model, input buffers, scenes, and notification queues.
+     * Prepares the GUI for a fresh start or after logout.
+     */
     public void resetGUIState() {
         clearModelAndBuffers();
         sceneRouter.reinitializeAllScenes();
@@ -991,12 +1245,13 @@ public class GUIView extends Application implements View {
         isShowingNotification = false;
         gamePhase = null;
         sceneEnum = null;
-        System.out.println("[DEBUG] GUIView state resettato completamente.");
     }
 
+    /**
+     * Clears the notification message queue.
+     */
     private void resetQueue(){
         notificationQueue.clear();
     }
-
 
 }

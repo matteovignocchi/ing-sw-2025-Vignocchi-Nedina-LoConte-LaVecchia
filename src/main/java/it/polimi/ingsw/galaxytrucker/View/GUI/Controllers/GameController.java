@@ -19,6 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Controller for the main game scene.
+ * Manages GUI interactions during the gameplay phase,
+ * including updating the map, displaying the dashboard, and handling button actions.
+ * @author Oleg Nedina
+ * @author Matteo VIgnocchi
+ */
 public class GameController extends GUIController {
 
     @FXML private GridPane imageShip;
@@ -91,6 +98,10 @@ public class GameController extends GUIController {
     private final Map<String, Image> tokenImageCache = new HashMap<>();
     private final StackPane[][] cellStackPanes = new StackPane[5][7];
 
+    /**
+     * Initializes GUI controls, sets up button handlers,
+     * and populates internal maps for demo and normal mode.
+     */
     public void initialize() {
         playerShip1Btn.setOnAction(e -> {
             guiView.prepareToViewEnemyDashboard((String) playerShip1Btn.getUserData());
@@ -150,10 +161,19 @@ public class GameController extends GUIController {
         pathMap.put(23, path23);
         pathMap.put(24, path24);
     }
+
+    /**
+     * Invokes the resolution of a generic command in the GUIView.
+     * @param command the command to resolve
+     */
     private void completeCommand(String command) {
         guiView.resolveGenericCommand(command);
     }
 
+    /**
+     * Configures the visibility and text of buttons related to other players' ships,
+     * based on the number of other players present in the game.
+     */
     private void setPlayersButton() {
         Map<String, int[]> mapPosition = model.getPlayerPositions();
         List<String> others = mapPosition.keySet().stream()
@@ -193,6 +213,12 @@ public class GameController extends GUIController {
         }
     }
 
+    /**
+     * Updates the graphical positions of players' ships on the map,
+     * choosing demo or normal display based on the isDemo flag.
+     * @param playerMaps map containing players' positions
+     * @param isDemo flag indicating if demo mode is active
+     */
     public void updateMapPosition(Map<String, int[]> playerMaps, boolean isDemo) {
         Map<Integer, Pane> paneMap = isDemo ? demoMap : pathMap;
 
@@ -216,6 +242,12 @@ public class GameController extends GUIController {
         }
     }
 
+    /**
+     * Returns the image of the ship corresponding to the given ID.
+     * Provides a placeholder image if the ID is not recognized.
+     * @param id the ship identifier
+     * @return the image of the ship
+     */
     private Image getShipImage(int id) {
         String path = switch (id){
             case 33 ->  "/images/BlueRocket.png";
@@ -227,6 +259,11 @@ public class GameController extends GUIController {
         return new Image(getClass().getResourceAsStream(path));
     }
 
+    /**
+     * Called after scene initialization.
+     * Sets up the game grid, updates the dashboard,
+     * and manages command visibility based on demo mode.
+     */
     @Override
     public void postInitialize() {
         initializeGrid();
@@ -234,12 +271,19 @@ public class GameController extends GUIController {
         setCommandVisibility(model.isDemo());
     }
 
+    /**
+     * Secondary initialization method that enables and shows the "Draw" button.
+     */
     @Override
     public void postInitialize2(){
         DrawButton.setVisible(true);
         DrawButton.setDisable(false);
     }
 
+    /**
+     * Secondary initialization method that hides the player ship buttons,
+     * the "Draw" button, and the logout button.
+     */
     public void postInitialize3(){
         playerShip1Btn.setVisible(false);
         playerShip2Btn.setVisible(false);
@@ -248,6 +292,11 @@ public class GameController extends GUIController {
         logout.setVisible(false);
     }
 
+    /**
+     * Sets the visibility of player ship buttons and other UI elements
+     * based on whether the game is in demo mode or not.
+     * @param demo true if demo mode is active, false otherwise
+     */
     private void setCommandVisibility(boolean demo) {
         playerShip1Btn.setVisible(false);
         playerShip2Btn.setVisible(false);
@@ -274,7 +323,11 @@ public class GameController extends GUIController {
         setPlayersButton();
     }
 
-
+    /**
+     * Updates the ship dashboard display by placing tiles and tokens
+     * on the grid according to the current model state.
+     * Initializes the grid if not already done.
+     */
     public void updateDashboard() {
         if (imageShip.getChildren().isEmpty()) {
             initializeGrid();
@@ -303,18 +356,12 @@ public class GameController extends GUIController {
         }
     }
 
-
-
-    public void clearDashboard() {
-        for (int row = 0; row < 5; row++) {
-            for (int col = 0; col < 7; col++) {
-                if (cellStackPanes[row][col] != null) {
-                    cellStackPanes[row][col].getChildren().clear();
-                }
-            }
-        }
-    }
-
+    /**
+     * Places a single tile image at the specified grid position.
+     * @param tile the ClientTile to place
+     * @param row the row index in the grid
+     * @param col the column index in the grid
+     */
     private void placeTile(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
         if (cell == null) return;
@@ -326,6 +373,10 @@ public class GameController extends GUIController {
         cell.getChildren().add(tileImage);
     }
 
+    /**
+     * Initializes the grid of stack panes representing the ship dashboard.
+     * Clears any existing nodes and prepares the grid for tile placement.
+     */
     public void initializeGrid() {
         imageShip.getChildren().clear();
         for (int row = 0; row < 5; row++) {
@@ -339,9 +390,11 @@ public class GameController extends GUIController {
         }
     }
 
-
     /**
-     * Abilita il click su una cella della dashboard. Il callback riceve la coordinata.
+     * Enables mouse click selection on dashboard cells.
+     * The given callback receives the coordinate of the clicked cell.
+     * Highlights selectable cells with a yellow border.
+     * @param callback function to be called with selected coordinates [row, col]
      */
     public void enableDashboardCoordinateSelection(Consumer<int[]> callback) {
         for (Node node : imageShip.getChildren()) {
@@ -359,7 +412,8 @@ public class GameController extends GUIController {
     }
 
     /**
-     * Rimuove gli handler e lo stile dalla dashboard dopo la selezione.
+     * Disables mouse click handlers and resets the style for all dashboard cells.
+     * Called after a coordinate selection is made to clean up UI.
      */
     public void disableDashboardCoordinateSelection() {
         for (Node node : imageShip.getChildren()) {
@@ -368,6 +422,11 @@ public class GameController extends GUIController {
         }
     }
 
+    /**
+     * Displays the specified card image in the cardPane.
+     * Clears the pane if card is null or has no image.
+     * @param card the ClientCard to display
+     */
     public void showCurrentCard(ClientCard card) {
         currentCard = card;
         cardPane.getChildren().clear();
@@ -384,17 +443,29 @@ public class GameController extends GUIController {
         cardPane.getChildren().add(imageView);
     }
 
-
+    /**
+     * Clears the currently displayed card from the cardPane.
+     */
     public void clearCurrentTile() {
         currentCard = null;
         cardPane.getChildren().clear();
     }
 
+    /**
+     * Sets a message to be shown in the message text area
+     * and makes the message container visible.
+     * @param message the text message to display
+     */
     public void messageSet(String message) {
         messageText.setText(message);
         messageTextFlow.setVisible(true);
     }
 
+    /**
+     * Shows a yes/no prompt with the given message.
+     * Sets button visibility and handlers to store user response.
+     * @param message the prompt message to display
+     */
     public void showYesNoButtons(String message) {
         messageText.setText(message);
         messageTextFlow.setVisible(true);
@@ -412,7 +483,10 @@ public class GameController extends GUIController {
         });
     }
 
-
+    /**
+     * Hides the yes/no prompt by making the message text and buttons invisible,
+     * and clears the message text.
+     */
     private void hidePrompt() {
         messageTextFlow.setVisible(false);
         yesButton.setVisible(false);
@@ -420,6 +494,18 @@ public class GameController extends GUIController {
         messageText.setText("");
     }
 
+    /**
+     * Updates the labels displaying player stats such as nickname, firepower,
+     * engine power, credits, alien presence, number of humans, and energy cells.
+     * @param nickname the player's nickname
+     * @param firePower the player's fire power value
+     * @param enginePower the player's engine power value
+     * @param creditsVal the player's credits count
+     * @param purple true if the player has a purple alien present
+     * @param brown true if the player has a brown alien present
+     * @param humans the number of humans on the player's ship
+     * @param energy the number of energy cells on the player's ship
+     */
     public void updateStatsLabels(String nickname, double firePower, int enginePower, int creditsVal, boolean purple, boolean brown, int humans, int energy) {
         nicknametext.setText(nickname);
         firepower.setText("Fire Power: " + firePower);
@@ -431,6 +517,13 @@ public class GameController extends GUIController {
         energycell.setText("Number of energy Cell: " + energy);
     }
 
+    /**
+     * Places visual tokens on the specified grid cell corresponding to the tile's tokens,
+     * energy cell capacity, and goods. Tokens are displayed with appropriate sizes and offsets.
+     * @param tile the ClientTile whose tokens are to be displayed
+     * @param row the row index in the dashboard grid
+     * @param col the column index in the dashboard grid
+     */
     private void placeTokens(ClientTile tile, int row, int col) {
         StackPane cell = cellStackPanes[row][col];
         if (cell == null) return;
@@ -471,7 +564,12 @@ public class GameController extends GUIController {
         }
     }
 
-
+    /**
+     * Returns an Image for the token type specified. Caches loaded images for performance.
+     * Supports humans, aliens, goods of various colors, energy cells, and a default placeholder.
+     * @param tokenType string identifier of the token type (e.g., "human", "red", "energycell")
+     * @return an Image object representing the token's image
+     */
     private Image getTokenImage(String tokenType) {
         return tokenImageCache.computeIfAbsent(tokenType.toLowerCase(), type -> {
             String path = switch (type) {
@@ -491,6 +589,5 @@ public class GameController extends GUIController {
                     : new Image(stream);
         });
     }
-
 
 }

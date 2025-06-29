@@ -5,6 +5,7 @@ import it.polimi.ingsw.galaxytrucker.Controller.Controller;
 import it.polimi.ingsw.galaxytrucker.Model.Player;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
 import java.util.Map;
@@ -371,7 +372,7 @@ public class GameManager {
     /**
      * Absolute path to save games.
      */
-    private static final File SAVES_DIR = new File(System.getProperty("user.home"), ".galaxytrucker" + File.separator + "saves");
+    private static final File SAVES_DIR = Paths.get(System.getProperty("user.home"), "Desktop", "saves_GT").toFile();
 
     /**
      * Schedules periodic saving of all active games every minute.

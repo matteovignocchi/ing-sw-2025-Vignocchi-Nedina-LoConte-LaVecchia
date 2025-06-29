@@ -81,8 +81,8 @@ public abstract class Tile implements Serializable {
      * @return true if the tiles are equal, false otherwise
      */
     public boolean equals(Object obj) {
-        if (this == obj) return true; // stesso riferimento
-        if (obj == null || getClass() != obj.getClass()) return false; // null o classi diverse
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Tile tile = (Tile) obj;
         return this.idTile == tile.idTile;
     }
