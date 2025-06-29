@@ -2569,6 +2569,7 @@ public class Controller implements Serializable {
             return true;
         }
 
+
         if(!tmpBoolean){
             inform("You are safe", Nickname);
         }else{
