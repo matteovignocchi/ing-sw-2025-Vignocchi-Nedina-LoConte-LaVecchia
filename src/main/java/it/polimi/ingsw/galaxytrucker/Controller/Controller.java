@@ -112,28 +112,29 @@ public class Controller implements Serializable {
         this.loggedInUsers = loggedInUsers;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //GESTIONE PARTITA
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    /**
+     * Initializes a single-threaded, daemon ScheduledExecutorService named
+     * "PingScheduler-<gameId>" and schedules a recurring ping task.
+     * <p>
+     * After an initial delay of 10 seconds, {@link #pingAllClients()} will be
+     * invoked every 3 seconds to check client connectivity.
+     * </p>
+     */
     private void initPingScheduler() {
         pingScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "PingScheduler-" + gameId);
             t.setDaemon(true);
             return t;
         });
-        // ping ogni 10 secondi
-        pingScheduler.scheduleAtFixedRate(this::pingAllClients, 10, 10, TimeUnit.SECONDS);
+        pingScheduler.scheduleAtFixedRate(this::pingAllClients, 10, 3, TimeUnit.SECONDS);
     }
 
+    /**
+     * Sends a heartbeat ("PING") to every registered client by calling
+     * {@code updateGameState("PING")} on each {@link VirtualView}. If a client
+     * fails to respond (throws), it is marked disconnected.
+     */
     private void pingAllClients() {
-        String phase;
-        try {
-            phase = enumSerializer.serializeGamePhase(getGamePhaseForAll());
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            System.err.println("[PING] errore serializzazione fase: " + e.getMessage());
-            phase = "PING";
-        }
 
         for (var entry : viewsByNickname.entrySet()) {
             String nick = entry.getKey();
@@ -146,12 +147,12 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Immediately shuts down the ping scheduler, cancelling any scheduled tasks.
+     * Safe to call multiple times.
+     */
     public void shutdownPing() {
         if (pingScheduler != null) pingScheduler.shutdownNow();
-    }
-
-    private GamePhase getGamePhaseForAll() {
-        return playersByNickname.values().iterator().next().getGamePhase();
     }
 
     /**
@@ -176,14 +177,12 @@ public class Controller implements Serializable {
                     getFirePower(p),
                     getPowerEngine(p),
                     p.getCredits(),
-                    //fBoard.getPositionOfPlayer(p),
                     p.presencePurpleAlien(),
                     p.presenceBrownAlien(),
                     p.getTotalHuman(),
                     p.getTotalEnergy()
             );
             if(getPlayerCheck(nickname).getGamePhase()==GamePhase.TILE_MANAGEMENT) {
-
                 String json = tileSerializer.toJson(p.getLastTile());
                 v.setTile(json);}
         } catch (IOException e) {
@@ -221,7 +220,6 @@ public class Controller implements Serializable {
             case 4 -> tmp = 61;
         }
 
-
         Player p = new Player(playerIdCounter.getAndIncrement(), isDemo , tmp);
         p.setConnected(true);
 
@@ -236,26 +234,59 @@ public class Controller implements Serializable {
         broadcastInform( nickname + "  joined");
     }
 
+    /**
+     * Returns the map of all players indexed by their nickname.
+     *
+     * @return an unmodifiable view of the map from nickname to Player
+     */
     public Map<String, Player> getPlayersByNickname(){
         return playersByNickname;
     }
 
+    /**
+     * Retrieves a Player by their nickname, or null if not found.
+     *
+     * @param nickname the player's nickname
+     * @return the Player object, or null if no such player
+     */
     public Player getPlayerByNickname(String nickname) {
         return playersByNickname.get(nickname);
     }
 
+    /**
+     * Retrieves a Player by nickname, throwing if absent.
+     *
+     * @param nickname the player's nickname
+     * @return the Player object
+     * @throws BusinessLogicException if no player with the given nickname exists
+     */
     public Player getPlayerCheck(String nickname) throws BusinessLogicException {
         Player player = playersByNickname.get(nickname);
         if (player == null) throw new BusinessLogicException("Player not found");
         return player;
     }
 
+
+    /**
+     * Retrieves a VirtualView by nickname, throwing if absent.
+     *
+     * @param nickname the player's nickname
+     * @return the VirtualView associated with the player
+     * @throws BusinessLogicException if no view for the given nickname exists
+     */
     public VirtualView getViewCheck(String nickname) throws BusinessLogicException {
         VirtualView view = viewsByNickname.get(nickname);
         if (view == null) throw new BusinessLogicException("Player not found");
         return view;
     }
 
+    /**
+     * Finds the nickname corresponding to a Player instance.
+     *
+     * @param player the Player object
+     * @return the nickname key under which this player is stored
+     * @throws BusinessLogicException if the player is not present in the map
+     */
     public String getNickByPlayer(Player player) throws BusinessLogicException {
         return playersByNickname.entrySet().stream()
                 .filter(e -> e.getValue().equals(player))
@@ -264,6 +295,13 @@ public class Controller implements Serializable {
                 .orElseThrow(() -> new BusinessLogicException("Player Not Found"));
     }
 
+    /**
+     * Sends an informational message to a specific player.
+     * Marks the player disconnected on any I/O or other failure.
+     *
+     * @param msg  the message to send
+     * @param nick the target player's nickname
+     */
     public void inform(String msg, String nick){
         VirtualView v = viewsByNickname.get(nick);
         try{
@@ -276,6 +314,14 @@ public class Controller implements Serializable {
         }
     }
 
+
+    /**
+     * Sends an informational message and then notifies the client of state update.
+     * Marks the player disconnected on any failure.
+     *
+     * @param msg  the message to send
+     * @param nick the target player's nickname
+     */
     public void informAndNotify(String msg, String nick){
         VirtualView v = viewsByNickname.get(nick);
         try{
@@ -289,6 +335,13 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Reports an error message to a specific player.
+     * Marks the player disconnected on any failure.
+     *
+     * @param msg  the error message
+     * @param nick the target player's nickname
+     */
     public void reportError(String msg, String nick){
         VirtualView v = viewsByNickname.get(nick);
         try{
@@ -301,6 +354,11 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Broadcasts an informational message to all connected players.
+     *
+     * @param msg the message to broadcast
+     */
     public void broadcastInform(String msg) {
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
@@ -309,6 +367,13 @@ public class Controller implements Serializable {
         }
     }
 
+
+    /**
+     * Broadcasts an informational message to all connected players except one.
+     *
+     * @param msg    the message to broadcast
+     * @param caller the player to exclude from the broadcast
+     */
     public void broadcastInformExcept(String msg, Player caller){
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
@@ -317,6 +382,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Sends the player's dashboard matrix to their view.
+     * Marks the player disconnected on any failure.
+     *
+     * @param v    the player's VirtualView
+     * @param p    the Player whose dashboard to print
+     * @param nick the player's nickname (for disconnection handling)
+     */
     public void printPlayerDashboard (VirtualView v, Player p, String nick) {
         try{
             v.printPlayerDashboard(tileSerializer.toJsonMatrix(p.getDashMatrix()));
@@ -328,6 +401,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Prints the list of goods for a player.
+     * Marks the player disconnected on any failure.
+     *
+     * @param list the list of goods to display
+     * @param nick the target player's nickname
+     * @throws BusinessLogicException if the player's view cannot be retrieved
+     */
     public void printListOfGoods (List<Colour> list, String nick) throws BusinessLogicException {
         VirtualView v = getViewCheck(nick);
         try{
@@ -340,6 +421,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Updates the player's view with a new game phase.
+     * Marks the player disconnected on any failure.
+     *
+     * @param nick  the player's nickname
+     * @param v     the player's VirtualView
+     * @param phase the new GamePhase to send
+     */
     public void updateGamePhase(String nick, VirtualView v, GamePhase phase){
         try {
             v.updateGameState(enumSerializer.serializeGamePhase(phase));
@@ -351,6 +440,11 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Counts how many players are currently connected.
+     *
+     * @return the number of players with isConnected == true
+     */
     public int countConnectedPlayers() {
         return (int) playersByNickname.values().stream().filter(Player::isConnected).count();
     }
@@ -375,6 +469,16 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Marks the given player as reconnected by updating their view and
+     * restoring their connected status. Broadcasts a reconnection message
+     * if the player was previously disconnected, cancels any pending
+     * single-player timeout, and notifies the client of the current state.
+     *
+     * @param nickname the nickname of the player who reconnected
+     * @param view     the new VirtualView instance for the player
+     * @throws BusinessLogicException if no player with the given nickname exists
+     */
     public void markReconnected(String nickname, VirtualView view) throws BusinessLogicException {
         viewsByNickname.put(nickname, view);
         Player p = playersByNickname.get(nickname);
@@ -388,6 +492,15 @@ public class Controller implements Serializable {
         cancelLastPlayerTimeout();
         notifyView(nickname);
     }
+
+    /**
+     * Handles the elimination of a player by setting their phase to WAITING_FOR_TURN,
+     * informing them of their elimination, and broadcasting the elimination to all
+     * other connected players.
+     *
+     * @param p the Player instance to eliminate
+     * @throws BusinessLogicException if the player's nickname cannot be resolved
+     */
 
     public void handleElimination(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
@@ -405,6 +518,14 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Reinitializes transient state after deserialization of the Controller:
+     * clears existing views, creates a new Hourglass with the provided listener,
+     * re-creates serializers, sets the end-of-game listener, and restarts pinging.
+     *
+     * @param hourglassListener   callback for hourglass state changes
+     * @param onGameEndListener   callback to invoke when the game ends
+     */
     public void reinitializeAfterLoad(Consumer<Hourglass> hourglassListener, Consumer<Integer> onGameEndListener) {
         this.viewsByNickname = new ConcurrentHashMap<>();
         this.hourglass = new Hourglass(hourglassListener);
@@ -415,13 +536,28 @@ public class Controller implements Serializable {
         initPingScheduler();
     }
 
+
+    /**
+     * Indicates whether the game has started. Returns true if any player
+     * is in a phase other than WAITING_FOR_PLAYERS.
+     *
+     * @return true if at least one player’s phase is not WAITING_FOR_PLAYERS
+     */
     public boolean isGameStarted() {
         return playersByNickname.values().stream()
                 .anyMatch(p -> p.getGamePhase() != GamePhase.WAITING_FOR_PLAYERS);
     }
 
+    /**
+     * Returns the maximum number of players allowed in this game.
+     *
+     * @return the configured maximum player count
+     */
     public int getMaxPlayers(){ return MaxPlayers; }
 
+    /**
+     * Cancels the scheduled timeout task for a single remaining player, if any.
+     */
     private void cancelLastPlayerTimeout() {
         if (lastPlayerTask != null) {
             lastPlayerTask.cancel(false);
@@ -429,6 +565,12 @@ public class Controller implements Serializable {
         }
     }
 
+
+    /**
+     * Schedules a timeout to automatically end the game and declare a winner
+     * if only one player remains connected for one minute.
+     * Cancels any previous single-player timeout before scheduling.
+     */
     private void setTimeout() {
         cancelLastPlayerTimeout();
         if (countConnectedPlayers() == 1) {
@@ -456,9 +598,6 @@ public class Controller implements Serializable {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //GESTIONE MODEL 1
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Starts the game by transitioning all players to the BOARD_SETUP phase.
@@ -659,6 +798,18 @@ public class Controller implements Serializable {
         notifyView(nickname);
     }
 
+    /**
+     * Begins the flight phase of the game.
+     * <p>
+     * If not in demo mode, cancels the hourglass timer and merges the remaining card decks.
+     * Marks any players not in the flight order as ready to fly, rebuilds player positions,
+     * and broadcasts a “Flight started!” notification.
+     * Then checks each player’s ship assembly, adds crewmates where needed,
+     * sets all players to WAITING_FOR_TURN, and initiates the draw phase.
+     * </p>
+     *
+     * @throws BusinessLogicException if an error occurs in game logic during setup of the flight phase
+     */
     public void startFlight() throws BusinessLogicException {
 
         if(!isDemo){
@@ -793,12 +944,30 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Draws the next card from the deck and manages the sequence of
+     * phases and notifications for all players.
+     * <p>
+     * - Draws a card and sets the drawer’s phase to WAITING_FOR_TURN.<br>
+     * - Broadcasts a “Card drawn!” message.<br>
+     * - For each connected, non-eliminated player: sets phase to CARD_EFFECT,
+     *   updates their view, and sends them the drawn card.<br>
+     * - Activates the card’s effect, then broadcasts “end of card's effect”.<br>
+     * - If the deck is empty or all players eliminated, moves to awards phase;<br>
+     *   otherwise, asks each remaining player (in parallel) whether they
+     *   wish to abandon the flight, handles eliminations, re-orders players,
+     *   and either starts the awards phase or continues with the next draw.
+     * </p>
+     *
+     * @param nickname the nickname of the player who initiated the draw
+     * @throws BusinessLogicException if drawing the card or applying game logic fails
+     */
     public void drawCardManagement(String nickname) throws BusinessLogicException {
         Card card = deck.draw();
         
         Player drawer = getPlayerCheck(nickname);
         drawer.setGamePhase(GamePhase.WAITING_FOR_TURN);
-        updateGamePhase(nickname, getViewCheck(nickname), GamePhase.WAITING_FOR_TURN); //omettibile
+        updateGamePhase(nickname, getViewCheck(nickname), GamePhase.WAITING_FOR_TURN);
 
         broadcastInform("\nSERVER: " + "Card drawn!");
 
@@ -901,6 +1070,20 @@ public class Controller implements Serializable {
         }
     }
 
+    /**
+     * Calculates and distributes end-of-flight rewards and maluses,
+     * updates player credits and phases, and notifies each player of their final score.
+     * <p>
+     * - Computes arrival bonuses, best-ship bonus, cargo bonuses (with half factor
+     *   for eliminated players), and broken-tile maluses.<br>
+     * - Applies each bonus/malus to players’ credit totals.<br>
+     * - Sets all players’ phase to EXIT, informs them of win/loss and game end,
+     *   and triggers the onGameEnd callback if present.<br>
+     * - Finally, notifies all clients of the updated END-phase state.
+     * </p>
+     *
+     * @throws BusinessLogicException if an error occurs during credit calculation or notification
+     */
     public void startAwardsPhase() throws BusinessLogicException {
 
         broadcastInform("\nSERVER: Flight ended! Time to collect rewards!");
@@ -915,8 +1098,6 @@ public class Controller implements Serializable {
                 fBoard.getBonusThirdPosition(), fBoard.getBonusFourthPosition()};
         List<Player> orderedPlayers = fBoard.getOrderedPlayers();
 
-        /**/System.out.printf("%d %d %d %d %d %d %s%n", malusBrokenTile, bonusBestShip, redGoodBonus, yellowGoodBonus, greenGoodBonus, blueGoodBonus, Arrays.toString(arrivalBonus));
-
         int minExpConnectors = playersByNickname.values().stream()
                 .mapToInt(Player::countExposedConnectors)
                 .min()
@@ -925,22 +1106,13 @@ public class Controller implements Serializable {
                 .filter(p -> p.countExposedConnectors() == minExpConnectors)
                 .toList();
 
-        /**/System.out.printf("Connettori minimi esposti %s%n", minExpConnectors);
-        /**/for(Player p: bestShipPlayers) System.out.println("Best ship player: "+getNickByPlayer(p));
-
-        /**/for (Player p : playersByNickname.values()) System.out.println("Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
-
         for (int i = 0; i < orderedPlayers.size(); i++) {
             orderedPlayers.get(i).addCredits(arrivalBonus[i]);
         }
 
-        /**/for (Player p : playersByNickname.values()) System.out.println("AFTER ARRIVAL BONUS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
-
         for (Player p : bestShipPlayers) {
             p.addCredits(bonusBestShip);
         }
-
-        /**/for (Player p : playersByNickname.values()) System.out.println("AFTER BESTSHIP BONUS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
 
         for (Player p : playersByNickname.values()) {
             List<Colour> goods = p.getTotalListOfGood();
@@ -956,24 +1128,13 @@ public class Controller implements Serializable {
                 }
             }
 
-            /**/System.out.println("Crediti bonus per merce: "+totalDouble);
-
-            /**/ System.out.println("BEFORE GOODS CREDTIS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
-
             p.addCredits((int) Math.ceil(totalDouble));
-
-            /**/ System.out.println("AFTER GOODS CREDTIS: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
 
             int numBrokenTiles = p.checkDiscardPile();
 
-            /**/ System.out.println("Numero di tessere distrutte: "+numBrokenTiles);
-
             p.addCredits(numBrokenTiles * malusBrokenTile);
 
-            /**/ System.out.println("AFTER BROKEN TILES: Player "+getNickByPlayer(p)+" credits: "+p.getCredits());
-
             String nick = getNickByPlayer(p);
-            VirtualView v = viewsByNickname.get(nick);
             int totalCredits = p.getCredits();
             p.setGamePhase(GamePhase.EXIT);
 
@@ -991,7 +1152,6 @@ public class Controller implements Serializable {
             String nick = getNickByPlayer(p);
             notifyView(nick);
         }
-
     }
 
     /**
@@ -1029,6 +1189,15 @@ public class Controller implements Serializable {
     //GESTIONE MODEL 2
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Prompts a connected player with a yes/no question and waits for their response.
+     * If the player is disconnected or an error occurs (including timeout), returns false.
+     *
+     * @param question the question to present to the player
+     * @param p        the Player instance to query
+     * @return true if the player answered “yes”; false on “no”, timeout, disconnection, or error
+     * @throws BusinessLogicException if the nickname-to-player lookup fails
+     */
     public boolean askPlayerDecision(String question, Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
@@ -1038,7 +1207,7 @@ public class Controller implements Serializable {
         try {
             return v.askWithTimeout(question);
         } catch (IOException e) {
-            System.err.println("[WARN] IOException in askPlayerDecision for " + nick + ": " + e.getMessage());
+            System.err.println("Error in IOException in askPlayerDecision for " + nick + ": " + e.getMessage());
             return false;
         } catch (Exception e) {
             markDisconnected(nick);
@@ -1048,6 +1217,14 @@ public class Controller implements Serializable {
 
     }
 
+    /**
+     * Prompts a connected player to supply coordinate input within a timeout.
+     * Returns null if the player is disconnected, times out, or an error occurs.
+     *
+     * @param p the Player instance to query
+     * @return an int array [x, y] of the coordinates, or null on timeout, disconnection, or error
+     * @throws BusinessLogicException if the nickname-to-player lookup fails
+     */
     public int[] askPlayerCoordinates (Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);
@@ -1065,6 +1242,15 @@ public class Controller implements Serializable {
         return null;
     }
 
+    /**
+     * Prompts a connected player to choose an index within a valid range.
+     * Repeats on invalid input, returns null on timeout, disconnection, or error.
+     *
+     * @param p   the Player instance to query
+     * @param len the exclusive upper bound on the valid index (0 ≤ index < len)
+     * @return the chosen index if valid; null on timeout, disconnection, or error
+     * @throws BusinessLogicException if the nickname-to-player lookup fails
+     */
     public Integer askPlayerIndex(Player p, int len) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
         VirtualView v = viewsByNickname.get(nick);

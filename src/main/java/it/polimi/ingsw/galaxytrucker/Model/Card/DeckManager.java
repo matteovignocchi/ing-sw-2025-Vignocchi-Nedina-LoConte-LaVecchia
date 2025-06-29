@@ -45,7 +45,7 @@ public class DeckManager implements Serializable {
     /**
      * Creates 4 "Second level" decks, each consisting of 2 level 2 cards and 1 level 1 card.
      * The method ensures that the cards are shuffled before generating the deck.
-     * @return a "List<Deck>" containing 4 individual decks
+     * @return a a {@code List<Deck>} containing 4 individual decks
      * @throws CardEffectException if there are not enough cards to generate the decks
      */
 
