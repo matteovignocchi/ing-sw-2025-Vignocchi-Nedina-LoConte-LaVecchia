@@ -509,13 +509,13 @@ public class TUIView implements View {
                 switch (tile.type) {
                     case "EMPTYSPACE"  -> {
                         if (mask[row][col] == null) {
-                            String block = "█████████"; // 9 caratteri pieni
+                            String block = "█████████";
                             top.append("|").append(block);
                             mid.append("|").append(block);
                             bot.append("|").append(block);
                         } else {
                             if (row == 0 && (col == 5 || col == 6)) {
-                                String block = YELLOW+"█████████"+RESET; // 9 caratteri pieni
+                                String block = YELLOW+"█████████"+RESET;
                                 top.append("|").append(block);
                                 mid.append("|").append(block);
                                 bot.append("|").append(block);
@@ -572,14 +572,13 @@ public class TUIView implements View {
                                 .reversed())
                 )
                 .forEach(entry -> {
-                    String nick    = entry.getKey();
-                    int[] data     = entry.getValue();
-                    boolean elim   = data[2] == 1;
-                    String lapStr  = elim ? "x" : String.valueOf(data[1]);
-                    String posStr  = elim ? "x" : String.valueOf(data[0]);
-                    String status  = elim ? "Eliminated" : "In game";
-                    inform(String.format("  %s – Lap: %s, Position: %s, status: %s",
-                            nick, lapStr, posStr, status));
+                    String nick = entry.getKey();
+                    int[] data = entry.getValue();
+                    boolean elim = data[2] == 1;
+                    String lapStr = elim ? "x" : String.valueOf(data[1]);
+                    String posStr = elim ? "x" : String.valueOf(data[0]);
+                    String status = elim ? "Eliminated" : "In game";
+                    inform(String.format("  %s – Lap: %s, Position: %s, status: %s", nick, lapStr, posStr, status));
                 });
     }
 
@@ -602,10 +601,10 @@ public class TUIView implements View {
             case WAITING_IN_LOBBY  -> inform("Nickame : " + nickname);
             case BOARD_SETUP -> inform("-Nickname: "+nickname+"\n-Position : Too early to know where you'll finish!"+"\n-Credits : too rich!"+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
             case TILE_MANAGEMENT -> {}
-            case DRAW_PHASE -> inform("-Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
-            case WAITING_FOR_PLAYERS -> inform("-Nickname: "+nickname+ /*" -Position : " +position+ */"\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
-            case WAITING_FOR_TURN, CARD_EFFECT -> inform("-Nickname: "+nickname+ /*" -Position : "+position+*/"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries: "+numberOfEnergy);
-            case SCORING -> inform("-Nickname: "+nickname/*+" -Position : "+position*/);
+            case DRAW_PHASE -> inform("-Nickname: "+nickname+ "\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
+            case WAITING_FOR_PLAYERS -> inform("-Nickname: "+nickname+ "\n-Credits : "+ credits+ "\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries : "+numberOfEnergy);
+            case WAITING_FOR_TURN, CARD_EFFECT -> inform("-Nickname: "+nickname+"\n-Credits : "+credits+"\n-Engine power : "+powerEngine+"\n-Fire power : "+firePower+"\n-Purple alien : "+(purpleAlien ? "present" : "not present")+ "\n-Brown alien : "+(brownAlien ? "present" : "not present")+"\n-Number of humans : "+numberOfHuman+"\n-Number of energy batteries: "+numberOfEnergy);
+            case SCORING -> inform("-Nickname: "+nickname);
             case EXIT -> inform("Goodbye!");
         }
         printMapPosition();
