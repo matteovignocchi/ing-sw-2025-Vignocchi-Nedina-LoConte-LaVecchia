@@ -57,7 +57,7 @@ public class ClientMain {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the server IP address: ");
         String host = readHost(scanner);
-        int rmiPort    = 1099;
+        int rmiPort = 1099;
         int socketPort = 30001;
         int protocolChoice = readChoice(
                 scanner,
@@ -97,9 +97,9 @@ public class ClientMain {
         }
     }
 
-    private static final String ANSI_RED    = "\u001B[31m";
-    private static final String ANSI_BOLD   = "\u001B[1m";
-    private static final String ANSI_RESET  = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_BOLD = "\u001B[1m";
+    private static final String ANSI_RESET = "\u001B[0m";
 
     /**
      * Prompts the user with a message and validates input against a set of allowed options.
