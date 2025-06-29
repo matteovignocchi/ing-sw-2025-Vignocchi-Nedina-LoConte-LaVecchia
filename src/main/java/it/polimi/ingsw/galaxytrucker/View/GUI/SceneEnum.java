@@ -24,7 +24,8 @@ public enum SceneEnum {
     JOIN_GAME_MENU("/fxml/GameListMenu.fxml"),
     WAITING_QUEUE("/fxml/WaitingQueue.fxml"),
     NICKNAME_DIALOG("/fxml/NicknameDialog.fxml"),
-    EXIT_PHASE("/fxml/FinalScene.fxml");
+    EXIT_PHASE("/fxml/FinalScene.fxml"),
+    CHAT("/fxml/Chat.fxml");
     private final String value;
 
     SceneEnum(final String value) {

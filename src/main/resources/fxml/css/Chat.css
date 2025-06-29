@@ -1,0 +1,44 @@
+.chat-message {
+    -fx-background-color: transparent;
+    -fx-text-fill: #444444;
+    -fx-font-family: "Impact";
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+}
+
+#chatBox {
+    -fx-padding: 5;
+    -fx-background-color: transparent;
+}
+
+#chatScroll {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .content {
+    -fx-background-color: transparent;
+}
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #b8860b;
+    -fx-background-insets: 2;
+    -fx-background-radius: 4;
+}
+
+.scroll-pane .increment-button,
+.scroll-pane .decrement-button {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .track {
+    -fx-background-color: transparent;
+}

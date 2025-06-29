@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.polimi.ingsw.galaxytrucker.View.GUI.Controllers.ChatController">
+    <children>
+
+        <ImageView fitHeight="447.0" fitWidth="460.0" preserveRatio="true">
+            <image>
+                <Image url="@../images/LobbyImage2.png" />
+            </image>
+        </ImageView>
+
+        <ScrollPane fx:id="chatScroll"
+                    layoutX="120.0" layoutY="81.0"
+                    prefHeight="285.0" prefWidth="206.0"
+                    fitToWidth="true"
+                    vbarPolicy="ALWAYS"
+                    style="-fx-background: transparent;">
+            <content>
+                <VBox fx:id="chatBox"
+                      spacing="6"
+                      alignment="BOTTOM_LEFT"
+                      style="-fx-padding: 5;" />
+            </content>
+        </ScrollPane>
+
+        <Button layoutX="378.0" layoutY="385.0" onAction="#closeChat" text="X" />
+
+    </children>
+
+    <stylesheets>
+        <URL value="@css/Button.css" />
+        <URL value="@css/Chat.css" />
+    </stylesheets>
+</AnchorPane>

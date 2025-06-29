@@ -33,7 +33,7 @@ public class BuildingPhaseController extends GUIController {
     @FXML private HBox nicknameBox;
     @FXML private Label nicknameLabel;
     @FXML private VBox tilePreviewPane;
-    @FXML private Button leftArrowButton, rightArrowButton, reserveBtn1, reserveBtn2;
+    @FXML private Button leftArrowButton, rightArrowButton, reserveBtn1, reserveBtn2, chatBtn;
 
     private List<ClientTile> tileList = new ArrayList<>();
     private int tileListIndex = 0;
@@ -68,7 +68,7 @@ public class BuildingPhaseController extends GUIController {
         rotateLeftBtn.setCursor(Cursor.HAND);
         rotateRightBtn.setCursor(Cursor.HAND);
 
-
+        chatBtn.setOnAction(event -> openChat());
         rotateLeftBtn.setOnAction(e -> {
             completeCommand("ROTATE_LEFT");
             rotateTile(-90);
@@ -572,6 +572,13 @@ public class BuildingPhaseController extends GUIController {
         reserveBtn2.setVisible(false);
         reserveBtn1.setDisable(true);
         reserveBtn2.setDisable(true);
+    }
+
+    /**
+     * Opens the chat scene by delegating to GUIView.
+     */
+    private void openChat() {
+        guiView.showChatScene();
     }
 
 }
