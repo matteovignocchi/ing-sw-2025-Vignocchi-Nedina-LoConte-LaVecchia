@@ -658,7 +658,7 @@ public class Controller implements Serializable {
         int size = getPileOfTile().size();
         if(size == 0) throw new BusinessLogicException("Pile of tiles is empty");
 
-        Tile t = getTile(1);
+        Tile t = getTile(0);
         p.setLastTile(t);
 
         p.setGamePhase(GamePhase.TILE_MANAGEMENT);
