@@ -80,7 +80,7 @@ public class Controller implements Serializable {
      * @throws CardEffectException if there is an error initializing a card effect
      * @throws IOException if loading tiles or decks fails
      */
-    public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws CardEffectException, IOException {
+    public Controller(boolean isDemo, int gameId, int MaxPlayers, Consumer<Integer> onGameEnd, Set<String> loggedInUsers) throws BusinessLogicException, IOException {
         if(isDemo) {
             fBoard = new FlightCardBoard(this);
             DeckManager deckCreator = new DeckManager();
