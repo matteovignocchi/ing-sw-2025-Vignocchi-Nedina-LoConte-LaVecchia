@@ -463,7 +463,7 @@ public class Controller implements Serializable {
         Player p = playersByNickname.get(nickname);
         if (p != null && p.isConnected()) {
             p.setConnected(false);
-            broadcastInform("SERVER: " + nickname + " is disconnected");
+            broadcastInform(nickname + " is disconnected");
             setTimeout();
             loggedInUsers.remove(nickname);
         }
@@ -487,7 +487,7 @@ public class Controller implements Serializable {
 
         if (!p.isConnected()) {
             p.setConnected(true);
-            broadcastInform("SERVER: "+ nickname + " is reconnected");
+            broadcastInform(nickname + " is reconnected");
         }
         cancelLastPlayerTimeout();
         notifyView(nickname);
@@ -507,9 +507,9 @@ public class Controller implements Serializable {
 
         p.setGamePhase(GamePhase.WAITING_FOR_TURN);
 
-        String msg = "\nSERVER: You have been eliminated!";
+        String msg = "\nYou have been eliminated!";
         informAndNotify(msg, nick);
-        String msg1 = "\nSERVER: Player "+nick+" has been eliminated!";
+        String msg1 = "\nPlayer "+nick+" has been eliminated!";
         List<String> nicknames = new ArrayList<>(viewsByNickname.keySet());
         for(String nickname : nicknames) {
             if(nickname.equals(nick)) continue;
@@ -583,7 +583,7 @@ public class Controller implements Serializable {
                             .orElse(null);
 
                     if (winner != null) {
-                        inform("\nSERVER: You win by timeout!", winner);
+                        inform("\nYou win by timeout!", winner);
                         Player p = getPlayerCheck(winner);
                         p.setGamePhase(GamePhase.EXIT);
                         updateGamePhase(winner, getViewCheck(winner), GamePhase.EXIT);
@@ -821,7 +821,7 @@ public class Controller implements Serializable {
         for(Player p : playersByNickname.values()) if(!playersInFlight.contains(p)) fBoard.setPlayerReadyToFly(p, isDemo);
 
         playersPosition = buildPlayersPositionMap();
-        broadcastInform("SERVER: " + "Flight started!");
+        broadcastInform("Flight started!");
 
         for (String nick : viewsByNickname.keySet()) checkPlayerAssembly(nick, 2, 3);
         addHuman();
@@ -850,7 +850,7 @@ public class Controller implements Serializable {
             VirtualView v = viewsByNickname.get(leaderNick);
             leader.setGamePhase(GamePhase.DRAW_PHASE);
             try {
-                v.inform("\nSERVER: " + "You're the leader! Draw a card");
+                v.inform("\nYou're the leader! Draw a card");
                 notifyView(leaderNick);
                 break;
             } catch (IOException e) {
@@ -878,7 +878,7 @@ public class Controller implements Serializable {
      */
     public void startHourglass(){
         hourglass.flip();
-        broadcastInform("SERVER: " + "Hourglass started!");
+        broadcastInform("Hourglass started!");
     }
 
     /**
@@ -897,7 +897,7 @@ public class Controller implements Serializable {
             case 1:
                 if(state == HourglassState.EXPIRED){
                     hourglass.flip();
-                    broadcastInform("\nSERVER: " + "Hourglass flipped a second time!");
+                    broadcastInform("\nHourglass flipped a second time!");
                 } else {
                     String msg = "You cannot flip the hourglass: It's still running";
                     reportError(msg, nickname);
@@ -909,7 +909,7 @@ public class Controller implements Serializable {
                     reportError(msg, nickname);
                 } else if (state == HourglassState.EXPIRED && p.getGamePhase() == GamePhase.WAITING_FOR_PLAYERS) {
                     hourglass.flip();
-                    broadcastInform("\nSERVER: " + "Hourglass flipped the last time!");
+                    broadcastInform("\nHourglass flipped the last time!");
                 } else {
                     String msg = "You cannot flip the hourglass for the last time: " +
                             "You are not ready";
@@ -932,13 +932,13 @@ public class Controller implements Serializable {
 
         switch (flips) {
             case 1:
-                broadcastInform("\nSERVER: " + "First Hourglass expired");
+                broadcastInform("\nFirst Hourglass expired");
                 break;
             case 2:
-                broadcastInform("\nSERVER: " + "Second Hourglass expired");
+                broadcastInform("\nSecond Hourglass expired");
                 break;
             case 3:
-                broadcastInform("\nSERVER: " + "Time’s up! Building phase ended.");
+                broadcastInform("\nTime’s up! Building phase ended.");
                 startFlight();
                 break;
         }
@@ -969,7 +969,7 @@ public class Controller implements Serializable {
         drawer.setGamePhase(GamePhase.WAITING_FOR_TURN);
         updateGamePhase(nickname, getViewCheck(nickname), GamePhase.WAITING_FOR_TURN);
 
-        broadcastInform("\nSERVER: " + "Card drawn!");
+        broadcastInform("\nCard drawn!");
 
         for(Map.Entry<String, VirtualView> entry :viewsByNickname.entrySet()){
             String nick = entry.getKey();
@@ -991,13 +991,13 @@ public class Controller implements Serializable {
         }
 
         activateCard(card);
-        broadcastInform("\nSERVER: end of card's effect");
+        broadcastInform("\nEnd of card's effect");
 
         if(deck.isEmpty()){
-            broadcastInform("SERVER: All cards drawn");
+            broadcastInform("All cards drawn");
             startAwardsPhase();
         } else if (fBoard.getOrderedPlayers().isEmpty()){
-            broadcastInform("SERVER: All players eliminated");
+            broadcastInform("All players eliminated");
             startAwardsPhase();
         }else {
             List<String> inFlight = playersByNickname.entrySet().stream()
@@ -1013,7 +1013,7 @@ public class Controller implements Serializable {
                     Player p = playersByNickname.get(nick);
                     if(p.isConnected() && !p.isEliminated()){
                         futures.put(nick, exec.submit(() ->
-                                askPlayerDecision("\nSERVER: Do you want to abandon the flight? ", p)
+                                askPlayerDecision("\nDo you want to abandon the flight? ", p)
                         ));
                     }
                 }
@@ -1048,7 +1048,7 @@ public class Controller implements Serializable {
             fBoard.orderPlayersInFlightList();
 
             if(fBoard.getOrderedPlayers().isEmpty()){
-                broadcastInform("SERVER: All players eliminated");
+                broadcastInform("All players eliminated");
                 startAwardsPhase();
             } else {
                 inFlight =  playersByNickname.entrySet().stream()
@@ -1086,7 +1086,7 @@ public class Controller implements Serializable {
      */
     public void startAwardsPhase() throws BusinessLogicException {
 
-        broadcastInform("\nSERVER: Flight ended! Time to collect rewards!");
+        broadcastInform("\nFlight ended! Time to collect rewards!");
 
         int malusBrokenTile = fBoard.getBrokenMalus();
         int bonusBestShip = fBoard.getBonusBestShip();
@@ -1108,12 +1108,12 @@ public class Controller implements Serializable {
 
         for (int i = 0; i < orderedPlayers.size(); i++) {
             orderedPlayers.get(i).addCredits(arrivalBonus[i]);
-            inform("SERVER: You received "+ arrivalBonus[i]+ "because you arrived "+ i+1, getNickByPlayer(orderedPlayers.get(i)));
+            inform("You received "+ arrivalBonus[i]+ "because you arrived "+ i+1, getNickByPlayer(orderedPlayers.get(i)));
         }
 
         for (Player p : bestShipPlayers) {
             p.addCredits(bonusBestShip);
-            inform("SERVER: You have received the Best Ship Built bonus plus 14 credits", getNickByPlayer(p));
+            inform("You have received the Best Ship Built bonus plus 14 credits", getNickByPlayer(p));
         }
 
         for (Player p : playersByNickname.values()) {
@@ -1139,14 +1139,14 @@ public class Controller implements Serializable {
             int totalCredits = p.getCredits();
             notifyView(getNickByPlayer(p));
             p.setGamePhase(GamePhase.EXIT);
-            inform("SERVER: You earned "+totalDouble+" credits from selling goods", getNickByPlayer(p));
-            inform("SERVER: you lost "+ numBrokenTiles * malusBrokenTile + " credits from all the tile you lost", getNickByPlayer(p));
+            inform("You earned "+totalDouble+" credits from selling goods", getNickByPlayer(p));
+            inform("You lost "+ numBrokenTiles * malusBrokenTile + " credits from all the tile you lost", getNickByPlayer(p));
 
             if(p.isConnected()){
-                if(totalCredits>0) inform("\nSERVER: " + "Your total credits are: " + totalCredits + "\nYOU WON!", nick);
-                else inform("SERVER: " + "Your total credits are: " + totalCredits + "\nYOU LOST!", nick);
+                if(totalCredits>0) inform("\nYour total credits are: " + totalCredits + "\nYOU WON!", nick);
+                else inform("Your total credits are: " + totalCredits + "\nYOU LOST!", nick);
 
-                informAndNotify("SERVER: " + "Game over. Thank you for playing!", nick);
+                informAndNotify("Game over. Thank you for playing!", nick);
             }
         }
         if (onGameEnd != null) {
@@ -1735,7 +1735,7 @@ public class Controller implements Serializable {
         if(num == totalGood){
             autoCommandForRemoveGoods(p, totalGood);
             if(!p.isConnected()) return;
-            inform("SERVER: You have lost all your goods", nick);
+            inform("You have lost all your goods", nick);
 
         } else if(num < totalGood){
             if(!p.isConnected()) {
@@ -1746,7 +1746,7 @@ public class Controller implements Serializable {
             while(num != 0){
                 if(r != 0){
                     if(p.isConnected()){
-                        inform("SERVER: Select a storage unit to remove a red good from", nick);
+                        inform("Select a storage unit to remove a red good from", nick);
                         printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
@@ -1795,7 +1795,7 @@ public class Controller implements Serializable {
                     }
                 } else if(g != 0){
                     if(p.isConnected()){
-                        inform("SERVER: Select a storage unit to remove a yellow good from", nick);
+                        inform("Select a storage unit to remove a yellow good from", nick);
                         printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
@@ -1845,7 +1845,7 @@ public class Controller implements Serializable {
                     }
                 }else if(v != 0){
                     if(p.isConnected()){
-                        inform("SERVER: Select a storage unit to remove a green good from", nick);
+                        inform("Select a storage unit to remove a green good from", nick);
                         printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
@@ -1894,7 +1894,7 @@ public class Controller implements Serializable {
                     }
                 } else if(b != 0){
                     if(p.isConnected()){
-                        inform("SERVER: Select a storage unit to remove a blue good from", nick);
+                        inform("Select a storage unit to remove a blue good from", nick);
                         printPlayerDashboard(x, p, nick);
                         int[] vari = askPlayerCoordinates(p);
 
@@ -1952,14 +1952,14 @@ public class Controller implements Serializable {
                 return;
             }
 
-            if(totalGood > 0) inform("SERVER: You have lost all your goods", nick);
-            else inform("SERVER: You don't have any good to remove", nick);
+            if(totalGood > 0) inform("You have lost all your goods", nick);
+            else inform("You don't have any good to remove", nick);
 
             if(finish < totalEnergy){
-                inform("SERVER: You will lose "+finish+" battery/ies", nick);
+                inform("You will lose "+finish+" battery/ies", nick);
                 while(finish > 0){
                     if(p.isConnected()){
-                        inform("SERVER: Select an energy cell to remove a battery from", nick);
+                        inform("Select an energy cell to remove a battery from", nick);
                         int[] vari = askPlayerCoordinates(p);
                         printPlayerDashboard(x, p, nick);
 
@@ -1988,9 +1988,9 @@ public class Controller implements Serializable {
                 if(!p.isConnected()) return;
 
                 if(totalEnergy>0){
-                    inform("SERVER: You have lost all your batteries", nick);
+                    inform("You have lost all your batteries", nick);
                 }
-                else inform("SERVER: You don't have any batteries to remove", nick);
+                else inform("You don't have any batteries to remove", nick);
             }
         }
         printPlayerDashboard(x, p, nick);
@@ -2028,7 +2028,7 @@ public class Controller implements Serializable {
                 }
             }
 
-            if(!askPlayerDecision("SERVER: Do you want to continue to manage your goods?", p)) flag = false;
+            if(!askPlayerDecision("Do you want to continue to manage your goods?", p)) flag = false;
         }
     }
 
@@ -2053,7 +2053,7 @@ public class Controller implements Serializable {
         }
 
         while (!list.isEmpty() && flag) {
-            inform("SERVER: Select a storage unit", nick);
+            inform("Select a storage unit", nick);
             printPlayerDashboard(x, p, nick);
 
             int[] vari = askPlayerCoordinates(p);
@@ -2065,7 +2065,7 @@ public class Controller implements Serializable {
             switch (t){
                 case StorageUnit c -> {
                     if(c.isFull()){
-                        inform("SERVER: Full Storage Unit\n SERVER: Select the index of the good in the storage unit to remove", nick);
+                        inform("Full Storage Unit\nSelect the index of the good in the storage unit to remove", nick);
                         List<Colour> listGoods = c.getListOfGoods();
 
                         printListOfGoods(listGoods, nick);
@@ -2079,7 +2079,7 @@ public class Controller implements Serializable {
                         list.add(tmp);
                     }
 
-                    inform("SERVER: Select the index of the good to place", nick);
+                    inform("Select the index of the good to place", nick);
 
                     printListOfGoods(list, nick);
                     Integer tmpint = askPlayerIndex(p, list.size());
@@ -2110,7 +2110,7 @@ public class Controller implements Serializable {
             }
             printPlayerDashboard(x, p, nick);
 
-            if(!askPlayerDecision("SERVER: Do you want to continue to add goods?", p)) flag = false;
+            if(!askPlayerDecision("Do you want to continue to add goods?", p)) flag = false;
         }
 
         if(flag) reportError("Empty list of goods", nick);
@@ -2136,7 +2136,7 @@ public class Controller implements Serializable {
         boolean exit = true;
 
         while (exit) {
-            inform("SERVER: Select a storage unit to take the good from", nick);
+            inform("Select a storage unit to take the good from", nick);
             coordinates = askPlayerCoordinates(p);
 
             Tile tmp2;
@@ -2153,7 +2153,7 @@ public class Controller implements Serializable {
                     }
 
                     printListOfGoods(tmplist, nick);
-                    inform("SERVER: Select the index of the good you want to rearrange", nick);
+                    inform("Select the index of the good you want to rearrange", nick);
                     Integer tmpint = askPlayerIndex(p, tmplist.size());
                     if(tmpint==null) tmpint = 0;
                     int idx = tmpint;
@@ -2166,7 +2166,7 @@ public class Controller implements Serializable {
                 default -> reportError("Not valid cell", nick);
             }
             printPlayerDashboard(v, p, nick);
-            if(!askPlayerDecision("SERVER: Do you want to select another storage unit for the rearranging?", p)) exit = false;
+            if(!askPlayerDecision("Do you want to select another storage unit for the rearranging?", p)) exit = false;
         }
     }
 
@@ -2188,7 +2188,7 @@ public class Controller implements Serializable {
         boolean exit = false;
 
         while (!exit) {
-            inform("SERVER: Select a storage unit to place the good in", nick);
+            inform("Select a storage unit to place the good in", nick);
             coordinates = askPlayerCoordinates(p);
 
             Tile tmp2;
@@ -2235,7 +2235,7 @@ public class Controller implements Serializable {
         printPlayerDashboard(v, p, nick);
 
         while (exit) {
-            inform("SERVER: Select a storage unit", nick);
+            inform("Select a storage unit", nick);
             coordinates = askPlayerCoordinates(p);
 
             if(coordinates==null) {
@@ -2247,7 +2247,7 @@ public class Controller implements Serializable {
                         if(!c.getListOfGoods().isEmpty()) {
                             List<Colour> tmplist = c.getListOfGoods();
                             printListOfGoods(tmplist, nick);
-                            inform("SERVER: Select the index of the good you want to trash", nick);
+                            inform("Select the index of the good you want to trash", nick);
                             Integer tmpint = askPlayerIndex(p, tmplist.size());
                             if(tmpint==null) tmpint = 0;
                             int idx = tmpint;
@@ -2262,7 +2262,7 @@ public class Controller implements Serializable {
                     default -> reportError("Not valid cell", nick);
                 }
             }
-            if(!askPlayerDecision("SERVER: " + "Do you want to select another storage unit for trashing?", p)) exit = false;
+            if(!askPlayerDecision("Do you want to select another storage unit for trashing?", p)) exit = false;
         }
     }
 
@@ -2277,7 +2277,7 @@ public class Controller implements Serializable {
      * @throws BusinessLogicException if an error occurs during crew placement
      */
     public void addHuman() throws BusinessLogicException {
-        broadcastInform("SERVER: Checking all players' ships");
+        broadcastInform("Checking all players' ships");
         for (Player p : playersByNickname.values()) {
             String tmpNick = getNickByPlayer(p);
             VirtualView x = viewsByNickname.get(tmpNick);
@@ -2304,7 +2304,7 @@ public class Controller implements Serializable {
                                             continue;
                                         }
                                         try {
-                                            String msg = "SERVER: Do you want to place a purple alien in the housing unit " +
+                                            String msg = "Do you want to place a purple alien in the housing unit " +
                                                     "next to the purple alien module?";
                                             if (askPlayerDecision(msg, p)) {
                                                 Human tmp2 = Human.PURPLE_ALIEN;
@@ -2326,7 +2326,7 @@ public class Controller implements Serializable {
                                             continue;
                                         }
                                         try {
-                                            String msg = "SERVER: Do you want to place a brown alien in the housing unit " +
+                                            String msg = "Do you want to place a brown alien in the housing unit " +
                                                     "next to the brown alien module?";
                                             if (askPlayerDecision(msg, p)) {
                                                 Human tmp2 = Human.BROWN_ALIEN;
@@ -2379,7 +2379,7 @@ public class Controller implements Serializable {
             }
             while (num > 0) {
                 if(p.isConnected()){
-                    inform("SERVER: Select an housing unit", nick);
+                    inform("Select an housing unit", nick);
                     int[] vari = askPlayerCoordinates(p);
 
                     Tile y;
@@ -2432,7 +2432,7 @@ public class Controller implements Serializable {
     public void startPlague(Player p) throws BusinessLogicException {
         String nick = getNickByPlayer(p);
 
-        inform("SERVER: Starting plague", nick);
+        inform("Starting plague", nick);
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 7; j++) {
                 Tile y = p.getTile(i, j);
@@ -2442,7 +2442,7 @@ public class Controller implements Serializable {
                         if(h.isConnected() && !h.getListOfToken().isEmpty()){
                             tmpHuman = h.getListOfToken().getFirst();
                             h.removeHumans(0);
-                            inform("SERVER: Connected Housing Unit detected. You lose 1 crewmate", nick);
+                            inform("Connected Housing Unit detected. You lose 1 crewmate", nick);
                             switch (tmpHuman){
                                 case BROWN_ALIEN -> p.setBrownAlien();
                                 case PURPLE_ALIEN ->  p.setPurpleAlien();
@@ -2480,7 +2480,7 @@ public class Controller implements Serializable {
             }
         }
         if (directionProtected) {
-            inform("SERVER: You can activate the shield by consuming a battery ", nick);
+            inform("You can activate the shield by consuming a battery ", nick);
             String mex = "To activate a shield";
             return manageEnergyCell(nick, mex);
         }
@@ -2508,7 +2508,7 @@ public class Controller implements Serializable {
         String nick = getNickByPlayer(p);
         VirtualView v = getViewCheck(nick);
 
-        String msg = "\nSERVER: A "+size+" attack is coming from "+direction+" on section "+dir2+"\nSERVER: Ship before attack";
+        String msg = "\nA "+size+" attack is coming from "+direction+" on section "+dir2+"\nShip before attack";
         inform(msg, nick);
         printPlayerDashboard(v, p, nick);
 
@@ -2516,10 +2516,10 @@ public class Controller implements Serializable {
             if (type || !isProtected(nick, dir)){
                 return scriptOfDefence(nick, p, v, dir2 , dir);
             } else {
-                inform("SERVER: You are protected", nick);
+                inform("You are protected", nick);
             }
         } else {
-            inform("SERVER: Attack out of range. You are safe", nick);
+            inform("Attack out of range. You are safe", nick);
         }
 
         return false;
@@ -2563,16 +2563,16 @@ public class Controller implements Serializable {
         }
 
         if(manageIfPlayerEliminated(p)){
-            inform("SERVER: You have lost all your humans. Your ship is destroyed", Nickname);
+            inform("You have lost all your humans. Your ship is destroyed", Nickname);
             p.destroyAll();
             printPlayerDashboard(v, p, Nickname);
             return true;
         }
 
         if(!tmpBoolean){
-            inform("SERVER: You are safe", Nickname);
+            inform("You are safe", Nickname);
         }else{
-            inform("SERVER: You've been hit", Nickname);
+            inform("You've been hit", Nickname);
             askStartHousingForControl(Nickname);
 
         }
@@ -2606,26 +2606,26 @@ public class Controller implements Serializable {
         for(Player p : players){
             if(players.getFirst().equals(p) || !p.isConnected() || p.isEliminated()) continue;
             String nick = getNickByPlayer(p);
-            inform("\nSERVER: Waiting for your turn...", nick);
+            inform("\nWaiting for your turn...", nick);
         }
 
         for (Player p : players) {
             if(p.isConnected() && !p.isEliminated()){
                 String nick = getNickByPlayer(p);
                 VirtualView v = getViewCheck(nick);
-                inform("SERVER: A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
-                inform("SERVER: Ship before the attack", nick);
+                inform("A " + size + " meteorite is coming from " + direction + " on section " + dir2, nick);
+                inform("Ship before the attack", nick);
                 printPlayerDashboard(v, p, nick);
 
                 if (!isHitZone(dir, dir2)) {
-                    inform("SERVER: Meteorite out of range. You are safe", nick);
+                    inform("Meteorite out of range. You are safe", nick);
                     continue;
                 }
                 if (isBig) {
                     if (!checkProtection(dir, dir2, nick)) {
                         scriptOfDefence(nick, p, v, dir2, dir);
                     } else {
-                        inform("SERVER: Cannon protected you!", nick);
+                        inform("Cannon protected you!", nick);
                     }
                 } else {
                     boolean noConnector = p.checkNoConnector(dir, dir2);
@@ -2634,12 +2634,12 @@ public class Controller implements Serializable {
                     if (!noConnector && !shielded) {
                         scriptOfDefence(nick, p, v, dir2, dir);
                     } else {
-                        inform("SERVER: You are safe", nick);
+                        inform("You are safe", nick);
                     }
                 }
 
-                if(players.indexOf(p) != players.size()-1) inform("SERVER: Checking other players...", nick);
-                else broadcastInform("SERVER: "+numMeteorite+"° meteorite processed for all players");
+                if(players.indexOf(p) != players.size()-1) inform("Checking other players...", nick);
+                else broadcastInform(numMeteorite+"° meteorite processed for all players");
             }
         }
     }
@@ -2663,7 +2663,7 @@ public class Controller implements Serializable {
         int[] coordinates;
         boolean exit = false;
 
-        if (!askPlayerDecision("SERVER: " + "Do you want to use a battery? "+mex, player)) {
+        if (!askPlayerDecision("Do you want to use a battery? "+mex, player)) {
             return false;
         } else {
             while (!exit) {
@@ -2678,7 +2678,7 @@ public class Controller implements Serializable {
                         int capacity = c.getCapacity();
                         if (capacity == 0) {
                             reportError("You have already used all the batteries for this cell", nick);
-                            if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
+                            if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
                                 return false;
                         } else {
                             c.useBattery();
@@ -2687,7 +2687,7 @@ public class Controller implements Serializable {
                     }
                     default -> {
                         reportError("Not valid cell", nick);
-                        if(!askPlayerDecision("SERVER: " + "Do you want to select another EnergyCell?", player))
+                        if(!askPlayerDecision("Do you want to select another EnergyCell?", player))
                             exit = true;
                     }
                 }
@@ -2863,7 +2863,7 @@ public class Controller implements Serializable {
             int[] xy;
             boolean flag = true;
             do{
-                inform("SERVER: Choose your starting housing unit:", nickname);
+                inform("Choose your starting housing unit:", nickname);
                 xy = askPlayerCoordinates(p);
 
                 Tile tmp;

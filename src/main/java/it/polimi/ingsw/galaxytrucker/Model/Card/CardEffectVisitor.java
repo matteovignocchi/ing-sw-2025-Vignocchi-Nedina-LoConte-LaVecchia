@@ -61,20 +61,20 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
     public void visit(OpenSpaceCard card) throws BusinessLogicException {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            controller.inform("SERVER: Checking your engine power...", nick);
+            controller.inform("Checking your engine power...", nick);
             controller.printPlayerDashboard(controller.getViewCheck(nick), p, nick);
             int x = controller.getPowerEngineForCard(p);
 
             if (x == 0) {
                 p.setEliminated();
-                controller.inform("SERVER: Your engine power is 0", nick);
+                controller.inform("Your engine power is 0", nick);
             } else {
-                String msg = "SERVER: Your engine power is " + x + ". You move forward by those spaces.";
+                String msg = "Your engine power is " + x + ". You move forward by those spaces.";
                 controller.inform(msg, nick);
                 f.moveRocket(x, p);
             }
@@ -103,7 +103,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
             int x = p.countExposedConnectors();
 
-            String msg = "SERVER: You have " + x + " exposed connectors. You move back by those spaces";
+            String msg = "You have " + x + " exposed connectors. You move back by those spaces";
             controller.inform(msg, nick);
             f.moveRocket(-x, p);
 
@@ -131,19 +131,19 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         double slavers_fire_power = card.getFirePower();
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            controller.inform("SERVER: Checking your fire power...", nick);
+            controller.inform("Checking your fire power...", nick);
             double player_fire_power = controller.getFirePowerForCard(p);
 
             if (player_fire_power > slavers_fire_power) {
                 int credits = card.getCredits();
                 int days = card.getDays();
-                String string = String.format("SERVER: You have defeated the slavers. Do you want to redeem %d credits and lose %d flight days?",
+                String string = String.format("You have defeated the slavers. Do you want to redeem %d credits and lose %d flight days?",
                         credits, days);
 
                 if (controller.askPlayerDecision(string, p)) {
@@ -153,22 +153,22 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
                 controller.changeMapPosition();
                 controller.updatePositionForEveryBody();
-                controller.broadcastInform("SERVER: Slavers defeated by " + nick + "!");
+                controller.broadcastInform("Slavers defeated by " + nick + "!");
                 exit = true;
 
             } else if (player_fire_power < slavers_fire_power) {
                 int lostCrewmates = card.getNumCrewmates();
-                String msg = "SERVER: You have been defeated by Slavers. You'll lose " + lostCrewmates + " crewmates";
+                String msg = "You have been defeated by Slavers. You'll lose " + lostCrewmates + " crewmates";
                 controller.inform(msg, nick);
 
                 controller.removeCrewmates(p, card.getNumCrewmates());
 
-                msg = "SERVER: Checking other players...";
+                msg = "Checking other players...";
                 controller.inform(msg, nick);
 
             } else {
-                String msg = "SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" +
-                        "SERVER: Checking other players";
+                String msg = "You have the same firepower as the slavers. Draw, nothing happens\n" +
+                        "Checking other players";
                 controller.inform(msg, nick);
             }
 
@@ -196,41 +196,41 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         if (players.size() == 1) {
             String nick = controller.getNickByPlayer(players.getFirst());
-            controller.inform("SERVER: You are flying alone. warzone card effect not activated ", nick);
+            controller.inform("You are flying alone. warzone card effect not activated ", nick);
             return;
         }
 
 
         int idx_crew = 0;
         int days = card.getDays();
-        controller.broadcastInform("\nSERVER: Checking the player with the least number of crewmates...\n");
+        controller.broadcastInform("\nChecking the player with the least number of crewmates...\n");
 
-        controller.broadcastInform("SERVER: "+controller.getNickByPlayer(players.get(idx_crew))+" has "+
+        controller.broadcastInform(controller.getNickByPlayer(players.get(idx_crew))+" has "+
                 controller.getNumCrew(players.get(idx_crew))+" crewmates");
         for (int i = 1; i < players.size(); i++) {
             Player p = players.get(i);
             int numcrew = controller.getNumCrew(p);
-            controller.broadcastInform("SERVER: "+controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
+            controller.broadcastInform(controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
             if (numcrew < controller.getNumCrew(players.get(idx_crew)))
                 idx_crew = i;
         }
 
         String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
-        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board!" +
+        controller.broadcastInform(nickCrew+" is the player with the least number of crewmates on board!" +
                 "He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_crew));
 
 
         int idx_enginepower = 0;
         int numCrew = card.getNumCrewmates();
-        controller.broadcastInform("\nSERVER: Checking the player with the lowest engine power...\n");
+        controller.broadcastInform("\nChecking the player with the lowest engine power...\n");
 
         List<Integer> enginePowers = new ArrayList<>();
         for(Player p : players) {
             int x = controller.getPowerEngineForCard(p);
             enginePowers.add(x);
             String nick = controller.getNickByPlayer(p);
-            controller.broadcastInform("SERVER: "+nick+" has an engine power of "+x);
+            controller.broadcastInform(nick+" has an engine power of "+x);
         }
         for (int i = 1; i < enginePowers.size(); i++) {
             if(enginePowers.get(i) < enginePowers.get(idx_enginepower))
@@ -238,19 +238,19 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         }
 
         String nickEngine = controller.getNickByPlayer(players.get(idx_enginepower));
-        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
+        controller.broadcastInform(nickEngine+" is the player with the lowest engine power! He loses "+numCrew+" crewmates");
         controller.removeCrewmates(players.get(idx_enginepower), numCrew);
 
 
         int idx_firepower = 0;
-        controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
+        controller.broadcastInform("\nChecking the player with the lowest fire power...\n");
 
         List<Double> firePowers = new ArrayList<>();
         for(Player p : players) {
             double x = controller.getFirePowerForCard(p);
             firePowers.add(x);
             String nick = controller.getNickByPlayer(p);
-            controller.broadcastInform("SERVER: "+nick+" has a fire power of "+x);
+            controller.broadcastInform(nick+" has a fire power of "+x);
         }
         for (int i = 1; i < firePowers.size(); i++) {
             if(firePowers.get(i) < firePowers.get(idx_firepower))
@@ -259,7 +259,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         Player p = players.get(idx_firepower);
         String nickFire = controller.getNickByPlayer(p);
-        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power! He will be hit by cannon fire");
+        controller.broadcastInform(nickFire+" is the player with the lowest fire power! He will be hit by cannon fire");
         List<Integer> shots_directions = card.getShotsDirections();
         List<Boolean> shots_size = card.getShotsSize();
         for (int i = 0; i < shots_directions.size(); i++) {
@@ -290,21 +290,21 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
 
         if (players.size() == 1) {
             String nick = controller.getNickByPlayer(players.getFirst());
-            controller.inform("SERVER: You are flying alone. warzone card effect not activated ", nick);
+            controller.inform("You are flying alone. warzone card effect not activated ", nick);
             return;
         }
 
 
         int idx_firepower = 0;
         int days = card.getDays();
-        controller.broadcastInform("\nSERVER: Checking the player with the lowest fire power...\n");
+        controller.broadcastInform("\nChecking the player with the lowest fire power...\n");
 
         List<Double> firePowers = new ArrayList<>();
         for(Player p : players) {
             double x = controller.getFirePowerForCard(p);
             firePowers.add(x);
             String nick = controller.getNickByPlayer(p);
-            controller.broadcastInform("SERVER: "+nick+" has a fire power of "+x);
+            controller.broadcastInform(nick+" has a fire power of "+x);
         }
         for (int i = 1; i < firePowers.size(); i++) {
             if(firePowers.get(i) < firePowers.get(idx_firepower))
@@ -312,21 +312,21 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         }
 
         String nickFire = controller.getNickByPlayer(players.get(idx_firepower));
-        controller.broadcastInform("SERVER: "+nickFire+" is the player with the lowest fire power!" +
+        controller.broadcastInform(nickFire+" is the player with the lowest fire power!" +
                 " He loses "+days+" flight days");
         f.moveRocket(-days, players.get(idx_firepower));
 
 
         int idx_engine = 0;
         int numGoods = card.getNumGoods();
-        controller.broadcastInform("\nSERVER: Checking the player with the lowest engine power...\n");
+        controller.broadcastInform("\nChecking the player with the lowest engine power...\n");
 
         List<Integer> enginePowers = new ArrayList<>();
         for(Player p : players) {
             int x = controller.getPowerEngineForCard(p);
             enginePowers.add(x);
             String nick = controller.getNickByPlayer(p);
-            controller.broadcastInform("SERVER: "+nick+" has an engine power of "+x);
+            controller.broadcastInform(nick+" has an engine power of "+x);
         }
         for (int i = 1; i < enginePowers.size(); i++) {
             if(enginePowers.get(i) < enginePowers.get(idx_engine))
@@ -334,26 +334,26 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         }
 
         String nickEngine = controller.getNickByPlayer(players.get(idx_engine));
-        controller.broadcastInform("SERVER: "+nickEngine+" is the player with the lowest engine power! He loses "+numGoods+" goods");
+        controller.broadcastInform(nickEngine+" is the player with the lowest engine power! He loses "+numGoods+" goods");
         controller.removeGoods(players.get(idx_engine), numGoods);
 
 
 
         int idx_crew = 0;
 
-        controller.broadcastInform("\nSERVER: Checking the player with the least number of crewmates...\n");
-        controller.broadcastInform("SERVER: "+controller.getNickByPlayer(players.get(idx_crew))+" has "+
+        controller.broadcastInform("\nChecking the player with the least number of crewmates...\n");
+        controller.broadcastInform(controller.getNickByPlayer(players.get(idx_crew))+" has "+
                 controller.getNumCrew(players.get(idx_crew))+" crewmates");
         for (int i = 1; i < players.size(); i++) {
             Player p = players.get(i);
             int numcrew = controller.getNumCrew(p);
-            controller.broadcastInform("SERVER: "+controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
+            controller.broadcastInform(controller.getNickByPlayer(p)+" has "+numcrew+" crewmates");
             if (numcrew < controller.getNumCrew(players.get(idx_crew)))
                 idx_crew = i;
         }
 
         String nickCrew = controller.getNickByPlayer(players.get(idx_crew));
-        controller.broadcastInform("SERVER: "+nickCrew+" is the player with the least number of crewmates on board!" +
+        controller.broadcastInform(nickCrew+" is the player with the least number of crewmates on board!" +
                 " He will be hit by cannon fire!");
 
         Player p = players.get(idx_crew);
@@ -386,17 +386,17 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         boolean exit = false;
         double smugglers_fire_power = card.getFirePower();
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            controller.inform("\nSERVER: Checking your fire power...", nick);
+            controller.inform("\nChecking your fire power...", nick);
             double player_fire_power = controller.getFirePowerForCard(p);
 
             if (player_fire_power > smugglers_fire_power) {
                 int days = card.getDays();
-                String string = String.format("SERVER: You defeated the smugglers!\nDo you want to redeem the card's reward goods" +
+                String string = String.format("You defeated the smugglers!\nDo you want to redeem the card's reward goods" +
                                 " and lose %d flight days?", days);
 
                 if (controller.askPlayerDecision(string, p)) {
@@ -406,18 +406,18 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     controller.updatePositionForEveryBody();
                 }
 
-                controller.broadcastInform("\nSERVER: Smugglers defeated by " + nick + "!");
+                controller.broadcastInform("\nSmugglers defeated by " + nick + "!");
                 exit = true;
             } else if (player_fire_power < smugglers_fire_power) {
 
-                String msg = "SERVER: You have been defeated by Smugglers. You'll lose the indicated goods";
+                String msg = "You have been defeated by Smugglers. You'll lose the indicated goods";
                 controller.inform(msg, nick);
                 controller.removeGoods(p, card.getNumRemovedGoods());
-                controller.inform("SERVER: Checking other players", nick);
+                controller.inform("Checking other players", nick);
 
             } else {
-                controller.inform("SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" +
-                        "SERVER: Checking other players", nick);
+                controller.inform("You have the same firepower as the slavers. Draw, nothing happens\n" +
+                        "Checking other players", nick);
             }
 
             if (exit) break;
@@ -440,7 +440,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
@@ -448,7 +448,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             int credits = card.getCredits();
             int days = card.getDays();
             int num_crewmates = card.getNumCrewmates();
-            String string = "SERVER: Do you want to redeem " + credits + " credits and lose " + num_crewmates + " crewmates and "
+            String string = "Do you want to redeem " + credits + " credits and lose " + num_crewmates + " crewmates and "
                     + days + " flight days?";
 
             if (controller.askPlayerDecision(string, p)) {
@@ -460,7 +460,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                 controller.updatePositionForEveryBody();
                 exit = true;
             } else {
-                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
+                if (players.indexOf(p) != players.size() - 1) controller.inform("Asking other players...", nick);
             }
 
             if (exit) break;
@@ -484,7 +484,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
         boolean exit = false;
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
@@ -492,7 +492,7 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
             int days = card.getDays();
 
             if (controller.getNumCrew(p) >= num_crewmates) {
-                String string = "SERVER: Do you want to redeem the card's reward goods and lose "+days+" flight days?";
+                String string = "Do you want to redeem the card's reward goods and lose "+days+" flight days?";
 
                 if (controller.askPlayerDecision(string, p)) {
                     f.moveRocket(-days, p);
@@ -503,11 +503,11 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     controller.updatePositionForEveryBody();
                     exit = true;
                 } else {
-                    if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
+                    if (players.indexOf(p) != players.size() - 1) controller.inform("Asking other players...", nick);
                 }
             } else {
-                controller.inform("SERVER: You don't have enough crewmates to be able to redeem the card's reward", nick);
-                if (players.indexOf(p) != players.size() - 1) controller.inform("SERVER: Asking other players...", nick);
+                controller.inform("You don't have enough crewmates to be able to redeem the card's reward", nick);
+                if (players.indexOf(p) != players.size() - 1) controller.inform("Asking other players...", nick);
             }
 
             if (exit) break;
@@ -566,18 +566,18 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         if (card == null) throw new InvalidCardException("Card cannot be null");
 
         List<Player> losers = new ArrayList<>();
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            controller.inform("SERVER: Checking your fire power...", nick);
+            controller.inform("Checking your fire power...", nick);
             double playerFirePower = controller.getFirePowerForCard(p);
 
             if (playerFirePower > card.getFirePower()) {
                 int days = card.getDays();
                 int credits = card.getCredits();
-                String string = "SERVER: You defeated the Pirates!\n SERVER: Do you want to redeem "+credits+
+                String string = "You defeated the Pirates!\nDo you want to redeem "+credits+
                         " and lose "+days+ " flight days?";
 
                 if (controller.askPlayerDecision(string, p)) {
@@ -587,14 +587,14 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
                     controller.updatePositionForEveryBody();
                 }
 
-                controller.broadcastInform("SERVER: Pirates defeated by "+nick+"!");
+                controller.broadcastInform("Pirates defeated by "+nick+"!");
                 break;
 
             } else if (playerFirePower < card.getFirePower()) {
                 losers.add(p);
-                controller.inform("SERVER: You have been defeated by slavers. You'll be hit by cannon fire", nick);
+                controller.inform("You have been defeated by slavers. You'll be hit by cannon fire", nick);
             } else {
-                controller.inform("SERVER: You have the same fire power as Pirates. Draw, nothing happens", nick);
+                controller.inform("You have the same fire power as Pirates. Draw, nothing happens", nick);
             }
         }
 
@@ -638,23 +638,23 @@ public class CardEffectVisitor implements CardVisitor, Serializable {
         int days = card.getDays();
         List<Player> landedPlayers = new ArrayList<>();
 
-        controller.broadcastInformExcept("\nSERVER: Waiting for your turn...", players.getFirst());
+        controller.broadcastInformExcept("\nWaiting for your turn...", players.getFirst());
 
         for (Player p : players) {
             String nick = controller.getNickByPlayer(p);
 
-            String string = "SERVER: Do you want to land on "+(z+1)+"° planet, take its goods and lose "+days+" flight days?";
+            String string = "Do you want to land on "+(z+1)+"° planet, take its goods and lose "+days+" flight days?";
 
             if (controller.askPlayerDecision(string, p)) {
                 landedPlayers.add(p);
-                controller.broadcastInform("SERVER: "+nick+" landed on planet "+(z+1));
+                controller.broadcastInform(nick+" landed on planet "+(z+1));
                 controller.manageGoods(p, card.getRewardGoods().get(z));
                 z++;
 
                 if (z >= card.getRewardGoods().size()) break;
             }
 
-            if(players.indexOf(p) < players.size()-1) controller.inform("SERVER: Asking other players...", nick);
+            if(players.indexOf(p) < players.size()-1) controller.inform("Asking other players...", nick);
         }
 
         if (!landedPlayers.isEmpty()) {
