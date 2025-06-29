@@ -63,7 +63,7 @@ class CardEffectVisitorTest {
         visitor.visit(new OpenSpaceCard("X"));
 
         assertTrue(p1.isEliminated());
-        verify(controller).inform("SERVER: Your engine power is 0", "A");
+        verify(controller).inform("Your engine power is 0", "A");
         verify(board).moveRocket(3, p2);
         verify(controller, times(2)).changeMapPosition();
         verify(controller, times(2)).updatePositionForEveryBody();
@@ -78,7 +78,7 @@ class CardEffectVisitorTest {
 
         verify(board).moveRocket(2, p1);
         verify(controller).inform(
-                "SERVER: Your engine power is 2. You move forward by those spaces.", "A"
+                "Your engine power is 2. You move forward by those spaces.", "A"
         );
     }
 
@@ -109,7 +109,7 @@ class CardEffectVisitorTest {
 
         verify(board).moveRocket(-card.getDays(), p1);
         assertEquals(10, p1.getCredits());
-        verify(controller).broadcastInform("SERVER: Slavers defeated by A!");
+        verify(controller).broadcastInform("Slavers defeated by A!");
     }
 
     @Test
@@ -128,7 +128,7 @@ class CardEffectVisitorTest {
 
         visitor.visit(card);
 
-        verify(controller).inform("SERVER: You have the same firepower as the slavers. Draw, nothing happens\n" + "SERVER: Checking other players", "A");
+        verify(controller).inform("You have the same firepower as the slavers. Draw, nothing happens\n" + "Checking other players", "A");
     }
 
     //——— FirstWarzoneCard —————————————————————————————————————
@@ -139,7 +139,7 @@ class CardEffectVisitorTest {
         visitor = new CardEffectVisitor(controller);
 
         visitor.visit(new FirstWarzoneCard("F", 2, 1, List.of(0), List.of(true)));
-        verify(controller).inform("SERVER: You are flying alone. warzone card effect not activated ", "A");
+        verify(controller).inform("You are flying alone. warzone card effect not activated ", "A");
     }
 
     @Test
@@ -175,7 +175,7 @@ class CardEffectVisitorTest {
         visitor = new CardEffectVisitor(controller);
 
         visitor.visit(new SecondWarzoneCard("S", 2, 1, List.of(0), List.of(false)));
-        verify(controller).inform("SERVER: You are flying alone. warzone card effect not activated ", "A");
+        verify(controller).inform("You are flying alone. warzone card effect not activated ", "A");
     }
 
     @Test
@@ -215,7 +215,7 @@ class CardEffectVisitorTest {
 
         verify(board).moveRocket(-card.getDays(), p1);
         verify(controller).manageGoods(p1, card.getRewardGoods());
-        verify(controller).broadcastInform("\nSERVER: Smugglers defeated by A!");
+        verify(controller).broadcastInform("\nSmugglers defeated by A!");
     }
 
     @Test
@@ -249,7 +249,7 @@ class CardEffectVisitorTest {
 
         visitor.visit(card);
 
-        verify(controller).inform("SERVER: Asking other players...", "A");
+        verify(controller).inform("Asking other players...", "A");
         verify(board).moveRocket(-card.getDays(), p2);
     }
 
@@ -262,7 +262,7 @@ class CardEffectVisitorTest {
 
         visitor.visit(card);
 
-        verify(controller).inform("SERVER: You don't have enough crewmates to be able to redeem the card's reward", "A");
+        verify(controller).inform("You don't have enough crewmates to be able to redeem the card's reward", "A");
     }
 
     @Test
@@ -303,7 +303,7 @@ class CardEffectVisitorTest {
         when(controller.askPlayerDecision(anyString(), eq(p1))).thenReturn(true);
 
         visitor.visit(card);
-        verify(controller).broadcastInform("SERVER: Pirates defeated by A!");
+        verify(controller).broadcastInform("Pirates defeated by A!");
     }
 
     @Test
