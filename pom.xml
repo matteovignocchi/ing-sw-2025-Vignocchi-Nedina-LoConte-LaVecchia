@@ -15,9 +15,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
-
-        <javafx.version>23.0.2</javafx.version>
-
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.2.0</mockito.version>
         <kotlin.version>1.9.22</kotlin.version>
@@ -27,29 +24,32 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
+            <version>23.0.2</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>23.0.2</version>
+            <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>23.0.2</version>
+            <classifier>mac-aarch64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>23.0.2</version>
+            <classifier>linux</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
+            <version>23.0.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-base</artifactId>
-            <version>${javafx.version}</version>
-            <classifier>${javafx.platform}</classifier>
-        </dependency>
-
-
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
@@ -96,7 +96,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -277,15 +276,6 @@
     </build>
     <profiles>
         <profile>
-            <id>windows-x64</id>
-            <activation>
-                <os><family>windows</family></os>
-            </activation>
-            <properties>
-                <javafx.platform>win</javafx.platform>
-            </properties>
-        </profile>
-        <profile>
             <id>mac-aarch64</id>
             <activation>
                 <os><family>mac</family><arch>aarch64</arch></os>
@@ -304,12 +294,12 @@
             </properties>
         </profile>
         <profile>
-            <id>linux-x64</id>
+            <id>windows-x64</id>
             <activation>
-                <os><family>linux</family></os>
+                <os><family>windows</family></os>
             </activation>
             <properties>
-                <javafx.platform>linux</javafx.platform>
+                <javafx.platform>win</javafx.platform>
             </properties>
         </profile>
     </profiles>
