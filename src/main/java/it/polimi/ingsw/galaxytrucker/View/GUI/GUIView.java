@@ -52,9 +52,8 @@ public class GUIView extends Application implements View {
     private String bufferedPlayerName = null;
     private volatile Boolean bufferedBoolean;
     private boolean showGoodActionPrompt = false;
-    private final Queue<String> notificationQueue = new LinkedList<>();
+    private Queue<String> notificationQueue = new LinkedList<>();
     private boolean isNotificationPlaying = false;
-    private static final int MAX_VISIBLE = 5;
     private StackPane currentToast = null;
     private StackPane previousToast = null;
     private List<String> bufferedGoods = List.of();
@@ -125,10 +124,8 @@ public class GUIView extends Application implements View {
     @Override
     public void inform(String message) {
         String subString = "";
-        if (message != null && message.trim().startsWith("SERVER:")) {
-            subString = message.trim().substring(7).trim();
-        }
-        if( message.equals("SERVER: Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.equals("SERVER: Select an housing unit") || message.equals("SERVER: Select an energy cell to remove a battery from")) {
+        if(message.toLowerCase().contains("eliminated")) model.setEliminated();
+        if( message.contains("Choose your starting housing unit:") || message.contains("select") || message.toLowerCase().contains("eliminated") || message.contains("Select an housing unit") || message.contains("Select an energy cell to remove a battery from")) {
             Platform.runLater(() -> {
                 GameController ctrl = (GameController) sceneRouter.getController(SceneEnum.GAME_PHASE);
                 if (ctrl != null) {
@@ -138,6 +135,47 @@ public class GUIView extends Application implements View {
                 }
             });
         }
+        if(message.contains("You have received the Best Ship Built bonus plus 14 credits")){
+            Platform.runLater(() -> {
+                FinalSceneController ctrl = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
+                if (ctrl != null) {
+                    ctrl.bestShipMessage(message);
+                } else {
+                    reportError("FinalSceneController not initialized");
+                }
+            });
+        }
+        if(message.contains("You earned") || message.contains("credits from selling goods")){
+            Platform.runLater(() -> {
+                FinalSceneController ctrl = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
+                if (ctrl != null) {
+                    ctrl.goodsMessage(message);
+                } else {
+                    reportError("FinalSceneController not initialized");
+                }
+            });
+        }
+        if(message.contains("because you arrived ")){
+            Platform.runLater(() -> {
+                FinalSceneController ctrl = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
+                if (ctrl != null) {
+                    ctrl.setArrivedMessage(message);
+                } else {
+                    reportError("FinalSceneController not initialized");
+                }
+            });
+        }
+        if(message.contains("credits from all the tile you lost")){
+            Platform.runLater(() -> {
+                FinalSceneController ctrl = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
+                if (ctrl != null) {
+                    ctrl.creditsLostMessage(message);
+                } else {
+                    reportError("FinalSceneController not initialized");
+                }
+            });
+        }
+
         if (filterDisplayNotification(subString, sceneEnum)) {
             showNotification(message);
         }
@@ -309,7 +347,7 @@ public class GUIView extends Application implements View {
                         numberOfEnergy);}
         });
         FinalSceneController ctrl2 = (FinalSceneController) sceneRouter.getController(EXIT_PHASE);
-        ctrl2.updateFinalScreen();
+        ctrl2.setCredits(credits);
     }
 
     /**
@@ -1235,7 +1273,7 @@ public class GUIView extends Application implements View {
      * Clears the notification message queue.
      */
     private void resetQueue(){
-        notificationQueue.clear();
+        notificationQueue = new LinkedList<>();
     }
 
 }
