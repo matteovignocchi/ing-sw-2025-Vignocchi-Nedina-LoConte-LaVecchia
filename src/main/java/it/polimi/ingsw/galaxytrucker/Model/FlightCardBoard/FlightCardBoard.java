@@ -330,7 +330,7 @@ public class FlightCardBoard implements Serializable {
             if(p.getTotalHuman()==0){
                 p.setEliminated();
                 String nick = controller.getNickByPlayer(p);
-                controller.inform("SERVER: You have lost all your crewmates", nick);
+                controller.inform("You have lost all your crewmates", nick);
             }
         }
     }

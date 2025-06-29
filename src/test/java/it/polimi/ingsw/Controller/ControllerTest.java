@@ -399,8 +399,8 @@ class ControllerTest {
         verify(demo, never()).mergeDecks();
         verify(fbdMock, times(2)).setPlayerReadyToFly(any(), eq(true));
 
-        verify(view1).inform(startsWith("SERVER: Flight started"));
-        verify(view2).inform(startsWith("SERVER: Flight started"));
+        verify(view1).inform(startsWith("Flight started"));
+        verify(view2).inform(startsWith("Flight started"));
 
         verify(demo, times(2)).checkPlayerAssembly(anyString(), eq(2), eq(3));
 
@@ -951,7 +951,7 @@ class ControllerTest {
 
         spyC.removeGoods(p, 3);
         verify(spyC).autoCommandForRemoveGoods(p, 3);
-        verify(spyC).inform("SERVER: You have lost all your goods", "P");
+        verify(spyC).inform("You have lost all your goods", "P");
     }
 
     @Test
@@ -991,9 +991,9 @@ class ControllerTest {
         spyC.removeGoods(p, 6);
 
         verify(spyC).autoCommandForRemoveGoods(p, 3);
-        verify(spyC).inform("SERVER: You have lost all your goods", "P");
-        verify(spyC).inform("SERVER: You will lose 3 battery/ies", "P");
-        verify(spyC, times(3)).inform("SERVER: Select an energy cell to remove a battery from", "P");
+        verify(spyC).inform("You have lost all your goods", "P");
+        verify(spyC).inform("You will lose 3 battery/ies", "P");
+        verify(spyC, times(3)).inform("Select an energy cell to remove a battery from", "P");
         verify(spyC, times(3)).autoCommandForBattery(p, 1);
         verify(spyC, times(4)).printPlayerDashboard(view1, p, "P");
     }
@@ -1550,10 +1550,10 @@ class ControllerTest {
         doReturn(true)
                 .doReturn(false)
                 .when(controller).askPlayerDecision(
-                        eq("SERVER: Do you want to select another storage unit for the rearranging?"),
+                        eq("Do you want to select another storage unit for the rearranging?"),
                         eq(p));
         controller.caseRedistribution(p, view, new ArrayList<>(), "P");
-        verify(controller, atLeastOnce()).inform("SERVER: Select a storage unit to take the good from", "P");
+        verify(controller, atLeastOnce()).inform("Select a storage unit to take the good from", "P");
         verify(controller).reportError("Empty storage unit", "P");
 
         verify(validSu).getListOfGoods();
@@ -1575,7 +1575,7 @@ class ControllerTest {
         doReturn(null).when(controller).askPlayerCoordinates(p);
         doReturn(false).when(controller).askPlayerDecision(anyString(), eq(p));
         controller.caseRedistribution(p, view, new ArrayList<>(), "P");
-        verify(controller, atLeastOnce()).inform("SERVER: Select a storage unit to take the good from", "P");
+        verify(controller, atLeastOnce()).inform("Select a storage unit to take the good from", "P");
         verify(controller).reportError("Not valid cell", "P");
         verify(controller, atLeastOnce()).printPlayerDashboard(view, p, "P");
     }
@@ -1600,9 +1600,9 @@ class ControllerTest {
         doReturn(false).when(controller).askPlayerDecision(anyString(), eq(p));
         controller.selectStorageUnitForAdd(view, p, Colour.YELLOW, "P");
         InOrder ord = inOrder(controller, fullSu, okSu);
-        ord.verify(controller).inform("SERVER: Select a storage unit to place the good in", "P");
+        ord.verify(controller).inform("Select a storage unit to place the good in", "P");
         ord.verify(controller).reportError("This storage unit is full. Try again", "P");
-        ord.verify(controller).inform("SERVER: Select a storage unit to place the good in", "P");
+        ord.verify(controller).inform("Select a storage unit to place the good in", "P");
         ord.verify(okSu).addGood(Colour.YELLOW);
     }
 
@@ -1647,7 +1647,7 @@ class ControllerTest {
 
         controller.caseRemove(p, view, "P");
         verify(controller).autoCommandForRemoveGoods(p, 1);
-        verify(controller).askPlayerDecision(startsWith("SERVER: Do you want to select another storage unit for trashing?"), eq(p));
+        verify(controller).askPlayerDecision(startsWith("Do you want to select another storage unit for trashing?"), eq(p));
     }
 
     @Test
@@ -1671,9 +1671,9 @@ class ControllerTest {
         controller.caseRemove(p, view, "P");
         InOrder order = inOrder(controller, su, view);
         order.verify(controller).printPlayerDashboard(view, p, "P");
-        order.verify(controller).inform("SERVER: Select a storage unit", "P");
+        order.verify(controller).inform("Select a storage unit", "P");
         order.verify(controller).printListOfGoods(goods, "P");
-        order.verify(controller).inform("SERVER: Select the index of the good you want to trash", "P");
+        order.verify(controller).inform("Select the index of the good you want to trash", "P");
         order.verify(su).removeGood(0);
         order.verify(controller).printPlayerDashboard(view, p, "P");
     }
@@ -1735,7 +1735,7 @@ class ControllerTest {
             return h;
         });
         ctrl.addHuman();
-        verify(ctrl).broadcastInform("SERVER: Checking all players' ships");
+        verify(ctrl).broadcastInform("Checking all players' ships");
         assertEquals(35, units.size());
         for (HousingUnit h : units) {
             verify(h, times(2)).addHuman(Human.HUMAN);
@@ -1776,8 +1776,8 @@ class ControllerTest {
             return h;
         });
 
-        doReturn(false).when(ctrl).askPlayerDecision(startsWith("SERVER: Do you want to place a purple alien"), eq(p));
-        doReturn(true).when(ctrl).askPlayerDecision(startsWith("SERVER: Do you want to place a brown alien"), eq(p));
+        doReturn(false).when(ctrl).askPlayerDecision(startsWith("Do you want to place a purple alien"), eq(p));
+        doReturn(true).when(ctrl).askPlayerDecision(startsWith("Do you want to place a brown alien"), eq(p));
 
         ctrl.addHuman();
         verify(p, never()).setPurpleAlien();
@@ -1891,10 +1891,10 @@ class ControllerTest {
         InOrder ord = inOrder(controller, p);
         controller.startPlague(p);
 
-        ord.verify(controller).inform("SERVER: Starting plague", "P");
-        ord.verify(controller).inform("SERVER: Connected Housing Unit detected. You lose 1 crewmate", "P");
+        ord.verify(controller).inform("Starting plague", "P");
+        ord.verify(controller).inform("Connected Housing Unit detected. You lose 1 crewmate", "P");
         ord.verify(p).setBrownAlien();
-        ord.verify(controller).inform("SERVER: Connected Housing Unit detected. You lose 1 crewmate", "P");
+        ord.verify(controller).inform("Connected Housing Unit detected. You lose 1 crewmate", "P");
         ord.verify(p).setPurpleAlien();
     }
 
@@ -1930,7 +1930,7 @@ class ControllerTest {
         doReturn(true).when(spyC).manageEnergyCell("P", "To activate a shield");
         boolean result = spyC.isProtected("P", 2);
 
-        verify(spyC).inform("SERVER: You can activate the shield by consuming a battery ", "P");
+        verify(spyC).inform("You can activate the shield by consuming a battery ", "P");
         verify(spyC).manageEnergyCell("P", "To activate a shield");
         assertTrue(result);
     }
@@ -1962,9 +1962,9 @@ class ControllerTest {
         doReturn(false).when(spyC).isHitZone(0, 2);
 
         boolean ret = spyC.defenceFromCannon(0, false, 2, p);
-        verify(spyC).inform("\nSERVER: A small attack is coming from Nord on section 2\nSERVER: Ship before attack", "P");
+        verify(spyC).inform("\nA small attack is coming from Nord on section 2\nShip before attack", "P");
         verify(spyC).printPlayerDashboard(v, p, "P");
-        verify(spyC).inform("SERVER: Attack out of range. You are safe", "P");
+        verify(spyC).inform("Attack out of range. You are safe", "P");
         assertFalse(ret);
     }
 
@@ -2020,7 +2020,7 @@ class ControllerTest {
         doReturn(true).when(spyC).isProtected("P",3);
 
         boolean ret = spyC.defenceFromCannon(3, false, 6, p);
-        verify(spyC).inform("SERVER: You are protected", "P");
+        verify(spyC).inform("You are protected", "P");
         assertFalse(ret);
     }
 
@@ -2035,7 +2035,7 @@ class ControllerTest {
         doReturn(true).when(spyC).manageIfPlayerEliminated(p);
 
         boolean ret = spyC.scriptOfDefence("P", p, v, 4, 0);
-        verify(spyC).inform("SERVER: You have lost all your humans. Your ship is destroyed", "P");
+        verify(spyC).inform("You have lost all your humans. Your ship is destroyed", "P");
         verify(p).destroyAll();
         assertTrue(ret);
     }
@@ -2051,7 +2051,7 @@ class ControllerTest {
         doReturn(false).when(spyC).manageIfPlayerEliminated(p);
 
         boolean ret1 = spyC.scriptOfDefence("P", p, v, 5, 1);
-        verify(spyC).inform("SERVER: You are safe", "P");
+        verify(spyC).inform("You are safe", "P");
         assertFalse(ret1);
 
         reset(spyC, p);
@@ -2061,7 +2061,7 @@ class ControllerTest {
         doNothing().when(spyC).askStartHousingForControl("P");
 
         boolean ret2 = spyC.scriptOfDefence("P", p, v, 6, 2);
-        verify(spyC).inform("SERVER: You've been hit", "P");
+        verify(spyC).inform("You've been hit", "P");
         verify(spyC).askStartHousingForControl("P");
         assertFalse(ret2);
     }
@@ -2096,8 +2096,8 @@ class ControllerTest {
         doReturn(false).when(spyC).scriptOfDefence(anyString(), any(), any(), anyInt(), anyInt());
 
         spyC.defenceFromMeteorite(0, true, 2, players, 42);
-        verify(spyC).inform("SERVER: Meteorite out of range. You are safe", "P1");
-        verify(spyC).inform("SERVER: Meteorite out of range. You are safe", "P2");
+        verify(spyC).inform("Meteorite out of range. You are safe", "P1");
+        verify(spyC).inform("Meteorite out of range. You are safe", "P2");
         clearInvocations(spyC);
 
         doReturn(true).when(spyC).isHitZone(1, 6);
@@ -2108,7 +2108,7 @@ class ControllerTest {
 
         verify(spyC).scriptOfDefence("P1", p1, v1, 6, 1);
         verify(spyC).scriptOfDefence("P2", p2, v2, 6, 1);
-        verify(spyC).broadcastInform("SERVER: 7° meteorite processed for all players");
+        verify(spyC).broadcastInform("7° meteorite processed for all players");
 
         clearInvocations(spyC);
         doReturn(true).when(spyC).isHitZone(2, 8);
@@ -2119,9 +2119,9 @@ class ControllerTest {
 
         spyC.defenceFromMeteorite(2, false, 8, players, 1);
 
-        verify(spyC).inform("SERVER: You are safe", "P1");
-        verify(spyC).inform("SERVER: You are safe", "P2");
-        verify(spyC).broadcastInform("SERVER: 1° meteorite processed for all players");
+        verify(spyC).inform("You are safe", "P1");
+        verify(spyC).inform("You are safe", "P2");
+        verify(spyC).broadcastInform("1° meteorite processed for all players");
     }
 
 
@@ -2140,32 +2140,32 @@ class ControllerTest {
         assertFalse(spyC.manageEnergyCell("P", "msg"));
         reset(spyC, p);
         when(p.isConnected()).thenReturn(true);
-        doReturn(false).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to use a battery?"), eq(p));
+        doReturn(false).when(spyC).askPlayerDecision(startsWith("Do you want to use a battery?"), eq(p));
         assertFalse(spyC.manageEnergyCell("P", "msg"));
         reset(spyC, p);
 
         when(p.isConnected()).thenReturn(true);
-        doReturn(true).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to use a battery?"), eq(p));
+        doReturn(true).when(spyC).askPlayerDecision(startsWith("Do you want to use a battery?"), eq(p));
         doReturn(null).when(spyC).askPlayerCoordinates(p);
         when(p.getTile(2,3)).thenReturn(new EmptySpace());
-        doReturn(false).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to select another EnergyCell?"), eq(p));
+        doReturn(false).when(spyC).askPlayerDecision(startsWith("Do you want to select another EnergyCell?"), eq(p));
         doNothing().when(spyC).reportError(anyString(), eq("P"));
         assertFalse(spyC.manageEnergyCell("P", "msg"));
         reset(spyC, p);
 
         when(p.isConnected()).thenReturn(true);
-        doReturn(true).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to use a battery?"), eq(p));
+        doReturn(true).when(spyC).askPlayerDecision(startsWith("Do you want to use a battery?"), eq(p));
         doReturn(null).when(spyC).askPlayerCoordinates(p);
         EnergyCell zero = mock(EnergyCell.class);
         when(zero.getCapacity()).thenReturn(0);
         when(p.getTile(2,3)).thenReturn(zero);
         doNothing().when(spyC).reportError("You have already used all the batteries for this cell", "P");
-        doReturn(false).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to select another EnergyCell?"), eq(p));
+        doReturn(false).when(spyC).askPlayerDecision(startsWith("Do you want to select another EnergyCell?"), eq(p));
         assertFalse(spyC.manageEnergyCell("P", "msg"));
         reset(spyC, p);
 
         when(p.isConnected()).thenReturn(true);
-        doReturn(true).when(spyC).askPlayerDecision(startsWith("SERVER: Do you want to use a battery?"), eq(p));
+        doReturn(true).when(spyC).askPlayerDecision(startsWith("Do you want to use a battery?"), eq(p));
         doReturn(null).when(spyC).askPlayerCoordinates(p);
         EnergyCell ok = mock(EnergyCell.class);
         when(ok.getCapacity()).thenReturn(5);
