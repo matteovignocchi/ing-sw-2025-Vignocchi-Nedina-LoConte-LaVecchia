@@ -83,7 +83,7 @@ public class GUIView extends Application implements View {
             try {
                 VirtualView virtualClient = GUIStartupConfig.virtualClient;
                 if (virtualClient == null) {
-                    reportError("VirtualClient non inizializzato.");
+                    reportError("VirtualClient not initialized.");
                     return;
                 }
 
@@ -91,7 +91,7 @@ public class GUIView extends Application implements View {
                 clientController.start();
 
             } catch (Exception e) {
-                reportError("Errore durante l'avvio del ClientController: " + e.getMessage());
+                reportError("Error from ClientController: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -199,7 +199,7 @@ public class GUIView extends Application implements View {
                 new SequentialTransition(fadeIn, pause, fadeOut).play();
 
             } catch (ClassCastException e) {
-                System.err.println("[GUIView] Errore nel cast del root pane: " + e.getMessage());
+                System.err.println("[GUIView] Error casting root pane: " + e.getMessage());
             }
         });
     }
@@ -240,7 +240,7 @@ public class GUIView extends Application implements View {
             if (ctrl != null) {
                 ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
             } else {
-                reportError("GameController non disponibile.");
+                reportError("GameController not enabled.");
             }
         });
 
@@ -342,13 +342,13 @@ public class GUIView extends Application implements View {
                     if (done != null) {
                         done.setOnAction(e -> popup.close());
                     } else {
-                        reportError("Done button non trovato nel file PrintDash.fxml.");
+                        reportError("Done button not found.");
                     }
 
                     popup.show();
 
                 } catch (IOException e) {
-                    reportError("Errore caricando PrintDash.fxml: " + e.getMessage());
+                    reportError("Error loading PrintDash.fxml: " + e.getMessage());
                 }
             });
         } else {
@@ -416,7 +416,7 @@ public class GUIView extends Application implements View {
                     if (controller != null) {
                         controller.postInitialize();
                     } else {
-                        reportError("Controller EXIT_PHASE non disponibile.");
+                        reportError("Controller EXIT_PHASE not found.");
                     }
                 }
                 case WAITING_FOR_PLAYERS -> {
@@ -617,7 +617,7 @@ public class GUIView extends Application implements View {
                 stage.show();
 
             } catch (IOException ex) {
-                reportError("Errore nel caricamento PrintListOfGood.fxml: " + ex.getMessage());
+                reportError("Error load of PrintListOfGood.fxml: " + ex.getMessage());
             }
         });
 
@@ -662,7 +662,7 @@ public class GUIView extends Application implements View {
             if (ctrl != null) {
                 ctrl.showYesNoButtons(finalMessage);
             } else {
-                reportError("Controller not.");
+                reportError("Controller not intialized yet.");
             }
         });
 
@@ -699,15 +699,14 @@ public class GUIView extends Application implements View {
             if (ctrl != null) {
                 ctrl.enableDashboardCoordinateSelection(coords -> setBufferedCoordinate(coords));
             } else {
-                reportError("GameController non disponibile.");
+                reportError("GameController not enabled yet.");
             }
         });
 
         long deadline = System.currentTimeMillis() + 300_000;
         while (bufferedCoordinate == null) {
             if (System.currentTimeMillis() > deadline) {
-                reportError("Timeout su askCoordinate.");
-                return null;
+                return new int[]{2,3};
             }
             try {
                 Thread.sleep(100);
@@ -735,7 +734,7 @@ public class GUIView extends Application implements View {
             String result = bufferedPlayerName;
             return result;
         } else {
-            reportError("Nessun nome giocatore selezionato.");
+            reportError("Player not selected.");
             return null;
         }
     }
@@ -891,14 +890,14 @@ public class GUIView extends Application implements View {
                 if (done != null) {
                     done.setOnAction(e -> popupStage.close());
                 } else {
-                    reportError("Done button non trovato nel file FXML.");
+                    reportError("Done button not fount");
                 }
 
                 popupStage.show();
 
             } catch (IOException e) {
                 e.printStackTrace();
-                reportError("Errore nel caricamento del file PrintDeck.fxml: " + e.getMessage());
+                reportError("Error loading PrintDeck.fxml: " + e.getMessage());
             }
         });
     }
@@ -1184,7 +1183,6 @@ public class GUIView extends Application implements View {
     public void prepareToViewEnemyDashboard(String enemyName) {
         this.previewingEnemyDashboard = true;
         this.bufferedPlayerName = enemyName;
-        System.out.println(""+ enemyName);
     }
 
     /**
