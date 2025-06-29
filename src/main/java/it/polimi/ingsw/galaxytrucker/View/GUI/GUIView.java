@@ -499,7 +499,7 @@ public class GUIView extends Application implements View {
             for (Map.Entry<Integer, int[]> entry : availableGames.entrySet()) {
                 int gameId = entry.getKey();
                 int[] data = entry.getValue();
-                games.add((gameId + 1) + ". Players: " + data[0] + ", Demo: " + (data[1] == 1 ? "Yes" : "No"));
+                games.add((gameId) + ". Players: " + data[0] + ", Demo: " + (data[1] == 1 ? "Yes" : "No"));
             }
 
             ctrl.displayGames(games);
