@@ -90,7 +90,12 @@ public class BuildingPhaseController extends GUIController {
             reserveBtn1.setDisable(true);
             reserveBtn2.setDisable(true);
         });
-        getShownBtn.setOnAction(e -> completeCommand("GET_SHOWN"));
+        getShownBtn.setOnAction(e -> {
+            completeCommand("GET_SHOWN");
+            deck1Btn.setDisable(true);
+            deck2Btn.setDisable(true);
+            deck3Btn.setDisable(true);
+        });
         returnTileBtn.setOnAction(e -> {
             completeCommand("RETURN_TILE");
             rotateLeftBtn.setVisible(false);
@@ -103,9 +108,6 @@ public class BuildingPhaseController extends GUIController {
             reserveBtn2.setVisible(true);
             reserveBtn1.setDisable(false);
             reserveBtn2.setDisable(false);
-            deck1Btn.setDisable(true);
-            deck2Btn.setDisable(true);
-            deck3Btn.setDisable(true);
         });
         setReadyBtn.setOnAction(e -> {
             completeCommand("READY");
