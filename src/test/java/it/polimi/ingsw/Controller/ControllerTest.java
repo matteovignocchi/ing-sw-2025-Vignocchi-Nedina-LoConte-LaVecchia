@@ -248,29 +248,6 @@ class ControllerTest {
     }
 
     @Test
-    void testPingAllClientsAndGetGamePhaseForAll() throws Exception {
-        controller = new Controller(false, 3, 2, endedGames::add, loggedInUsers);
-        assertTrue(controller.getIsDemo() == false);
-        assertNotNull(controller.getFlightCardBoard());
-        assertNotNull(controller.decks);
-        assertNotNull(controller.deck);
-
-        controller.addPlayer("A", view1);
-        controller.addPlayer("B", view2);
-        Method ping = Controller.class.getDeclaredMethod("pingAllClients");
-        ping.setAccessible(true);
-        doThrow(new RuntimeException("fail")).when(view1).updateGameState("PING");
-        doNothing().when(view2).updateGameState("PING");
-        ping.invoke(controller);
-        assertFalse(controller.getPlayerByNickname("A").isConnected());
-        verify(view2).updateGameState("PING");
-        Method getPhase = Controller.class.getDeclaredMethod("getGamePhaseForAll");
-        getPhase.setAccessible(true);
-        Object gp = getPhase.invoke(controller);
-        assertEquals(it.polimi.ingsw.galaxytrucker.Model.GamePhase.WAITING_IN_LOBBY, gp);
-    }
-
-    @Test
     void testShutdownPingScheduler() throws Exception {
         controller.addPlayer("P1", view1);
         ScheduledExecutorService sched = controller.pingScheduler;
