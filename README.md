@@ -71,6 +71,13 @@ At startup, you will be prompted to choose between:
 ### Flight Phase
 ![Flight](src/main/resources/images/GameScene.png)
 
+## Test Coverage
+
+| Module     | Coverage |
+|------------|----------|
+| Model      | 97%      |
+| Controller | 83%      |
+
 ## Development Tools
 
 - [IntelliJ IDEA](https://www.jetbrains.com/idea) – Primary IDE for development
@@ -80,9 +87,3 @@ At startup, you will be prompted to choose between:
 - [Maven](https://maven.apache.org) – Build automation and dependency management tool
 - [JUnit](https://junit.org) – Framework for writing and executing unit tests  
 
-## Test Coverage
-
-| Module     | Coverage |
-|------------|----------|
-| Model      | 97%      |
-| Controller | 83%      |
