@@ -93,7 +93,6 @@ public class ClientController {
             switch (view) {
                 case GUIView g -> {
 
-                    // Lascio la GUI controllare cosa inviare con resolveMenuChoice o simili
                     while (!g.hasResolvedMenuChoice()) {
                         Thread.sleep(100);
                     }
@@ -112,7 +111,7 @@ public class ClientController {
                 }
 
                 default -> {
-                    mainMenuLoop(); // fallback per TUI
+                    mainMenuLoop();
                 }
             }
         }
@@ -283,7 +282,7 @@ public class ClientController {
                 List<Object> data = g.askCreateGameData();
                 if (data.isEmpty()) {
                     Platform.runLater(() -> g.setSceneEnum(SceneEnum.MAIN_MENU));
-                    return; // esce e torna al ciclo principale
+                    return;
                 }
                 boolean demo = (boolean) data.get(0);
                 int numberOfPlayer = (int) data.get(1);
@@ -479,13 +478,6 @@ public class ClientController {
                             } catch (Exception e) {
                                 v.reportError(e.getMessage());
                             }
-                            /**
-                             if (!waitForFlightStart()) return;
-                             if (currentGamePhase == GamePhase.DRAW_PHASE) {
-                             view.printListOfCommand();
-                             continue;
-                             }
-                             */
                         }
                         case "watchadeck" -> {
                             try {
@@ -547,8 +539,6 @@ public class ClientController {
                 printMyDashBoardByController();
                 while (true) {
                     String key = g.sendAvailableChoices();
-                    System.out.println("[DEBUG] Comando ricevuto da GUI: " + key);
-
                     if (key == null) continue;
 
                     switch (key) {
@@ -963,7 +953,6 @@ public class ClientController {
     public void updateGameStateByController(String phase) {
         ClientGamePhase gamePhase = clientEnumFactory.describeGamePhase(phase);
         if (gamePhase == this.currentGamePhase) {
-            System.out.println("[DEBUG] Fase invariata, salto updateState: " + gamePhase);
             return;
         }
 

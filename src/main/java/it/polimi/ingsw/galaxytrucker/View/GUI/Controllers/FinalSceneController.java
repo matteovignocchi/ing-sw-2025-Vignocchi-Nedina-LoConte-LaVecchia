@@ -4,12 +4,6 @@ import it.polimi.ingsw.galaxytrucker.Client.ClientGamePhase;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
-import javafx.scene.layout.Pane;
-
-import java.util.List;
-import java.util.Map;
-
 
 /**
  * Controller for the final scene GUI displayed at the end of the game.
@@ -62,9 +56,6 @@ public class FinalSceneController extends GUIController {
             titleLabel.setStyle("-fx-text-fill: #444444; -fx-font-size: 28px;");
         }
     }
-
-
-
 
     /**
      * Called after the scene is fully loaded to populate the final screen data.

@@ -61,6 +61,11 @@ public abstract class GUIController {
      */
     public ClientTile[][] getDashboard(){ return model.getDashboard(); }
 
+    /**
+     * Updates the visual representation of the player's dashboard.
+     * Intended to refresh the grid of tiles and tokens displayed.
+     * Implementation should update the UI components accordingly.
+     */
     public void updateDashboard() {
     }
 
