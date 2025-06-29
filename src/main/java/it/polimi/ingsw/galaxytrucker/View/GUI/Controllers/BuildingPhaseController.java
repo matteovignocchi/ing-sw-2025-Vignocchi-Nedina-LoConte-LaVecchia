@@ -202,6 +202,10 @@ public class BuildingPhaseController extends GUIController {
         }
     }
 
+    /**
+     * Reset buttons, show the logout button, and conditionally show the hourglass button
+     * if the client is not in demo mode. Also configures the player buttons.
+     */
     public void postInitialize4(){
         resetButtons();
         if(!model.isDemo()){
