@@ -10,6 +10,8 @@
 ## Overview
 This software project brings the board game *Galaxy Trucker* into a distributed digital environment. Players can interact via graphical or textual interfaces, building their ships and facing space hazards according to the [original rules](src/main/resources/rules/galaxy-trucker-rules-it.pdf).
 
+## Grade 30/30L
+
 ## Features
 
 | Feature                      | Implemented |
