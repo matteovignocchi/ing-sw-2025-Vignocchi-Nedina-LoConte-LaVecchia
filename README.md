@@ -90,6 +90,7 @@ At startup, you will be prompted to choose between:
 ## License
 
 [**GalaxyTrucker**](https://www.craniocreations.it/prodotto/galaxy-trucker) is property of [_Cranio Creations_] and all of the copyrighted graphical assets used in this project were supplied by [**Politecnico di Milano**] in collaboration with their rights' holders.
+
 Distribution, copying or reproduction of these contents and images out of this project is forbidden, as well as publishing these contents for other purposes.
 Commercial use of the aforementioned content is as well forbidden.
 
