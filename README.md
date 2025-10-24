@@ -1,7 +1,6 @@
 # Galaxy Trucker - Software Engineering Project, A.Y. 2024/2025
 ![Logo](src/main/resources/images/background_image_menu.png)
-<h2 style="font-size: 24px; font-weight: normal;">Grade: 30L/30</h2>
-
+### Grade: 30L/30
 ## Team
 - [Matteo Vignocchi](https://github.com/matteovignocchi)
 - [Francesco Lo Conte](https://github.com/24GIOCONDO24)
