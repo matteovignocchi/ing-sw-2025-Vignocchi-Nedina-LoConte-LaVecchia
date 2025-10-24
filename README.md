@@ -1,6 +1,6 @@
 # Galaxy Trucker - Software Engineering Project, A.Y. 2024/2025
 ![Logo](src/main/resources/images/background_image_menu.png)
-
+## Grade 30/30L
 ## Team
 - [Matteo Vignocchi](https://github.com/matteovignocchi)
 - [Francesco Lo Conte](https://github.com/24GIOCONDO24)
@@ -10,7 +10,7 @@
 ## Overview
 This software project brings the board game *Galaxy Trucker* into a distributed digital environment. Players can interact via graphical or textual interfaces, building their ships and facing space hazards according to the [original rules](src/main/resources/rules/galaxy-trucker-rules-it.pdf).
 
-## Grade 30/30L
+
 
 ## Features
 
