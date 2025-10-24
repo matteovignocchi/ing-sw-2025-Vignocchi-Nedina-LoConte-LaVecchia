@@ -86,7 +86,7 @@ At startup, you will be prompted to choose between:
 - [SceneBuilder](https://gluonhq.com/products/scene-builder) – Tool for designing JavaFX interfaces visually
 - [Maven](https://maven.apache.org) – Build automation and dependency management tool
 - [JUnit](https://junit.org) – Framework for writing and executing unit tests
-- 
+  
 ## License
 
 [**GalaxyTrucker**](https://www.craniocreations.it/prodotto/galaxy-trucker) is property of [_Cranio Creations_] and all of the copyrighted graphical assets used in this project were supplied by [**Politecnico di Milano**] in collaboration with their rights' holders.
